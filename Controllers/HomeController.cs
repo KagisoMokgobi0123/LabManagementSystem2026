@@ -10,6 +10,10 @@ namespace NMB_HLabSys.Controllers
         {
             return View();
         }
+        public ActionResult LandIn()
+        {
+            return View();
+        }
 
         // GET: HomeController/Details/5
         public ActionResult Details(int id)

@@ -13,7 +13,7 @@
                         <h2 class="fw-bold mb-4 text-center">Sign In</h2>
 
                         <!-- Form -->
-                        <form class="w-100" style="max-width: 350px;">
+                        <form method="post" asp-action="Login" asp-controller="Account" class="mx-auto" style="max-width: 400px;">
 
                             <div class="mb-3 text-center">
                                 <label class="form-label w-100 text-start" for="email">Your Email</label>
@@ -27,7 +27,7 @@
 
                             <div class="d-flex justify-content-center gap-2 mt-3"> 
                                 <button type="submit" class="btn btn-primary">Sign In</button>
-                                <button asp-page="/_LandInLayout" type="button" class="btn btn-secondary">Back</button>
+                                <a asp-action="LandIn" asp-controller="Home" type="button" class="btn btn-secondary">Back</a>
                             </div>
 
                         </form>

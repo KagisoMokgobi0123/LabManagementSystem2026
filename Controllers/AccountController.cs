@@ -19,17 +19,17 @@ namespace NMB_HLabSys.Controllers
 
             // GET: Register
             [HttpGet]
-            public IActionResult Register()
+            public IActionResult RegisterUser()
             {
                 return View();
             }
 
             // POST: Register
             [HttpPost]
-            public async Task<IActionResult> Register(RegisterUser model)
+            public async Task<IActionResult> RegisterIUser(RegisterUser model)
             {
             if (!ModelState.IsValid)
-                return View("Register", model);
+                return View("RegisterUser", model);
 
                var user = new RegisterUser
                 {
@@ -56,14 +56,14 @@ namespace NMB_HLabSys.Controllers
 
             // GET: Login
             [HttpGet]
-            public IActionResult Login()
+            public IActionResult LoginUser()
             {
                 return View();
             }
 
             // POST: Login
             [HttpPost]
-            public async Task<IActionResult> Login(LoginUser model)
+            public async Task<IActionResult> LoginUser(LoginUser model)
             {
                 if (!ModelState.IsValid)
                     return View(model);
