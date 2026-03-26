@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "NMB_HLabSys | Sign In";
+    Layout = "_LoginLayout";
+}
+<section class="vh-100 d-flex justify-content-center align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-xl-5">
+                <div class="card text-black" style="border-radius: 20px;">
+                    <div class="card-body d-flex flex-column justify-content-center align-items-center p-4">
+
+                        <!-- Title -->
+                        <h2 class="fw-bold mb-4 text-center">Sign In</h2>
+
+                        <!-- Form -->
+                        <form class="w-100" style="max-width: 350px;">
+
+                            <div class="mb-3 text-center">
+                                <label class="form-label w-100 text-start" for="email">Your Email</label>
+                                <input type="email" id="email" class="form-control">
+                            </div>
+
+                            <div class="mb-3 text-center">
+                                <label class="form-label w-100 text-start" for="password">Password</label>
+                                <input type="password" id="password" class="form-control">
+                            </div>
+
+                            <div class="d-flex justify-content-center gap-2 mt-3"> 
+                                <button type="submit" class="btn btn-primary">Sign In</button>
+                                <button asp-page="/_LandInLayout" type="button" class="btn btn-secondary">Back</button>
+                            </div>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
