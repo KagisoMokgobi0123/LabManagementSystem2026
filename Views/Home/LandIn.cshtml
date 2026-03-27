@@ -6,7 +6,7 @@
 	<div id="page-wrapper">
 
 		<!-- Header -->
-		<div id="header">
+	<div id="header">
 
 			<!-- Inner -->
 			<div class="inner">
@@ -16,7 +16,7 @@
 					<p>Another fine freebie by HTML5 UP</p>
 				</header>
 				<footer>
-					<a href="#banner" class="button circled scrolly">Start</a>
+					<a href="#banner" class="button circled scrolly">Sign In</a>
 				</footer>
 			</div>
 
@@ -25,7 +25,8 @@
 				<ul>
 					<li><a href="index.html">Home</a></li>
 					<li>
-						<a href="#">Dropdown</a>
+					<li><a asp-controller="Home" asp-action="About">Services</a>
+					@* 	<a href="#">Services</a> *@
 						<ul>
 							<li><a href="#">Lorem ipsum dolor</a></li>
 
@@ -43,7 +44,9 @@
 							<li><a href="#">Veroeros feugiat</a></li>
 						</ul>
 					</li>
-					<li><a href="left-sidebar.html">Left Sidebar</a></li>
+					<li><a href="left-sidebar.html">Forum</a></li>
+				<li><a href="left-sidebar.html">About</a></li>
+
 					<li>
 						<a asp-controller="Account" asp-action="RegisterUser">Register</a>
 					</li>
