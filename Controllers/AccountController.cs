@@ -76,7 +76,7 @@ namespace NMB_HLabSys.Controllers
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Index", "Home"); // Or your dashboard
+                    return RedirectToAction("TehnicianDashboard", "Home"); // Or your dashboard
                 }
 
                 ModelState.AddModelError("", "Invalid login attempt");

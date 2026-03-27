@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Administrator\Controllers\" />
+    <Folder Include="Areas\Administrator\Data\" />
+    <Folder Include="Areas\Administrator\Models\" />
+    <Folder Include="Areas\Administrator\Views\" />
     <Folder Include="Areas\Doctor\Controllers\" />
     <Folder Include="Areas\Doctor\Data\" />
     <Folder Include="Areas\Doctor\Models\" />
@@ -27,10 +31,8 @@
     <Folder Include="Areas\LabManager\Data\" />
     <Folder Include="Areas\LabManager\Models\" />
     <Folder Include="Areas\LabManager\Views\" />
-    <Folder Include="Areas\LabTechnician\Controllers\" />
     <Folder Include="Areas\LabTechnician\Data\" />
     <Folder Include="Areas\LabTechnician\Models\" />
-    <Folder Include="Areas\LabTechnician\Views\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />
