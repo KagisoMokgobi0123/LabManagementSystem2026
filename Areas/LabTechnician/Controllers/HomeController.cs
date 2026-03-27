@@ -2,9 +2,9 @@
 
 namespace NMB_HLabSys.Areas.LabTechnician.Controllers
 {
-    public class DashboardController : Controller
+    public class HomeController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Dashboard()
         {
             return View();
         }

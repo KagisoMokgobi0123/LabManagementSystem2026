@@ -26,33 +26,33 @@ namespace NMB_HLabSys.Controllers
 
             // POST: Register
             [HttpPost]
-            public async Task<IActionResult> RegisterIUser(RegisterUser model)
-            {
-            if (!ModelState.IsValid)
-                return View("RegisterUser", model);
+            //public async Task<IActionResult> RegisterIUser(RegisterUser model)
+            //{
+            //if (!ModelState.IsValid)
+            //    return View("RegisterUser", model);
 
-               var user = new RegisterUser
-                {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FullName = model.FullName
-                };
+            //   var user = new RegisterUser
+            //    {
+            //        UserName = model.Email,
+            //        Email = model.Email,
+            //        FullName = model.FullName
+            //    };
 
-                var result = await _userManager.CreateAsync(user, model.Password);
+            //    var result = await _userManager.CreateAsync(user, model.Password);
 
-                if (result.Succeeded)
-                {
-                    // Optional: automatically sign in user after registration
-                    // await _signInManager.SignInAsync(user, isPersistent: false);
+            //    if (result.Succeeded)
+            //    {
+            //        // Optional: automatically sign in user after registration
+            //        // await _signInManager.SignInAsync(user, isPersistent: false);
 
-                    return RedirectToAction("Login");
-                }
+            //        return RedirectToAction("Login");
+            //    }
 
-                foreach (var error in result.Errors)
-                    ModelState.AddModelError("", error.Description);
+            //    foreach (var error in result.Errors)
+            //        ModelState.AddModelError("", error.Description);
 
-                return View(model);
-            }
+            //    return View(model);
+            //}
 
             // GET: Login
             [HttpGet]
@@ -61,30 +61,50 @@ namespace NMB_HLabSys.Controllers
                 return View();
             }
 
-            // POST: Login
-            [HttpPost]
-            public async Task<IActionResult> LoginUser(LoginUser model)
+        // POST: Login
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LoginUser(LoginUser model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
             {
-                if (!ModelState.IsValid)
-                    return View(model);
-
-                var result = await _signInManager.PasswordSignInAsync(
-                    model.Email,
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: false);
-
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("TehnicianDashboard", "Home"); // Or your dashboard
-                }
-
                 ModelState.AddModelError("", "Invalid login attempt");
                 return View(model);
             }
 
-            // POST: Logout
-            [HttpPost]
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                // Check user roles and redirect accordingly
+                if (await _userManager.IsInRoleAsync(user, "Doctor"))
+                {
+                    return RedirectToAction("DoctorDashboard", "Home");
+                }
+                else if (await _userManager.IsInRoleAsync(user, "LabTechnician"))
+                {
+                    return RedirectToAction("TechnicianDashboard", "Home");
+                }
+                else
+                {
+                    // Default dashboard for other roles
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+
+            ModelState.AddModelError("", "Invalid login attempt");
+            return View(model);
+        }
+        // POST: Logout
+        [HttpPost]
             public async Task<IActionResult> Logout()
             {
                 await _signInManager.SignOutAsync();

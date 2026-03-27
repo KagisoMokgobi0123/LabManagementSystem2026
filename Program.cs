@@ -17,6 +17,14 @@ builder.Services.AddIdentity<RegisterUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 var app = builder.Build();
+//seed roles and default users
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var userManager = services.GetRequiredService<UserManager<RegisterUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    await RoleInitializer.InitializeAsync(userManager, roleManager);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -27,7 +35,9 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();   // serve css/js/images
 app.UseRouting();
+app.UseAuthentication();
 
 app.UseAuthorization();
 
