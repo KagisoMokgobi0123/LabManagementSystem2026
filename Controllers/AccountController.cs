@@ -24,35 +24,6 @@ namespace NMB_HLabSys.Controllers
                 return View();
             }
 
-            // POST: Register
-            [HttpPost]
-            //public async Task<IActionResult> RegisterIUser(RegisterUser model)
-            //{
-            //if (!ModelState.IsValid)
-            //    return View("RegisterUser", model);
-
-            //   var user = new RegisterUser
-            //    {
-            //        UserName = model.Email,
-            //        Email = model.Email,
-            //        FullName = model.FullName
-            //    };
-
-            //    var result = await _userManager.CreateAsync(user, model.Password);
-
-            //    if (result.Succeeded)
-            //    {
-            //        // Optional: automatically sign in user after registration
-            //        // await _signInManager.SignInAsync(user, isPersistent: false);
-
-            //        return RedirectToAction("Login");
-            //    }
-
-            //    foreach (var error in result.Errors)
-            //        ModelState.AddModelError("", error.Description);
-
-            //    return View(model);
-            //}
 
             // GET: Login
             [HttpGet]
@@ -87,11 +58,23 @@ namespace NMB_HLabSys.Controllers
                 // Check user roles and redirect accordingly
                 if (await _userManager.IsInRoleAsync(user, "Doctor"))
                 {
-                    return RedirectToAction("DoctorDashboard", "Home");
+                    return RedirectToAction("Dashboard", "Home");
                 }
-                else if (await _userManager.IsInRoleAsync(user, "LabTechnician"))
+                else if (await _userManager.IsInRoleAsync(user, "Technician"))
                 {
-                    return RedirectToAction("TechnicianDashboard", "Home");
+                    return RedirectToAction("Dashboard", "Home", new { area = "Technician" });
+                }
+                else if (await _userManager.IsInRoleAsync(user, "Manager"))
+                {
+                    return RedirectToAction("Dashboard", "Home");
+                }
+                else if (await _userManager.IsInRoleAsync(user, "Admnistrator"))
+                {
+                    return RedirectToAction("Dashboard", "Home");
+                }
+                else if (await _userManager.IsInRoleAsync(user, "Patient"))
+                {
+                    return RedirectToAction("Dashboard", "Home");
                 }
                 else
                 {

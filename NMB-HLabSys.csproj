@@ -31,8 +31,8 @@
     <Folder Include="Areas\LabManager\Data\" />
     <Folder Include="Areas\LabManager\Models\" />
     <Folder Include="Areas\LabManager\Views\" />
-    <Folder Include="Areas\LabTechnician\Data\" />
-    <Folder Include="Areas\LabTechnician\Models\" />
+    <Folder Include="Areas\Technician\Data\" />
+    <Folder Include="Areas\Technician\Models\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />
