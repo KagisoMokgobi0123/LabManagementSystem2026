@@ -1,6 +1,5 @@
 ﻿using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 
 namespace NMB_HLabSys.Areas.Technician.Models
 {

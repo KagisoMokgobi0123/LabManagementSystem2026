@@ -8,7 +8,7 @@ using NMB_HLabSys.Data;
 
 #nullable disable
 
-namespace NMB_HLabSys.Migrations
+namespace NMBHLabSys.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -17,7 +17,7 @@ namespace NMB_HLabSys.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.5")
+                .HasAnnotation("ProductVersion", "7.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -251,31 +251,32 @@ namespace NMB_HLabSys.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SampleId"));
 
-                    b.Property<int>("BarcodeNumber")
-                        .HasColumnType("int");
+                    b.Property<string>("BarcodeNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("RecievedDateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("RequestTestRequestId")
-                        .HasColumnType("int");
 
                     b.Property<string>("SampleType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TechcianId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("TechnicianId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("TestRequestId")
+                        .HasColumnType("int");
 
                     b.HasKey("SampleId");
 
-                    b.HasIndex("RequestTestRequestId");
+                    b.HasIndex("BarcodeNumber")
+                        .IsUnique();
 
                     b.HasIndex("TechnicianId");
+
+                    b.HasIndex("TestRequestId");
 
                     b.ToTable("Samples");
                 });
@@ -697,17 +698,21 @@ namespace NMB_HLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
                 {
-                    b.HasOne("NMB_HLabSys.Areas.Technician.Models.TestRequestModel", "Request")
-                        .WithMany("Samples")
-                        .HasForeignKey("RequestTestRequestId");
-
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Technician")
                         .WithMany()
-                        .HasForeignKey("TechnicianId");
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Request");
+                    b.HasOne("NMB_HLabSys.Areas.Technician.Models.TestRequestModel", "TestRequest")
+                        .WithMany("Samples")
+                        .HasForeignKey("TestRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Technician");
+
+                    b.Navigation("TestRequest");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TechnicianTestTypeModel", b =>

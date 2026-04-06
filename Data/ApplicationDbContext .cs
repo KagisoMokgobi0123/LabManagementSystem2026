@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Account;
+using System.Reflection.Emit;
 
 namespace NMB_HLabSys.Data
 {
@@ -9,6 +11,16 @@ namespace NMB_HLabSys.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+           
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Always call the base method first when using Identity
+            base.OnModelCreating(modelBuilder);
+            // 1. Your unique index for barcodes
+            modelBuilder.Entity<SampleModel>()
+                .HasIndex(s => s.BarcodeNumber)
+                .IsUnique();
         }
         public DbSet<LoginUser> LoggedInUsers { get; set; }
         public DbSet<RegisterUser> RegisterdUsers { get; set; }
