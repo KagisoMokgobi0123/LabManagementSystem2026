@@ -13,7 +13,9 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string Status { get; set; } = "Pending";
         public string PatientId { get; set; } = String.Empty;
         public RegisterUser? Patient { get; set; }
-
+        [Required]
+        [Display(Name = "Request Number")]
+        public string RequestNumber { get; set; } = string.Empty; 
         public string DoctorId { get; set; } = String.Empty;
         public RegisterUser? Doctor { get; set; }
 
