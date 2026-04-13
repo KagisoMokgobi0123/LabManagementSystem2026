@@ -1,0 +1,48 @@
+﻿@using NMB_HLabSys.Areas.Doctor.Models
+@{
+	ViewData["Title"] = "NMB_HLabSys | Pending Requests";
+	Layout = "_TechnicianLayout";
+}
+@model IEnumerable<TestRequestsModel>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-list-check"></i> Pending Test Requests</h2>
+        <span class="badge bg-info text-dark">@Model.Count() Requests Awaiting Samples</span>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Request Number</th>
+                        <th>Date Requested</th>
+                        <th>Patient ID</th>
+                        <th>Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td><strong>@item.RequestNumber</strong></td>
+                            <td>@item.RequestDate.ToString("dd MMM yyyy")</td>
+                            <td>@item.PatientId</td>
+                            <td>
+                                <span class="badge bg-warning text-dark">@item.Status</span>
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="Receive" asp-route-id="@item.TestRequestId"
+                                       class="btn btn-primary btn-sm px-3">
+                                    <i class="fas fa-clipboard-check"></i> Verify
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

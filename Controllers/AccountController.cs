@@ -62,7 +62,7 @@ namespace NMB_HLabSys.Controllers
                 }
                 else if (await _userManager.IsInRoleAsync(user, "Technician"))
                 {
-                    return RedirectToAction("Dashboard", "Home", new { area = "Technician" });
+                    return RedirectToAction("Home", "Home", new { area = "Technician" });
                 }
                 else if (await _userManager.IsInRoleAsync(user, "Manager"))
                 {

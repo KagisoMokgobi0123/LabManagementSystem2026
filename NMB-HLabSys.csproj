@@ -32,16 +32,10 @@
     <Folder Include="Areas\Administrator\Data\" />
     <Folder Include="Areas\Administrator\Models\" />
     <Folder Include="Areas\Administrator\Views\" />
-    <Folder Include="Areas\Doctor\Controllers\" />
     <Folder Include="Areas\Doctor\Data\" />
-    <Folder Include="Areas\Doctor\Models\" />
-    <Folder Include="Areas\Doctor\Views\" />
-    <Folder Include="Areas\LabManager\Controllers\" />
     <Folder Include="Areas\LabManager\Data\" />
-    <Folder Include="Areas\LabManager\Models\" />
     <Folder Include="Areas\LabManager\Views\" />
     <Folder Include="Areas\Technician\Data\" />
-    <Folder Include="Areas\Technician\Models\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />

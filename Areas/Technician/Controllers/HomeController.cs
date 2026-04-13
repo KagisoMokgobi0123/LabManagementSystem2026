@@ -9,5 +9,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             return View();
         }
+        public ActionResult Home()
+        {
+            return View();
+        }
     }
 }
