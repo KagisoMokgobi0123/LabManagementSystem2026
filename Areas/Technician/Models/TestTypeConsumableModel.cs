@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using NMB_HLabSys.Areas.LabManager.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace NMB_HLabSys.Areas.Technician.Models
 {

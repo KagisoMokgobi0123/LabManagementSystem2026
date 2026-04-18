@@ -8,6 +8,7 @@ using NMB_HLabSys.Models.Account;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
+    [Area("Technician")]
     public class TestRequestController : Controller
     {
         private readonly ApplicationDbContext _dbcontext;
@@ -18,7 +19,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _userManager = userManager;
         }
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> ListRequests()
         {
             // Only show requests that are still "Pending"
             var pendingRequests = await _dbcontext.TestRequests
@@ -65,7 +66,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     TestRequestId = request.TestRequestId,
                     Barcode = model.Barcode,
                     SampleType = model.SampleType,
-                    TechnicianId = _userManager.GetUserId(User),
                     DateReceived = DateTime.Now // Use local time for lab logs
                 };
 

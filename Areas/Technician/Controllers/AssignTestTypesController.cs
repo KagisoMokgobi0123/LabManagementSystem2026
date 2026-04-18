@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace NMB_HLabSys.Areas.LabManager.Controllers
+namespace NMB_HLabSys.Areas.Technician.Controllers
 {
     public class AssignTestTypesController : Controller
     {

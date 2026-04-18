@@ -31,27 +31,25 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             var viewModel = new SampleModel
             {
                 TestRequestId = request.TestRequestId,
-                RequestNumber = request.RequestNumber,
-                TechnicianId = _userManager.GetUserId(User) // Get current technician ID
             };
 
             return View(viewModel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Sample(SampleModel model)
-        {
-            if (ModelState.IsValid)
-            {
-                var success = await Sample(model.TestRequestId, model.Barcode, model.SampleType, model.TechnicianId);
-                if (success)
-                {
-                    TempData["Success"] = "Sample verified and received successfully.";
-                    return RedirectToAction("Index"); // Redirect to your dashboard
-                }
-            }
-            return View(model);
-        }
+        //public async Task<IActionResult> Sample(SampleModel model)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        var success = await Sample(model.TestRequestId, model.Barcode, model.SampleType);
+        //        if (success)
+        //        {
+        //            TempData["Success"] = "Sample verified and received successfully.";
+        //            return RedirectToAction("Index"); // Redirect to your dashboard
+        //        }
+        //    }
+        //    return View(model);
+        //}
 
         public async Task<bool> Sample(int requestId, string barcode, string sampleType, string technicianId)
         {

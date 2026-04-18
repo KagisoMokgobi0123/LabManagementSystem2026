@@ -1,6 +1,7 @@
 ﻿using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NMB_HLabSys.Areas.Technician.Models
 {
@@ -10,8 +11,10 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int SampleId { get; set; }
 
         [Display(Name = "Request Number")]
-        public string RequestNumber { get; set; } = string.Empty;// Read-only display
-
+        // This property isn't in the DB, it just formats the ID for the UI
+        [NotMapped]
+        public string RequestNumber => $"NMB-REQ-{TestRequestId:D6}";
+        // Result: NMB-REQ-000001
         [Required]
         public string Barcode { get; set; } = string.Empty;
 
@@ -24,7 +27,6 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int TestRequestId { get; set; }
         public TestRequestsModel? TestRequest { get; set; }
 
-        public string TechnicianId { get; set; } = string.Empty;
-        public RegisterUser? Technician { get; set; }
+      
     }
 }

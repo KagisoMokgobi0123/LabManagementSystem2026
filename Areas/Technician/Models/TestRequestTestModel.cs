@@ -1,4 +1,5 @@
 ﻿using NMB_HLabSys.Areas.Doctor.Models;
+using NMB_HLabSys.Areas.LabManager.Models;
 using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
 

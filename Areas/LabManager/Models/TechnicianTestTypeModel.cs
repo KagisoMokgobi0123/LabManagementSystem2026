@@ -1,7 +1,7 @@
 ﻿using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
 
-namespace NMB_HLabSys.Areas.Technician.Models
+namespace NMB_HLabSys.Areas.LabManager.Models
 {
     public class TechnicianTestTypeModel
     {

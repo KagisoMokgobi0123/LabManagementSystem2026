@@ -33,6 +33,7 @@
     <Folder Include="Areas\Administrator\Models\" />
     <Folder Include="Areas\Administrator\Views\" />
     <Folder Include="Areas\Doctor\Data\" />
+    <Folder Include="Areas\LabManager\Controllers\" />
     <Folder Include="Areas\LabManager\Data\" />
     <Folder Include="Areas\LabManager\Views\" />
     <Folder Include="Areas\Technician\Data\" />
