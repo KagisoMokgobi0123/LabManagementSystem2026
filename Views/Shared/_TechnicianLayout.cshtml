@@ -25,6 +25,23 @@
 
 	<!-- CSS Just for demo purpose, don't include it in your project -->
 			<link rel="stylesheet" href="~/assets/css/demo.css">
+
+			  <!--datatables links-->
+				<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+				<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
+				<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+				<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+				<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+				<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+				<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+				<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+
+
+
 </head>
 <body>
 	
@@ -71,7 +88,43 @@
 	<!-- Atlantis DEMO methods, don't include it in your project! -->
 				<script src="~/assets/js/setting-demo.js"></script>
 				<script src="~/assets/js/demo.js"></script>
+
+				<!--Datatables links-->
+				<script>
+					$(document).ready(function() {
+					$('#add-row').DataTable({
+					"pageLength": 5, // Default rows per page
+					"dom": 'Bfrtip', // B = Buttons, f = filter, r = processing, t = table, i = info, p = pagination
+					"buttons": [
+					{
+					extend: 'excelHtml5',
+					text: '<i class="fa fa-file-excel"></i> Excel',
+					className: 'btn btn-success btn-sm',
+					exportOptions: { columns: ':not(.no-export)' } // Excludes the Action column
+					},
+					{
+					extend: 'csvHtml5',
+					text: '<i class="fa fa-file-csv"></i> CSV',
+					className: 'btn btn-info btn-sm',
+					exportOptions: { columns: ':not(.no-export)' }
+					},
+					{
+					extend: 'pdfHtml5',
+					text: '<i class="fa fa-file-pdf"></i> PDF',
+					className: 'btn btn-danger btn-sm',
+					exportOptions: { columns: ':not(.no-export)' }
+					}
+					]
+					});
+					});
+					</script>
 	<script>
+
+
+
+
+
+
 		Circles.create({
 		id:'circles-1',
 		radius:45,
