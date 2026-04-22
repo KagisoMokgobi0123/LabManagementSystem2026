@@ -1,4 +1,5 @@
-﻿using NMB_HLabSys.Areas.Technician.Models;
+﻿using NMB_HLabSys.Areas.LabManager.Models;
+using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -13,9 +14,9 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         public DateTime RequestDate { get; set; } = DateTime.Now;
 
         public string Status { get; set; } = string.Empty;
-
         public string PatientId { get; set; } = string.Empty;
-        public RegisterUser? Patient { get; set; }
+        public RegisterUser Patient { get; set; } = null!;
+
 
         [Required]
         [Display(Name = "Request Number")]
@@ -25,7 +26,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         // Result: NMB-REQ-000001
 
         public string DoctorId { get; set; } = String.Empty;
-        public RegisterUser? Doctor { get; set; }
+        public RegisterUser Doctor { get; set; } = null!;
 
 
         [Required(ErrorMessage = "Please select the level of urgency.")]
@@ -36,8 +37,9 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         [DataType(DataType.MultilineText)]
         public string? ClinicalNotes { get; set; }
 
-        public ICollection<TestRequestTestModel> Tests { get; set; } = new List<TestRequestTestModel>();
-        public ICollection<AssignTestTypesModel> TestAssignments { get; set; } = new List<AssignTestTypesModel>();
+
         public ICollection<SampleModel> Samples { get; set; } = new List<SampleModel>();
+
+        public ICollection<TestTypeModel> TestTypes { get; set; } = new List<TestTypeModel>();
     }
 }

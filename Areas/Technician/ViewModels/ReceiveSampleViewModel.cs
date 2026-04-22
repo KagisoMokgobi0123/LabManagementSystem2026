@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NMB_HLabSys.Areas.Technician.Models.ViewModels
+namespace NMB_HLabSys.Areas.Technician.ViewModels
 {
     public class ReceiveSampleViewModel
     {

@@ -9,7 +9,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int NotificationId { get; set; }
         public DateTime IssuedDate { get; set; }
         public string DoctorId { get; set; } = string.Empty;
-        public RegisterUser? Doctor { get; set; }
+        public RegisterUser Doctor { get; set; } = null!;
         public string Message { get; set; } = string.Empty;
     }
 }

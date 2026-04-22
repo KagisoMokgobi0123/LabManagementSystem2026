@@ -33,9 +33,9 @@
     <Folder Include="Areas\Administrator\Models\" />
     <Folder Include="Areas\Administrator\Views\" />
     <Folder Include="Areas\Doctor\Data\" />
-    <Folder Include="Areas\LabManager\Controllers\" />
-    <Folder Include="Areas\LabManager\Data\" />
-    <Folder Include="Areas\LabManager\Views\" />
+    <Folder Include="Areas\Manager\Data\" />
+    <Folder Include="Areas\Manager\Views\TestType\" />
+    <Folder Include="Areas\Manager\Views\TechnicianTestType\" />
     <Folder Include="Areas\Technician\Data\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />

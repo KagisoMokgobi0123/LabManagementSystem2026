@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Technician.Models;
-using NMB_HLabSys.Areas.Technician.Models.ViewModels;
+using NMB_HLabSys.Areas.Technician.ViewModels;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 
@@ -21,10 +21,13 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         [HttpGet]
         public async Task<IActionResult> ListRequests()
         {
-            // Only show requests that are still "Pending"
-            var pendingRequests = await _dbcontext.TestRequests
-                .Where(r => r.Status == "Submitted")
-                .ToListAsync();
+        var pendingRequests = await _dbcontext.TestRequests
+       .Where(r => r.Status == "Submitted")
+       .Include(r => r.Patient)
+       .Include(r => r.Doctor)
+       .Include(r => r.Samples)
+       .Include(r => r.TestTypes)
+       .ToListAsync();
 
             return View(pendingRequests);
         }

@@ -11,7 +11,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int TestRequestTestId { get; set; }
 
         public int TestRequestId { get; set; }
-        public TestRequestsModel? TestRequest { get; set; }
+        public TestRequestsModel TestRequest { get; set; } = null!;
         public string Name { get; set; } = string.Empty;
         public int TestTypeId { get; set; }
         public TestTypeModel? TestType { get; set; } 

@@ -1,4 +1,5 @@
-﻿using NMB_HLabSys.Models.Account;
+﻿using NMB_HLabSys.Areas.Doctor.Models;
+using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
 
 namespace NMB_HLabSys.Areas.LabManager.Models
@@ -7,7 +8,10 @@ namespace NMB_HLabSys.Areas.LabManager.Models
     {
         [Key]
         public int TestTypeId { get; set; }
-        public string Description { get; set; } = string.Empty;
+        public string TestName { get; set; } = string.Empty;
         public DateTime TurnAroundTime { get; set; } = DateTime.Now;
+
+        public ICollection<TestRequestsModel> TestRequests { get; set; } = new List<TestRequestsModel>();
+
     }
 }

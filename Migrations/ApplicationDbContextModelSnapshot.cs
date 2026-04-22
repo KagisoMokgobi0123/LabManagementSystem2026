@@ -155,6 +155,32 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ClinicalNotesModel", b =>
+                {
+                    b.Property<int>("NotesId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotesId"));
+
+                    b.Property<string>("DoctorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("IssuedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotesId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("ClinicalNotes");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.Property<int>("TestRequestId")
@@ -216,69 +242,6 @@ namespace NMBHLabSys.Migrations
                         });
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.LabManager.Models.AssignTestTypesModel", b =>
-                {
-                    b.Property<int>("AssignTestId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AssignTestId"));
-
-                    b.Property<DateTime?>("CompletionDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ManagerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime?>("StartDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TechnicianId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("TestRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TestTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AssignTestId");
-
-                    b.HasIndex("ManagerId");
-
-                    b.HasIndex("TechnicianId");
-
-                    b.HasIndex("TestRequestId");
-
-                    b.HasIndex("TestTypeId");
-
-                    b.ToTable("AssignTestTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            AssignTestId = 1,
-                            ManagerId = "7cfd1034-f3a8-42ed-b13e-61f3b19ed8ec",
-                            Status = 3,
-                            TestRequestId = 1,
-                            TestTypeId = 1
-                        },
-                        new
-                        {
-                            AssignTestId = 2,
-                            ManagerId = "7cfd1034-f3a8-42ed-b13e-61f3b19ed8ec",
-                            StartDateTime = new DateTime(2026, 4, 18, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            Status = 1,
-                            TechnicianId = "bdd52efb-571c-4ea7-9a18-9e9c66c92731",
-                            TestRequestId = 2,
-                            TestTypeId = 2
-                        });
-                });
-
             modelBuilder.Entity("NMB_HLabSys.Areas.LabManager.Models.TechnicianTestTypeModel", b =>
                 {
                     b.Property<int>("TechnicianTestTypeId")
@@ -324,7 +287,7 @@ namespace NMBHLabSys.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestTypeId"));
 
-                    b.Property<string>("Description")
+                    b.Property<string>("TestName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -339,41 +302,15 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestTypeId = 1,
-                            Description = "Full Blood Count (FBC)",
+                            TestName = "Full Blood Count (FBC)",
                             TurnAroundTime = new DateTime(2026, 1, 1, 4, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             TestTypeId = 2,
-                            Description = "Liver Function Test (LFT)",
+                            TestName = "Liver Function Test (LFT)",
                             TurnAroundTime = new DateTime(2026, 1, 1, 8, 0, 0, 0, DateTimeKind.Unspecified)
                         });
-                });
-
-            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ClinicalNotesModel", b =>
-                {
-                    b.Property<int>("NotesId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotesId"));
-
-                    b.Property<string>("DoctorId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("IssuedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("NotesId");
-
-                    b.HasIndex("DoctorId");
-
-                    b.ToTable("ClinicalNotes");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ConsumableModel", b =>
@@ -448,9 +385,8 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime>("DateReceived")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("SampleType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("SampleTypeId")
+                        .HasColumnType("int");
 
                     b.Property<int>("TestRequestId")
                         .HasColumnType("int");
@@ -459,6 +395,8 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("Barcode")
                         .IsUnique();
+
+                    b.HasIndex("SampleTypeId");
 
                     b.HasIndex("TestRequestId");
 
@@ -469,17 +407,56 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 1,
                             Barcode = "NMB-2026-0001",
-                            DateReceived = new DateTime(2026, 4, 18, 2, 52, 35, 589, DateTimeKind.Local).AddTicks(173),
-                            SampleType = "Whole Blood",
+                            DateReceived = new DateTime(2026, 4, 22, 2, 0, 4, 957, DateTimeKind.Local).AddTicks(5856),
+                            SampleTypeId = 1,
                             TestRequestId = 1
                         },
                         new
                         {
                             SampleId = 2,
                             Barcode = "NMB-2026-0002",
-                            DateReceived = new DateTime(2026, 4, 18, 2, 52, 35, 589, DateTimeKind.Local).AddTicks(175),
-                            SampleType = "Blood Film",
+                            DateReceived = new DateTime(2026, 4, 22, 2, 0, 4, 957, DateTimeKind.Local).AddTicks(5859),
+                            SampleTypeId = 4,
                             TestRequestId = 2
+                        });
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleTypeModel", b =>
+                {
+                    b.Property<int>("SampleTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SampleTypeId"));
+
+                    b.Property<string>("SampleName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SampleTypeId");
+
+                    b.ToTable("SampleTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            SampleTypeId = 1,
+                            SampleName = "Blood"
+                        },
+                        new
+                        {
+                            SampleTypeId = 2,
+                            SampleName = "Urine"
+                        },
+                        new
+                        {
+                            SampleTypeId = 3,
+                            SampleName = "Saliva"
+                        },
+                        new
+                        {
+                            SampleTypeId = 4,
+                            SampleName = "Swab"
                         });
                 });
 
@@ -688,6 +665,21 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("TestRequestsModelTestTypeModel", b =>
+                {
+                    b.Property<int>("TestRequestsTestRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestTypesTestTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TestRequestsTestRequestId", "TestTypesTestTypeId");
+
+                    b.HasIndex("TestTypesTestTypeId");
+
+                    b.ToTable("TestRequestsModelTestTypeModel");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -739,6 +731,17 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ClinicalNotesModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
@@ -756,39 +759,6 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
-                });
-
-            modelBuilder.Entity("NMB_HLabSys.Areas.LabManager.Models.AssignTestTypesModel", b =>
-                {
-                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Technician")
-                        .WithMany()
-                        .HasForeignKey("TechnicianId");
-
-                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
-                        .WithMany("TestAssignments")
-                        .HasForeignKey("TestRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Areas.LabManager.Models.TestTypeModel", "TestType")
-                        .WithMany()
-                        .HasForeignKey("TestTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Manager");
-
-                    b.Navigation("Technician");
-
-                    b.Navigation("TestRequest");
-
-                    b.Navigation("TestType");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.LabManager.Models.TechnicianTestTypeModel", b =>
@@ -818,17 +788,6 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestType");
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ClinicalNotesModel", b =>
-                {
-                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
-                        .WithMany()
-                        .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Doctor");
-                });
-
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ResultModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Technician")
@@ -846,11 +805,19 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
                 {
+                    b.HasOne("NMB_HLabSys.Areas.Technician.Models.SampleTypeModel", "SampleType")
+                        .WithMany()
+                        .HasForeignKey("SampleTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
                         .WithMany("Samples")
                         .HasForeignKey("TestRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("SampleType");
 
                     b.Navigation("TestRequest");
                 });
@@ -862,7 +829,7 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("TechnicianId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
-                        .WithMany("Tests")
+                        .WithMany()
                         .HasForeignKey("TestRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -899,13 +866,24 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestType");
                 });
 
+            modelBuilder.Entity("TestRequestsModelTestTypeModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", null)
+                        .WithMany()
+                        .HasForeignKey("TestRequestsTestRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.LabManager.Models.TestTypeModel", null)
+                        .WithMany()
+                        .HasForeignKey("TestTypesTestTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.Navigation("Samples");
-
-                    b.Navigation("TestAssignments");
-
-                    b.Navigation("Tests");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestRequestTestModel", b =>

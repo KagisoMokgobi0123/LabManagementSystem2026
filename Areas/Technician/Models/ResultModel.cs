@@ -10,7 +10,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public DateTime CapturedDateTime { get; set; }
         public DateTime IssuedDate { get; set; } = DateTime.Now;
         public string TechnicianId { get; set; } = string.Empty;
-        public RegisterUser? Technician { get; set; }
+        public RegisterUser Technician { get; set; } = null!;
         public string ResultValues { get; set; } = string.Empty;
         public string Notes { get; set;  } = string.Empty;
         public bool IsAbnormal { get; set; } = false;

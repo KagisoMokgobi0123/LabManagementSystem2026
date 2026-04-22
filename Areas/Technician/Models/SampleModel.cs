@@ -18,15 +18,16 @@ namespace NMB_HLabSys.Areas.Technician.Models
         [Required]
         public string Barcode { get; set; } = string.Empty;
 
-        [Required]
-        public string SampleType { get; set; } = string.Empty; // e.g., Blood, Plasma
+        [Required(ErrorMessage ="Sample type is required. Please select test type.")]
+        public int SampleTypeId { get; set; }// e.g., Blood, Plasma
+        public  SampleTypeModel SampleType {  get; set; } = null!;
 
         public DateTime DateReceived { get; set; } = DateTime.Now;
 
         // Foreign Keys
         public int TestRequestId { get; set; }
-        public TestRequestsModel? TestRequest { get; set; }
+        public TestRequestsModel TestRequest { get; set; } = null!;
 
-      
+
     }
 }

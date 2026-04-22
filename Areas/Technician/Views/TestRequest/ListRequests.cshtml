@@ -663,20 +663,26 @@
 																			<table id="add-row" class="display table table-striped table-hover">
 																			<thead class="no-export" style="width: 10%">
 																					<tr>
-																					<th>Request Number</th>
-																					<th>Date Requested</th>
-																					<th>Patient ID</th>
+																					<th>Issued</th>
+																					<th>No.</th>
+																					<th>Code</th>
+																					<th>Patient</th>
+																					<th>Doctor</th>
+																				    <th>Test Type</th>
+																					<th>Urgency</th>
 																					<th>Status</th>
-																						<th>Action</th>
 																					</tr>
 																				</thead>
 																				<tfoot>
 																					<tr>
-																					<th>Request Number</th>
-																					<th>Date Requested</th>
-																					<th>Patient ID</th>
+																					<th>Issued</th>
+																					<th>No.</th>
+																					<th>Code</th>
+																					<th>Patient</th>
+																					<th>Doctor</th>
+																					<th>Test Type</th>
+																					<th>Urgency</th>
 																					<th>Status</th>
-																					<th>Action</th>
 																					</tr>
 																				</tfoot>
 																				<tbody>
@@ -684,24 +690,39 @@
 																				@foreach (var item in Model)
 																				{
 																					<tr>
-																						<td><strong>@item.RequestNumber</strong></td>
-																						<td>@item.RequestDate.ToString("dd MMM yyyy")</td>
-																						<td>@item.PatientId</td>
+																						<td>@item.RequestDate.ToString("dd MMM yyyy")</td>  <!-- Issued -->
+																						<td>@item.RequestNumber</td>                       <!-- No. -->
+																						<td>@foreach (var sample in item.Samples)
+																							{
+																								<span class="badge bg-info text-white me-1">
+																									@sample.Barcode
+																								</span>
+																							}</td>                             <!-- Code -->
+																						<td>@item.Patient.FullName</td>                    <!-- Patient -->
+																						<td>@item.Doctor.FullName</td>                     <!-- Doctor -->
 																						<td>
-																							<span class="badge bg-warning text-dark">@item.Status</span>
-																						</td>
-																						
+																							@foreach (var test in item.TestTypes)
+																							{
+																								<span class="badge bg-info text-white me-1">
+																									@test.TestName
+																								</span>
+																							}
+																						</td>                  <!-- Test Type -->
+        
 																						<td>
-																							<div class="form-button-action">
-																							
-																									<a href="/Technician/TestRequest/Start/@item.TestRequestId" class="btn btn-link btn-primary">
-																										<i class="fa fa-play"></i> Verify
-																									</a>
-																								
-																							</div>
-																						</td>
+																							<span class="badge @(item.Urgency == "Stat" ? "bg-danger" : item.Urgency == "Urgent" ? "bg-warning" : "bg-success")">
+																								@item.Urgency
+																							</span>
+																						</td>                                              <!-- Urgency -->
+
+																						<td>
+																							<span class="badge bg-warning text-white">
+																								@item.Status
+																							</span>
+																						</td>                                              <!-- Status -->
 																					</tr>
 																				}
+																				
 																	
 																				</tbody>
 																			</table>

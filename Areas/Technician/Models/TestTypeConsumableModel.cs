@@ -10,7 +10,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int TestTypeId { get; set; }
         public TestTypeModel? TestType { get; set; }
         public int ConsumableId { get; set; }
-        public ConsumableModel? Consumable { get; set; }
+        public ConsumableModel Consumable { get; set; } = null!;
         public DateTime VerificationDate { get; set; } = DateTime.Now;
         public string Notes { get; set; } = string.Empty;
 

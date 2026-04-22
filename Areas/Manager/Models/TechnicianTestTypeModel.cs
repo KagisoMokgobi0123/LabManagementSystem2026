@@ -8,7 +8,7 @@ namespace NMB_HLabSys.Areas.LabManager.Models
         [Key]
         public int TechnicianTestTypeId { get; set; }
         public int TestTypeId { get; set; }
-        public TestTypeModel? TestType { get; set; }
+        public TestTypeModel TestType { get; set; } = null!;
         public string TechnicianId { get; set; } = string.Empty;
         public RegisterUser? Technician { get; set; }
         public string ManagerId { get; set; } = string.Empty;
