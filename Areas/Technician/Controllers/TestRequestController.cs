@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Technician.Models;
@@ -8,6 +10,7 @@ using NMB_HLabSys.Models.Account;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
+    [Authorize(Roles = "Technician")]
     [Area("Technician")]
     public class TestRequestController : Controller
     {
@@ -18,78 +21,95 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _dbcontext = context;
             _userManager = userManager;
         }
+        //List Doctor Requests
         [HttpGet]
         public async Task<IActionResult> ListRequests()
         {
-        var pendingRequests = await _dbcontext.TestRequests
-       .Where(r => r.Status == "Submitted")
-       .Include(r => r.Patient)
-       .Include(r => r.Doctor)
-       .Include(r => r.Samples)
-       .Include(r => r.TestTypes)
-       .ToListAsync();
+            var pendingRequests = await _dbcontext.TestRequests
+           .Where(r => r.Status == "Submitted")
+           .Include(r => r.Patient)
+           .Include(r => r.Doctor)
+           .Include(r => r.Samples)
+           .Include(r => r.TestTypes)
+           .ToListAsync();
 
             return View(pendingRequests);
         }
+        //Verify Request
         [HttpGet]
-        public async Task<IActionResult> Receive(int id)
+      
+        public async Task<IActionResult> ProcessSample(int id)
         {
             var request = await _dbcontext.TestRequests
                 .FirstOrDefaultAsync(r => r.TestRequestId == id);
 
-            if (request == null) return NotFound();
+            if (request == null)
+                return NotFound();
 
-            var viewModel = new ReceiveSampleViewModel
+            var model = new ReceiveSampleViewModel
             {
-                TestRequestId = request.TestRequestId,
-                RequestNumber = request.RequestNumber
+                RequestId = request.TestRequestId,
+                RequestNumber = request.RequestNumber,
+                ReceivedDateTime = DateTime.Now,
+                TechnicianId = _userManager.GetUserId(User)!
             };
 
-            return View(viewModel);
+            return View(model);
         }
-
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Receive(SampleModel model)
+        public async Task<IActionResult> ProcessSample(ReceiveSampleViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            var request = await _dbcontext.TestRequests
+                .Include(r => r.Samples)
+                .FirstOrDefaultAsync(r => r.TestRequestId == model.RequestId);
 
-            using var transaction = await _dbcontext.Database.BeginTransactionAsync();
-            try
+            if (request == null)
+                return BadRequest("Invalid request");
+
+            var sample = request.Samples
+                .FirstOrDefault(s => s.Barcode == model.Barcode);
+
+            if (sample == null)
+                return BadRequest("Invalid sample");
+
+            if (sample.Status == "Received")
+                return BadRequest("Sample already received");
+
+            sample.Status = "SampleReceived";
+            sample.TechnicianId = _userManager.GetUserId(User)!;
+            sample.DateReceived = DateTime.Now;
+
+            await _dbcontext.SaveChangesAsync();
+
+            TempData["Success"] = "Sample received successfully!";
+            return RedirectToAction("ProcessSample", new { id = model.RequestId });
+        }
+        [HttpPost]
+        public async Task<IActionResult> VerifyQRCode(string qrData)
+        {
+            if (string.IsNullOrEmpty(qrData) || !qrData.Contains("|"))
+                return BadRequest("Invalid QR format");
+
+            var parts = qrData.Split('|');
+
+            if (parts.Length < 2)
+                return BadRequest("Invalid QR format");
+
+            var requestPart = parts[0].Replace("REQ:", "");
+            var barcodePart = parts[1].Replace("BAR:", "");
+
+            if (!int.TryParse(requestPart, out int requestId))
+                return BadRequest("Invalid request ID");
+
+            // ✅ FIX: pass ViewModel instead
+            var model = new ReceiveSampleViewModel
             {
-                // 1. Find the parent Test Request
-                var request = await _dbcontext.TestRequests
-                    .FirstOrDefaultAsync(r => r.TestRequestId == model.TestRequestId);
+                RequestId = requestId,
+                Barcode = barcodePart
+            };
 
-                if (request == null) return NotFound();
-
-                // 2. Create the Sample Record
-                var sample = new SampleModel
-                {
-                    TestRequestId = request.TestRequestId,
-                    Barcode = model.Barcode,
-                    SampleType = model.SampleType,
-                    DateReceived = DateTime.Now // Use local time for lab logs
-                };
-
-                // 3. Update Request Status
-                request.Status = "Samples Received";
-
-                _dbcontext.Samples.Add(sample);
-                await _dbcontext.SaveChangesAsync();
-
-                // Commit both changes at once
-                await transaction.CommitAsync();
-
-                TempData["Success"] = $"Request {request.RequestNumber} verified. Status: Samples Received.";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync();
-                ModelState.AddModelError("", "An error occurred while receiving the sample. Please try again.");
-                return View(model);
-            }
+            return await ProcessSample(model);
         }
     }
 }
+

@@ -658,9 +658,9 @@
 																				</div>
 																			</div>
 																		</div>
-
+																	
 																		<div class="table-responsive">
-																			<table id="add-row" class="display table table-striped table-hover">
+																		<table id="add-row" class="display table table-striped table-hover table-bordered">
 																			<thead class="no-export" style="width: 10%">
 																					<tr>
 																					<th>Issued</th>
@@ -671,6 +671,7 @@
 																				    <th>Test Type</th>
 																					<th>Urgency</th>
 																					<th>Status</th>
+																					<th>Verification</th>
 																					</tr>
 																				</thead>
 																				<tfoot>
@@ -683,6 +684,7 @@
 																					<th>Test Type</th>
 																					<th>Urgency</th>
 																					<th>Status</th>
+																					<th>Verification</th>
 																					</tr>
 																				</tfoot>
 																				<tbody>
@@ -710,7 +712,7 @@
 																						</td>                  <!-- Test Type -->
         
 																						<td>
-																							<span class="badge @(item.Urgency == "Stat" ? "bg-danger" : item.Urgency == "Urgent" ? "bg-warning" : "bg-success")">
+																							<span class="badge @(item.Urgency == "Stat" ? "bg-danger" : item.Urgency == "Urgent" ? "bg-warning" : "bg-success") text-white" ">
 																								@item.Urgency
 																							</span>
 																						</td>                                              <!-- Urgency -->
@@ -719,7 +721,19 @@
 																							<span class="badge bg-warning text-white">
 																								@item.Status
 																							</span>
-																						</td>                                              <!-- Status -->
+																						</td>  
+																					
+																						<td>
+																							<!-- Actions -->
+																							<div class="d-inline">
+																								<!-- Verify Button -->
+																								<a href="/Technician/TestRequest/ProcessSample/@item.TestRequestId"
+																									   class="btn btn-success btn-sm me-1">
+																									<i class="fa fa-check"></i> Verify
+																								</a>
+
+																							</div>
+																						</td><!-- Status -->
 																					</tr>
 																				}
 																				

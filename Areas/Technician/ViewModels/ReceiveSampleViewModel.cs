@@ -4,17 +4,17 @@ namespace NMB_HLabSys.Areas.Technician.ViewModels
 {
     public class ReceiveSampleViewModel
     {
-        public int TestRequestId { get; set; }
+        [Required]
+        public string RequestNumber { get; set; } = string.Empty;
 
-        [Display(Name = "Request Number")]
-        public string? RequestNumber { get; set; }
-
-        [Required(ErrorMessage = "Please scan or enter the sample barcode.")]
-        [Display(Name = "Sample Barcode")]
+        [Required]
         public string Barcode { get; set; } = string.Empty;
+        public int RequestId { get; set; }
 
-        [Required(ErrorMessage = "Please select a sample type.")]
-        [Display(Name = "Sample Type")]
         public string SampleType { get; set; } = string.Empty;
+
+        public DateTime ReceivedDateTime { get; set; } = DateTime.Now;
+
+        public string TechnicianId { get; set; } = string.Empty;
     }
 }

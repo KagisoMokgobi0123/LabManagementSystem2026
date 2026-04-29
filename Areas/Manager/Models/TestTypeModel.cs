@@ -10,7 +10,6 @@ namespace NMB_HLabSys.Areas.LabManager.Models
         public int TestTypeId { get; set; }
         public string TestName { get; set; } = string.Empty;
         public DateTime TurnAroundTime { get; set; } = DateTime.Now;
-
         public ICollection<TestRequestsModel> TestRequests { get; set; } = new List<TestRequestsModel>();
 
     }
