@@ -2,7 +2,7 @@
 
 namespace NMB_HLabSys.Areas.Manager.Models
 {
-    public class TestCategory
+    public class TestCategoryModel
     {
         [Key]
         public int TestCategoryId { get; set; }
