@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NMB_HLabSys.Areas.Technician.Models
+namespace NMB_HLabSys.Areas.Manager.Models
 {
     public class SampleTypeModel
     {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.LabManager.Models;
+using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Account;
 using System.Reflection.Emit;
@@ -37,14 +38,14 @@ namespace NMB_HLabSys.Data
                 new TestTypeModel
                 {
                     TestTypeId = 1,
-                    TestName = "Full Blood Count (FBC)",
+                    Name = "Full Blood Count (FBC)",
                     TurnAroundTime = new DateTime(2026, 01, 01, 04, 00, 0) // 4-hour target
                 },
                
                 new TestTypeModel
                 {
                     TestTypeId = 2,
-                    TestName = "Liver Function Test (LFT)",
+                    Name = "Liver Function Test (LFT)",
                     TurnAroundTime = new DateTime(2026, 01, 01, 08, 00, 0)
                 }
             );
@@ -117,12 +118,14 @@ namespace NMB_HLabSys.Data
         public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
         public DbSet<TestTypeModel> TestTypes { get; set; }
         public DbSet<Areas.Technician.Models.SampleModel> Samples { get; set; }
-        public DbSet<Areas.Technician.Models.SampleTypeModel> SampleTypes { get; set; }
+        public DbSet<SampleTypeModel> SampleTypes { get; set; }
         public DbSet<Areas.Doctor.Models.TestRequestsModel> TestRequests { get; set; }
-        public DbSet<Areas.Technician.Models.TestRequestTestModel> TestRequestTests { get; set; }
+        public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTests { get; set; }
         public DbSet<ClinicalNotesModel> ClinicalNotes { get; set; }
         public DbSet<Areas.Technician.Models.ResultModel> Results { get; set; }
-        public DbSet<Areas.Technician.Models.ConsumableModel> Consumables { get; set; }
+
+        public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTestTypes { get; set; }
+        public DbSet<Areas.Manager.Models.ConsumableModel> Consumables { get; set; }
         public DbSet<Areas.Technician.Models.TestTypeConsumableModel> TestConsumables { get; set; }
 
 

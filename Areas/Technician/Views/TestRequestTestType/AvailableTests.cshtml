@@ -1,0 +1,42 @@
+﻿@using NMB_HLabSys.Areas.Technician.Models
+@model IEnumerable<TestRequestTestTypeModel>
+
+<h2>Available Tests</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No available tests at the moment.
+    </div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Request Number</th>
+                <th>Test Type</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.TestRequest.RequestNumber</td>
+                    <td>@item.TestType.Name</td>
+                    <td>@item.Status</td>
+                    <td>
+                        <form asp-action="StartTest" method="post">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-success">
+                                Start Test
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

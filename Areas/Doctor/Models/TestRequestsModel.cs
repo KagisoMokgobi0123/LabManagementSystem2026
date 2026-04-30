@@ -39,6 +39,6 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
 
         public ICollection<SampleModel> Samples { get; set; } = new List<SampleModel>();
-        public ICollection<TestTypeModel> TestTypes { get; set; } = new List<TestTypeModel>(); public ICollection<TestRequestsModel> TestRequests { get; set; } = new List<TestRequestsModel>();
+        public List<TestRequestTestTypeModel> TestTypes { get; set; } = new();
     }
 }

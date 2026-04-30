@@ -1,4 +1,5 @@
 ﻿using NMB_HLabSys.Areas.Doctor.Models;
+using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,11 +30,10 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         public string Status { get; set; } = string.Empty;
 
-
-        // Foreign Keys
         public int TestRequestId { get; set; }
         public TestRequestsModel TestRequest { get; set; } = null!;
 
+        public bool IsReceived { get; set; }
 
     }
 }

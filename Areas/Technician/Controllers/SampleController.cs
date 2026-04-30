@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Technician.Models;
+using NMB_HLabSys.Areas.Technician.ViewModels;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 
@@ -20,54 +21,89 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             return View();
         }
-
-
-        // GET: TestRequests/Receive/5
-        public async Task<IActionResult> Sample(int id)
+        public async Task<IActionResult> VerifiedSample()
         {
-            var request = await _dbcontext.TestRequests.FindAsync(id);
-            if (request == null) return NotFound();
+            var technicianId = _userManager.GetUserId(User);
 
-            var viewModel = new SampleModel
-            {
-                TestRequestId = request.TestRequestId,
-            };
+            var samples = await _dbcontext.Samples
+                .Where(s => s.IsReceived == true &&
+                            s.TechnicianId == technicianId)
+                .OrderByDescending(s => s.DateReceived)
+                .ToListAsync();
 
-            return View(viewModel);
+            return View(samples);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Sample(SampleModel model)
-        //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        var success = await Sample(model.TestRequestId, model.Barcode, model.SampleType);
-        //        if (success)
-        //        {
-        //            TempData["Success"] = "Sample verified and received successfully.";
-        //            return RedirectToAction("Index"); // Redirect to your dashboard
-        //        }
-        //    }
-        //    return View(model);
-        //}
-
-        public async Task<bool> Sample(int requestId, string barcode, string sampleType, string technicianId)
+        public async Task<IActionResult> VerifySample(SampleModel model)
         {
-            //GET TestRequest
+            // Get logged-in technician
+            var technicianId = User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(technicianId))
+                return Unauthorized();
+
+            // Basic validation
+            if (!ModelState.IsValid)
+                return View("VerifySample", model);
+
+            // Check request exists
             var request = await _dbcontext.TestRequests
-                .FirstOrDefaultAsync(r => r.TestRequestId == requestId);
+                .FirstOrDefaultAsync(r => r.RequestNumber == model.RequestNumber);
 
-            if (request == null) return false;
+            if (request == null)
+            {
+                ModelState.AddModelError("", "Invalid request number.");
+                return View("VerifySample", model);
+            }
 
-            // 1. Update the Status
-            request.Status = "Samples Received";
+            // Find sample
+            var sample = await _dbcontext.Samples
+                .FirstOrDefaultAsync(s =>
+                    s.Barcode == model.Barcode &&
+                    s.RequestNumber == model.RequestNumber);
 
-            // 2. Log the Verification details 
+            if (sample == null)
+            {
+                ModelState.AddModelError("", "Sample barcode does not match request.");
+                return View("VerifySample", model);
+            }
 
+            // Prevent duplicate receiving
+            if (sample.IsReceived)
+            {
+                ModelState.AddModelError("", "This sample has already been received.");
+                return View("VerifySample", model);
+            }
+
+            // Validate sample type
+            if (sample.SampleType != model.SampleType)
+            {
+                ModelState.AddModelError("", "Incorrect sample type.");
+                return View("VerifySample", model);
+            }
+
+            // VERIFY / RECEIVE SAMPLE
+            sample.IsReceived = true;
+            sample.DateReceived = DateTime.Now;
+            sample.TechnicianId = technicianId;
+
+            // (Optional) update request status
+            request.Status = "SamplesReceived";
 
             await _dbcontext.SaveChangesAsync();
-            return true;
+
+            TempData["Success"] = "Sample verified and received successfully.";
+
+            return RedirectToAction("VerifySample");
         }
+
+
+
+      
+       
+
+        
 
     }
 }

@@ -35,7 +35,6 @@
     <Folder Include="Areas\Doctor\Data\" />
     <Folder Include="Areas\Manager\Data\" />
     <Folder Include="Areas\Manager\Views\TestType\" />
-    <Folder Include="Areas\Manager\Views\TechnicianTestType\" />
     <Folder Include="Areas\Technician\Data\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
