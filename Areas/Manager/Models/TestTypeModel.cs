@@ -16,7 +16,8 @@ namespace NMB_HLabSys.Areas.LabManager.Models
         public int SampleTypeId { get; set; }
         public SampleModel SampleType { get; set; } = null!;
         public double MeasurementUnit { get; set; }
-        public string NormalRange { get; set; } = null!;
+        public decimal NormalMin { get; set; }
+        public decimal NormalMax { get; set; }
         public int ConsumanleId { get; set; }
         public ConsumableModel Consumable { get; set; } = null!;
         public DateTime TurnAroundTime { get; set; } = DateTime.Now;

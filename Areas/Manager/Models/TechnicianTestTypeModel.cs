@@ -17,7 +17,7 @@ namespace NMB_HLabSys.Areas.LabManager.Models
         public string ManagerId { get; set; } = string.Empty;
         public RegisterUser? Manager { get; set; }
 
-        public string Status { get; set; } = "Pending";
+        public string Status { get; set; } = "Submitted";
         public DateTime AssignmentDate { get; set; } = DateTime.Now;
     }
 }

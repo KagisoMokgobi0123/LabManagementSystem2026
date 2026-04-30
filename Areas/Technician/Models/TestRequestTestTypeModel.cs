@@ -23,6 +23,15 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public DateTime StartDateTime { get; set; } = DateTime.Now;
         public DateTime? CompletionDateTime { get; set; } =  DateTime.Now;
 
+        // Result capture
+        public string? ResultValue { get; set; }
+        public string? Notes { get; set; }
+
+        // Verification
+        public string? VerifiedByTechnicianId { get; set; }
+        public RegisterUser? VerifyTechnician { get; set; }
+        public string? VerificationNote { get; set; }
+
         public ICollection<ResultModel> Results { get; set; } = new List<ResultModel>();
     }
 }
