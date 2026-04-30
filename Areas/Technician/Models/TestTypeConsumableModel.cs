@@ -1,4 +1,5 @@
 ﻿using NMB_HLabSys.Areas.LabManager.Models;
+using NMB_HLabSys.Areas.Manager.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace NMB_HLabSys.Areas.Technician.Models
@@ -12,7 +13,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int ConsumableId { get; set; }
         public ConsumableModel Consumable { get; set; } = null!;
         public DateTime VerificationDate { get; set; } = DateTime.Now;
-        public string Notes { get; set; } = string.Empty;
+        public int QuantityRequired { get; set; } 
 
     }
 }

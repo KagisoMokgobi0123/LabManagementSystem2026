@@ -8,7 +8,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
     public class TestRequestTestTypeModel
     {
         [Key]
-        public int TestRequestTestId { get; set; }
+        public int TestRequestTestTypeId { get; set; }
 
         public int TestRequestId { get; set; }
         public TestRequestsModel TestRequest { get; set; } = null!;
@@ -21,7 +21,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         public string Status { get; set; } = "Pending";
         public DateTime StartDateTime { get; set; } = DateTime.Now;
-        public DateTime? CompletionDateTime { get; set; } =  DateTime.Now;
+        public DateTime? CompletionDateTime { get; set; }
 
         // Result capture
         public string? ResultValue { get; set; }
@@ -31,6 +31,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string? VerifiedByTechnicianId { get; set; }
         public RegisterUser? VerifyTechnician { get; set; }
         public string? VerificationNote { get; set; }
+        public DateTime? VerificationDateTime { get; set; }
 
         public ICollection<ResultModel> Results { get; set; } = new List<ResultModel>();
     }

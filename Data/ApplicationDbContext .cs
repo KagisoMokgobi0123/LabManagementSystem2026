@@ -39,14 +39,14 @@ namespace NMB_HLabSys.Data
                 {
                     TestTypeId = 1,
                     Name = "Full Blood Count (FBC)",
-                    TurnAroundTime = new DateTime(2026, 01, 01, 04, 00, 0) // 4-hour target
+                    TurnAroundTimeHours = 4
                 },
                
                 new TestTypeModel
                 {
                     TestTypeId = 2,
                     Name = "Liver Function Test (LFT)",
-                    TurnAroundTime = new DateTime(2026, 01, 01, 08, 00, 0)
+                    TurnAroundTimeHours = 8
                 }
             );
             // 1. Seed Test Requests
@@ -126,7 +126,7 @@ namespace NMB_HLabSys.Data
 
         public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTestTypes { get; set; }
         public DbSet<Areas.Manager.Models.ConsumableModel> Consumables { get; set; }
-        public DbSet<Areas.Technician.Models.TestTypeConsumableModel> TestConsumables { get; set; }
+        public DbSet<Areas.Technician.Models.TestTypeConsumableModel> TestTypeConsumables { get; set; }
 
 
 
