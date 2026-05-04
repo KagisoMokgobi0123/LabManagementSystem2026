@@ -178,7 +178,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("DoctorId");
 
-                    b.ToTable("ClinicalNotes");
+                    b.ToTable("ClinicalNotes", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
@@ -217,7 +217,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("TestRequests");
+                    b.ToTable("TestRequests", (string)null);
 
                     b.HasData(
                         new
@@ -276,7 +276,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TechnicianTestTypes");
+                    b.ToTable("TechnicianTestTypes", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.LabManager.Models.TestTypeModel", b =>
@@ -296,7 +296,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("TestTypeId");
 
-                    b.ToTable("TestTypes");
+                    b.ToTable("TestTypes", (string)null);
 
                     b.HasData(
                         new
@@ -326,7 +326,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("ConsumableId");
 
-                    b.ToTable("Consumables");
+                    b.ToTable("Consumables", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ResultModel", b =>
@@ -367,7 +367,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestRequestTestModelTestRequestTestId");
 
-                    b.ToTable("Results");
+                    b.ToTable("Results", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
@@ -400,7 +400,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestRequestId");
 
-                    b.ToTable("Samples");
+                    b.ToTable("Samples", (string)null);
 
                     b.HasData(
                         new
@@ -435,7 +435,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("SampleTypeId");
 
-                    b.ToTable("SampleTypes");
+                    b.ToTable("SampleTypes", (string)null);
 
                     b.HasData(
                         new
@@ -499,7 +499,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TestRequestTests");
+                    b.ToTable("TestRequestTests", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestTypeConsumableModel", b =>
@@ -529,7 +529,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TestConsumables");
+                    b.ToTable("TestConsumables", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Models.Account.LoginUser", b =>
@@ -592,7 +592,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LoggedInUsers");
+                    b.ToTable("LoggedInUsers", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Models.Account.RegisterUser", b =>
@@ -677,7 +677,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypesTestTypeId");
 
-                    b.ToTable("TestRequestsModelTestTypeModel");
+                    b.ToTable("TestRequestsModelTestTypeModel", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

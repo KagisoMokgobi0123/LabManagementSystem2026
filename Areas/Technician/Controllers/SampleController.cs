@@ -96,13 +96,31 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return RedirectToAction("VerifiedSample");
         }
+        [HttpGet]
+        [HttpGet]
+        public async Task<IActionResult> SearchRequest(string term)
+        {
+            var results = await _dbcontext.TestRequests
+                .Include(r => r.Patient)
+                .Where(r => r.RequestNumber.Contains(term))
+                .Select(r => new
+                {
+                    requestNumber = r.RequestNumber,
+                    patientName = r.Patient.FullName, // adjust if needed
+                    urgency = r.Urgency
+                })
+                .Take(10)
+                .ToListAsync();
+
+            return Json(results);
+        }
 
 
 
-      
-       
 
-        
+
+
+
 
     }
 }

@@ -21,15 +21,32 @@ namespace NMB_HLabSys.Data
         {
             // Always call the base method first when using Identity
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<TechnicianTestTypeModel>()
+      .HasOne(t => t.Technician)
+      .WithMany()
+      .HasForeignKey(t => t.TechnicianId)
+      .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TechnicianTestTypeModel>()
+                .HasOne(t => t.Manager)
+                .WithMany()
+                .HasForeignKey(t => t.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // 1. Your unique index for barcodes
             modelBuilder.Entity<SampleModel>()
                 .HasIndex(s => s.Barcode)
                 .IsUnique();
 
-      // modelBuilder.Entity<TestRequestsModel>()
-      //.HasMany(t => t.TestTypes)
-      //.WithMany(t => t.TestRequests) // Make sure this exists in TestTypeModel
-      //.UsingEntity(j => j.ToTable("TestRequestTestTypes"));
+            modelBuilder.Entity<TestRequestsModel>()
+    .Property(t => t.Urgency)
+    .HasConversion<string>();
+
+            // modelBuilder.Entity<TestRequestsModel>()
+            //.HasMany(t => t.TestTypes)
+            //.WithMany(t => t.TestRequests) // Make sure this exists in TestTypeModel
+            //.UsingEntity(j => j.ToTable("TestRequestTestTypes"));
 
 
 

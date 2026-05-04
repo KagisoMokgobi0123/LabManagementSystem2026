@@ -66,7 +66,7 @@ namespace NMBHLabSys.Migrations
                 column: "TechnicianId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
     }
 }
