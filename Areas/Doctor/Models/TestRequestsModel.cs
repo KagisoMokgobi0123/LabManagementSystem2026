@@ -6,8 +6,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
+    public enum Urgency
+    {
+        Routine,
+        Urgent,
+        STAT
+    }
     public class TestRequestsModel
     {
+        
         [Key]
         public int TestRequestId { get; set; }
 
@@ -30,8 +37,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
 
         [Required(ErrorMessage = "Please select the level of urgency.")]
-        public string Urgency { get; set; } = "Routine"; // Default value
-
+        public Urgency Urgency { get; set; } = Urgency.Routine;
 
         [Display(Name = "Clinical Notes")]
         [DataType(DataType.MultilineText)]

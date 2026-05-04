@@ -20,8 +20,12 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public RegisterUser? Technician { get; set; }
 
         public string Status { get; set; } = "Pending";
-        public DateTime StartDateTime { get; set; } = DateTime.Now;
-        public DateTime? CompletionDateTime { get; set; }
+        public DateTime StartDateTime { get; set; } 
+        public DateTime CompletionDateTime { get; set; } 
+
+        public DateTime? DueDate { get; set; }
+        public bool IsOverdue =>
+        DueDate < DateTime.Now && Status != "Completed";
 
         // Result capture
         public string? ResultValue { get; set; }

@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Identity" Version="1.20.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2">
@@ -35,14 +36,10 @@
     <Folder Include="Areas\Doctor\Data\" />
     <Folder Include="Areas\Manager\Data\" />
     <Folder Include="Areas\Manager\Views\TestType\" />
-    <Folder Include="Areas\Technician\Data\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />
     <Folder Include="Areas\Patient\Views\" />
-    <Folder Include="Areas\Technician\VerifyTechnician\Data\" />
-    <Folder Include="Areas\Technician\VerifyTechnician\Models\" />
-    <Folder Include="Areas\Technician\VerifyTechnician\Views\" />
   </ItemGroup>
 
 </Project>

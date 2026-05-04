@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Technician.Models;
-using NMB_HLabSys.Areas.Technician.ViewModels;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 
@@ -89,13 +88,13 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             sample.TechnicianId = technicianId;
 
             // (Optional) update request status
-            request.Status = "SamplesReceived";
+            request.Status = "Samples Received";
 
             await _dbcontext.SaveChangesAsync();
 
             TempData["Success"] = "Sample verified and received successfully.";
 
-            return RedirectToAction("VerifySample");
+            return RedirectToAction("VerifiedSample");
         }
 
 

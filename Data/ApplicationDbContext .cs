@@ -53,13 +53,13 @@ namespace NMB_HLabSys.Data
             modelBuilder.Entity<TestRequestsModel>().HasData(
                 new TestRequestsModel
                 {
-                    TestRequestId = 1, RequestDate = new DateTime(2026, 04, 10, 10, 30, 0),  Status = "Submitted",Urgency = "Routine",ClinicalNotes = "Patient complaining of persistent fatigue. Check for anemia.",
+                    TestRequestId = 1, RequestDate = new DateTime(2026, 04, 10, 10, 30, 0),  Status = "Submitted",Urgency = Urgency.Urgent,ClinicalNotes = "Patient complaining of persistent fatigue. Check for anemia.",
                     PatientId = "3663096b-0ae2-4ab9-9321-d2a991afef86",
                     DoctorId = "24d75510-b1ad-4803-86e5-8e279b3ddb5a"    // Must match a seeded User Id
                 },
                 new TestRequestsModel
                 {
-                    TestRequestId = 2, RequestDate = new DateTime(2026, 04, 11, 09, 15, 0),Status = "Submitted",Urgency = "Stat",ClinicalNotes = "Suspected Malaria. High fever and chills.",
+                    TestRequestId = 2, RequestDate = new DateTime(2026, 04, 11, 09, 15, 0),Status = "Submitted",Urgency = Urgency.Routine,ClinicalNotes = "Suspected Malaria. High fever and chills.",
                     PatientId = "8ebb4a85-c399-43a9-a9ed-9d85211bc67d",
                     DoctorId = "ebfc3689-96da-433d-a042-58a90b0da38a"
                 }
@@ -123,7 +123,7 @@ namespace NMB_HLabSys.Data
         public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTests { get; set; }
         public DbSet<ClinicalNotesModel> ClinicalNotes { get; set; }
         public DbSet<Areas.Technician.Models.ResultModel> Results { get; set; }
-
+        public DbSet<Areas.Technician.Models.TestRequestTestTypeHistoryModel> TestRequestTestTypeHistories { get; set; }
         public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTestTypes { get; set; }
         public DbSet<Areas.Manager.Models.ConsumableModel> Consumables { get; set; }
         public DbSet<Areas.Technician.Models.TestTypeConsumableModel> TestTypeConsumables { get; set; }

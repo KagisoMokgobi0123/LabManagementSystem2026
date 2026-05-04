@@ -17,6 +17,25 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _dbcontext = context;
             _userManager = userManager;
         }
+        public static class Status
+        {
+            public const string Pending = "Pending";
+            public const string InProgress = "In Progress";
+            public const string Completed = "Completed";
+            public const string SamplesReceived = "Samples Received";
+        }
+        public async Task<IActionResult> MyTests()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            var tests = await _dbcontext.TestRequestTestTypes
+                .Include(t => t.TestType)
+                .Include(t => t.TestRequest)
+                .Where(t => t.TechnicianId == technicianId)
+                .ToListAsync();
+
+            return View(tests);
+        }
         public async Task<IActionResult> AvailableTests()
         {  
 
@@ -33,8 +52,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .Include(t => t.TestRequest)
                 .Include(t => t.TestType)
                 .Where(t =>
-                    t.Status == "Pending" &&
-                    t.TestRequest.Status == "SamplesReceived" &&
+                    t.Status == Status.Pending &&
+                    t.TestRequest.Status == Status.SamplesReceived &&
                     allowedTestTypes.Contains(t.TestTypeId))
                 .ToListAsync();
 
@@ -47,138 +66,89 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             var test = await _dbcontext.TestRequestTestTypes
                 .Include(t => t.TestRequest)
+                .Include(t => t.TestType)
                 .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
 
             if (test == null)
                 return NotFound();
 
-            // Already in progress check
-            if (test.Status == "In Progress")
+            if (test.Status == Status.InProgress)
             {
                 TempData["Error"] = "Test is already in progress.";
                 return RedirectToAction("AvailableTests");
             }
 
-            // Already completed check
-            if (test.Status == "Completed")
+            if (test.Status == Status.Completed)
             {
                 TempData["Error"] = "This test has already been completed.";
                 return RedirectToAction("AvailableTests");
             }
 
-            // CHECK + DEDUCT CONSUMABLES
+            var allowedTestTypes = _dbcontext.TechnicianTestTypes
+                .Where(t => t.TechnicianId == technicianId)
+                .Select(t => t.TestTypeId);
+
+            if (!allowedTestTypes.Contains(test.TestTypeId))
+                return Forbid();
+
             var consumables = await _dbcontext.TestTypeConsumables
                 .Where(c => c.TestTypeId == test.TestTypeId)
                 .ToListAsync();
 
-            foreach (var item in consumables)
-            {
-                var stock = await _dbcontext.Consumables
-                    .FirstOrDefaultAsync(s => s.ConsumableId == item.ConsumableId);
+            using var transaction = await _dbcontext.Database.BeginTransactionAsync();
 
-                if (stock == null || stock.QuantityOnHand < item.QuantityRequired)
+            try
+            {
+                foreach (var item in consumables)
                 {
-                    TempData["Error"] = "Insufficient stock for this test.";
-                    return RedirectToAction("AvailableTests");
+                    var stock = await _dbcontext.Consumables
+                        .FirstOrDefaultAsync(s => s.ConsumableId == item.ConsumableId);
+
+                    if (stock == null || stock.QuantityOnHand < item.QuantityRequired)
+                    {
+                        TempData["Error"] = "Insufficient stock for this test.";
+                        return RedirectToAction("AvailableTests");
+                    }
+
+                    stock.QuantityOnHand -= item.QuantityRequired;
                 }
 
-                stock.QuantityOnHand -= item.QuantityRequired;
+                test.TechnicianId = technicianId;
+                test.Status = Status.InProgress;
+                test.StartDateTime = DateTime.UtcNow;
+                test.DueDate = DateTime.UtcNow.AddHours(test.TestType.TurnAroundTimeHours);
+
+                if (test.TestRequest.Status != Status.InProgress)
+                {
+                    test.TestRequest.Status = Status.InProgress;
+                }
+
+                await _dbcontext.SaveChangesAsync();
+                await transaction.CommitAsync();
             }
-
-            // Assign technician
-            test.TechnicianId = technicianId;
-            test.Status = "In Progress";
-
-            // Start time
-            test.StartDateTime = DateTime.Now;
-
-            // Expected completion time (TURNAROUND TIME)
-            test.CompletionDateTime = DateTime.Now.AddHours(test.TestType.TurnAroundTimeHours);
-
-            // Update request status
-            if (test.TestRequest.Status != "In Progress")
+            catch
             {
-                test.TestRequest.Status = "In Progress";
+                await transaction.RollbackAsync();
+                throw;
             }
-
-            await _dbcontext.SaveChangesAsync();
 
             TempData["Success"] = "Test started successfully.";
-
             return RedirectToAction("MyTests");
         }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CompleteTest(int id)
-        {
-            var test = await _dbcontext.TestRequestTestTypes
-                .Include(t => t.TestRequest)
-                .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
-
-            if (test == null)
-                return NotFound();
-
-            // Check if already completed
-            if (test.Status == "Completed")
-            {
-                TempData["Error"] = "This test has already been completed.";
-                return RedirectToAction("MyTests");
-            }
-
-            // ensure it was started first
-            if (test.Status != "In Progress")
-            {
-                TempData["Error"] = "Test must be started before it can be completed.";
-                return RedirectToAction("MyTests");
-            }
-
-            // Complete test
-            test.Status = "Completed";
-            test.CompletionDateTime = DateTime.Now;
-
-            // Check if ALL tests are completed
-            var allCompleted = _dbcontext.TestRequestTestTypes
-                .Where(t => t.TestRequestId == test.TestRequestId)
-                .All(t => t.Status == "Completed");
-
-            if (allCompleted)
-            {
-                test.TestRequest.Status = "Completed";
-            }
-
-            await _dbcontext.SaveChangesAsync();
-
-            TempData["Success"] = "Test completed successfully.";
-
-            return RedirectToAction("MyTests");
-        }
-
-
-        public async Task<IActionResult> MyTests()
-        {
-            var technicianId = _userManager.GetUserId(User);
-
-            var tests = await _dbcontext.TestRequestTestTypes
-                .Include(t => t.TestType)
-                .Include(t => t.TestRequest)
-                .Where(t => t.TechnicianId == technicianId)
-                .ToListAsync();
-
-            return View(tests);
-        }
-
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CaptureTestResult(int id, string resultValue, string notes)
         {
             var test = await _dbcontext.TestRequestTestTypes
                 .Include(t => t.TestRequest)
+                .Include(t => t.TestType)
                 .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
 
             if (test == null)
                 return NotFound();
 
-            if (test.Status != "In Progress")
+            if (test.Status != Status.InProgress)
             {
                 TempData["Error"] = "Test must be in progress before capturing results.";
                 return RedirectToAction("MyTests");
@@ -208,21 +178,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             }
 
             // Mark test completed
-            test.Status = "Completed";
-            test.CompletionDateTime = DateTime.Now;
+            test.Status = Status.Completed;
+            test.CompletionDateTime = DateTime.UtcNow;
 
             // Update request status
             var allCompleted = _dbcontext.TestRequestTestTypes
                 .Where(t => t.TestRequestId == test.TestRequestId)
-                .All(t => t.Status == "Completed");
+                .All(t => t.Status == Status.Completed);
 
             if (allCompleted)
             {
-                test.TestRequest.Status = "Completed";
+                test.TestRequest.Status = Status.Completed;
             }
             else
             {
-                test.TestRequest.Status = "In Progress";
+                test.TestRequest.Status = Status.InProgress;
             }
 
             await _dbcontext.SaveChangesAsync();
