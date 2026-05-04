@@ -72,7 +72,7 @@ namespace NMBHLabSys.Migrations
                 column: "TechnicianId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Samples_TestRequests_TestRequestId",
@@ -80,7 +80,7 @@ namespace NMBHLabSys.Migrations
                 column: "TestRequestId",
                 principalTable: "TestRequests",
                 principalColumn: "TestRequestId",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.NoAction);
         }
 
         /// <inheritdoc />
@@ -145,8 +145,8 @@ namespace NMBHLabSys.Migrations
                 table: "Samples",
                 column: "TechnicianId",
                 principalTable: "AspNetUsers",
-                principalColumn: "Id");
-
+principalColumn: "Id",
+    onDelete: ReferentialAction.Restrict);
             migrationBuilder.AddForeignKey(
                 name: "FK_Samples_TestRequests_RequestTestRequestId",
                 table: "Samples",
