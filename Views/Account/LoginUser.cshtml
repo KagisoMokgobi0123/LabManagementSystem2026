@@ -7,54 +7,419 @@
     Layout = "_LoginLayout";
 }
 
-<section class="vh-100 d-flex justify-content-center align-items-center">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-body p-4">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <!-- Bootstrap 5 CSS + Icons + Google Fonts for refined look -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Font: Inter for clean modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
 
-                        <!-- Title -->
-                        <h3 class="fw-bold mb-3 text-center">Sign In</h3>
+        body {
+            background: linear-gradient(135deg, #e9f0ff 0%, #d9e4f5 100%);
+            overflow-x: auto;    /* ensure horizontal scroll if needed, but row will wrap gracefully */
+        }
 
-                        <!-- Form -->
-                        <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
-                            @Html.AntiForgeryToken()
+        /* full-height wrapper with subtle backdrop */
+        .login-dashboard {
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-                            <!-- Email/Username -->
-                            <div class="mb-3">
-                                <label asp-for="Email" class="form-label">Username</label>
-                                <input asp-for="Email" class="form-control form-control-sm" placeholder="Enter username or email" />
-                                <span asp-validation-for="Email" class="text-danger small"></span>
-                            </div>
+        /* Each card gets consistent spacing and smooth hover */
+        .role-card {
+            transition: transform 0.2s ease, box-shadow 0.25s ease;
+            border: none;
+            border-radius: 1.25rem !important;
+            background: linear-gradient(145deg, #ffffff 0%, #fefefe 100%);
+            backdrop-filter: blur(0px);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0,0,0,0.02);
+            height: 100%;
+        }
 
-                            <!-- Password -->
-                            <div class="mb-3">
-                                <label asp-for="Password" class="form-label">Password</label>
-                                <input asp-for="Password" class="form-control form-control-sm" placeholder="Enter password" />
-                                <span asp-validation-for="Password" class="text-danger small"></span>
-                            </div>
+        .role-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 28px 36px -14px rgba(0, 0, 0, 0.2);
+        }
 
-                            <!-- Remember Me -->
-                            <div class="form-check mb-3">
-                                <input asp-for="RememberMe" class="form-check-input" id="rememberMe">
-                                    <label asp-for="RememberMe" class="form-check-label">Remember Me</label>
-                                </div>
+        /* custom header gradient per card (dynamic but unified brand) */
+        .card-header-brand {
+            background: linear-gradient(120deg, #0b5ed7 0%, #0a58ca 100%);
+            border-radius: 1.25rem 1.25rem 0 0 !important;
+            padding: 1rem 0.75rem 0.5rem 0.75rem;
+            margin-top: -1px;
+        }
 
-                                <!-- Buttons -->
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-sm fw-semibold text-white" style="background-color:coral">Sign In</button>                                    <a asp-action="LandIn" asp-controller="Home" class="btn btn-outline-secondary btn-sm">Back</a>
-                                </div>
+        /* brand icon + title side by side elegance */
+        .card-title-icon {
+            display: flex;
+            justify-content: center;
+            align-items: baseline;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
 
-                                <!-- Optional Forgot Password -->
-                                <div class="mt-2 text-center">
-                                    <a asp-action="ForgotPassword" asp-controller="Account" class="small text-decoration-none">Forgot your password?</a>
-                                </div>
-                            </form>
+        .card-title-icon i {
+            font-size: 1.8rem;
+            color: rgba(255,255,240,0.95);
+        }
 
-                        </div>
+        .role-badge {
+            background: rgba(255,255,245,0.2);
+            padding: 0.2rem 0.9rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            letter-spacing: 0.3px;
+            backdrop-filter: blur(2px);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 0.3rem;
+            color: #1e2a3e;
+        }
+
+        .form-control-sm, .form-select-sm {
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            background: #fafcff;
+            padding: 0.5rem 0.85rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .form-control-sm:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.2);
+            background-color: white;
+        }
+
+        .btn-coral {
+            background: linear-gradient(95deg, #ff7e5e, #feb47b);
+            border: none;
+            border-radius: 2rem;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .btn-coral:hover {
+            background: linear-gradient(95deg, #f66947, #fd9f5e);
+            transform: scale(0.98);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+        }
+
+        .btn-outline-soft {
+            border-radius: 2rem;
+            border: 1px solid #ced8e6;
+            background: rgba(255,255,245,0.7);
+            font-weight: 500;
+            color: #2c3e66;
+        }
+
+        .btn-outline-soft:hover {
+            background: #eef3fc;
+            border-color: #0d6efd;
+        }
+
+        .text-link-muted {
+            color: #2b3b5c;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .text-link-muted:hover {
+            color: #ff6b4a;
+            text-decoration: underline;
+        }
+
+        /* consistent card body spacing */
+        .card-body-custom {
+            padding: 1.4rem 1.3rem 1.8rem 1.3rem;
+        }
+
+        /* fixed row: all cards in one row for lg+ , md: 2 per row , sm:1 per row */
+      
+
+        /* For screens large enough, forcing one horizontal row (no wrap) — ensures all cards visible inline */
+     
+        
+
+        /* fallback: on ultrawide keep cards neatly spaced */
+        .row-cards {
+            gap: 1.5rem;
+            margin-right: 0;
+            margin-left: 0;
+        }
+        .row-cards > div {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        /* custom scrollbar for horizontal row if needed */
+        .overflow-auto-custom {
+            scrollbar-width: thin;
+        }
+        .overflow-auto-custom::-webkit-scrollbar {
+            height: 6px;
+        }
+        .overflow-auto-custom::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+        .overflow-auto-custom::-webkit-scrollbar-thumb {
+            background: #a0b3d9;
+            border-radius: 10px;
+        }
+
+        hr {
+            opacity: 0.3;
+            margin: 0.75rem 0;
+        }
+    </style>
+</head>
+<body>
+<div class="login-dashboard">
+    <div class="container-fluid px-3 px-lg-4">
+        <!-- Header section with stylish greeting (optional) -->
+        <div class="text-center mb-4 mb-lg-5">
+            <h1 class="fw-bold display-6" style="color: #1f2b48;"><i class="fas fa-stethoscope me-2" style="color:#0d6efd;"></i>NMB_HLabSys</h1>
+            <p class="text-secondary-emphasis mt-1 fw-medium">Secure login portal · Select your role</p>
+        </div>
+
+        <!-- One row: all cards MUST be in a single row and remain fit without breaking -->
+        <!-- Using flex-row with nowrap and gap utility to ensure all cards stay side-by-side on large screens -->
+        <div class="d-flex flex-nowrap gap-4 overflow-auto-custom pb-2 justify-content-start" style="scroll-behavior:smooth; overflow-x: auto;">
+            
+            <!-- 1️⃣ PATIENT CARD -->
+            <div class="card role-card" style="min-width: 280px; max-width: 320px; flex: 0 0 auto;">
+                <div class="card-header-brand text-white text-center border-0">
+                    <div class="card-title-icon">
+                        <i class="fas fa-user-injured fa-lg"></i>
+                        <h3 class="fw-bold mb-0 fs-4 d-inline-block">Sign In</h3>
                     </div>
+                    <span class="role-badge mt-1 d-inline-block">Patient Portal</span>
+                </div>
+                <div class="card-body-custom">
+                    <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
+                        <!-- Antiforgery token (place holder, works in .net) -->
+                        <input name="__RequestVerificationToken" type="hidden" value="placeholder">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="far fa-envelope me-1"></i> Username / Email</label>
+                            <input type="text" name="Email" class="form-control form-control-sm" placeholder="patient@example.com" value="">
+                            <span class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-lock me-1"></i> Password</label>
+                            <input type="password" name="Password" class="form-control form-control-sm" placeholder="••••••••">
+                            <span class="text-danger small"></span>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="RememberMe" id="rememberP">
+                            <label class="form-check-label small fw-semibold" for="rememberP">Remember Me</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-coral text-white fw-semibold"><i class="fas fa-arrow-right-to-bracket me-1"></i> Sign In</button>
+                            <a href="#" class="btn btn-outline-soft btn-sm fw-medium text-dark"><i class="fas fa-chevron-left me-1"></i> Back</a>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="#" class="text-link-muted small"><i class="far fa-question-circle"></i> Forgot password?</a>
+                        </div>
+                    </form>
                 </div>
             </div>
+
+            <!-- 2️⃣ DOCTOR CARD -->
+            <div class="card role-card" style="min-width: 280px; max-width: 320px; flex: 0 0 auto;">
+                <div class="card-header-brand text-white text-center border-0">
+                    <div class="card-title-icon">
+                        <i class="fas fa-user-md fa-lg"></i>
+                        <h3 class="fw-bold mb-0 fs-4 d-inline-block">Sign In</h3>
+                    </div>
+                    <span class="role-badge mt-1 d-inline-block">Doctor</span>
+                </div>
+                <div class="card-body-custom">
+                    <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
+                        <input name="__RequestVerificationToken" type="hidden" value="placeholder">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="far fa-envelope me-1"></i> Username / Email</label>
+                            <input type="text" name="Email" class="form-control form-control-sm" placeholder="doctor@hospital.com">
+                            <span class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-lock me-1"></i> Password</label>
+                            <input type="password" name="Password" class="form-control form-control-sm" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="RememberMe" id="rememberD">
+                            <label class="form-check-label small fw-semibold" for="rememberD">Remember Me</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-coral text-white fw-semibold"><i class="fas fa-arrow-right-to-bracket me-1"></i> Sign In</button>
+                            <a href="#" class="btn btn-outline-soft btn-sm fw-medium text-dark"><i class="fas fa-chevron-left me-1"></i> Back</a>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="#" class="text-link-muted small"><i class="far fa-question-circle"></i> Forgot password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 3️⃣ LAB MANAGER CARD -->
+            <div class="card role-card" style="min-width: 280px; max-width: 320px; flex: 0 0 auto;">
+                <div class="card-header-brand text-white text-center border-0">
+                    <div class="card-title-icon">
+                        <i class="fas fa-flask fa-lg"></i>
+                        <h3 class="fw-bold mb-0 fs-4 d-inline-block">Sign In</h3>
+                    </div>
+                    <span class="role-badge mt-1 d-inline-block">Lab Manager</span>
+                </div>
+                <div class="card-body-custom">
+                    <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
+                        <input name="__RequestVerificationToken" type="hidden" value="placeholder">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="far fa-envelope me-1"></i> Username / Email</label>
+                            <input type="text" name="Email" class="form-control form-control-sm" placeholder="lab.manager@medilab.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-lock me-1"></i> Password</label>
+                            <input type="password" name="Password" class="form-control form-control-sm" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="RememberMe" id="rememberLM">
+                            <label class="form-check-label small fw-semibold" for="rememberLM">Remember Me</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-coral text-white fw-semibold"><i class="fas fa-arrow-right-to-bracket me-1"></i> Sign In</button>
+                            <a href="#" class="btn btn-outline-soft btn-sm fw-medium text-dark"><i class="fas fa-chevron-left me-1"></i> Back</a>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="#" class="text-link-muted small"><i class="far fa-question-circle"></i> Forgot password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 4️⃣ LAB TECHNICIAN CARD -->
+            <div class="card role-card" style="min-width: 280px; max-width: 320px; flex: 0 0 auto;">
+                <div class="card-header-brand text-white text-center border-0">
+                    <div class="card-title-icon">
+                        <i class="fas fa-microscope fa-lg"></i>
+                        <h3 class="fw-bold mb-0 fs-4 d-inline-block">Sign In</h3>
+                    </div>
+                    <span class="role-badge mt-1 d-inline-block">Lab Technician</span>
+                </div>
+                <div class="card-body-custom">
+                    <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
+                        <input name="__RequestVerificationToken" type="hidden" value="placeholder">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="far fa-envelope me-1"></i> Username / Email</label>
+                            <input type="text" name="Email" class="form-control form-control-sm" placeholder="technician@diaglab.org">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-lock me-1"></i> Password</label>
+                            <input type="password" name="Password" class="form-control form-control-sm" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="RememberMe" id="rememberT">
+                            <label class="form-check-label small fw-semibold" for="rememberT">Remember Me</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-coral text-white fw-semibold"><i class="fas fa-arrow-right-to-bracket me-1"></i> Sign In</button>
+                            <a href="#" class="btn btn-outline-soft btn-sm fw-medium text-dark"><i class="fas fa-chevron-left me-1"></i> Back</a>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="#" class="text-link-muted small"><i class="far fa-question-circle"></i> Forgot password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 5️⃣ ADMINISTRATOR CARD -->
+            <div class="card role-card" style="min-width: 280px; max-width: 320px; flex: 0 0 auto;">
+                <div class="card-header-brand text-white text-center border-0">
+                    <div class="card-title-icon">
+                        <i class="fas fa-shield-alt fa-lg"></i>
+                        <h3 class="fw-bold mb-0 fs-4 d-inline-block">Sign In</h3>
+                    </div>
+                    <span class="role-badge mt-1 d-inline-block">Administrator</span>
+                </div>
+                <div class="card-body-custom">
+                    <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
+                        <input name="__RequestVerificationToken" type="hidden" value="placeholder">
+                        <div class="mb-3">
+                            <label class="form-label"><i class="far fa-envelope me-1"></i> Username / Email</label>
+                            <input type="text" name="Email" class="form-control form-control-sm" placeholder="admin@mediflow.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-lock me-1"></i> Password</label>
+                            <input type="password" name="Password" class="form-control form-control-sm" placeholder="••••••••">
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="RememberMe" id="rememberA">
+                            <label class="form-check-label small fw-semibold" for="rememberA">Remember Me</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            <button type="submit" class="btn btn-coral text-white fw-semibold"><i class="fas fa-arrow-right-to-bracket me-1"></i> Sign In</button>
+                            <a href="#" class="btn btn-outline-soft btn-sm fw-medium text-dark"><i class="fas fa-chevron-left me-1"></i> Back</a>
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="#" class="text-link-muted small"><i class="far fa-question-circle"></i> Forgot password?</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- optional extra note: exactly five cards, one row, all fit horizontally -->
         </div>
-    </section>
+
+        <!-- subtle footer note (optional) -->
+        <div class="text-center mt-5 pt-2">
+            <p class="small text-secondary opacity-75"><i class="far fa-clock me-1"></i> Secure single sign-on · Role-based access · <i class="fas fa-laptop-medical ms-1"></i> HIPAA compliant demo</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add any Bootstrap bundle (optional interactive) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<!-- ensure that forms are non-conflicting, just demo UI -- no actual submit logic breaks -->
+<script>
+    // just to prevent accidental full page reload for demo (but it's fine - forms are placeholders)
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            alert('Demo UI: Login simulation for ' + (form.closest('.card')?.querySelector('.role-badge')?.innerText || 'role') + '.\nIn production, server-side validation would process credentials.');
+        });
+    });
+    // "Back" buttons smooth alert + visual feedback
+    document.querySelectorAll('.btn-outline-soft').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Return to landing page (simulated).');
+        });
+    });
+    document.querySelectorAll('.text-link-muted').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Password recovery flow: check your email (demo).');
+        });
+    });
+</script>
+</body>
+</html>
