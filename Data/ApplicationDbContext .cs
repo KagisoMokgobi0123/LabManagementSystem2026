@@ -51,42 +51,42 @@ namespace NMB_HLabSys.Data
 
 
             // Seed the Test Types (The Lab Catalog)
-            modelBuilder.Entity<TestTypeModel>().HasData(
-                new TestTypeModel
-                {
-                    TestTypeId = 1,
-                    Name = "Full Blood Count (FBC)",
-                    TurnAroundTimeHours = 4
-                },
+            //modelBuilder.Entity<TestTypeModel>().HasData(
+            //    new TestTypeModel
+            //    {
+            //        TestTypeId = 1,
+            //        Name = "Full Blood Count (FBC)",
+            //        TurnAroundTimeHours = 4
+            //    },
                
-                new TestTypeModel
-                {
-                    TestTypeId = 2,
-                    Name = "Liver Function Test (LFT)",
-                    TurnAroundTimeHours = 8
-                }
-            );
+            //    new TestTypeModel
+            //    {
+            //        TestTypeId = 2,
+            //        Name = "Liver Function Test (LFT)",
+            //        TurnAroundTimeHours = 8
+            //    }
+            //);
             // 1. Seed Test Requests
-            modelBuilder.Entity<TestRequestsModel>().HasData(
-                new TestRequestsModel
-                {
-                    TestRequestId = 1, RequestDate = new DateTime(2026, 04, 10, 10, 30, 0),  Status = "Submitted",Urgency = Urgency.Urgent,ClinicalNotes = "Patient complaining of persistent fatigue. Check for anemia.",
-                    PatientId = "3663096b-0ae2-4ab9-9321-d2a991afef86",
-                    DoctorId = "24d75510-b1ad-4803-86e5-8e279b3ddb5a"    // Must match a seeded User Id
-                },
-                new TestRequestsModel
-                {
-                    TestRequestId = 2, RequestDate = new DateTime(2026, 04, 11, 09, 15, 0),Status = "Submitted",Urgency = Urgency.Routine,ClinicalNotes = "Suspected Malaria. High fever and chills.",
-                    PatientId = "8ebb4a85-c399-43a9-a9ed-9d85211bc67d",
-                    DoctorId = "ebfc3689-96da-433d-a042-58a90b0da38a"
-                }
-            );
+            //modelBuilder.Entity<TestRequestsModel>().HasData(
+            //    new TestRequestsModel
+            //    {
+            //        TestRequestId = 1, RequestDate = new DateTime(2026, 04, 10, 10, 30, 0),  Status = "Submitted",Urgency = Urgency.Urgent,ClinicalNotes = "Patient complaining of persistent fatigue. Check for anemia.",
+            //        PatientId = "3663096b-0ae2-4ab9-9321-d2a991afef86",
+            //        DoctorId = "24d75510-b1ad-4803-86e5-8e279b3ddb5a"    // Must match a seeded User Id
+            //    },
+            //    new TestRequestsModel
+            //    {
+            //        TestRequestId = 2, RequestDate = new DateTime(2026, 04, 11, 09, 15, 0),Status = "Submitted",Urgency = Urgency.Routine,ClinicalNotes = "Suspected Malaria. High fever and chills.",
+            //        PatientId = "8ebb4a85-c399-43a9-a9ed-9d85211bc67d",
+            //        DoctorId = "ebfc3689-96da-433d-a042-58a90b0da38a"
+            //    }
+            //);
 
             // 3. Seed Samples (Barcodes)
-            modelBuilder.Entity<SampleModel>().HasData(
-                new SampleModel { SampleId = 1, TestRequestId = 1, Barcode = "NMB-2026-0001", SampleTypeId = 1 },
-                new SampleModel { SampleId = 2, TestRequestId = 2, Barcode = "NMB-2026-0002", SampleTypeId = 4 }
-            );
+            //modelBuilder.Entity<SampleModel>().HasData(
+            //    new SampleModel { SampleId = 1, TestRequestId = 1, Barcode = "NMB-2026-0001", SampleTypeId = 1 },
+            //    new SampleModel { SampleId = 2, TestRequestId = 2, Barcode = "NMB-2026-0002", SampleTypeId = 4 }
+            //);
 
             //// 4. Seed Test Assignments (Linking Requests to Test Types)
             //modelBuilder.Entity<AssignTestTypesModel>().HasData(
@@ -103,28 +103,28 @@ namespace NMB_HLabSys.Data
             //    } // Still working on it }
             //);
 
-       modelBuilder.Entity<SampleTypeModel>().HasData(
-       new SampleTypeModel
-       {
-           SampleTypeId = 1,
-           SampleName = "Blood"
-       },
-       new SampleTypeModel
-       {
-           SampleTypeId = 2,
-           SampleName = "Urine"
-       },
-          new SampleTypeModel
-          {
-              SampleTypeId = 3,
-              SampleName = "Saliva"
-          },
-        new SampleTypeModel
-        {
-            SampleTypeId = 4,
-            SampleName = "Swab"
-        }
-     );
+     //  modelBuilder.Entity<SampleTypeModel>().HasData(
+     //  new SampleTypeModel
+     //  {
+     //      SampleTypeId = 1,
+     //      SampleName = "Blood"
+     //  },
+     //  new SampleTypeModel
+     //  {
+     //      SampleTypeId = 2,
+     //      SampleName = "Urine"
+     //  },
+     //     new SampleTypeModel
+     //     {
+     //         SampleTypeId = 3,
+     //         SampleName = "Saliva"
+     //     },
+     //   new SampleTypeModel
+     //   {
+     //       SampleTypeId = 4,
+     //       SampleName = "Swab"
+     //   }
+     //);
         }
 
         
