@@ -7,6 +7,7 @@
     Layout = "_TechnicianLayout";
 }
 
+
 <div class="wrapper">
 	<div class="main-header">
 		<!-- Logo Header -->
@@ -582,8 +583,7 @@
 														<h5 class="text-white op-7 mb-2">Verify patient samples submitted by doctor</h5>
 													</div>
 													<div class="ml-md-auto py-2 py-md-0">
-														<a href="#" class="btn btn-primary btn-border btn-round ">Back</a>
-
+														<a href="#" class="btn btn-white btn-border btn-round mr-2">Back</a>
 														<a href="#" class="btn btn-white btn-border btn-round mr-2">Samples</a>
 														<a href="#" class="btn btn-secondary btn-round">No. of Verified</a>
 													</div>
@@ -602,7 +602,7 @@
 															
 															<div class="row justify-content-center">
 																<div class="col-lg-10">
-																	<form asp-action="VerifySample" method="post">
+																	<form asp-controller="Sample" asp-action="VerifySample" method="post">
 
 																		<!-- Request Number -->
 																		<div class="row mb-3 align-items-center">
@@ -683,7 +683,7 @@
 																										<ul class="nav">
 																											<li class="nav-item">
 																												<a class="nav-link" href="https://www.themekita.com">
-																													ThemeKita
+																													NelsonMandelaBayHemetologyLab
 																												</a>
 																											</li>
 																											<li class="nav-item">
@@ -691,15 +691,15 @@
 																													Help
 																												</a>
 																											</li>
-																											<li class="nav-item">
+																										@* 	<li class="nav-item">
 																												<a class="nav-link" href="#">
 																													Licenses
 																												</a>
-																											</li>
+																											</li> *@
 																										</ul>
 																									</nav>
 																									<div class="copyright ml-auto">
-																										2018, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">ThemeKita</a>
+																										2026, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">NelsonMandelaBayHLabSystem</a>
 																									</div>
 																								</div>
 																							</footer>
@@ -776,7 +776,10 @@
 																							</div>
 																						</div>
 																						<!-- End Custom template -->
-
-
+								@section Scripts {
+									@{
+										await Html.RenderPartialAsync("_ValidationScriptsPartial");
+									}
+								}
 
 
