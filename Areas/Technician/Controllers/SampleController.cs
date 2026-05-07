@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Technician.Models;
@@ -7,6 +8,8 @@ using NMB_HLabSys.Models.Account;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
+    [Area("Technician")]
+    [Authorize(Roles = "Technician")]
     public class SampleController : Controller
     {
         private readonly ApplicationDbContext _dbcontext;
@@ -31,6 +34,11 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .ToListAsync();
 
             return View(samples);
+        }
+        [HttpGet]
+        public IActionResult VerifySample()
+        {
+            return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

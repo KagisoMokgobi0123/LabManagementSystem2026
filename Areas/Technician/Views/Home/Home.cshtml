@@ -333,61 +333,18 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#base">
 							<i class="fas fa-layer-group"></i>
-							<p>Requests</p>
+							<p>Verification</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="base">
 							<ul class="nav nav-collapse">
+							
 								<li>
-									<a href="/Technician/TestRequest/ListRequests">
-										<span class="sub-item">Tests</span>
-									</a>
-								</li>
-								<li>
-									<a href="components/buttons.html">
+								<a href="@Url.Action("VerifySample", "Sample", new { area = "Technician" })">
 										<span class="sub-item">Samples</span>
 									</a>
 								</li>
-								@* <li>
-									<a href="components/gridsystem.html">
-										<span class="sub-item">Grid System</span>
-									</a>
-								</li> *@
-								@* <li>
-									<a href="components/panels.html">
-										<span class="sub-item">Panels</span>
-									</a>
-								</li> *@
-								@* <li>
-									<a href="components/notifications.html">
-										<span class="sub-item">Notifications</span>
-									</a>
-								</li> *@
-								@* <li>
-									<a href="components/sweetalert.html">
-										<span class="sub-item">Sweet Alert</span>
-									</a>
-								</li> *@
-								@* <li>
-									<a href="components/font-awesome-icons.html">
-										<span class="sub-item">Font Awesome Icons</span>
-									</a>
-								</li> *@
-								@* <li>
-									<a href="components/simple-line-icons.html">
-										<span class="sub-item">Simple Line Icons</span>
-									</a>
-								</li> *@
-							@* 	<li>
-									<a href="components/flaticons.html">
-										<span class="sub-item">Flaticons</span>
-									</a>
-								</li> *@
-								@* <li>
-									<a href="components/typography.html">
-										<span class="sub-item">Typography</span>
-									</a>
-								</li> *@
+								
 							</ul>
 						</div>
 					</li>
@@ -575,11 +532,11 @@
 					<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
 						<div>
 							<h2 class="text-white pb-2 fw-bold">Dashboard</h2>
-							<h5 class="text-white op-7 mb-2">Free Bootstrap 4 Admin Dashboard</h5>
+							<h5 class="text-white op-7 mb-2">Lab Technician Dashboard</h5>
 						</div>
 						<div class="ml-md-auto py-2 py-md-0">
 							<a href="#" class="btn btn-white btn-border btn-round mr-2">Manage</a>
-							<a href="#" class="btn btn-secondary btn-round">Add Customer</a>
+							<a href="#" class="btn btn-secondary btn-round">Verify Sample</a>
 						</div>
 					</div>
 				</div>
