@@ -105,7 +105,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return RedirectToAction("VerifiedSample");
         }
         [HttpGet]
-        [HttpGet]
         public async Task<IActionResult> SearchRequest(string term)
         {
             var results = await _dbcontext.TestRequests
