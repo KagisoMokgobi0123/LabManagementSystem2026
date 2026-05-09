@@ -59,7 +59,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                     UrgentTests = await _dbcontext.TestRequestTestTypes
                         .Include(t => t.TestRequest)
-                        .Where(t => t.TestRequest.Urgency == Urgency.STAT
+                        .Where(t => t.TestRequest.Urgency == Urgency.Stat
                                     && t.Status != Status.Verified)
                         .ToListAsync(),
 

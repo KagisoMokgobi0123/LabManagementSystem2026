@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Data;
+using NMB_HLabSys.Services;
 
 namespace NMB_HLabSys.Areas.Technician.Data
 {
@@ -17,27 +18,27 @@ namespace NMB_HLabSys.Areas.Technician.Data
             _emailService = emailService;
         }
 
-        public async Task GeneratePdfAndSendEmail(int requestId)
-        {
-            var request = await _db.TestRequests
-                .Include(r => r.Patient)
-                .Include(r => r.TestTypes)
-                .FirstOrDefaultAsync(r => r.TestRequestId == requestId);
+        //public async Task GeneratePdfAndSendEmail(int requestId)
+        //{
+        //    var request = await _db.TestRequests
+        //        .Include(r => r.Patient)
+        //        .Include(r => r.TestTypes)
+        //        .FirstOrDefaultAsync(r => r.TestRequestId == requestId);
 
-            if (request == null) return;
+        //    if (request == null) return;
 
-            // 1. Generate PDF
-            var pdfBytes = GeneratePdf(request);
+        //    // 1. Generate PDF
+        //    var pdfBytes = GeneratePdf(request);
 
-            // 2. Send Email WITH attachment
-            await _emailService.SendEmailWithAttachmentAsync(
-                request.Doctor.Email,
-                "Lab Results Ready",
-                "Please find attached the lab results PDF.",
-                pdfBytes,
-                "LabResults.pdf"
-            );
-        }
+        //    // 2. Send Email WITH attachment
+        //    await _emailService.SendEmailWithAttachmentAsync(
+        //        request.Doctor.Email,
+        //        "Lab Results Ready",
+        //        "Please find attached the lab results PDF.",
+        //        pdfBytes,
+        //        "LabResults.pdf"
+        //    );
+        //}
         private byte[] GeneratePdf(TestRequestsModel request)
         {
             // placeholder - we’ll implement next step

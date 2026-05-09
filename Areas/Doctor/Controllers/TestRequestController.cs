@@ -1,83 +1,109 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Doctor.Models;
+using NMB_HLabSys.Areas.Technician.Data;
+using NMB_HLabSys.Areas.Technician.Models;
+using NMB_HLabSys.Data;
+using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Services;
 
 namespace NMB_HLabSys.Areas.Doctor.Controllers
 {
     public class TestRequestController : Controller
     {
-        // GET: CreateTestRequestController
-        public ActionResult Index()
-        {
-            return View();
-        }
+        private readonly UserManager<RegisterUser> _userManager;
+        private readonly SignInManager<RegisterUser> _signInManager;
+        private readonly ApplicationDbContext _dbcontext;
+        private readonly IEmailService _emailService;
 
-        // GET: CreateTestRequestController/Details/5
-        public ActionResult Details(int id)
+        public TestRequestController(
+            UserManager<RegisterUser> userManager,
+            SignInManager<RegisterUser> signInManager,
+            ApplicationDbContext dbcontext,
+            IEmailService emailService)
         {
-            return View();
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _dbcontext = dbcontext;
+            _emailService = emailService;
         }
-
-        // GET: CreateTestRequestController/Create
-        public ActionResult Create()
+        [HttpGet]
+        public IActionResult CreateTestRequest()
         {
-            return View();
-        }
+            var model = new TestRequestsModel
+            {
+                RequestDate = DateTime.Now,
+                TestTypes = new List<TestRequestTestTypeModel>(),
+                Samples = new List<SampleModel>()
+            };
 
-        // POST: CreateTestRequestController/Create
+            return View(model);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> CreateTestRequest(TestRequestsModel model)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+            if (!ModelState.IsValid)
+                return View(model);
 
-        // GET: CreateTestRequestController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
+            // ✅ Validation rules
+            if (model.TestTypes == null || !model.TestTypes.Any())
+            {
+                ModelState.AddModelError("", "At least one test type is required.");
+                return View(model);
+            }
 
-        // POST: CreateTestRequestController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
+            if (model.Samples == null || !model.Samples.Any())
             {
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("", "At least one sample is required.");
+                return View(model);
             }
-            catch
-            {
-                return View();
-            }
-        }
 
-        // GET: CreateTestRequestController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
+            // ✅ Load patient
+            var patient = await _userManager.FindByIdAsync(model.PatientId);
+            if (patient == null)
+            {
+                ModelState.AddModelError("", "Patient not found.");
+                return View(model);
+            }
 
-        // POST: CreateTestRequestController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
+            model.Patient = patient;
+
+            // ❗ Always set system values
+            model.RequestDate = DateTime.Now;
+            model.Status = "Submitted";
+
+            // 1️⃣ Save Test Request first
+            _dbcontext.TestRequests.Add(model);
+            await _dbcontext.SaveChangesAsync();
+
+            // 2️⃣ Update Test Types
+            foreach (var test in model.TestTypes)
             {
-                return RedirectToAction(nameof(Index));
+                test.TestRequestId = model.TestRequestId;
+                test.Status = "Submitted";
             }
-            catch
+
+            // 3️⃣ Update Samples
+            foreach (var sample in model.Samples)
             {
-                return View();
+                sample.TestRequestId = model.TestRequestId;
+                sample.Status = "Submitted";
+                sample.DateReceived = DateTime.Now;
             }
+            model.RequestNumber = $"NMB-REQ-{model.TestRequestId:D6}";
+            await _dbcontext.SaveChangesAsync();
+
+            // 📧 Email ONLY patient
+            await _emailService.SendEmailAsync(
+                patient.Email,
+                "Test Request Submitted",
+                $"Dear {patient.UserName}, your test request {model.RequestNumber} has been submitted."
+            );
+
+            return RedirectToAction("Success");
         }
     }
 }

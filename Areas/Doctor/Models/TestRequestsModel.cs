@@ -10,7 +10,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
     {
         Routine,
         Urgent,
-        STAT
+        Stat
     }
     public class TestRequestsModel
     {
@@ -18,18 +18,16 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         [Key]
         public int TestRequestId { get; set; }
 
-        public DateTime RequestDate { get; set; } = DateTime.Now;
+        public DateTime RequestDate { get; set; } 
 
         public string Status { get; set; } = string.Empty;
         public string PatientId { get; set; } = string.Empty;
         public RegisterUser Patient { get; set; } = null!;
 
-
         [Required]
         [Display(Name = "Request Number")]
         // This property isn't in the DB, it just formats the ID for the UI
-        [NotMapped]
-        public string RequestNumber => $"NMB-REQ-{TestRequestId:D6}";
+        public string RequestNumber { get; set; } = string.Empty;
         // Result: NMB-REQ-000001
 
         public string DoctorId { get; set; } = String.Empty;

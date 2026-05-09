@@ -8,6 +8,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public int SampleTypeId { get; set; }
 
         [Required(ErrorMessage ="Sample type name is required")]
-        public string SampleName { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
     }
 }

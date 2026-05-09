@@ -34,97 +34,213 @@ namespace NMB_HLabSys.Data
                 .HasForeignKey(t => t.ManagerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 1. Your unique index for barcodes
+            // 1. Your index for barcodes
             modelBuilder.Entity<SampleModel>()
                 .HasIndex(s => s.Barcode)
                 .IsUnique();
 
             modelBuilder.Entity<TestRequestsModel>()
-    .Property(t => t.Urgency)
-    .HasConversion<string>();
+            .Property(t => t.Urgency)
+            .HasConversion<string>();
 
-            // modelBuilder.Entity<TestRequestsModel>()
-            //.HasMany(t => t.TestTypes)
-            //.WithMany(t => t.TestRequests) // Make sure this exists in TestTypeModel
-            //.UsingEntity(j => j.ToTable("TestRequestTestTypes"));
+        modelBuilder.Entity<TestCategoryModel>().HasData(
+        new TestCategoryModel
+        {
+            TestCategoryId = 1,
+            Description = "Hematology"
+        },
+        new TestCategoryModel
+        {
+            TestCategoryId = 2,
+            Description = "Biochemistry"
+        },
+        new TestCategoryModel
+        {
+            TestCategoryId = 3,
+            Description = "Microbiology"
+        },
+        new TestCategoryModel
+        {
+            TestCategoryId = 4,
+            Description = "Immunology"
+        },
+        new TestCategoryModel
+        {
+            TestCategoryId = 5,
+            Description = "Blood Banking"
+        }
+    );
+
+            modelBuilder.Entity<TestTypeModel>().HasData(
+            new TestTypeModel
+            {
+                TestTypeId = 1,
+                Name = "Full Blood Count",
+                TestCategoryId = 1,
+                SampleTypeId = 1,
+                ConsumableId = 1,
+                MeasurementUnit = 1,
+                NormalMin = 4.5m,
+                NormalMax = 11.0m,
+                TurnAroundTimeHours = 2
+            },
+            new TestTypeModel
+            {
+                TestTypeId = 2,
+                Name = "Urine Culture",
+                TestCategoryId = 2,
+                SampleTypeId = 2,
+                ConsumableId = 2,
+                MeasurementUnit = 1,
+                NormalMin = 0,
+                NormalMax = 5,
+                TurnAroundTimeHours = 4
+            },
+            new TestTypeModel
+            {
+                TestTypeId = 3,
+                Name = "Glucose Test",
+                TestCategoryId = 3,
+                SampleTypeId = 1,
+                ConsumableId = 3,
+                MeasurementUnit = 1,
+                NormalMin = 3.9m,
+                NormalMax = 5.5m,
+                TurnAroundTimeHours = 1
+            }
+        );
+
+            modelBuilder.Entity<SampleTypeModel>().HasData(
+        new SampleTypeModel
+        {
+            SampleTypeId = 1,
+            Name = "Blood"
+        },
+        new SampleTypeModel
+        {
+            SampleTypeId = 2,
+            Name = "Urine"
+        },
+        new SampleTypeModel
+        {
+            SampleTypeId = 3,
+            Name = "Saliva"
+        },
+        new SampleTypeModel
+        {
+            SampleTypeId = 4,
+            Name = "Plasma"
+        },
+        new SampleTypeModel
+        {
+            SampleTypeId = 5,
+            Name = "Serum"
+        }
+        );
+
+            modelBuilder.Entity<ConsumableModel>().HasData(
+                new ConsumableModel
+                {
+                    ConsumableId = 1,
+                    Name = "Test Tubes (EDTA)",
+                    QuantityOnHand = 500,
+                    ReorderLevel = 100
+                },
+                new ConsumableModel
+                {
+                    ConsumableId = 2,
+                    Name = "Syringes 5ml",
+                    QuantityOnHand = 300,
+                    ReorderLevel = 50
+                },
+                new ConsumableModel
+                {
+                    ConsumableId = 3,
+                    Name = "Alcohol Swabs",
+                    QuantityOnHand = 1000,
+                    ReorderLevel = 200
+                },
+                new ConsumableModel
+                {
+                    ConsumableId = 4,
+                    Name = "Gloves (Medium)",
+                    QuantityOnHand = 800,
+                    ReorderLevel = 150
+                }
+            );
 
 
 
-            // Seed the Test Types (The Lab Catalog)
-            //modelBuilder.Entity<TestTypeModel>().HasData(
-            //    new TestTypeModel
-            //    {
-            //        TestTypeId = 1,
-            //        Name = "Full Blood Count (FBC)",
-            //        TurnAroundTimeHours = 4
-            //    },
-               
-            //    new TestTypeModel
-            //    {
-            //        TestTypeId = 2,
-            //        Name = "Liver Function Test (LFT)",
-            //        TurnAroundTimeHours = 8
-            //    }
-            //);
-            // 1. Seed Test Requests
-            //modelBuilder.Entity<TestRequestsModel>().HasData(
-            //    new TestRequestsModel
-            //    {
-            //        TestRequestId = 1, RequestDate = new DateTime(2026, 04, 10, 10, 30, 0),  Status = "Submitted",Urgency = Urgency.Urgent,ClinicalNotes = "Patient complaining of persistent fatigue. Check for anemia.",
-            //        PatientId = "3663096b-0ae2-4ab9-9321-d2a991afef86",
-            //        DoctorId = "24d75510-b1ad-4803-86e5-8e279b3ddb5a"    // Must match a seeded User Id
-            //    },
-            //    new TestRequestsModel
-            //    {
-            //        TestRequestId = 2, RequestDate = new DateTime(2026, 04, 11, 09, 15, 0),Status = "Submitted",Urgency = Urgency.Routine,ClinicalNotes = "Suspected Malaria. High fever and chills.",
-            //        PatientId = "8ebb4a85-c399-43a9-a9ed-9d85211bc67d",
-            //        DoctorId = "ebfc3689-96da-433d-a042-58a90b0da38a"
-            //    }
-            //);
 
-            // 3. Seed Samples (Barcodes)
-            //modelBuilder.Entity<SampleModel>().HasData(
-            //    new SampleModel { SampleId = 1, TestRequestId = 1, Barcode = "NMB-2026-0001", SampleTypeId = 1 },
-            //    new SampleModel { SampleId = 2, TestRequestId = 2, Barcode = "NMB-2026-0002", SampleTypeId = 4 }
-            //);
+    modelBuilder.Entity<TechnicianTestTypeModel>().HasData(
+    new TechnicianTestTypeModel
+    {
+        TechnicianTestTypeId = 1,
+        TestTypeId = 1,
+        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+        ManagerId = "9e586fad-975e-44b3-9b44-16bdf420354e",
+        Status = "Submitted",
+        AssignmentDate = new DateTime(2026, 01, 01)
+    },
+    new TechnicianTestTypeModel
+    {
+        TechnicianTestTypeId = 2,
+        TestTypeId = 2,
+        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+        ManagerId = "9e586fad-975e-44b3-9b44-16bdf420354e",
+        Status = "Submitted",
+        AssignmentDate = new DateTime(2026, 01, 02)
+    },
+    new TechnicianTestTypeModel
+    {
+        TechnicianTestTypeId = 3,
+        TestTypeId = 3,
+        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+        ManagerId = "1ae2c09e-4743-4950-a377-fc9484ea4794",
+        Status = "Submitted",
+        AssignmentDate = new DateTime(2026, 01, 03)
+    }
+);
 
-            //// 4. Seed Test Assignments (Linking Requests to Test Types)
-            //modelBuilder.Entity<AssignTestTypesModel>().HasData(
-            //    new AssignTestTypesModel { AssignTestId = 1, TestRequestId = 1, TestTypeId = 1, Status = TestStatus.SampleReceived, ManagerId = "7cfd1034-f3a8-42ed-b13e-61f3b19ed8ec", TechnicianId = null, // Not yet claimed
-            //        StartDateTime = null,
-            //        CompletionDateTime = null
-            //    },
-            //    new AssignTestTypesModel
-            //    {
-            //        AssignTestId = 2,TestRequestId = 2, TestTypeId = 2, Status = TestStatus.InProgress, ManagerId = "7cfd1034-f3a8-42ed-b13e-61f3b19ed8ec",
-            //        TechnicianId = "bdd52efb-571c-4ea7-9a18-9e9c66c92731", // The tech who assigned themselves
-            //        StartDateTime = new DateTime(2026, 04, 18, 08, 00, 0),
-            //        CompletionDateTime = null
-            //    } // Still working on it }
-            //);
 
-     //  modelBuilder.Entity<SampleTypeModel>().HasData(
-     //  new SampleTypeModel
-     //  {
-     //      SampleTypeId = 1,
-     //      SampleName = "Blood"
-     //  },
-     //  new SampleTypeModel
-     //  {
-     //      SampleTypeId = 2,
-     //      SampleName = "Urine"
-     //  },
-     //     new SampleTypeModel
-     //     {
-     //         SampleTypeId = 3,
-     //         SampleName = "Saliva"
-     //     },
-     //   new SampleTypeModel
-     //   {
-     //       SampleTypeId = 4,
-     //       SampleName = "Swab"
-     //   }
-     //);
+            modelBuilder.Entity<TestRequestsModel>().HasData(
+        new TestRequestsModel
+        {
+            TestRequestId = 1,
+            RequestDate = new DateTime(2026, 5, 1),
+            Status = "Pending",
+            PatientId = "7f8a9985-54df-4e2c-8433-14089d075dbf",
+            DoctorId = "cad131b2-791f-4d47-ae17-06f5e3864ef1",
+            Urgency = Urgency.Routine,
+            ClinicalNotes = "Routine blood test",
+            RequestNumber = "NMB-REQ-000001"
+        },
+        new TestRequestsModel
+        {
+            TestRequestId = 2,
+            RequestDate = new DateTime(2026, 5, 2),
+            Status = "Samples Received",
+            PatientId = "e6fa143c-9f79-4af2-8b53-97fb8ee94947",
+            DoctorId = "cad131b2-791f-4d47-ae17-06f5e3864ef1",
+            Urgency = Urgency.Urgent,
+            ClinicalNotes = "Suspected infection",
+            RequestNumber = "NMB-REQ-000002"
+        },
+        new TestRequestsModel
+        {
+            TestRequestId = 3,
+            RequestDate = new DateTime(2026, 5, 3),
+            Status = "Pending",
+            PatientId = "e6fa143c-9f79-4af2-8b53-97fb8ee94947",
+            DoctorId = "b5c8ea7a-50fa-4df6-8e93-3b722c5377a2",
+            Urgency = Urgency.Stat,
+            ClinicalNotes = "Emergency test required",
+            RequestNumber = "NMB-REQ-000003"
+        }
+    );
+
+
+
         }
 
         
