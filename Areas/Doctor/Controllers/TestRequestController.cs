@@ -45,65 +45,78 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTestRequest(TestRequestsModel model)
         {
+            // VALIDATION
             if (!ModelState.IsValid)
                 return View(model);
 
-            // ✅ Validation rules
             if (model.TestTypes == null || !model.TestTypes.Any())
             {
                 ModelState.AddModelError("", "At least one test type is required.");
                 return View(model);
             }
 
-            if (model.Samples == null || !model.Samples.Any())
-            {
-                ModelState.AddModelError("", "At least one sample is required.");
-                return View(model);
-            }
-
-            // ✅ Load patient
-            var patient = await _userManager.FindByIdAsync(model.PatientId);
-            if (patient == null)
-            {
-                ModelState.AddModelError("", "Patient not found.");
-                return View(model);
-            }
-
-            model.Patient = patient;
-
-            // ❗ Always set system values
+            // STEP 1 — SAVE TEST REQUEST
             model.RequestDate = DateTime.Now;
             model.Status = "Submitted";
 
-            // 1️⃣ Save Test Request first
             _dbcontext.TestRequests.Add(model);
             await _dbcontext.SaveChangesAsync();
 
-            // 2️⃣ Update Test Types
+            // STEP 2 — GENERATE REQUEST NUMBER
+            model.RequestNumber = $"NMB-REQ-{model.TestRequestId:D6}";
+
+            await _dbcontext.SaveChangesAsync();
+
+            // STEP 3 — SAVE TEST REQUEST TEST TYPES
             foreach (var test in model.TestTypes)
             {
                 test.TestRequestId = model.TestRequestId;
                 test.Status = "Submitted";
+
+                _dbcontext.TestRequestTestTypes.Add(test);
             }
 
-            // 3️⃣ Update Samples
-            foreach (var sample in model.Samples)
-            {
-                sample.TestRequestId = model.TestRequestId;
-                sample.Status = "Submitted";
-                sample.DateReceived = DateTime.Now;
-            }
-            model.RequestNumber = $"NMB-REQ-{model.TestRequestId:D6}";
             await _dbcontext.SaveChangesAsync();
 
-            // 📧 Email ONLY patient
-            await _emailService.SendEmailAsync(
-                patient.Email,
-                "Test Request Submitted",
-                $"Dear {patient.UserName}, your test request {model.RequestNumber} has been submitted."
-            );
+            // STEP 4 — DETERMINE REQUIRED SAMPLE TYPES
+            var sampleTypeIds = await _dbcontext.TestTypes
+                .Where(t => model.TestTypes.Select(x => x.TestTypeId)
+                .Contains(t.TestTypeId))
+                .Select(t => t.SampleTypeId)
+                .Distinct()
+                .ToListAsync();
+
+            // STEP 5 — CREATE SAMPLES
+            foreach (var sampleTypeId in sampleTypeIds)
+            {
+                var sample = new SampleModel
+                {
+                    TestRequestId = model.TestRequestId,
+                    SampleTypeId = sampleTypeId,
+                    Status = "Submitted",
+                    DateReceived = DateTime.Now,
+                    IsReceived = false
+                };
+
+                _dbcontext.Samples.Add(sample);
+            }
+
+            await _dbcontext.SaveChangesAsync();
+
+            // STEP 6 — GENERATE SAMPLE BARCODES
+            var samples = await _dbcontext.Samples
+                .Where(s => s.TestRequestId == model.TestRequestId)
+                .ToListAsync();
+
+            foreach (var sample in samples)
+            {
+                sample.Barcode = $"NMB-SMP-{sample.SampleId:D6}";
+            }
+
+            await _dbcontext.SaveChangesAsync();
 
             return RedirectToAction("Success");
         }
+
     }
 }
