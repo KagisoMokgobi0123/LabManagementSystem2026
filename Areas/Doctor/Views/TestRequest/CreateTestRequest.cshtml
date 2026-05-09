@@ -3,8 +3,8 @@
 
 
 @{
-	ViewData["Title"] = "NMB_HLabSys | Verify Sample";
-	Layout = "_TechnicianLayout";
+	ViewData["Title"] = "NMB_HLabSys | Test Request";
+	Layout = "_DoctorLayout";
 }
 
 
@@ -580,12 +580,12 @@
 												<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
 													<div>
 														<h2 class="text-white pb-2 fw-bold">Patient Test Request</h2>
-														<h5 class="text-white op-7 mb-2">Verify patient samples submitted by doctor</h5>
+														<h5 class="text-white op-7 mb-2">Create test request to be submitted to the labtory</h5>
 													</div>
 													<div class="ml-md-auto py-2 py-md-0">
 														<a href="#" class="btn btn-white btn-border btn-round mr-2">Back</a>
-														<a href="#" class="btn btn-white btn-border btn-round mr-2">Tests</a>
-														<a href="#" class="btn btn-secondary btn-round">No. of Verified</a>
+														<a href="#" class="btn btn-white btn-border btn-round mr-2">Manage Tests</a>
+														<a href="#" class="btn btn-secondary btn-round">No. Submitted</a>
 													</div>
 												</div>
 											</div>
@@ -597,25 +597,22 @@
 														<div class="card-body">
 															<div class="card-category">
 															</div>
-															<div class="card-title">Verify Sample</div>
+															<div class="card-title">Create Test Request</div>
 															
 															<div class="row justify-content-center">
 																<div class="col-lg-10">
-																	<form asp-controller="Sample" asp-action="VerifySample" method="post">
+																	<form asp-controller="TestRequest" asp-action="CreateTestRequest" method="post">
 
 																		<!-- Request Number -->
 																		<div class="row mb-3 align-items-center">
 																			<label class="col-md-3 col-form-label fw-bold">
-																				Request Number
+																				Select Patient
 																			</label>
 
 																			<div class="col-md-9">
-																				<input asp-for="RequestNumber"
-																					   class="form-control"
-																					   id="requestNumberInput"
-																					   autocomplete="off" />
-
-																				<ul id="requestSuggestions" class="list-group mt-1"></ul>
+																				<select asp-for="PatientId" class="form-control" asp-items="ViewBag.Patients">
+																					<option value="">-- Select Patient --</option>
+																				</select>
 
 																				<span asp-validation-for="RequestNumber"
 																					  class="text-danger"></span>
@@ -625,11 +622,15 @@
 																		<!-- Barcode -->
 																		<div class="row mb-3 align-items-center">
 																			<label class="col-md-3 col-form-label fw-bold">
-																				Barcode
+																				Urgency
 																			</label>
 
 																			<div class="col-md-9">
-																				<input asp-for="Barcode" class="form-control" />
+																				<select asp-for="Urgency" class="form-control">
+																					<option value="Routine">Routine</option>
+																					<option value="Urgent">Urgent</option>
+																					<option value="Stat">Stat</option>
+																				</select>
 
 																				<span asp-validation-for="Barcode"
 																					  class="text-danger"></span>
@@ -639,26 +640,57 @@
 																		<!-- Sample Type -->
 																		<div class="row mb-4 align-items-center">
 																			<label class="col-md-3 col-form-label fw-bold">
-																				Sample Type
+																				Clinical Notes
 																			</label>
 
 																			<div class="col-md-9">
-																				<select asp-for="SampleType" class="form-control">
-																					<option value="">-- Select Sample Type --</option>
-																					<option value="Blood">Blood</option>
-																					<option value="Urine">Urine</option>
-																					<option value="Saliva">Saliva</option>
-																				</select>
+																				<textarea asp-for="ClinicalNotes"
+																						  class="form-control"
+																						  rows="4"
+																						  placeholder="Enter clinical notes..."></textarea>
 
 																				<span asp-validation-for="SampleType"
 																					  class="text-danger"></span>
+																			</div>
+																		</div>
+																		<div class="row mb-4 align-items-center">
+																			<label class="col-md-3 col-form-label fw-bold">
+																				Test Type
+																			</label>
+
+																			<div class="col-md-9">
+																				<select asp-for="SelectedTestTypeIds"
+																						asp-items="ViewBag.TestTypes"
+																						class="form-control"
+																						multiple="multiple"
+																						size="6">
+																				</select>
+																				<small class="text-muted">
+																					Hold CTRL (Windows) or CMD (Mac) to select multiple test types
+																				</small>
+
+
+																				<span asp-validation-for="SampleType"
+																					  class="text-danger"></span>
+																			</div>
+
+																			<!-- INFO -->
+																			<div class="row mb-3">
+																				<div class="col-md-3">
+																					<strong>System Info</strong>
+																				</div>
+																				<div class="col-md-9">
+																					<div class="alert alert-info mb-0">
+																						The system will automatically generate required samples and barcodes after submission.
+																					</div>
+																				</div>
 																			</div>
 																		</div>
 
 																		<!-- Buttons -->
 																		<div class="text-center mt-4">
 																			<button type="submit" class="btn btn-success px-4 me-2">
-																				Verify
+																				Submit Test Request
 																			</button>
 
 																			<button type="reset" class="btn btn-danger px-4">
