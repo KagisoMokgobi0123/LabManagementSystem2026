@@ -137,8 +137,92 @@ namespace NMB_HLabSys.Data
             Name = "Serum"
         }
         );
+       
 
-            modelBuilder.Entity<ConsumableModel>().HasData(
+            // Seed Samples
+            modelBuilder.Entity<SampleModel>().HasData(
+                new SampleModel
+                {
+                    SampleId = 1,
+                    Barcode = "SMP-2024-000001",
+                    SampleTypeId = 1,
+                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                    DateReceived = new DateTime(2024, 1, 15, 10, 30, 0),
+                    Status = "Received",
+                    TestRequestId = 1,
+                    IsReceived = true
+                },
+                new SampleModel
+                {
+                    SampleId = 2,
+                    Barcode = "SMP-2024-000002",
+                    SampleTypeId = 2,
+                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                    DateReceived = new DateTime(2024, 1, 16, 11, 45, 0),
+                    Status = "Received",
+                    TestRequestId = 1,
+                    IsReceived = true
+                },
+                new SampleModel
+                {
+                    SampleId = 3,
+                    Barcode = "SMP-2024-000003",
+                    SampleTypeId = 3,
+                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                    DateReceived = new DateTime(2024, 1, 17, 09, 15, 0),
+                    Status = "Received",
+                    TestRequestId = 2,
+                    IsReceived = true
+                },
+                new SampleModel
+                {
+                    SampleId = 4,
+                    Barcode = "SMP-2024-000004",
+                    SampleTypeId = 1,
+                    TechnicianId = null,
+                    DateReceived = new DateTime(2024, 1, 18, 14, 20, 0),
+                    Status = "Pending",
+                    TestRequestId = 2,
+                    IsReceived = false
+                },
+                new SampleModel
+                {
+                    SampleId = 5,
+                    Barcode = "SMP-2024-000005",
+                    SampleTypeId = 4,
+                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                    DateReceived = new DateTime(2024, 1, 19, 08, 00, 0),
+                    Status = "Received",
+                    TestRequestId = 3,
+                    IsReceived = true
+                },
+                new SampleModel
+                {
+                    SampleId = 6,
+                    Barcode = "SMP-2024-000006",
+                    SampleTypeId = 5,
+                    TechnicianId = null,
+                    DateReceived = new DateTime(2024, 1, 20, 13, 30, 0),
+                    Status = "Pending",
+                    TestRequestId = 3,
+                    IsReceived = false
+                },
+             
+                new SampleModel
+                {
+                    SampleId = 9,
+                    Barcode = "SMP-2024-000009",
+                    SampleTypeId = 3,
+                    TechnicianId = null,
+                    DateReceived = new DateTime(2024, 1, 23, 11, 20, 0),
+                    Status = "Pending",
+                    TestRequestId = 5,
+                    IsReceived = false
+                }
+             
+            );
+        
+        modelBuilder.Entity<ConsumableModel>().HasData(
                 new ConsumableModel
                 {
                     ConsumableId = 1,

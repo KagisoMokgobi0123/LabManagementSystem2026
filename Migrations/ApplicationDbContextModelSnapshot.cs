@@ -642,6 +642,82 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("TestRequestId");
 
                     b.ToTable("Samples");
+
+                    b.HasData(
+                        new
+                        {
+                            SampleId = 1,
+                            Barcode = "SMP-2024-000001",
+                            DateReceived = new DateTime(2024, 1, 15, 10, 30, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = true,
+                            SampleTypeId = 1,
+                            Status = "Received",
+                            TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                            TestRequestId = 1
+                        },
+                        new
+                        {
+                            SampleId = 2,
+                            Barcode = "SMP-2024-000002",
+                            DateReceived = new DateTime(2024, 1, 16, 11, 45, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = true,
+                            SampleTypeId = 2,
+                            Status = "Received",
+                            TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                            TestRequestId = 1
+                        },
+                        new
+                        {
+                            SampleId = 3,
+                            Barcode = "SMP-2024-000003",
+                            DateReceived = new DateTime(2024, 1, 17, 9, 15, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = true,
+                            SampleTypeId = 3,
+                            Status = "Received",
+                            TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                            TestRequestId = 2
+                        },
+                        new
+                        {
+                            SampleId = 4,
+                            Barcode = "SMP-2024-000004",
+                            DateReceived = new DateTime(2024, 1, 18, 14, 20, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = false,
+                            SampleTypeId = 1,
+                            Status = "Pending",
+                            TestRequestId = 2
+                        },
+                        new
+                        {
+                            SampleId = 5,
+                            Barcode = "SMP-2024-000005",
+                            DateReceived = new DateTime(2024, 1, 19, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = true,
+                            SampleTypeId = 4,
+                            Status = "Received",
+                            TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+                            TestRequestId = 3
+                        },
+                        new
+                        {
+                            SampleId = 6,
+                            Barcode = "SMP-2024-000006",
+                            DateReceived = new DateTime(2024, 1, 20, 13, 30, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = false,
+                            SampleTypeId = 5,
+                            Status = "Pending",
+                            TestRequestId = 3
+                        },
+                        new
+                        {
+                            SampleId = 9,
+                            Barcode = "SMP-2024-000009",
+                            DateReceived = new DateTime(2024, 1, 23, 11, 20, 0, 0, DateTimeKind.Unspecified),
+                            IsReceived = false,
+                            SampleTypeId = 3,
+                            Status = "Pending",
+                            TestRequestId = 5
+                        });
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestRequestTestTypeHistoryModel", b =>
@@ -1117,7 +1193,7 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("TechnicianId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
-                        .WithMany("TestTypes")
+                        .WithMany("AssignedTestTypes")
                         .HasForeignKey("TestRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1162,9 +1238,9 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
-                    b.Navigation("Samples");
+                    b.Navigation("AssignedTestTypes");
 
-                    b.Navigation("TestTypes");
+                    b.Navigation("Samples");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.LabManager.Models.TestTypeModel", b =>

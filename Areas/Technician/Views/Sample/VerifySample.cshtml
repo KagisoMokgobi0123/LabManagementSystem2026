@@ -1,7 +1,6 @@
 ﻿@using NMB_HLabSys.Areas.Technician.Models
 @model SampleModel
 
-
 @{
     ViewData["Title"] = "NMB_HLabSys | Verify Sample";
     Layout = "_TechnicianLayout";
@@ -9,777 +8,807 @@
 
 
 <div class="wrapper">
-	<div class="main-header">
-		<!-- Logo Header -->
-		<div class="logo-header" data-background-color="blue">
-				
-			<a href="index.html" class="logo">
-				<img src="~assets/img/logo.svg" alt="navbar brand" class="navbar-brand">
-			</a>
-			<button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon">
-					<i class="icon-menu"></i>
-				</span>
-			</button>
-			<button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
-			<div class="nav-toggle">
-				<button class="btn btn-toggle toggle-sidebar">
-					<i class="icon-menu"></i>
-				</button>
-			</div>
-		</div>
-		<!-- End Logo Header -->
-		<!-- Navbar Header -->
-		<nav class="navbar navbar-header navbar-expand-lg" data-background-color="blue">
-				
-			<div class="container-fluid">
-				<div class="collapse" id="search-nav">
-					<form class="navbar-left navbar-form nav-search mr-md-3">
-						<div class="input-group">
-							<div class="input-group-prepend">
-								<button type="submit" class="btn btn-search pr-1">
-									<i class="fa fa-search search-icon"></i>
-								</button>
-							</div>
-							<input type="text" placeholder="Search ..." class="form-control">
-						</div>
-					</form>
-				</div>
-				<ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
-					<li class="nav-item toggle-nav-search hidden-caret">
-						<a class="nav-link" data-toggle="collapse" href="#search-nav" role="button" aria-expanded="false" aria-controls="search-nav">
-							<i class="fa fa-search"></i>
-						</a>
-					</li>
-					<li class="nav-item dropdown hidden-caret">
-						<a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<i class="fa fa-envelope"></i>
-						</a>
-						<ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
-							<li>
-								<div class="dropdown-title d-flex justify-content-between align-items-center">
-									Messages
-									<a href="#" class="small">Mark all as read</a>
-								</div>
-							</li>
-							<li>
-								<div class="message-notif-scroll scrollbar-outer">
-									<div class="notif-center">
-										<a href="#">
-											<div class="notif-img">
-												<img src="~/assets/img/jm_denis.jpg" alt="Img Profile">
-												</div>
-												<div class="notif-content">
-													<span class="subject">Jimmy Denis</span>
-													<span class="block">
-														How are you ?
-													</span>
-													<span class="time">5 minutes ago</span>
-												</div>
-											</a>
-											<a href="#">
-												<div class="notif-img">
-													<img src="~/assets/img/chadengle.jpg" alt="Img Profile">
-													</div>
-													<div class="notif-content">
-														<span class="subject">Chad</span>
-														<span class="block">
-															Ok, Thanks !
-														</span>
-														<span class="time">12 minutes ago</span>
-													</div>
-												</a>
-												<a href="#">
-													<div class="notif-img">
-														<img src="~/assets/img/mlane.jpg" alt="Img Profile">
-														</div>
-														<div class="notif-content">
-															<span class="subject">Jhon Doe</span>
-															<span class="block">
-																Ready for the meeting today...
-															</span>
-															<span class="time">12 minutes ago</span>
-														</div>
-													</a>
-													<a href="#">
-														<div class="notif-img">
-															<img src="~/assets/img/talha.jpg" alt="Img Profile">
-															</div>
-															<div class="notif-content">
-																<span class="subject">Talha</span>
-																<span class="block">
-																	Hi, Apa Kabar ?
-																</span>
-																<span class="time">17 minutes ago</span>
-															</div>
-														</a>
-													</div>
-												</div>
-											</li>
-											<li>
-												<a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i> </a>
-											</li>
-										</ul>
-									</li>
-									<li class="nav-item dropdown hidden-caret">
-										<a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-											<i class="fa fa-bell"></i>
-											<span class="notification">4</span>
-										</a>
-										<ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
-											<li>
-												<div class="dropdown-title">You have 4 new notification</div>
-											</li>
-											<li>
-												<div class="notif-scroll scrollbar-outer">
-													<div class="notif-center">
-														<a href="#">
-															<div class="notif-icon notif-primary"> <i class="fa fa-user-plus"></i> </div>
-															<div class="notif-content">
-																<span class="block">
-																	New user registered
-																</span>
-																<span class="time">5 minutes ago</span>
-															</div>
-														</a>
-														<a href="#">
-															<div class="notif-icon notif-success"> <i class="fa fa-comment"></i> </div>
-															<div class="notif-content">
-																<span class="block">
-																	Rahmad commented on Admin
-																</span>
-																<span class="time">12 minutes ago</span>
-															</div>
-														</a>
-														<a href="#">
-															<div class="notif-img">
-																<img src="~/assets/img/profile2.jpg" alt="Img Profile">
-																</div>
-																<div class="notif-content">
-																	<span class="block">
-																		Reza send messages to you
-																	</span>
-																	<span class="time">12 minutes ago</span>
-																</div>
-															</a>
-															<a href="#">
-																<div class="notif-icon notif-danger"> <i class="fa fa-heart"></i> </div>
-																<div class="notif-content">
-																	<span class="block">
-																		Farrah liked Admin
-																	</span>
-																	<span class="time">17 minutes ago</span>
-																</div>
-															</a>
-														</div>
-													</div>
-												</li>
-												<li>
-													<a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i> </a>
-												</li>
-											</ul>
-										</li>
-										<li class="nav-item dropdown hidden-caret">
-											<a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
-												<i class="fas fa-layer-group"></i>
-											</a>
-											<div class="dropdown-menu quick-actions quick-actions-info animated fadeIn">
-												<div class="quick-actions-header">
-													<span class="title mb-1">Quick Actions</span>
-													<span class="subtitle op-8">Shortcuts</span>
-												</div>
-												<div class="quick-actions-scroll scrollbar-outer">
-													<div class="quick-actions-items">
-														<div class="row m-0">
-															<a class="col-6 col-md-4 p-0" href="#">
-																<div class="quick-actions-item">
-																	<i class="flaticon-file-1"></i>
-																	<span class="text">Generated Report</span>
-																</div>
-															</a>
-															<a class="col-6 col-md-4 p-0" href="#">
-																<div class="quick-actions-item">
-																	<i class="flaticon-database"></i>
-																	<span class="text">Create New Database</span>
-																</div>
-															</a>
-															<a class="col-6 col-md-4 p-0" href="#">
-																<div class="quick-actions-item">
-																	<i class="flaticon-pen"></i>
-																	<span class="text">Create New Post</span>
-																</div>
-															</a>
-															<a class="col-6 col-md-4 p-0" href="#">
-																<div class="quick-actions-item">
-																	<i class="flaticon-interface-1"></i>
-																	<span class="text">Create New Task</span>
-																</div>
-															</a>
-															<a class="col-6 col-md-4 p-0" href="#">
-																<div class="quick-actions-item">
-																	<i class="flaticon-list"></i>
-																	<span class="text">Completed Tasks</span>
-																</div>
-															</a>
-															<a class="col-6 col-md-4 p-0" href="#">
-																<div class="quick-actions-item">
-																	<i class="flaticon-file"></i>
-																	<span class="text">Create New Invoice</span>
-																</div>
-															</a>
-														</div>
-													</div>
-												</div>
-											</div>
-										</li>
-										<li class="nav-item dropdown hidden-caret">
-											<a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
-												<div class="avatar-sm">
-													<img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
-													</div>
-												</a>
-												<ul class="dropdown-menu dropdown-user animated fadeIn">
-													<div class="dropdown-user-scroll scrollbar-outer">
-														<li>
-															<div class="user-box">
-																<div class="avatar-lg"><img src="~/assets/img/profile.jpg" alt="image profile" class="avatar-img rounded"></div>
-																<div class="u-text">
-																	<h4>Hizrian</h4>
-																	<p class="text-muted">hello@example.com</p><a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
-																</div>
-															</div>
-														</li>
-														<li>
-															<div class="dropdown-divider"></div>
-															<a class="dropdown-item" href="#">My Profile</a>
-															<a class="dropdown-item" href="#">My Balance</a>
-															<a class="dropdown-item" href="#">Inbox</a>
-															<div class="dropdown-divider"></div>
-															<a class="dropdown-item" href="#">Account Setting</a>
-															<div class="dropdown-divider"></div>
-															<a class="dropdown-item" href="#">Logout</a>
-														</li>
-													</div>
-												</ul>
-											</li>
-										</ul>
-									</div>
-								</nav>
-								<!-- End Navbar -->
-							</div>
+    <div class="main-header">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="blue">
+            <a href="index.html" class="logo">
+                <img src="~/assets/img/logo.svg" alt="navbar brand" class="navbar-brand">
+            </a>
+            <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon">
+                    <i class="icon-menu"></i>
+                </span>
+            </button>
+            <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+            <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                    <i class="icon-menu"></i>
+                </button>
+            </div>
+        </div>
+        <!-- End Logo Header -->
+        
+        <!-- Navbar Header -->
+        <nav class="navbar navbar-header navbar-expand-lg" data-background-color="blue">
+            <div class="container-fluid">
+                <div class="collapse" id="search-nav">
+                    <form class="navbar-left navbar-form nav-search mr-md-3">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <button type="submit" class="btn btn-search pr-1">
+                                    <i class="fa fa-search search-icon"></i>
+                                </button>
+                            </div>
+                            <input type="text" placeholder="Search ..." class="form-control">
+                        </div>
+                    </form>
+                </div>
+                <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+                    <li class="nav-item toggle-nav-search hidden-caret">
+                        <a class="nav-link" data-toggle="collapse" href="#search-nav" role="button" aria-expanded="false" aria-controls="search-nav">
+                            <i class="fa fa-search"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-envelope"></i>
+                        </a>
+                        <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                            <li>
+                                <div class="dropdown-title d-flex justify-content-between align-items-center">
+                                    Messages
+                                    <a href="#" class="small">Mark all as read</a>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="message-notif-scroll scrollbar-outer">
+                                    <div class="notif-center">
+                                        <a href="#">
+                                            <div class="notif-img">
+                                                <img src="~/assets/img/jm_denis.jpg" alt="Img Profile">
+                                            </div>
+                                            <div class="notif-content">
+                                                <span class="subject">Jimmy Denis</span>
+                                                <span class="block">How are you ?</span>
+                                                <span class="time">5 minutes ago</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa fa-bell"></i>
+                            <span class="notification">4</span>
+                        </a>
+                        <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                            <li>
+                                <div class="dropdown-title">You have 4 new notification</div>
+                            </li>
+                            <li>
+                                <div class="notif-scroll scrollbar-outer">
+                                    <div class="notif-center">
+                                        <a href="#">
+                                            <div class="notif-icon notif-primary"> <i class="fa fa-user-plus"></i> </div>
+                                            <div class="notif-content">
+                                                <span class="block">New user registered</span>
+                                                <span class="time">5 minutes ago</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown hidden-caret">
+                        <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+                            <div class="avatar-sm">
+                                <img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user animated fadeIn">
+                            <div class="dropdown-user-scroll scrollbar-outer">
+                                <li>
+                                    <div class="user-box">
+                                        <div class="avatar-lg"><img src="~/assets/img/profile.jpg" alt="image profile" class="avatar-img rounded"></div>
+                                        <div class="u-text">
+                                            <h4>Rudzani Khauli</h4>
+                                            <p class="text-muted">technician@nmblab.co.za</p>
+                                            <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">My Profile</a>
+                                    <a class="dropdown-item" href="#">My Balance</a>
+                                    <a class="dropdown-item" href="#">Inbox</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Account Setting</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Logout</a>
+                                </li>
+                            </div>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!-- End Navbar -->
+    </div>
 
-							<!-- Sidebar -->
-							<div class="sidebar sidebar-style-2">
-								<div class="sidebar-wrapper scrollbar scrollbar-inner">
-									<div class="sidebar-content">
-										<div class="user">
-											<div class="avatar-sm float-left mr-2">
-												<img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
-												</div>
-												<div class="info">
-													<a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
-														<span>
-															Rudzani Khauli
-															<span class="user-level">Lab Technician</span>
-															<span class="caret"></span>
-														</span>
-													</a>
-													<div class="clearfix"></div>
+    <!-- Sidebar -->
+    <div class="sidebar sidebar-style-2">
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+            <div class="sidebar-content">
+                <div class="user">
+                    <div class="avatar-sm float-left mr-2">
+                        <img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+                    </div>
+                    <div class="info">
+                        <a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+                            <span>
+                                Rudzani Khauli
+                                <span class="user-level">Lab Technician</span>
+                                <span class="caret"></span>
+                            </span>
+                        </a>
+                        <div class="clearfix"></div>
+                        <div class="collapse in" id="collapseExample">
+                            <ul class="nav">
+                                <li><a href="#profile"><span class="link-collapse">My Profile</span></a></li>
+                                <li><a href="#edit"><span class="link-collapse">Edit Profile</span></a></li>
+                                <li><a href="#settings"><span class="link-collapse">Settings</span></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <ul class="nav nav-primary">
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
+                            <i class="fas fa-home"></i>
+                            <p>Dashboard</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="dashboard">
+                            <ul class="nav nav-collapse">
+                                <li><a href="#"><span class="sub-item">Workload Analytics</span></a></li>
+                                <li><a href="#"><span class="sub-item">Generate Reports</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-section">
+                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                        <h4 class="text-section">Menu</h4>
+                    </li>
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#base">
+                            <i class="fas fa-layer-group"></i>
+                            <p>Requests</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="base">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Technician/TestRequest/ListRequests"><span class="sub-item">Tests</span></a></li>
+                                <li><a href="#"><span class="sub-item">Samples</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a data-toggle="collapse" href="#sidebarLayouts">
+                            <i class="fas fa-th-list"></i>
+                            <p>Tests</p>
+                            <span class="caret"></span>
+                        </a>
+                        <div class="collapse" id="sidebarLayouts">
+                            <ul class="nav nav-collapse">
+                                <li><a href="#"><span class="sub-item">Assigned Test Types</span></a></li>
+                                <li><a href="#"><span class="sub-item">Select Test Type</span></a></li>
+                                <li><a href="#"><span class="sub-item">Results</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="mx-4 mt-2">
+                        <a href="#" class="btn btn-primary btn-block">
+                            <span class="btn-label mr-2"><i class="fa fa-heart"></i></span>Sign Out
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- End Sidebar -->
 
-													<div class="collapse in" id="collapseExample">
-														<ul class="nav">
-															<li>
-																<a href="#profile">
-																	<span class="link-collapse">My Profile</span>
-																</a>
-															</li>
-															<li>
-																<a href="#edit">
-																	<span class="link-collapse">Edit Profile</span>
-																</a>
-															</li>
-															<li>
-																<a href="#settings">
-																	<span class="link-collapse">Settings</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</div>
-											</div>
-											<ul class="nav nav-primary">
-												<li class="nav-item active">
-													<a data-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
-														<i class="fas fa-home"></i>
-														<p>Dashboard</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="dashboard">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="~/demo1/index.html">
-																	<span class="sub-item">Workload Analytics</span>
-																</a>
-															</li>
-															<li>
-																<a href="~/demo2/index.html">
-																	<span class="sub-item">Generate Reports</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</li>
-												<li class="nav-section">
-													<span class="sidebar-mini-icon">
-														<i class="fa fa-ellipsis-h"></i>
-													</span>
-													<h4 class="text-section">Menu</h4>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#base">
-														<i class="fas fa-layer-group"></i>
-														<p>Requests</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="base">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="/Technician/TestRequest/ListRequests">
-																	<span class="sub-item">Tests</span>
-																</a>
-															</li>
-															<li>
-																<a href="components/buttons.html">
-																	<span class="sub-item">Samples</span>
-																</a>
-															</li>
-															@* <li>
-									<a href="components/gridsystem.html">
-										<span class="sub-item">Grid System</span>
-									</a>
-								</li> *@
-															@* <li>
-									<a href="components/panels.html">
-										<span class="sub-item">Panels</span>
-									</a>
-								</li> *@
-															@* <li>
-									<a href="components/notifications.html">
-										<span class="sub-item">Notifications</span>
-									</a>
-								</li> *@
-															@* <li>
-									<a href="components/sweetalert.html">
-										<span class="sub-item">Sweet Alert</span>
-									</a>
-								</li> *@
-															@* <li>
-									<a href="components/font-awesome-icons.html">
-										<span class="sub-item">Font Awesome Icons</span>
-									</a>
-								</li> *@
-															@* <li>
-									<a href="components/simple-line-icons.html">
-										<span class="sub-item">Simple Line Icons</span>
-									</a>
-								</li> *@
-															@* 	<li>
-									<a href="components/flaticons.html">
-										<span class="sub-item">Flaticons</span>
-									</a>
-								</li> *@
-															@* <li>
-									<a href="components/typography.html">
-										<span class="sub-item">Typography</span>
-									</a>
-								</li> *@
-														</ul>
-													</div>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#sidebarLayouts">
-														<i class="fas fa-th-list"></i>
-														<p>Tests</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="sidebarLayouts">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="sidebar-style-1.html">
-																	<span class="sub-item">Assigned Test Types</span>
-																</a>
-															</li>
-															<li>
-																<a href="overlay-sidebar.html">
-																	<span class="sub-item">Select Test Type</span>
-																</a>
-															</li>
-															<li>
-																<a href="compact-sidebar.html">
-																	<span class="sub-item">Results</span>
-																</a>
-															</li>
-															@* <li>
-									<a href="static-sidebar.html">
-										<span class="sub-item">Static Sidebar</span>
-									</a>
-								</li> *@
-															@* 	<li>
-									<a href="icon-menu.html">
-										<span class="sub-item">Icon Menu</span>
-									</a>
-								</li> *@
-														</ul>
-													</div>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#forms">
-														<i class="fas fa-pen-square"></i>
-														<p>Forms</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="forms">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="forms/forms.html">
-																	<span class="sub-item">Basic Form</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#tables">
-														<i class="fas fa-table"></i>
-														<p>Tables</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="tables">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="tables/tables.html">
-																	<span class="sub-item">Basic Table</span>
-																</a>
-															</li>
-															<li>
-																<a href="tables/datatables.html">
-																	<span class="sub-item">Datatables</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#maps">
-														<i class="fas fa-map-marker-alt"></i>
-														<p>Maps</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="maps">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="maps/jqvmap.html">
-																	<span class="sub-item">JQVMap</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#charts">
-														<i class="far fa-chart-bar"></i>
-														<p>Charts</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="charts">
-														<ul class="nav nav-collapse">
-															<li>
-																<a href="charts/charts.html">
-																	<span class="sub-item">Chart Js</span>
-																</a>
-															</li>
-															<li>
-																<a href="charts/sparkline.html">
-																	<span class="sub-item">Sparkline</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</li>
-												<li class="nav-item">
-													<a href="widgets.html">
-														<i class="fas fa-desktop"></i>
-														<p>Widgets</p>
-														<span class="badge badge-success">4</span>
-													</a>
-												</li>
-												<li class="nav-item">
-													<a data-toggle="collapse" href="#submenu">
-														<i class="fas fa-bars"></i>
-														<p>Menu Levels</p>
-														<span class="caret"></span>
-													</a>
-													<div class="collapse" id="submenu">
-														<ul class="nav nav-collapse">
-															<li>
-																<a data-toggle="collapse" href="#subnav1">
-																	<span class="sub-item">Level 1</span>
-																	<span class="caret"></span>
-																</a>
-																<div class="collapse" id="subnav1">
-																	<ul class="nav nav-collapse subnav">
-																		<li>
-																			<a href="#">
-																				<span class="sub-item">Level 2</span>
-																			</a>
-																		</li>
-																		<li>
-																			<a href="#">
-																				<span class="sub-item">Level 2</span>
-																			</a>
-																		</li>
-																	</ul>
-																</div>
-															</li>
-															<li>
-																<a data-toggle="collapse" href="#subnav2">
-																	<span class="sub-item">Level 1</span>
-																	<span class="caret"></span>
-																</a>
-																<div class="collapse" id="subnav2">
-																	<ul class="nav nav-collapse subnav">
-																		<li>
-																			<a href="#">
-																				<span class="sub-item">Level 2</span>
-																			</a>
-																		</li>
-																	</ul>
-																</div>
-															</li>
-															<li>
-																<a href="#">
-																	<span class="sub-item">Level 1</span>
-																</a>
-															</li>
-														</ul>
-													</div>
-												</li>
-												<li class="mx-4 mt-2">
-													<a href="http://themekita.com/atlantis-bootstrap-dashboard.html" class="btn btn-primary btn-block"><span class="btn-label mr-2"> <i class="fa fa-heart"></i> </span>Sign Out</a>
-												</li>
-											</ul>
-										</div>
-									</div>
-								</div>
-								<!-- End Sidebar -->
+    <div class="main-panel">
+        <div class="content">
+            <div class="panel-header bg-primary-gradient">
+                <div class="page-inner py-5">
+                    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+                        <div>
+                            <h2 class="text-white pb-2 fw-bold">Verify Sample</h2>
+                            <h5 class="text-white op-7 mb-2">Search request, scan barcode, and verify sample</h5>
+                        </div>
+                        <div class="ml-md-auto py-2 py-md-0">
+                            <a href="@Url.Action("VerifiedSamplesList", "Sample", new { area = "Technician" })" class="btn btn-white btn-border btn-round mr-2">
+                                <i class="fa fa-list"></i> Verified Samples
+                            </a>
+                            <a href="@Url.Action("Dashboard", "Home", new { area = "Technician" })" class="btn btn-secondary btn-round">
+                                <i class="fa fa-home"></i> Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="page-inner mt--5">
+                <div class="row mt--2">
+                    <div class="col-md-12">
+                        <!-- Verify Sample Form Card -->
+                        <div class="card full-height">
+                            <div class="card-header bg-primary text-white">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-check-circle fa-2x mr-3"></i>
+                                    <div>
+                                        <h4 class="card-title mb-0 text-white">Sample Verification Form</h4>
+                                        <small class="op-8">Enter sample details to verify and receive</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <form asp-controller="Sample" asp-action="VerifySample" method="post" id="verifySampleForm">
+                                    @Html.AntiForgeryToken()
+                                    <div asp-validation-summary="model" class="text-danger"></div>
+                                    
+                                    <!-- Hidden field for TestRequestId -->
+                                    <input type="hidden" asp-for="TestRequestId" id="TestRequestId" />
+                                    
+                                    <!-- Request Number - Searchable with Search Button -->
+                                    <div class="row mb-4 align-items-center">
+                                        <label class="col-md-3 col-form-label fw-bold">
+                                            <i class="fa fa-hashtag"></i> Request Number <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="col-md-7">
+                                            <input type="text"
+                                                   id="RequestNumberSearch"
+                                                   class="form-control form-control-lg"
+                                                   autocomplete="off"
+                                                   placeholder="Enter request number or patient name..."
+                                                   required />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" id="searchRequestBtn" class="btn btn-info btn-lg w-100">
+                                                <i class="fa fa-search"></i> Search
+                                            </button>
+                                        </div>
+                                        <div class="col-md-12 mt-2">
+                                            <div id="requestSuggestionsContainer" style="position: relative;">
+                                                <ul id="requestSuggestions" class="list-group mt-1" style="position: absolute; width: 100%; z-index: 1000; max-height: 300px; overflow-y: auto; display: none;"></ul>
+                                            </div>
+                                            <small class="form-text text-muted">Enter at least 2 characters and click Search</small>
+                                            <span asp-validation-for="TestRequestId" class="text-danger"></span>
+                                        </div>
+                                    </div>
 
-								<div class="main-panel">
-									<div class="content">
-										<div class="panel-header bg-primary-gradient">
-											<div class="page-inner py-5">
-												<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
-													<div>
-														<h2 class="text-white pb-2 fw-bold">Doctor Samples</h2>
-														<h5 class="text-white op-7 mb-2">Verify patient samples submitted by doctor</h5>
-													</div>
-													<div class="ml-md-auto py-2 py-md-0">
-														<a href="#" class="btn btn-white btn-border btn-round mr-2">Back</a>
-														<a href="#" class="btn btn-white btn-border btn-round mr-2">Samples</a>
-														<a href="#" class="btn btn-secondary btn-round">No. of Verified</a>
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="page-inner mt--5">
-											<div class="row mt--2">
-												<div class="col-md-12">
-													<div class="card full-height">
-														<div class="card-body">
-															<div class="card-category">
-																
-															</div>
-															<div class="card-title">Verify Sample</div>
-															
-															<div class="row justify-content-center">
-																<div class="col-lg-10">
-																	<form asp-controller="Sample" asp-action="VerifySample" method="post">
+                                    <!-- Request Details Card (shown after selection) -->
+                                    <div id="requestDetails" style="display: none;" class="mb-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5><i class="fa fa-info-circle"></i> Request Details</h5>
+                                                <hr />
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p><strong>Patient Name:</strong> <span id="patientName"></span></p>
+                                                        <p><strong>Urgency:</strong> <span id="urgency" class="badge"></span></p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p><strong>Request Date:</strong> <span id="requestDate"></span></p>
+                                                        <p><strong>Status:</strong> <span id="requestStatus" class="badge badge-info"></span></p>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <p><strong>Clinical Notes:</strong></p>
+                                                        <p id="clinicalNotes" class="text-muted"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-																		<!-- Request Number -->
-																		<div class="row mb-3 align-items-center">
-																			<label class="col-md-3 col-form-label fw-bold">
-																				Request Number
-																			</label>
+                                    <!-- Barcode -->
+                                    <div class="row mb-4 align-items-center">
+                                        <label class="col-md-3 col-form-label fw-bold">
+                                            <i class="fa fa-barcode"></i> Barcode <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="col-md-9">
+                                            <input asp-for="Barcode" 
+                                                   class="form-control form-control-lg" 
+                                                   id="Barcode"
+                                                   placeholder="Scan or enter barcode..."
+                                                   autofocus />
+                                            <small class="form-text text-muted">Scan the sample barcode or enter manually</small>
+                                            <span asp-validation-for="Barcode" class="text-danger"></span>
+                                        </div>
+                                    </div>
 
-																			<div class="col-md-9">
-																				<input asp-for="RequestNumber"
-																					   class="form-control"
-																					   id="requestNumberInput"
-																					   autocomplete="off" />
+                                    <!-- Sample Type Dropdown -->
+                                    <div class="row mb-4 align-items-center">
+                                        <label class="col-md-3 col-form-label fw-bold">
+                                            <i class="fa fa-flask"></i> Sample Type <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="col-md-9">
+                                                            <select asp-for="SampleTypeId"
+                                                                    class="form-control form-control-lg"
+                                                                    id="SampleTypeId">
+                                                                <option value="">-- Select Sample Type --</option>
+                                                                <option value="1">🩸 Blood</option>
+                                                                <option value="2">💧 Urine</option>
+                                                                <option value="3">💦 Saliva</option>
+                                                                <option value="4">🧪 Plasma</option>
+                                                                <option value="5">🧫 Serum</option>
+                                                                <option value="6">🔬 Tissue</option>
+                                                                <option value="7">🫘 Stool</option>
+                                                                <option value="8">🧠 CSF</option>
+                                                                <option value="9">🫁 Sputum</option>
+                                                                <option value="10">🦠 Swab</option>
+                                                                <option value="11">💉 Blood Culture</option>
+                                                                <option value="12">🧬 DNA Sample</option>
+                                                                <option value="13">🔴 Whole Blood</option>
+                                                                <option value="14">⚪ White Blood Cells</option>
+                                                                <option value="15">🟡 Plasma</option>
+                                                                <option value="16">🟢 Serum</option>
+                                                                <option value="17">🧪 Urine Culture</option>
+                                                                <option value="18">🫁 Sputum Culture</option>
+                                                                <option value="19">🦷 Buccal Swab</option>
+                                                                <option value="20">🩹 Wound Swab</option>
+                                                            </select>
+                                            <small class="form-text text-muted">Select the type of sample being verified</small>
+                                            <span asp-validation-for="SampleTypeId" class="text-danger"></span>
+                                        </div>
+                                    </div>
 
-																				<ul id="requestSuggestions" class="list-group mt-1"></ul>
+                                    <!-- Technician Info -->
+                                    <div class="row mb-4 align-items-center">
+                                        <label class="col-md-3 col-form-label fw-bold">
+                                            <i class="fa fa-user-md"></i> Technician
+                                        </label>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control" value="@User.Identity?.Name" disabled />
+                                        </div>
+                                    </div>
 
-																				<span asp-validation-for="RequestNumber"
-																					  class="text-danger"></span>
-																			</div>
-																		</div>
+                                    <!-- Date/Time Received -->
+                                    <div class="row mb-4 align-items-center">
+                                        <label class="col-md-3 col-form-label fw-bold">
+                                            <i class="fa fa-calendar"></i> Date/Time Received
+                                        </label>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control" value="@DateTime.Now.ToString("dd MMM yyyy HH:mm:ss")" disabled />
+                                        </div>
+                                    </div>
 
-																		<!-- Barcode -->
-																		<div class="row mb-3 align-items-center">
-																			<label class="col-md-3 col-form-label fw-bold">
-																				Barcode
-																			</label>
+                                    <!-- Validation Summary -->
+                                    <div id="validationSummary" class="alert alert-danger" style="display: none;">
+                                        <i class="fa fa-exclamation-triangle"></i> <span id="validationMessage"></span>
+                                    </div>
 
-																			<div class="col-md-9">
-																				<input asp-for="Barcode" class="form-control" />
+                                    <!-- Buttons -->
+                                    <div class="text-center mt-4">
+                                        <button type="submit" class="btn btn-success btn-lg px-5 me-3" id="verifyBtn">
+                                            <i class="fa fa-check-circle"></i> Verify Sample
+                                        </button>
+                                        <button type="button" class="btn btn-warning btn-lg px-5 me-3" id="resetBtn">
+                                            <i class="fa fa-undo"></i> Reset
+                                        </button>
+                                        <button type="button" class="btn btn-danger btn-lg px-5" onclick="location.href='@Url.Action("Dashboard", "Home", new { area = "Technician" })'">
+                                            <i class="fa fa-times-circle"></i> Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
-																				<span asp-validation-for="Barcode"
-																					  class="text-danger"></span>
-																			</div>
-																		</div>
+                        <!-- Instructions Card -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-info text-white">
+                                <h5 class="card-title mb-0 text-white">
+                                    <i class="fa fa-info-circle"></i> Verification Instructions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4 text-center">
+                                        <div class="step-circle bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                            <i class="fa fa-search fa-2x"></i>
+                                        </div>
+                                        <h6>1. Search Request</h6>
+                                        <p class="text-muted">Search and select the test request number</p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="step-circle bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                            <i class="fa fa-barcode fa-2x"></i>
+                                        </div>
+                                        <h6>2. Scan Barcode</h6>
+                                        <p class="text-muted">Scan the sample barcode using scanner</p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="step-circle bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                            <i class="fa fa-flask fa-2x"></i>
+                                        </div>
+                                        <h6>3. Select Type & Verify</h6>
+                                        <p class="text-muted">Choose sample type and click verify</p>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="alert alert-light">
+                                    <i class="fa fa-shield-alt text-primary"></i> 
+                                    <strong>Note:</strong> All verified samples will be marked as received and sent for processing.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="footer" data-background-color="blue">
+            <div class="container-fluid">
+                <nav class="pull-left">
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                NelsonMandelaBayHematologyLab
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Help</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="copyright ml-auto">
+                    2026, made with <i class="fa fa-heart heart text-danger"></i> by NelsonMandelaBayHLabSystem
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
 
-																		<!-- Sample Type -->
-																		<div class="row mb-4 align-items-center">
-																			<label class="col-md-3 col-form-label fw-bold">
-																				Sample Type
-																			</label>
-
-																			<div class="col-md-9">
-																				<select asp-for="SampleType" class="form-control">
-																					<option value="">-- Select Sample Type --</option>
-																					<option value="Blood">Blood</option>
-																					<option value="Urine">Urine</option>
-																					<option value="Saliva">Saliva</option>
-																				</select>
-
-																				<span asp-validation-for="SampleType"
-																					  class="text-danger"></span>
-																			</div>
-																		</div>
-
-																		<!-- Buttons -->
-																		<div class="text-center mt-4">
-																			<button type="submit" class="btn btn-success px-4 me-2">
-																				Verify
-																			</button>
-
-																			<button type="reset" class="btn btn-danger px-4">
-																				Cancel
-																			</button>
-																		</div>
-
-																	</form>
-																</div>
-															</div>
-														</div>
-													</div>
-												</div>
-										
- 										</div>
-								</div>
-									</div>
-									<footer class="footer" data-background-color="blue">
-																								<div class="container-fluid">
-																									<nav class="pull-left">
-																										<ul class="nav">
-																											<li class="nav-item">
-																												<a class="nav-link" href="https://www.themekita.com">
-																													NelsonMandelaBayHemetologyLab
-																												</a>
-																											</li>
-																											<li class="nav-item">
-																												<a class="nav-link" href="#">
-																													Help
-																												</a>
-																											</li>
-																										@* 	<li class="nav-item">
-																												<a class="nav-link" href="#">
-																													Licenses
-																												</a>
-																											</li> *@
-																										</ul>
-																									</nav>
-																									<div class="copyright ml-auto">
-																										2026, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">NelsonMandelaBayHLabSystem</a>
-																									</div>
-																								</div>
-																							</footer>
-																						</div>
-		
-																						<!-- Custom template | don't include it in your project! -->
-																						<div class="custom-template">
-																							<div class="title">Settings</div>
-																							<div class="custom-content">
-																								<div class="switcher">
-																									<div class="switch-block">
-																										<h4>Logo Header</h4>
-																										<div class="btnSwitch">
-																											<button type="button" class="changeLogoHeaderColor" data-color="dark"></button>
-																											<button type="button" class="selected changeLogoHeaderColor" data-color="blue"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="purple"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="light-blue"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="green"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="orange"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="red"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="white"></button>
-																											<br />
-																											<button type="button" class="changeLogoHeaderColor" data-color="dark2"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="blue2"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="purple2"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="light-blue2"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="green2"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="orange2"></button>
-																											<button type="button" class="changeLogoHeaderColor" data-color="red2"></button>
-																										</div>
-																									</div>
-																									<div class="switch-block">
-																										<h4>Navbar Header</h4>
-																										<div class="btnSwitch">
-																											<button type="button" class="changeTopBarColor" data-color="dark"></button>
-																											<button type="button" class="changeTopBarColor" data-color="blue"></button>
-																											<button type="button" class="changeTopBarColor" data-color="purple"></button>
-																											<button type="button" class="changeTopBarColor" data-color="light-blue"></button>
-																											<button type="button" class="changeTopBarColor" data-color="green"></button>
-																											<button type="button" class="changeTopBarColor" data-color="orange"></button>
-																											<button type="button" class="changeTopBarColor" data-color="red"></button>
-																											<button type="button" class="changeTopBarColor" data-color="white"></button>
-																											<br />
-																											<button type="button" class="changeTopBarColor" data-color="dark2"></button>
-																											<button type="button" class="selected changeTopBarColor" data-color="blue2"></button>
-																											<button type="button" class="changeTopBarColor" data-color="purple2"></button>
-																											<button type="button" class="changeTopBarColor" data-color="light-blue2"></button>
-																											<button type="button" class="changeTopBarColor" data-color="green2"></button>
-																											<button type="button" class="changeTopBarColor" data-color="orange2"></button>
-																											<button type="button" class="changeTopBarColor" data-color="red2"></button>
-																										</div>
-																									</div>
-																									<div class="switch-block">
-																										<h4>Sidebar</h4>
-																										<div class="btnSwitch">
-																											<button type="button" class="selected changeSideBarColor" data-color="white"></button>
-																											<button type="button" class="changeSideBarColor" data-color="dark"></button>
-																											<button type="button" class="changeSideBarColor" data-color="dark2"></button>
-																										</div>
-																									</div>
-																									<div class="switch-block">
-																										<h4>Background</h4>
-																										<div class="btnSwitch">
-																											<button type="button" class="changeBackgroundColor" data-color="bg2"></button>
-																											<button type="button" class="changeBackgroundColor selected" data-color="bg1"></button>
-																											<button type="button" class="changeBackgroundColor" data-color="bg3"></button>
-																											<button type="button" class="changeBackgroundColor" data-color="dark"></button>
-																										</div>
-																									</div>
-																								</div>
-																							</div>
-																							<div class="custom-toggle">
-																								<i class="flaticon-settings"></i>
-																							</div>
-																						</div>
-																						<!-- End Custom template -->
-								@section Scripts {
-									@{
-										await Html.RenderPartialAsync("_ValidationScriptsPartial");
-									}
-								}
-
-
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        $(document).ready(function() {
+            let searchTimeout;
+            
+            // Show SweetAlert messages from TempData
+            @if (TempData["Success"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sample Verified Successfully!',
+                    html: `<div style="text-align: left;">
+                        <p><strong>@TempData["Success"]</strong></p>
+                        <hr/>
+                        <p><i class="fa fa-hashtag"></i> <strong>Request Number:</strong> @TempData["RequestNumber"]</p>
+                        <p><i class="fa fa-user"></i> <strong>Patient:</strong> @TempData["PatientName"]</p>
+                        <p><i class="fa fa-barcode"></i> <strong>Barcode:</strong> @TempData["Barcode"]</p>
+                    </div>`,
+                    confirmButtonColor: '#28a745',
+                    confirmButtonText: 'Continue'
+                });
+                </text>
+            }
+            
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Verification Failed',
+                    text: '@TempData["Error"]',
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'OK',
+                    timer: 4000
+                });
+                </text>
+            }
+            
+            // Search button click handler
+            $('#searchRequestBtn').click(function() {
+                let query = $('#RequestNumberSearch').val().trim();
+                
+                if (query.length < 2) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Search Error',
+                        text: 'Please enter at least 2 characters to search',
+                        confirmButtonColor: '#3085d6'
+                    });
+                    $('#RequestNumberSearch').focus();
+                    return;
+                }
+                
+                // Show loading state
+                let searchBtn = $('#searchRequestBtn');
+                searchBtn.html('<i class="fa fa-spinner fa-spin"></i> Searching...');
+                searchBtn.prop('disabled', true);
+                
+                // Perform search
+                $.ajax({
+                    url: '@Url.Action("SearchTestRequests", "Sample")',
+                    type: 'GET',
+                    data: { term: query },
+                    dataType: 'json',
+                    success: function(data) {
+                        displaySuggestions(data);
+                        searchBtn.html('<i class="fa fa-search"></i> Search');
+                        searchBtn.prop('disabled', false);
+                    },
+                    error: function() {
+                        searchBtn.html('<i class="fa fa-search"></i> Search');
+                        searchBtn.prop('disabled', false);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Search Failed',
+                            text: 'An error occurred while searching. Please try again.',
+                            confirmButtonColor: '#d33'
+                        });
+                    }
+                });
+            });
+            
+            // Enter key press in search box
+            $('#RequestNumberSearch').keypress(function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#searchRequestBtn').click();
+                }
+            });
+            
+            // Display suggestions
+            function displaySuggestions(requests) {
+                let suggestionsList = $('#requestSuggestions');
+                suggestionsList.empty();
+                
+                if (requests.length === 0) {
+                    suggestionsList.html('<li class="list-group-item text-muted">No matching requests found</li>');
+                    suggestionsList.show();
+                    setTimeout(function() {
+                        suggestionsList.fadeOut();
+                    }, 3000);
+                } else {
+                    $.each(requests, function(index, request) {
+                        let requestNumber = request.requestNumber;
+                        let urgencyBadge = request.urgency === 'STAT' ? 'danger' : (request.urgency === 'Urgent' ? 'warning' : 'info');
+                        suggestionsList.append(`
+                            <li class="list-group-item list-group-item-action" 
+                                data-id="${request.testRequestId}"
+                                data-requestnumber="${requestNumber}"
+                                data-patientname="${request.patientName}"
+                                data-urgency="${request.urgency}"
+                                data-status="${request.status}"
+                                data-requestdate="${request.requestDate}"
+                                data-clinicalnotes="${request.clinicalNotes || ''}"
+                                style="cursor: pointer;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong class="text-primary">${requestNumber}</strong>
+                                        <br/><small class="text-muted"><i class="fa fa-user"></i> Patient: ${request.patientName}</small>
+                                    </div>
+                                    <span class="badge badge-${urgencyBadge}">${request.urgency}</span>
+                                </div>
+                            </li>
+                        `);
+                    });
+                    suggestionsList.show();
+                }
+            }
+            
+            // Handle suggestion click
+            $(document).on('click', '#requestSuggestions .list-group-item', function() {
+                let requestId = $(this).data('id');
+                let requestNumber = $(this).data('requestnumber');
+                let patientName = $(this).data('patientname');
+                let urgency = $(this).data('urgency');
+                let status = $(this).data('status');
+                let requestDate = $(this).data('requestdate');
+                let clinicalNotes = $(this).data('clinicalnotes');
+                
+                // Set values
+                $('#TestRequestId').val(requestId);
+                $('#RequestNumberSearch').val(requestNumber);
+                $('#patientName').text(patientName);
+                
+                let urgencyClass = urgency === 'STAT' ? 'badge-danger' : (urgency === 'Urgent' ? 'badge-warning' : 'badge-info');
+                $('#urgency').text(urgency).removeClass().addClass(`badge ${urgencyClass}`);
+                $('#requestStatus').text(status);
+                $('#requestDate').text(requestDate ? new Date(requestDate).toLocaleDateString() : 'N/A');
+                $('#clinicalNotes').text(clinicalNotes || 'No clinical notes provided');
+                
+                // Show details and hide suggestions
+                $('#requestDetails').show();
+                $('#requestSuggestions').empty().hide();
+                
+                // Focus on barcode
+                $('#Barcode').focus();
+                
+                // Remove any existing validation errors
+                $('#validationSummary').hide();
+            });
+            
+            // Close suggestions when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#RequestNumberSearch, #searchRequestBtn, #requestSuggestions').length) {
+                    $('#requestSuggestions').empty().hide();
+                }
+            });
+            
+            // Reset form handler
+            $('#resetBtn').click(function() {
+                $('#TestRequestId').val('');
+                $('#RequestNumberSearch').val('');
+                $('#Barcode').val('');
+                $('#SampleTypeId').val('');
+                $('#requestSuggestions').empty().hide();
+                $('#requestDetails').hide();
+                $('#validationSummary').hide();
+                $('#Barcode').focus();
+            });
+            
+            // JS Validation before submit
+            $('#verifySampleForm').on('submit', function(e) {
+                let isValid = true;
+                let errorMessage = '';
+                
+                // Clear previous validation
+                $('#validationSummary').hide();
+                $('.is-invalid').removeClass('is-invalid');
+                
+                // Validate Request Number (TestRequestId)
+                let testRequestId = $('#TestRequestId').val();
+                if (!testRequestId) {
+                    isValid = false;
+                    errorMessage = 'Please search and select a valid request number.';
+                    $('#RequestNumberSearch').addClass('is-invalid');
+                    $('#RequestNumberSearch').focus();
+                } else {
+                    $('#RequestNumberSearch').removeClass('is-invalid');
+                }
+                
+                // Validate Barcode
+                let barcode = $('#Barcode').val().trim();
+                if (isValid && !barcode) {
+                    isValid = false;
+                    errorMessage = 'Please scan or enter the sample barcode.';
+                    $('#Barcode').addClass('is-invalid');
+                    $('#Barcode').focus();
+                } else if (isValid && barcode.length < 3) {
+                    isValid = false;
+                    errorMessage = 'Barcode must be at least 3 characters long.';
+                    $('#Barcode').addClass('is-invalid');
+                    $('#Barcode').focus();
+                } else {
+                    $('#Barcode').removeClass('is-invalid');
+                }
+                
+                // Validate Sample Type
+                let sampleTypeId = $('#SampleTypeId').val();
+                if (isValid && !sampleTypeId) {
+                    isValid = false;
+                    errorMessage = 'Please select the sample type.';
+                    $('#SampleTypeId').addClass('is-invalid');
+                    $('#SampleTypeId').focus();
+                } else {
+                    $('#SampleTypeId').removeClass('is-invalid');
+                }
+                
+                // Show validation error if any
+                if (!isValid) {
+                    e.preventDefault();
+                    $('#validationMessage').text(errorMessage);
+                    $('#validationSummary').show();
+                    
+                    // Scroll to validation summary
+                    $('html, body').animate({
+                        scrollTop: $('#validationSummary').offset().top - 100
+                    }, 500);
+                    
+                    return false;
+                }
+                
+                // Show loading state on submit button
+                let verifyBtn = $('#verifyBtn');
+                verifyBtn.html('<i class="fa fa-spinner fa-spin"></i> Verifying...');
+                verifyBtn.prop('disabled', true);
+                
+                return true;
+            });
+            
+            // Real-time validation removal
+            $('#RequestNumberSearch').on('input', function() {
+                $(this).removeClass('is-invalid');
+                $('#validationSummary').hide();
+            });
+            
+            $('#Barcode').on('input', function() {
+                $(this).removeClass('is-invalid');
+                $('#validationSummary').hide();
+            });
+            
+            $('#SampleTypeId').on('change', function() {
+                $(this).removeClass('is-invalid');
+                $('#validationSummary').hide();
+            });
+            
+            // Auto-focus barcode if coming back with error
+            if ($('#Barcode').val() === '') {
+                $('#Barcode').focus();
+            }
+        });
+    </script>
+    
+    <style>
+        .list-group-item-action:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transform: translateX(5px);
+            transition: all 0.2s ease;
+        }
+        
+        .step-circle {
+            transition: all 0.3s ease;
+        }
+        
+        .step-circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .form-control-lg {
+            font-size: 1.1rem;
+        }
+        
+        #requestSuggestions {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        
+        .card {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .btn {
+            border-radius: 8px;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+    </style>
+    
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

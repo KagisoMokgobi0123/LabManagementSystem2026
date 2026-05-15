@@ -1,0 +1,425 @@
+﻿@using NMB_HLabSys.Areas.Technician.Models
+@model IEnumerable<SampleModel>
+
+@{
+    ViewData["Title"] = "NMB_HLabSys | Verified Samples List";
+    Layout = "_TechnicianLayout";
+}
+
+<div class="wrapper">
+    <div class="main-header">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="blue">
+            <a href="index.html" class="logo">
+                <img src="~/assets/img/logo.svg" alt="navbar brand" class="navbar-brand">
+                </a>
+                <button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon">
+                        <i class="icon-menu"></i>
+                    </span>
+                </button>
+                <button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+                <div class="nav-toggle">
+                    <button class="btn btn-toggle toggle-sidebar">
+                        <i class="icon-menu"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- End Logo Header -->
+            <!-- Navbar Header -->
+            <nav class="navbar navbar-header navbar-expand-lg" data-background-color="blue">
+                <div class="container-fluid">
+                    <div class="collapse" id="search-nav">
+                        <form class="navbar-left navbar-form nav-search mr-md-3">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button type="submit" class="btn btn-search pr-1">
+                                        <i class="fa fa-search search-icon"></i>
+                                    </button>
+                                </div>
+                                <input type="text" placeholder="Search ..." class="form-control">
+                            </div>
+                        </form>
+                    </div>
+                    <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+                        <li class="nav-item toggle-nav-search hidden-caret">
+                            <a class="nav-link" data-toggle="collapse" href="#search-nav" role="button" aria-expanded="false" aria-controls="search-nav">
+                                <i class="fa fa-search"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown hidden-caret">
+                            <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-envelope"></i>
+                            </a>
+                            <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                                <li>
+                                    <div class="dropdown-title d-flex justify-content-between align-items-center">
+                                        Messages
+                                        <a href="#" class="small">Mark all as read</a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="message-notif-scroll scrollbar-outer">
+                                        <div class="notif-center">
+                                            <a href="#">
+                                                <div class="notif-img">
+                                                    <img src="~/assets/img/jm_denis.jpg" alt="Img Profile">
+                                                    </div>
+                                                    <div class="notif-content">
+                                                        <span class="subject">Jimmy Denis</span>
+                                                        <span class="block">How are you ?</span>
+                                                        <span class="time">5 minutes ago</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i></a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown hidden-caret">
+                                <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fa fa-bell"></i>
+                                    <span class="notification">4</span>
+                                </a>
+                                <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                                    <li>
+                                        <div class="dropdown-title">You have 4 new notification</div>
+                                    </li>
+                                    <li>
+                                        <div class="notif-scroll scrollbar-outer">
+                                            <div class="notif-center">
+                                                <a href="#">
+                                                    <div class="notif-icon notif-primary"> <i class="fa fa-user-plus"></i> </div>
+                                                    <div class="notif-content">
+                                                        <span class="block">New user registered</span>
+                                                        <span class="time">5 minutes ago</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i></a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown hidden-caret">
+                                <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+                                    <div class="avatar-sm">
+                                        <img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+                                        </div>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                        <div class="dropdown-user-scroll scrollbar-outer">
+                                            <li>
+                                                <div class="user-box">
+                                                    <div class="avatar-lg"><img src="~/assets/img/profile.jpg" alt="image profile" class="avatar-img rounded"></div>
+                                                    <div class="u-text">
+                                                        <h4>Rudzani Khauli</h4>
+                                                        <p class="text-muted">technician@nmblab.co.za</p>
+                                                        <a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="#">My Profile</a>
+                                                <a class="dropdown-item" href="#">My Balance</a>
+                                                <a class="dropdown-item" href="#">Inbox</a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="#">Account Setting</a>
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="#">Logout</a>
+                                            </li>
+                                        </div>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                    <!-- End Navbar -->
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar sidebar-style-2">
+                    <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                        <div class="sidebar-content">
+                            <div class="user">
+                                <div class="avatar-sm float-left mr-2">
+                                    <img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+                                    </div>
+                                    <div class="info">
+                                        <a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+                                            <span>
+                                                Rudzani Khauli
+                                                <span class="user-level">Lab Technician</span>
+                                                <span class="caret"></span>
+                                            </span>
+                                        </a>
+                                        <div class="clearfix"></div>
+                                        <div class="collapse in" id="collapseExample">
+                                            <ul class="nav">
+                                                <li><a href="#profile"><span class="link-collapse">My Profile</span></a></li>
+                                                <li><a href="#edit"><span class="link-collapse">Edit Profile</span></a></li>
+                                                <li><a href="#settings"><span class="link-collapse">Settings</span></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="nav nav-primary">
+                                    <li class="nav-item">
+                                        <a data-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
+                                            <i class="fas fa-home"></i>
+                                            <p>Dashboard</p>
+                                            <span class="caret"></span>
+                                        </a>
+                                        <div class="collapse" id="dashboard">
+                                            <ul class="nav nav-collapse">
+                                                <li><a href="#"><span class="sub-item">Workload Analytics</span></a></li>
+                                                <li><a href="#"><span class="sub-item">Generate Reports</span></a></li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li class="nav-section">
+                                        <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                                        <h4 class="text-section">Menu</h4>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a data-toggle="collapse" href="#base">
+                                            <i class="fas fa-layer-group"></i>
+                                            <p>Requests</p>
+                                            <span class="caret"></span>
+                                        </a>
+                                        <div class="collapse" id="base">
+                                            <ul class="nav nav-collapse">
+                                                <li><a href="/Technician/TestRequest/ListRequests"><span class="sub-item">Tests</span></a></li>
+                                                <li><a href="/Technician/Sample/VerifiedSamplesList"><span class="sub-item">Samples</span></a></li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a data-toggle="collapse" href="#sidebarLayouts">
+                                            <i class="fas fa-th-list"></i>
+                                            <p>Tests</p>
+                                            <span class="caret"></span>
+                                        </a>
+                                        <div class="collapse" id="sidebarLayouts">
+                                            <ul class="nav nav-collapse">
+                                                <li><a href="#"><span class="sub-item">Assigned Test Types</span></a></li>
+                                                <li><a href="#"><span class="sub-item">Select Test Type</span></a></li>
+                                                <li><a href="#"><span class="sub-item">Results</span></a></li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                    <li class="mx-4 mt-2">
+                                        <a href="#" class="btn btn-primary btn-block">
+                                            <span class="btn-label mr-2"><i class="fa fa-heart"></i></span>Sign Out
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Sidebar -->
+
+                    <div class="main-panel">
+                        <div class="content">
+                            <div class="panel-header bg-primary-gradient">
+                                <div class="page-inner py-5">
+                                    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+                                        <div>
+                                            <h2 class="text-white pb-2 fw-bold">Verified Samples</h2>
+                                            <h5 class="text-white op-7 mb-2">Manage and track all verified samples</h5>
+                                        </div>
+                                        <div class="ml-md-auto py-2 py-md-0">
+                                            <a href="@Url.Action("VerifySample", "Sample", new { area = "Technician" })" class="btn btn-success btn-round mr-2">
+                                                <i class="fa fa-plus-circle"></i> Verify New Sample
+                                            </a>
+                                            <a href="@Url.Action("Dashboard", "Home", new { area = "Technician" })" class="btn btn-secondary btn-round">
+                                                <i class="fa fa-home"></i> Dashboard
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+            
+                            <div class="page-inner mt--5">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <!-- Filters Card -->
+                                        <div class="card">
+                                            <div class="card-header bg-info text-white">
+                                                <h5 class="card-title text-white mb-0">
+                                                    <i class="fa fa-filter"></i> Filters & Export
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Date From</label>
+                                                        <input type="date" id="filterDateFrom" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Date To</label>
+                                                        <input type="date" id="filterDateTo" class="form-control" />
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Sample Type</label>
+                                                        <select id="filterSampleType" class="form-control">
+                                                            <option value="">All Types</option>
+                                                            @if (ViewBag.SampleTypes != null)
+                                                            {
+                                                                foreach (var type in ViewBag.SampleTypes)
+                                                                {
+                                                                    <option value="@type.Value">@type.Text</option>
+                                                                }
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">&nbsp;</label>
+                                                        <div>
+                                                            <button id="btnFilter" class="btn btn-primary">
+                                                                <i class="fa fa-search"></i> Apply Filters
+                                                            </button>
+                                                            <button id="btnReset" class="btn btn-secondary">
+                                                                <i class="fa fa-undo"></i> Reset
+                                                            </button>
+                                                            <div class="btn-group">
+                                                                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                                                    <i class="fa fa-download"></i> Export
+                                                                </button>
+                                                                <div class="dropdown-menu">
+                                                                    <a class="dropdown-item" href="#" id="btnExportCSV">
+                                                                        <i class="fa fa-file-excel-o"></i> CSV
+                                                                    </a>
+                                                                    <a class="dropdown-item" href="#" id="btnExportExcel">
+                                                                        <i class="fa fa-file-excel-o"></i> Excel
+                                                                    </a>
+                                                                    <a class="dropdown-item" href="#" id="btnPrint">
+                                                                        <i class="fa fa-print"></i> Print
+                                                                    </a>
+                                                                    <a class="dropdown-item" href="#" id="btnCopy">
+                                                                        <i class="fa fa-copy"></i> Copy
+                                                                    </a>
+                                                                    <a class="dropdown-item" href="#" id="btnPDF">
+                                                                        <i class="fa fa-file-pdf-o"></i> PDF
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Samples Table Card -->
+                                        <div class="card mt-3">
+                                            <div class="card-header bg-primary text-white">
+                                                <h5 class="card-title text-white mb-0">
+                                                    <i class="fa fa-table"></i> Verified Samples List
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-bordered" id="samplesTable" width="100%">
+                                                        <thead class="bg-light">
+                                                            <tr>
+                                                                <th>Request Number</th>
+                                                                <th>Barcode</th>
+                                                                <th>Sample Type</th>
+                                                                <th>Patient Name</th>
+                                                                <th>Technician</th>
+                                                                <th>Date Received</th>
+                                                                <th>Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="samplesTableBody">
+                                                            @if (Model != null && Model.Any())
+                                                            {
+                                                                int counter = 1;
+                                                                foreach (var sample in Model)
+                                                                {
+                                                                    <tr>
+                                                                        <td>@counter</td>
+                                                                        <td>@sample.RequestNumber</td>
+                                                                        <td>@sample.Barcode</td>
+                                                                        <td>@sample.SampleType.Name</td>
+                                                                        <td>@sample.TestRequest.Patient.FullName</td>
+                                                                        <td>@sample.Technician.FullName</td>
+                                                                        <td>@sample.DateReceived.ToString("dd MMM yyyy HH:mm")</td>
+                                                                        <td>
+                                                                            <span class="badge badge-success">@sample.Status</span>
+                                                                        </td>
+                                                                        <td>
+                                                                            <button class="btn btn-sm btn-info btn-view" data-id="@sample.SampleId" title="View Details">
+                                                                                <i class="fa fa-eye"></i>
+                                                                            </button>
+                                                                            <button class="btn btn-sm btn-primary btn-print-label" data-id="@sample.SampleId" data-barcode="@sample.Barcode" title="Print Label">
+                                                                                <i class="fa fa-print"></i>
+                                                                            </button>
+                                                                        </td>
+                                                                    </tr>
+                                                                    counter++;
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                <tr>
+                                                                    <td colspan="9" class="text-center text-muted">No verified samples found</td>
+                                                                </tr>
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <footer class="footer" data-background-color="blue">
+                            <div class="container-fluid">
+                                <nav class="pull-left">
+                                    <ul class="nav">
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#">NelsonMandelaBayHematologyLab</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="#">Help</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                                <div class="copyright ml-auto">
+                                    2026, made with <i class="fa fa-heart heart text-danger"></i> by NelsonMandelaBayHLabSystem
+                                </div>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+
+                @section Scripts {
+                    <!-- DataTables CSS -->
+                    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css" />
+                    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.bootstrap4.min.css" />
+                    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.bootstrap4.min.css" />
+    
+                    <!-- DataTables JS -->
+                    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+                    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap4.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.bootstrap4.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
+                    <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.print.min.js"></script>
+                    <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+                    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+                   }
