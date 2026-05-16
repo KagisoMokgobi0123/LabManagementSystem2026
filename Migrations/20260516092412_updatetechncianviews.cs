@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NMBHLabSys.Migrations
 {
     /// <inheritdoc />
-    public partial class updateverifysample : Migration
+    public partial class updatetechncianviews : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

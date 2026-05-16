@@ -12,8 +12,8 @@ using NMB_HLabSys.Data;
 namespace NMBHLabSys.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260515205837_updateverifysample")]
-    partial class updateverifysample
+    [Migration("20260516092412_updatetechncianviews")]
+    partial class updatetechncianviews
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
