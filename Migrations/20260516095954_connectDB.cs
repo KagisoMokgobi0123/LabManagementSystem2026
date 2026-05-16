@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace NMBHLabSys.Migrations
 {
     /// <inheritdoc />
-    public partial class pushtodb : Migration
+    public partial class connectDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -104,11 +106,24 @@ namespace NMBHLabSys.Migrations
                 {
                     SampleTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    SampleName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SampleTypes", x => x.SampleTypeId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestCategoryModel",
+                columns: table => new
+                {
+                    TestCategoryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestCategoryModel", x => x.TestCategoryId);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,7 +144,7 @@ namespace NMBHLabSys.Migrations
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -239,67 +254,13 @@ namespace NMBHLabSys.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Results",
-                columns: table => new
-                {
-                    ResultId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CapturedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IssuedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TechnicianId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ResultValues = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsAbnormal = table.Column<bool>(type: "bit", nullable: false),
-                    TestRequestTestTypeModelTestRequestTestTypeId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Results", x => x.ResultId);
-                    table.ForeignKey(
-                        name: "FK_Results_AspNetUsers_TechnicianId",
-                        column: x => x.TechnicianId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Samples",
-                columns: table => new
-                {
-                    SampleId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Barcode = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    SampleTypeId = table.Column<int>(type: "int", nullable: false),
-                    TechnicianId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    DateReceived = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TestRequestId = table.Column<int>(type: "int", nullable: false),
-                    IsReceived = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Samples", x => x.SampleId);
-                    table.ForeignKey(
-                        name: "FK_Samples_AspNetUsers_TechnicianId",
-                        column: x => x.TechnicianId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Samples_SampleTypes_SampleTypeId",
-                        column: x => x.SampleTypeId,
-                        principalTable: "SampleTypes",
-                        principalColumn: "SampleTypeId",
-                        onDelete: ReferentialAction.NoAction);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TestTypes",
                 columns: table => new
                 {
                     TestTypeId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TestCategoryId = table.Column<int>(type: "int", nullable: false),
                     SampleTypeId = table.Column<int>(type: "int", nullable: false),
                     MeasurementUnit = table.Column<double>(type: "float", nullable: false),
                     NormalMin = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -317,10 +278,16 @@ namespace NMBHLabSys.Migrations
                         principalColumn: "ConsumableId",
                         onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
-                        name: "FK_TestTypes_Samples_SampleTypeId",
+                        name: "FK_TestTypes_SampleTypes_SampleTypeId",
                         column: x => x.SampleTypeId,
-                        principalTable: "Samples",
-                        principalColumn: "SampleId",
+                        principalTable: "SampleTypes",
+                        principalColumn: "SampleTypeId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_TestTypes_TestCategoryModel_TestCategoryId",
+                        column: x => x.TestCategoryId,
+                        principalTable: "TestCategoryModel",
+                        principalColumn: "TestCategoryId",
                         onDelete: ReferentialAction.NoAction);
                 });
 
@@ -374,6 +341,7 @@ namespace NMBHLabSys.Migrations
                     RequestDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PatientId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RequestNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DoctorId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Urgency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClinicalNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -430,6 +398,42 @@ namespace NMBHLabSys.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Samples",
+                columns: table => new
+                {
+                    SampleId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Barcode = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    SampleTypeId = table.Column<int>(type: "int", nullable: false),
+                    TechnicianId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    DateReceived = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TestRequestId = table.Column<int>(type: "int", nullable: false),
+                    IsReceived = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Samples", x => x.SampleId);
+                    table.ForeignKey(
+                        name: "FK_Samples_AspNetUsers_TechnicianId",
+                        column: x => x.TechnicianId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Samples_SampleTypes_SampleTypeId",
+                        column: x => x.SampleTypeId,
+                        principalTable: "SampleTypes",
+                        principalColumn: "SampleTypeId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Samples_TestRequests_TestRequestId",
+                        column: x => x.TestRequestId,
+                        principalTable: "TestRequests",
+                        principalColumn: "TestRequestId",
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TestRequestTestTypeModel",
                 columns: table => new
                 {
@@ -477,6 +481,36 @@ namespace NMBHLabSys.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Results",
+                columns: table => new
+                {
+                    ResultId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CapturedDateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IssuedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TechnicianId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ResultValues = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsAbnormal = table.Column<bool>(type: "bit", nullable: false),
+                    TestRequestTestTypeModelTestRequestTestTypeId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Results", x => x.ResultId);
+                    table.ForeignKey(
+                        name: "FK_Results_AspNetUsers_TechnicianId",
+                        column: x => x.TechnicianId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Results_TestRequestTestTypeModel_TestRequestTestTypeModelTestRequestTestTypeId",
+                        column: x => x.TestRequestTestTypeModelTestRequestTestTypeId,
+                        principalTable: "TestRequestTestTypeModel",
+                        principalColumn: "TestRequestTestTypeId");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TestRequestTestTypeHistories",
                 columns: table => new
                 {
@@ -498,6 +532,51 @@ namespace NMBHLabSys.Migrations
                         principalTable: "TestRequestTestTypeModel",
                         principalColumn: "TestRequestTestTypeId",
                         onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Consumables",
+                columns: new[] { "ConsumableId", "Name", "QuantityOnHand", "ReorderLevel" },
+                values: new object[,]
+                {
+                    { 1, "Test Tubes (EDTA)", 500, 100 },
+                    { 2, "Syringes 5ml", 300, 50 },
+                    { 3, "Alcohol Swabs", 1000, 200 },
+                    { 4, "Gloves (Medium)", 800, 150 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "SampleTypes",
+                columns: new[] { "SampleTypeId", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Blood" },
+                    { 2, "Urine" },
+                    { 3, "Saliva" },
+                    { 4, "Plasma" },
+                    { 5, "Serum" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TestCategoryModel",
+                columns: new[] { "TestCategoryId", "Description" },
+                values: new object[,]
+                {
+                    { 1, "Hematology" },
+                    { 2, "Biochemistry" },
+                    { 3, "Microbiology" },
+                    { 4, "Immunology" },
+                    { 5, "Blood Banking" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TestTypes",
+                columns: new[] { "TestTypeId", "ConsumableId", "MeasurementUnit", "Name", "NormalMax", "NormalMin", "SampleTypeId", "TestCategoryId", "TurnAroundTimeHours" },
+                values: new object[,]
+                {
+                    { 1, 1, 1.0, "Full Blood Count", 11.0m, 4.5m, 1, 1, 2 },
+                    { 2, 2, 1.0, "Urine Culture", 5m, 0m, 2, 2, 4 },
+                    { 3, 3, 1.0, "Glucose Test", 5.5m, 3.9m, 1, 3, 1 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -655,45 +734,15 @@ namespace NMBHLabSys.Migrations
                 table: "TestTypes",
                 column: "SampleTypeId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Results_TestRequestTestTypeModel_TestRequestTestTypeModelTestRequestTestTypeId",
-                table: "Results",
-                column: "TestRequestTestTypeModelTestRequestTestTypeId",
-                principalTable: "TestRequestTestTypeModel",
-                principalColumn: "TestRequestTestTypeId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Samples_TestRequests_TestRequestId",
-                table: "Samples",
-                column: "TestRequestId",
-                principalTable: "TestRequests",
-                principalColumn: "TestRequestId",
-                onDelete: ReferentialAction.NoAction);
+            migrationBuilder.CreateIndex(
+                name: "IX_TestTypes_TestCategoryId",
+                table: "TestTypes",
+                column: "TestCategoryId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Samples_AspNetUsers_TechnicianId",
-                table: "Samples");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_TestRequests_AspNetUsers_DoctorId",
-                table: "TestRequests");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_TestRequests_AspNetUsers_PatientId",
-                table: "TestRequests");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Samples_SampleTypes_SampleTypeId",
-                table: "Samples");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Samples_TestRequests_TestRequestId",
-                table: "Samples");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -719,6 +768,9 @@ namespace NMBHLabSys.Migrations
                 name: "Results");
 
             migrationBuilder.DropTable(
+                name: "Samples");
+
+            migrationBuilder.DropTable(
                 name: "TechnicianTestTypes");
 
             migrationBuilder.DropTable(
@@ -734,13 +786,10 @@ namespace NMBHLabSys.Migrations
                 name: "TestRequestTestTypeModel");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "SampleTypes");
-
-            migrationBuilder.DropTable(
                 name: "TestRequests");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "TestTypes");
@@ -749,7 +798,10 @@ namespace NMBHLabSys.Migrations
                 name: "Consumables");
 
             migrationBuilder.DropTable(
-                name: "Samples");
+                name: "SampleTypes");
+
+            migrationBuilder.DropTable(
+                name: "TestCategoryModel");
         }
     }
 }

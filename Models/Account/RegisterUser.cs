@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using NMB_HLabSys.Areas.LabManager.Models;
+using NMB_HLabSys.Areas.Manager.Models;
 using System.ComponentModel.DataAnnotations;
 
 
@@ -15,6 +15,6 @@ namespace NMB_HLabSys.Models.Account
         public int EmployeeNumber { get; set; }
         public int ContactNumber { get; set; }
         public bool MustChangePassword { get; set; } = true;
-        public List<TechnicianTestTypeModel> TechnicianTestTypes { get; set; } = new();
+        public List<Areas.Manager.Models.TechnicianTestTypeModel> TechnicianTestTypes { get; set; } = new();
     }
 }

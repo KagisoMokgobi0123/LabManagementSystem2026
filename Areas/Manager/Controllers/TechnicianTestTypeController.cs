@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NMB_HLabSys.Areas.LabManager.Models;
+using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 

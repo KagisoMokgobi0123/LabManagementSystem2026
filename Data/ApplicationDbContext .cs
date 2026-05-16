@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Doctor.Models;
-using NMB_HLabSys.Areas.LabManager.Models;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Account;
@@ -139,88 +138,88 @@ namespace NMB_HLabSys.Data
         );
        
 
-            // Seed Samples
-            modelBuilder.Entity<SampleModel>().HasData(
-                new SampleModel
-                {
-                    SampleId = 1,
-                    Barcode = "SMP-2024-000001",
-                    SampleTypeId = 1,
-                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-                    DateReceived = new DateTime(2024, 1, 15, 10, 30, 0),
-                    Status = "Received",
-                    TestRequestId = 1,
-                    IsReceived = true
-                },
-                new SampleModel
-                {
-                    SampleId = 2,
-                    Barcode = "SMP-2024-000002",
-                    SampleTypeId = 2,
-                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-                    DateReceived = new DateTime(2024, 1, 16, 11, 45, 0),
-                    Status = "Received",
-                    TestRequestId = 1,
-                    IsReceived = true
-                },
-                new SampleModel
-                {
-                    SampleId = 3,
-                    Barcode = "SMP-2024-000003",
-                    SampleTypeId = 3,
-                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-                    DateReceived = new DateTime(2024, 1, 17, 09, 15, 0),
-                    Status = "Received",
-                    TestRequestId = 2,
-                    IsReceived = true
-                },
-                new SampleModel
-                {
-                    SampleId = 4,
-                    Barcode = "SMP-2024-000004",
-                    SampleTypeId = 1,
-                    TechnicianId = null,
-                    DateReceived = new DateTime(2024, 1, 18, 14, 20, 0),
-                    Status = "Pending",
-                    TestRequestId = 2,
-                    IsReceived = false
-                },
-                new SampleModel
-                {
-                    SampleId = 5,
-                    Barcode = "SMP-2024-000005",
-                    SampleTypeId = 4,
-                    TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-                    DateReceived = new DateTime(2024, 1, 19, 08, 00, 0),
-                    Status = "Received",
-                    TestRequestId = 3,
-                    IsReceived = true
-                },
-                new SampleModel
-                {
-                    SampleId = 6,
-                    Barcode = "SMP-2024-000006",
-                    SampleTypeId = 5,
-                    TechnicianId = null,
-                    DateReceived = new DateTime(2024, 1, 20, 13, 30, 0),
-                    Status = "Pending",
-                    TestRequestId = 3,
-                    IsReceived = false
-                },
+            //// Seed Samples
+            //modelBuilder.Entity<SampleModel>().HasData(
+            //    new SampleModel
+            //    {
+            //        SampleId = 1,
+            //        Barcode = "SMP-2024-000001",
+            //        SampleTypeId = 1,
+            //        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+            //        DateReceived = new DateTime(2024, 1, 15, 10, 30, 0),
+            //        Status = "Received",
+            //        TestRequestId = 1,
+            //        IsReceived = true
+            //    },
+            //    new SampleModel
+            //    {
+            //        SampleId = 2,
+            //        Barcode = "SMP-2024-000002",
+            //        SampleTypeId = 2,
+            //        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+            //        DateReceived = new DateTime(2024, 1, 16, 11, 45, 0),
+            //        Status = "Received",
+            //        TestRequestId = 1,
+            //        IsReceived = true
+            //    },
+            //    new SampleModel
+            //    {
+            //        SampleId = 3,
+            //        Barcode = "SMP-2024-000003",
+            //        SampleTypeId = 3,
+            //        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+            //        DateReceived = new DateTime(2024, 1, 17, 09, 15, 0),
+            //        Status = "Received",
+            //        TestRequestId = 2,
+            //        IsReceived = true
+            //    },
+            //    new SampleModel
+            //    {
+            //        SampleId = 4,
+            //        Barcode = "SMP-2024-000004",
+            //        SampleTypeId = 1,
+            //        TechnicianId = null,
+            //        DateReceived = new DateTime(2024, 1, 18, 14, 20, 0),
+            //        Status = "Pending",
+            //        TestRequestId = 2,
+            //        IsReceived = false
+            //    },
+            //    new SampleModel
+            //    {
+            //        SampleId = 5,
+            //        Barcode = "SMP-2024-000005",
+            //        SampleTypeId = 4,
+            //        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+            //        DateReceived = new DateTime(2024, 1, 19, 08, 00, 0),
+            //        Status = "Received",
+            //        TestRequestId = 3,
+            //        IsReceived = true
+            //    },
+            //    new SampleModel
+            //    {
+            //        SampleId = 6,
+            //        Barcode = "SMP-2024-000006",
+            //        SampleTypeId = 5,
+            //        TechnicianId = null,
+            //        DateReceived = new DateTime(2024, 1, 20, 13, 30, 0),
+            //        Status = "Pending",
+            //        TestRequestId = 3,
+            //        IsReceived = false
+            //    },
              
-                new SampleModel
-                {
-                    SampleId = 9,
-                    Barcode = "SMP-2024-000009",
-                    SampleTypeId = 3,
-                    TechnicianId = null,
-                    DateReceived = new DateTime(2024, 1, 23, 11, 20, 0),
-                    Status = "Pending",
-                    TestRequestId = 5,
-                    IsReceived = false
-                }
+            //    new SampleModel
+            //    {
+            //        SampleId = 9,
+            //        Barcode = "SMP-2024-000009",
+            //        SampleTypeId = 3,
+            //        TechnicianId = null,
+            //        DateReceived = new DateTime(2024, 1, 23, 11, 20, 0),
+            //        Status = "Pending",
+            //        TestRequestId = 3,
+            //        IsReceived = false
+            //    }
              
-            );
+            //);
         
         modelBuilder.Entity<ConsumableModel>().HasData(
                 new ConsumableModel
@@ -256,72 +255,72 @@ namespace NMB_HLabSys.Data
 
 
 
-    modelBuilder.Entity<TechnicianTestTypeModel>().HasData(
-    new TechnicianTestTypeModel
-    {
-        TechnicianTestTypeId = 1,
-        TestTypeId = 1,
-        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-        ManagerId = "9e586fad-975e-44b3-9b44-16bdf420354e",
-        Status = "Submitted",
-        AssignmentDate = new DateTime(2026, 01, 01)
-    },
-    new TechnicianTestTypeModel
-    {
-        TechnicianTestTypeId = 2,
-        TestTypeId = 2,
-        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-        ManagerId = "9e586fad-975e-44b3-9b44-16bdf420354e",
-        Status = "Submitted",
-        AssignmentDate = new DateTime(2026, 01, 02)
-    },
-    new TechnicianTestTypeModel
-    {
-        TechnicianTestTypeId = 3,
-        TestTypeId = 3,
-        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
-        ManagerId = "1ae2c09e-4743-4950-a377-fc9484ea4794",
-        Status = "Submitted",
-        AssignmentDate = new DateTime(2026, 01, 03)
-    }
-);
+//    modelBuilder.Entity<TechnicianTestTypeModel>().HasData(
+//    new TechnicianTestTypeModel
+//    {
+//        TechnicianTestTypeId = 1,
+//        TestTypeId = 1,
+//        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+//        ManagerId = "9e586fad-975e-44b3-9b44-16bdf420354e",
+//        Status = "Submitted",
+//        AssignmentDate = new DateTime(2026, 01, 01)
+//    },
+//    new TechnicianTestTypeModel
+//    {
+//        TechnicianTestTypeId = 2,
+//        TestTypeId = 2,
+//        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+//        ManagerId = "9e586fad-975e-44b3-9b44-16bdf420354e",
+//        Status = "Submitted",
+//        AssignmentDate = new DateTime(2026, 01, 02)
+//    },
+//    new TechnicianTestTypeModel
+//    {
+//        TechnicianTestTypeId = 3,
+//        TestTypeId = 3,
+//        TechnicianId = "6f9e21e3-6ae1-450d-90cf-9d89d3afe07a",
+//        ManagerId = "1ae2c09e-4743-4950-a377-fc9484ea4794",
+//        Status = "Submitted",
+//        AssignmentDate = new DateTime(2026, 01, 03)
+//    }
+//);
 
 
-            modelBuilder.Entity<TestRequestsModel>().HasData(
-        new TestRequestsModel
-        {
-            TestRequestId = 1,
-            RequestDate = new DateTime(2026, 5, 1),
-            Status = "Pending",
-            PatientId = "7f8a9985-54df-4e2c-8433-14089d075dbf",
-            DoctorId = "cad131b2-791f-4d47-ae17-06f5e3864ef1",
-            Urgency = Urgency.Routine,
-            ClinicalNotes = "Routine blood test",
-            RequestNumber = "NMB-REQ-000001"
-        },
-        new TestRequestsModel
-        {
-            TestRequestId = 2,
-            RequestDate = new DateTime(2026, 5, 2),
-            Status = "Samples Received",
-            PatientId = "e6fa143c-9f79-4af2-8b53-97fb8ee94947",
-            DoctorId = "cad131b2-791f-4d47-ae17-06f5e3864ef1",
-            Urgency = Urgency.Urgent,
-            ClinicalNotes = "Suspected infection",
-            RequestNumber = "NMB-REQ-000002"
-        },
-        new TestRequestsModel
-        {
-            TestRequestId = 3,
-            RequestDate = new DateTime(2026, 5, 3),
-            Status = "Pending",
-            PatientId = "e6fa143c-9f79-4af2-8b53-97fb8ee94947",
-            DoctorId = "b5c8ea7a-50fa-4df6-8e93-3b722c5377a2",
-            Urgency = Urgency.Stat,
-            ClinicalNotes = "Emergency test required",
-            RequestNumber = "NMB-REQ-000003"
-        }
-    );
+    //        modelBuilder.Entity<TestRequestsModel>().HasData(
+    //    new TestRequestsModel
+    //    {
+    //        TestRequestId = 1,
+    //        RequestDate = new DateTime(2026, 5, 1),
+    //        Status = "Pending",
+    //        PatientId = "7f8a9985-54df-4e2c-8433-14089d075dbf",
+    //        DoctorId = "cad131b2-791f-4d47-ae17-06f5e3864ef1",
+    //        Urgency = Urgency.Routine,
+    //        ClinicalNotes = "Routine blood test",
+    //        RequestNumber = "NMB-REQ-000001"
+    //    },
+    //    new TestRequestsModel
+    //    {
+    //        TestRequestId = 2,
+    //        RequestDate = new DateTime(2026, 5, 2),
+    //        Status = "Samples Received",
+    //        PatientId = "e6fa143c-9f79-4af2-8b53-97fb8ee94947",
+    //        DoctorId = "cad131b2-791f-4d47-ae17-06f5e3864ef1",
+    //        Urgency = Urgency.Urgent,
+    //        ClinicalNotes = "Suspected infection",
+    //        RequestNumber = "NMB-REQ-000002"
+    //    },
+    //    new TestRequestsModel
+    //    {
+    //        TestRequestId = 3,
+    //        RequestDate = new DateTime(2026, 5, 3),
+    //        Status = "Pending",
+    //        PatientId = "e6fa143c-9f79-4af2-8b53-97fb8ee94947",
+    //        DoctorId = "b5c8ea7a-50fa-4df6-8e93-3b722c5377a2",
+    //        Urgency = Urgency.Stat,
+    //        ClinicalNotes = "Emergency test required",
+    //        RequestNumber = "NMB-REQ-000003"
+    //    }
+    //);
 
 
 
@@ -333,12 +332,12 @@ namespace NMB_HLabSys.Data
 
         //Lab Technician Tables
         public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
-        public DbSet<TestTypeModel> TestTypes { get; set; }
+        public DbSet<Areas.Manager.Models.TestTypeModel> TestTypes { get; set; }
         public DbSet<Areas.Technician.Models.SampleModel> Samples { get; set; }
-        public DbSet<SampleTypeModel> SampleTypes { get; set; }
+        public DbSet<Areas.Manager.Models.SampleTypeModel> SampleTypes { get; set; }
         public DbSet<Areas.Doctor.Models.TestRequestsModel> TestRequests { get; set; }
         public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTests { get; set; }
-        public DbSet<ClinicalNotesModel> ClinicalNotes { get; set; }
+        public DbSet<Areas.Doctor.Models.ClinicalNotesModel> ClinicalNotes { get; set; }
         public DbSet<Areas.Technician.Models.ResultModel> Results { get; set; }
         public DbSet<Areas.Technician.Models.TestRequestTestTypeHistoryModel> TestRequestTestTypeHistories { get; set; }
         public DbSet<Areas.Technician.Models.TestRequestTestTypeModel> TestRequestTestTypes { get; set; }

@@ -20,11 +20,15 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _dbcontext = context;
             _userManager = userManager;
         }
-      
-       
+
+
         [HttpGet]
-        public async Task<IActionResult> VerifySample()
+        public async Task<IActionResult> VerifySample(int? testRequestId = null)
         {
+            // Get current technician info
+            var technicianId = User.Identity?.Name;
+            var technician = await _userManager.FindByNameAsync(technicianId);
+
             // Load sample types for dropdown
             var sampleTypes = await _dbcontext.SampleTypes
                 .Select(s => new SelectListItem
@@ -40,11 +44,16 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 // Add fallback data if table is empty
                 ViewBag.SampleTypes = new List<SelectListItem>
         {
-            new SelectListItem { Value = "1", Text = "Blood" },
-            new SelectListItem { Value = "2", Text = "Urine" },
-            new SelectListItem { Value = "3", Text = "Saliva" },
-            new SelectListItem { Value = "4", Text = "Plasma" },
-            new SelectListItem { Value = "5", Text = "Serum" }
+            new SelectListItem { Value = "1", Text = "🩸 Blood" },
+            new SelectListItem { Value = "2", Text = "💧 Urine" },
+            new SelectListItem { Value = "3", Text = "💦 Saliva" },
+            new SelectListItem { Value = "4", Text = "🧪 Plasma" },
+            new SelectListItem { Value = "5", Text = "🧫 Serum" },
+            new SelectListItem { Value = "6", Text = "🔬 Tissue" },
+            new SelectListItem { Value = "7", Text = "🫘 Stool" },
+            new SelectListItem { Value = "8", Text = "🧠 CSF" },
+            new SelectListItem { Value = "9", Text = "🫁 Sputum" },
+            new SelectListItem { Value = "10", Text = "🦠 Swab" }
         };
 
                 // Optional: Show warning in TempData
@@ -55,8 +64,72 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 ViewBag.SampleTypes = sampleTypes;
             }
 
-            return View(new SampleModel());
+            // Load recent pending requests for quick selection
+            var recentPendingRequests = await _dbcontext.TestRequests
+                .Include(tr => tr.Patient)
+                .Where(tr => tr.Status == "Pending" || tr.Status == "Submitted")
+                .OrderByDescending(tr => tr.RequestDate)
+                .Take(5)
+                .Select(tr => new
+                {
+                    tr.TestRequestId,
+                    tr.RequestNumber,
+                    PatientName = tr.Patient.FullName,
+                    tr.RequestDate,
+                    tr.Urgency
+                })
+                .ToListAsync();
+
+            ViewBag.RecentPendingRequests = recentPendingRequests;
+
+            // Load technician's recent verifications
+            var recentVerifications = await _dbcontext.Samples
+                .Include(s => s.TestRequest)
+                .Where(s => s.TechnicianId == technicianId && s.IsReceived)
+                .OrderByDescending(s => s.DateReceived)
+                .Take(5)
+                .Select(s => new
+                {
+                    s.SampleId,
+                    s.Barcode,
+                    RequestNumber = s.TestRequest.RequestNumber,
+                    s.DateReceived
+                })
+                .ToListAsync();
+
+            ViewBag.RecentVerifications = recentVerifications;
+
+            // Load statistics for the technician
+            var today = DateTime.Now.Date;
+            var stats = new
+            {
+                SamplesReceivedToday = await _dbcontext.Samples
+                    .CountAsync(s => s.TechnicianId == technicianId && s.DateReceived.Date == today),
+                PendingRequests = await _dbcontext.TestRequests
+                    .CountAsync(tr => (tr.Status == "Pending" || tr.Status == "Submitted")),
+                UrgentPending = await _dbcontext.TestRequests
+                    .CountAsync(tr => (tr.Status == "Pending" || tr.Status == "Submitted") && tr.Urgency == Doctor.Models.Urgency.Stat)
+            };
+
+            ViewBag.Stats = stats;
+
+            // Create view model
+            var model = new SampleModel();
+            if (testRequestId.HasValue)
+            {
+                model.TestRequestId = testRequestId.Value;
+                var testRequest = await _dbcontext.TestRequests
+                    .FirstOrDefaultAsync(tr => tr.TestRequestId == testRequestId.Value);
+                if (testRequest != null)
+                {
+                    ViewBag.PreSelectedRequestNumber = testRequest.RequestNumber;
+                    ViewBag.PreSelectedPatientName = testRequest.Patient?.FullName;
+                }
+            }
+
+            return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> VerifySample(SampleModel model)
