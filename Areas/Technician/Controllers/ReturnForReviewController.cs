@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 
@@ -31,21 +32,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             var technicianId = _userManager.GetUserId(User);
 
-            var test = await _dbcontext.TestRequestTestTypes
+            var test = await _dbcontext.TestRequestTests
                 .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
 
             if (test == null)
                 return NotFound();
 
             // Must be completed before review action
-            if (test.Status != Status.Completed)
+            if (test.Status != "Completed")
             {
                 TempData["Error"] = "Only completed tests can be returned for review.";
                 return RedirectToAction("VerificationQueue");
             }
 
             // Set proper status
-            test.Status = Status.ReturnedForReview;
+            test.Status = "ToBeReviewed";
 
             test.VerifiedByTechnicianId = technicianId;
             test.VerificationNote = note;

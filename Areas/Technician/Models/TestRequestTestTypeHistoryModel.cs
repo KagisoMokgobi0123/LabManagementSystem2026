@@ -6,17 +6,17 @@
 
         public int TestRequestTestTypeId { get; set; }
 
-        public string ResultValue { get; set; }
-        public string Notes { get; set; }
+        public string ResultValue { get; set; } = null!;
+        public string Notes { get; set; } = null!;
 
-        public string ActionType { get; set; } // e.g. Captured, Returned, Reworked
+        public string ActionType { get; set; } = null!; // e.g. Captured, Returned, Reworked
 
-        public string ActionByTechnicianId { get; set; }
+        public string ActionByTechnicianId { get; set; } = null!;
 
         public DateTime ActionDateTime { get; set; }
 
         // optional navigation
-        public TestRequestTestTypeModel TestRequestTestType { get; set; }
+        public TestRequestTestTypeModel? TestRequestTestType { get; set; } 
     }
 }
 

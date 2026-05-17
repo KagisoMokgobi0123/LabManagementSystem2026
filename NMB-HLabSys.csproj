@@ -39,6 +39,7 @@
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />
     <Folder Include="Areas\Patient\Views\" />
+    <Folder Include="Areas\Technician\Views\TestRework\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

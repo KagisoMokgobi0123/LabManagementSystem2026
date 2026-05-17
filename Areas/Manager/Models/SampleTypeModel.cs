@@ -9,5 +9,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         [Required(ErrorMessage ="Sample type name is required")]
         public string Name { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
     }
 }

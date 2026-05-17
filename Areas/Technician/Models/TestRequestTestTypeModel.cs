@@ -2,9 +2,11 @@
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Models.Account;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NMB_HLabSys.Areas.Technician.Models
 {
+ 
     public class TestRequestTestTypeModel
     {
         [Key]
@@ -19,13 +21,14 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string? TechnicianId { get; set; }
         public RegisterUser? Technician { get; set; }
 
-        public string Status { get; set; } = "Pending";
+        public string Status { get; set; } = "Submitted";     
         public DateTime StartDateTime { get; set; } 
-        public DateTime CompletionDateTime { get; set; } 
-
+        public DateTime CompletionDateTime { get; set; }
+        // Add this property - marks if result is abnormal
+        public bool IsAbnormal { get; set; } = false;
         public DateTime? DueDate { get; set; }
-        public bool IsOverdue =>
-        DueDate < DateTime.Now && Status != "Completed";
+        [NotMapped]
+        public bool IsOverdue => DueDate < DateTime.Now && Status != "Completed" && Status != "Verified";
 
         // Result capture
         public string? ResultValue { get; set; }

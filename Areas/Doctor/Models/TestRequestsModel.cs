@@ -40,9 +40,9 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         [Display(Name = "Clinical Notes")]
         [DataType(DataType.MultilineText)]
         public string? ClinicalNotes { get; set; }
-
+        //public DateTime? CompletedDate { get; set; }
 
         public ICollection<SampleModel> Samples { get; set; } = new List<SampleModel>();
-        public List<TestRequestTestTypeModel> AssignedTestTypes { get; set; } = new();
+        public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new();
     }
 }

@@ -227,6 +227,118 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("TestTypeModelTestTypeId");
 
                     b.ToTable("TestRequests");
+
+                    b.HasData(
+                        new
+                        {
+                            TestRequestId = 1,
+                            ClinicalNotes = "Routine blood test - Annual checkup",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000001",
+                            Status = "Submitted",
+                            Urgency = "Routine"
+                        },
+                        new
+                        {
+                            TestRequestId = 2,
+                            ClinicalNotes = "Patient presenting with fever and chills - suspected infection",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000002",
+                            Status = "Samples Received",
+                            Urgency = "Urgent"
+                        },
+                        new
+                        {
+                            TestRequestId = 3,
+                            ClinicalNotes = "Emergency - Patient collapsed, suspected DVT",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000003",
+                            Status = "InProgress",
+                            Urgency = "Stat"
+                        },
+                        new
+                        {
+                            TestRequestId = 4,
+                            ClinicalNotes = "Diabetes monitoring - HbA1c and glucose levels",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000004",
+                            Status = "Completed",
+                            Urgency = "Routine"
+                        },
+                        new
+                        {
+                            TestRequestId = 5,
+                            ClinicalNotes = "Chest pain, suspected cardiac issue - Lipid Profile and Cardiac enzymes",
+                            DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
+                            PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
+                            RequestDate = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000005",
+                            Status = "Submitted",
+                            Urgency = "Urgent"
+                        },
+                        new
+                        {
+                            TestRequestId = 6,
+                            ClinicalNotes = "Routine liver function test for patient on medication",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000006",
+                            Status = "Samples Received",
+                            Urgency = "Routine"
+                        },
+                        new
+                        {
+                            TestRequestId = 7,
+                            ClinicalNotes = "Pre-surgery coagulation screen - STAT request",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000007",
+                            Status = "Submitted",
+                            Urgency = "Stat"
+                        },
+                        new
+                        {
+                            TestRequestId = 8,
+                            ClinicalNotes = "Routine urinalysis - suspected UTI",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000008",
+                            Status = "Completed",
+                            Urgency = "Routine"
+                        },
+                        new
+                        {
+                            TestRequestId = 9,
+                            ClinicalNotes = "Suspected blood stream infection - Blood culture",
+                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+                            PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
+                            RequestDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000009",
+                            Status = "InProgress",
+                            Urgency = "Urgent"
+                        },
+                        new
+                        {
+                            TestRequestId = 10,
+                            ClinicalNotes = "Annual physical examination - Full blood count and chemistry panel",
+                            DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
+                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+                            RequestDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-000010",
+                            Status = "Submitted",
+                            Urgency = "Routine"
+                        });
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", b =>
@@ -262,23 +374,274 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             ConsumableId = 2,
+                            Name = "Test Tubes (Sodium Citrate)",
+                            QuantityOnHand = 300,
+                            ReorderLevel = 75
+                        },
+                        new
+                        {
+                            ConsumableId = 3,
                             Name = "Syringes 5ml",
                             QuantityOnHand = 300,
                             ReorderLevel = 50
                         },
                         new
                         {
-                            ConsumableId = 3,
+                            ConsumableId = 4,
+                            Name = "Blood Smear Slides",
+                            QuantityOnHand = 1000,
+                            ReorderLevel = 200
+                        },
+                        new
+                        {
+                            ConsumableId = 5,
+                            Name = "ESR Racks and Tubes",
+                            QuantityOnHand = 50,
+                            ReorderLevel = 15
+                        },
+                        new
+                        {
+                            ConsumableId = 6,
+                            Name = "Coagulation Test Cartridges",
+                            QuantityOnHand = 200,
+                            ReorderLevel = 50
+                        },
+                        new
+                        {
+                            ConsumableId = 7,
+                            Name = "D-Dimer Test Kits",
+                            QuantityOnHand = 100,
+                            ReorderLevel = 30
+                        },
+                        new
+                        {
+                            ConsumableId = 8,
+                            Name = "Chemistry Analyzer Reagents",
+                            QuantityOnHand = 50,
+                            ReorderLevel = 15
+                        },
+                        new
+                        {
+                            ConsumableId = 9,
+                            Name = "Urine Dipsticks",
+                            QuantityOnHand = 500,
+                            ReorderLevel = 100
+                        },
+                        new
+                        {
+                            ConsumableId = 10,
+                            Name = "Microscope Slides (Urine)",
+                            QuantityOnHand = 500,
+                            ReorderLevel = 100
+                        },
+                        new
+                        {
+                            ConsumableId = 11,
+                            Name = "Culture Media Plates",
+                            QuantityOnHand = 300,
+                            ReorderLevel = 80
+                        },
+                        new
+                        {
+                            ConsumableId = 12,
+                            Name = "Blood Culture Bottles",
+                            QuantityOnHand = 150,
+                            ReorderLevel = 40
+                        },
+                        new
+                        {
+                            ConsumableId = 13,
                             Name = "Alcohol Swabs",
                             QuantityOnHand = 1000,
                             ReorderLevel = 200
                         },
                         new
                         {
-                            ConsumableId = 4,
+                            ConsumableId = 14,
                             Name = "Gloves (Medium)",
                             QuantityOnHand = 800,
                             ReorderLevel = 150
+                        },
+                        new
+                        {
+                            ConsumableId = 15,
+                            Name = "Gloves (Large)",
+                            QuantityOnHand = 600,
+                            ReorderLevel = 120
+                        },
+                        new
+                        {
+                            ConsumableId = 16,
+                            Name = "Face Masks",
+                            QuantityOnHand = 500,
+                            ReorderLevel = 100
+                        },
+                        new
+                        {
+                            ConsumableId = 17,
+                            Name = "Lab Coats (Disposable)",
+                            QuantityOnHand = 100,
+                            ReorderLevel = 25
+                        },
+                        new
+                        {
+                            ConsumableId = 18,
+                            Name = "Centrifuge Tubes",
+                            QuantityOnHand = 1000,
+                            ReorderLevel = 200
+                        },
+                        new
+                        {
+                            ConsumableId = 19,
+                            Name = "Pipette Tips",
+                            QuantityOnHand = 2000,
+                            ReorderLevel = 400
+                        },
+                        new
+                        {
+                            ConsumableId = 20,
+                            Name = "Quality Control Materials",
+                            QuantityOnHand = 50,
+                            ReorderLevel = 15
+                        });
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", b =>
+                {
+                    b.Property<int>("MeasurementUnitId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MeasurementUnitId"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("MeasurementUnitId");
+
+                    b.ToTable("MeasurementUnits");
+
+                    b.HasData(
+                        new
+                        {
+                            MeasurementUnitId = 1,
+                            Description = "Thousand cells per microliter",
+                            IsActive = true,
+                            Unit = "x10³/μL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 2,
+                            Description = "Percentage",
+                            IsActive = true,
+                            Unit = "%"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 3,
+                            Description = "Positive/Negative",
+                            IsActive = true,
+                            Unit = "Qualitative"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 4,
+                            Description = "Millimeters per hour",
+                            IsActive = true,
+                            Unit = "mm/hr"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 5,
+                            Description = "Seconds",
+                            IsActive = true,
+                            Unit = "seconds"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 6,
+                            Description = "Ratio",
+                            IsActive = true,
+                            Unit = "ratio"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 7,
+                            Description = "Nanograms per milliliter",
+                            IsActive = true,
+                            Unit = "ng/mL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 8,
+                            Description = "Milligrams per deciliter",
+                            IsActive = true,
+                            Unit = "mg/dL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 9,
+                            Description = "Millimoles per liter",
+                            IsActive = true,
+                            Unit = "mmol/L"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 10,
+                            Description = "Units per liter",
+                            IsActive = true,
+                            Unit = "U/L"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 11,
+                            Description = "Colony forming units per milliliter",
+                            IsActive = true,
+                            Unit = "CFU/mL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 12,
+                            Description = "Grams per deciliter",
+                            IsActive = true,
+                            Unit = "g/dL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 13,
+                            Description = "Femtoliters",
+                            IsActive = true,
+                            Unit = "fL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 14,
+                            Description = "Picograms",
+                            IsActive = true,
+                            Unit = "pg"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 15,
+                            Description = "Million cells per microliter",
+                            IsActive = true,
+                            Unit = "x10⁶/μL"
+                        },
+                        new
+                        {
+                            MeasurementUnitId = 16,
+                            Description = "Micromoles per liter",
+                            IsActive = true,
+                            Unit = "μmol/L"
                         });
                 });
 
@@ -289,6 +652,9 @@ namespace NMBHLabSys.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SampleTypeId"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -302,28 +668,104 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleTypeId = 1,
+                            IsActive = true,
                             Name = "Blood"
                         },
                         new
                         {
                             SampleTypeId = 2,
+                            IsActive = true,
                             Name = "Urine"
                         },
                         new
                         {
                             SampleTypeId = 3,
+                            IsActive = true,
                             Name = "Saliva"
                         },
                         new
                         {
                             SampleTypeId = 4,
+                            IsActive = true,
                             Name = "Plasma"
                         },
                         new
                         {
                             SampleTypeId = 5,
+                            IsActive = true,
                             Name = "Serum"
+                        },
+                        new
+                        {
+                            SampleTypeId = 6,
+                            IsActive = true,
+                            Name = "Bone Marrow"
+                        },
+                        new
+                        {
+                            SampleTypeId = 7,
+                            IsActive = true,
+                            Name = "CSF"
+                        },
+                        new
+                        {
+                            SampleTypeId = 8,
+                            IsActive = true,
+                            Name = "Stool"
+                        },
+                        new
+                        {
+                            SampleTypeId = 9,
+                            IsActive = true,
+                            Name = "Sputum"
+                        },
+                        new
+                        {
+                            SampleTypeId = 10,
+                            IsActive = true,
+                            Name = "Swab"
                         });
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockTransactionModel", b =>
+                {
+                    b.Property<int>("TransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionId"));
+
+                    b.Property<int>("ConsumableId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NewQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PerformedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("PreviousQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransactionId");
+
+                    b.HasIndex("ConsumableId");
+
+                    b.ToTable("StockTransactions");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel", b =>
@@ -426,6 +868,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<double>("MeasurementUnit")
                         .HasColumnType("float");
 
+                    b.Property<int?>("MeasurementUnitModelMeasurementUnitId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -449,6 +894,8 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("ConsumableId");
 
+                    b.HasIndex("MeasurementUnitModelMeasurementUnitId");
+
                     b.HasIndex("SampleTypeId");
 
                     b.HasIndex("TestCategoryId");
@@ -461,7 +908,7 @@ namespace NMBHLabSys.Migrations
                             TestTypeId = 1,
                             ConsumableId = 1,
                             MeasurementUnit = 1.0,
-                            Name = "Full Blood Count",
+                            Name = "Full Blood Count (FBC)",
                             NormalMax = 11.0m,
                             NormalMin = 4.5m,
                             SampleTypeId = 1,
@@ -471,27 +918,281 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestTypeId = 2,
-                            ConsumableId = 2,
-                            MeasurementUnit = 1.0,
-                            Name = "Urine Culture",
-                            NormalMax = 5m,
+                            ConsumableId = 1,
+                            MeasurementUnit = 2.0,
+                            Name = "White Blood Cell Differential",
+                            NormalMax = 0m,
                             NormalMin = 0m,
-                            SampleTypeId = 2,
-                            TestCategoryId = 2,
-                            TurnAroundTimeHours = 4
+                            SampleTypeId = 1,
+                            TestCategoryId = 1,
+                            TurnAroundTimeHours = 3
                         },
                         new
                         {
                             TestTypeId = 3,
-                            ConsumableId = 3,
-                            MeasurementUnit = 1.0,
-                            Name = "Glucose Test",
+                            ConsumableId = 4,
+                            MeasurementUnit = 3.0,
+                            Name = "Peripheral Blood Film",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 1,
+                            TestCategoryId = 1,
+                            TurnAroundTimeHours = 4
+                        },
+                        new
+                        {
+                            TestTypeId = 4,
+                            ConsumableId = 1,
+                            MeasurementUnit = 2.0,
+                            Name = "Reticulocyte Count",
+                            NormalMax = 2.5m,
+                            NormalMin = 0.5m,
+                            SampleTypeId = 1,
+                            TestCategoryId = 1,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 5,
+                            ConsumableId = 5,
+                            MeasurementUnit = 4.0,
+                            Name = "Erythrocyte Sedimentation Rate (ESR)",
+                            NormalMax = 20m,
+                            NormalMin = 0m,
+                            SampleTypeId = 1,
+                            TestCategoryId = 1,
+                            TurnAroundTimeHours = 1
+                        },
+                        new
+                        {
+                            TestTypeId = 6,
+                            ConsumableId = 6,
+                            MeasurementUnit = 5.0,
+                            Name = "Prothrombin Time (PT)",
+                            NormalMax = 13.5m,
+                            NormalMin = 11.0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 2,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 7,
+                            ConsumableId = 6,
+                            MeasurementUnit = 5.0,
+                            Name = "Activated Partial Thromboplastin Time (aPTT)",
+                            NormalMax = 35.0m,
+                            NormalMin = 25.0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 2,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 8,
+                            ConsumableId = 6,
+                            MeasurementUnit = 6.0,
+                            Name = "International Normalized Ratio (INR)",
+                            NormalMax = 1.2m,
+                            NormalMin = 0.8m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 2,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 9,
+                            ConsumableId = 7,
+                            MeasurementUnit = 7.0,
+                            Name = "D-Dimer",
+                            NormalMax = 500m,
+                            NormalMin = 0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 2,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 10,
+                            ConsumableId = 6,
+                            MeasurementUnit = 8.0,
+                            Name = "Fibrinogen Level",
+                            NormalMax = 400m,
+                            NormalMin = 200m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 2,
+                            TurnAroundTimeHours = 3
+                        },
+                        new
+                        {
+                            TestTypeId = 11,
+                            ConsumableId = 8,
+                            MeasurementUnit = 9.0,
+                            Name = "Glucose (Fasting)",
                             NormalMax = 5.5m,
                             NormalMin = 3.9m,
-                            SampleTypeId = 1,
+                            SampleTypeId = 4,
                             TestCategoryId = 3,
                             TurnAroundTimeHours = 1
+                        },
+                        new
+                        {
+                            TestTypeId = 12,
+                            ConsumableId = 1,
+                            MeasurementUnit = 2.0,
+                            Name = "Hemoglobin A1C (HbA1c)",
+                            NormalMax = 5.6m,
+                            NormalMin = 4.0m,
+                            SampleTypeId = 1,
+                            TestCategoryId = 3,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 13,
+                            ConsumableId = 8,
+                            MeasurementUnit = 9.0,
+                            Name = "Lipid Profile",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 3,
+                            TurnAroundTimeHours = 4
+                        },
+                        new
+                        {
+                            TestTypeId = 14,
+                            ConsumableId = 8,
+                            MeasurementUnit = 10.0,
+                            Name = "Liver Function Test (LFT)",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 3,
+                            TurnAroundTimeHours = 4
+                        },
+                        new
+                        {
+                            TestTypeId = 15,
+                            ConsumableId = 8,
+                            MeasurementUnit = 9.0,
+                            Name = "Renal Function Test (RFT)",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 3,
+                            TurnAroundTimeHours = 3
+                        },
+                        new
+                        {
+                            TestTypeId = 16,
+                            ConsumableId = 8,
+                            MeasurementUnit = 7.0,
+                            Name = "C-Reactive Protein (CRP)",
+                            NormalMax = 5m,
+                            NormalMin = 0m,
+                            SampleTypeId = 4,
+                            TestCategoryId = 3,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 17,
+                            ConsumableId = 9,
+                            MeasurementUnit = 3.0,
+                            Name = "Urinalysis (Dipstick)",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 2,
+                            TestCategoryId = 4,
+                            TurnAroundTimeHours = 1
+                        },
+                        new
+                        {
+                            TestTypeId = 18,
+                            ConsumableId = 10,
+                            MeasurementUnit = 1.0,
+                            Name = "Urine Microscopy",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 2,
+                            TestCategoryId = 4,
+                            TurnAroundTimeHours = 2
+                        },
+                        new
+                        {
+                            TestTypeId = 19,
+                            ConsumableId = 11,
+                            MeasurementUnit = 11.0,
+                            Name = "Urine Culture and Sensitivity",
+                            NormalMax = 10000m,
+                            NormalMin = 0m,
+                            SampleTypeId = 2,
+                            TestCategoryId = 4,
+                            TurnAroundTimeHours = 48
+                        },
+                        new
+                        {
+                            TestTypeId = 20,
+                            ConsumableId = 12,
+                            MeasurementUnit = 3.0,
+                            Name = "Blood Culture",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 1,
+                            TestCategoryId = 5,
+                            TurnAroundTimeHours = 72
+                        },
+                        new
+                        {
+                            TestTypeId = 21,
+                            ConsumableId = 11,
+                            MeasurementUnit = 3.0,
+                            Name = "Sputum Culture",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 9,
+                            TestCategoryId = 5,
+                            TurnAroundTimeHours = 48
+                        },
+                        new
+                        {
+                            TestTypeId = 22,
+                            ConsumableId = 11,
+                            MeasurementUnit = 3.0,
+                            Name = "Wound Swab Culture",
+                            NormalMax = 0m,
+                            NormalMin = 0m,
+                            SampleTypeId = 10,
+                            TestCategoryId = 5,
+                            TurnAroundTimeHours = 48
                         });
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.NotificationModel", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<string>("DoctorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("IssuedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ResultModel", b =>
@@ -550,8 +1251,23 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime>("DateReceived")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsReceived")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("RestoredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RestoredBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SampleTypeId")
                         .HasColumnType("int");
@@ -578,6 +1294,89 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("TestRequestId");
 
                     b.ToTable("Samples");
+
+                    b.HasData(
+                        new
+                        {
+                            SampleId = 1,
+                            Barcode = "SMP-2024-000001",
+                            DateReceived = new DateTime(2024, 1, 15, 10, 30, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = true,
+                            SampleTypeId = 1,
+                            Status = "Received",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 1
+                        },
+                        new
+                        {
+                            SampleId = 2,
+                            Barcode = "SMP-2024-000002",
+                            DateReceived = new DateTime(2024, 1, 16, 11, 45, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = true,
+                            SampleTypeId = 2,
+                            Status = "Received",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 1
+                        },
+                        new
+                        {
+                            SampleId = 3,
+                            Barcode = "SMP-2024-000003",
+                            DateReceived = new DateTime(2024, 1, 17, 9, 15, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = true,
+                            SampleTypeId = 3,
+                            Status = "Received",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 2
+                        },
+                        new
+                        {
+                            SampleId = 4,
+                            Barcode = "SMP-2024-000004",
+                            DateReceived = new DateTime(2024, 1, 18, 14, 20, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 1,
+                            Status = "Pending",
+                            TestRequestId = 2
+                        },
+                        new
+                        {
+                            SampleId = 5,
+                            Barcode = "SMP-2024-000005",
+                            DateReceived = new DateTime(2024, 1, 19, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = true,
+                            SampleTypeId = 4,
+                            Status = "Received",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 3
+                        },
+                        new
+                        {
+                            SampleId = 6,
+                            Barcode = "SMP-2024-000006",
+                            DateReceived = new DateTime(2024, 1, 20, 13, 30, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 5,
+                            Status = "Pending",
+                            TestRequestId = 3
+                        },
+                        new
+                        {
+                            SampleId = 9,
+                            Barcode = "SMP-2024-000009",
+                            DateReceived = new DateTime(2024, 1, 23, 11, 20, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 3,
+                            Status = "Pending",
+                            TestRequestId = 3
+                        });
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestRequestTestTypeHistoryModel", b =>
@@ -631,6 +1430,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsAbnormal")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -642,7 +1444,10 @@ namespace NMBHLabSys.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Submitted");
 
                     b.Property<string>("TechnicianId")
                         .HasColumnType("nvarchar(450)");
@@ -675,7 +1480,102 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("VerifyTechnicianId");
 
-                    b.ToTable("TestRequestTestTypeModel");
+                    b.ToTable("TestRequestTests");
+
+                    b.HasData(
+                        new
+                        {
+                            TestRequestTestTypeId = 1,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3658),
+                            DueDate = new DateTime(2026, 5, 17, 1, 18, 41, 223, DateTimeKind.Local).AddTicks(3660),
+                            IsAbnormal = false,
+                            StartDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3649),
+                            Status = "Submitted",
+                            TestRequestId = 1,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 2,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3669),
+                            DueDate = new DateTime(2026, 5, 17, 0, 18, 41, 223, DateTimeKind.Local).AddTicks(3670),
+                            IsAbnormal = false,
+                            StartDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3668),
+                            Status = "Submitted",
+                            TestRequestId = 1,
+                            TestTypeId = 11
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 3,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3673),
+                            DueDate = new DateTime(2026, 5, 17, 1, 18, 41, 223, DateTimeKind.Local).AddTicks(3673),
+                            IsAbnormal = false,
+                            StartDateTime = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3672),
+                            Status = "InProgress",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 2,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 4,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3676),
+                            DueDate = new DateTime(2026, 5, 17, 1, 18, 41, 223, DateTimeKind.Local).AddTicks(3677),
+                            IsAbnormal = false,
+                            StartDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3676),
+                            Status = "Submitted",
+                            TestRequestId = 2,
+                            TestTypeId = 6
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 5,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 22, 18, 41, 223, DateTimeKind.Local).AddTicks(3681),
+                            DueDate = new DateTime(2026, 5, 16, 22, 18, 41, 223, DateTimeKind.Local).AddTicks(3682),
+                            IsAbnormal = false,
+                            Notes = "Results show elevated white blood cells",
+                            ResultValue = "WBC: 11.2, RBC: 4.8, HGB: 14.2, PLT: 250",
+                            StartDateTime = new DateTime(2026, 5, 16, 20, 18, 41, 223, DateTimeKind.Local).AddTicks(3680),
+                            Status = "Completed",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 3,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 6,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3686),
+                            DueDate = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3687),
+                            IsAbnormal = false,
+                            Notes = "Normal range",
+                            ResultValue = "5.6 mmol/L",
+                            StartDateTime = new DateTime(2026, 5, 16, 20, 18, 41, 223, DateTimeKind.Local).AddTicks(3685),
+                            Status = "Verified",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 3,
+                            TestTypeId = 11,
+                            VerificationDateTime = new DateTime(2026, 5, 16, 21, 48, 41, 223, DateTimeKind.Local).AddTicks(3690),
+                            VerificationNote = "Verified - within normal range",
+                            VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 7,
+                            CompletionDateTime = new DateTime(2026, 5, 16, 22, 48, 41, 223, DateTimeKind.Local).AddTicks(3693),
+                            DueDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3695),
+                            IsAbnormal = false,
+                            Notes = "Abnormal high INR - needs review",
+                            ResultValue = "INR: 3.5",
+                            StartDateTime = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3693),
+                            Status = "ToBeReviewed",
+                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            TestRequestId = 3,
+                            TestTypeId = 6,
+                            VerificationDateTime = new DateTime(2026, 5, 16, 22, 48, 41, 223, DateTimeKind.Local).AddTicks(3696),
+                            VerificationNote = "Result appears abnormal. Please review clinical notes.",
+                            VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
+                        });
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestTypeConsumableModel", b =>
@@ -705,6 +1605,184 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("TestTypeId");
 
                     b.ToTable("TestTypeConsumables");
+
+                    b.HasData(
+                        new
+                        {
+                            TestTypeConsumableId = 1,
+                            ConsumableId = 1,
+                            QuantityRequired = 1,
+                            TestTypeId = 1,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3952)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 2,
+                            ConsumableId = 1,
+                            QuantityRequired = 1,
+                            TestTypeId = 2,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3955)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 3,
+                            ConsumableId = 4,
+                            QuantityRequired = 2,
+                            TestTypeId = 3,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3956)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 4,
+                            ConsumableId = 1,
+                            QuantityRequired = 1,
+                            TestTypeId = 4,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3957)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 5,
+                            ConsumableId = 5,
+                            QuantityRequired = 1,
+                            TestTypeId = 5,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3958)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 6,
+                            ConsumableId = 2,
+                            QuantityRequired = 1,
+                            TestTypeId = 6,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3960)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 7,
+                            ConsumableId = 2,
+                            QuantityRequired = 1,
+                            TestTypeId = 7,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3961)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 8,
+                            ConsumableId = 2,
+                            QuantityRequired = 1,
+                            TestTypeId = 8,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3962)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 9,
+                            ConsumableId = 7,
+                            QuantityRequired = 1,
+                            TestTypeId = 9,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3963)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 10,
+                            ConsumableId = 6,
+                            QuantityRequired = 1,
+                            TestTypeId = 10,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3967)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 11,
+                            ConsumableId = 8,
+                            QuantityRequired = 1,
+                            TestTypeId = 11,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3968)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 12,
+                            ConsumableId = 8,
+                            QuantityRequired = 1,
+                            TestTypeId = 12,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3969)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 13,
+                            ConsumableId = 8,
+                            QuantityRequired = 2,
+                            TestTypeId = 13,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3970)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 14,
+                            ConsumableId = 8,
+                            QuantityRequired = 2,
+                            TestTypeId = 14,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3971)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 15,
+                            ConsumableId = 8,
+                            QuantityRequired = 1,
+                            TestTypeId = 15,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3972)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 16,
+                            ConsumableId = 8,
+                            QuantityRequired = 1,
+                            TestTypeId = 16,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3974)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 17,
+                            ConsumableId = 9,
+                            QuantityRequired = 1,
+                            TestTypeId = 17,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3975)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 18,
+                            ConsumableId = 10,
+                            QuantityRequired = 1,
+                            TestTypeId = 18,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3976)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 19,
+                            ConsumableId = 11,
+                            QuantityRequired = 1,
+                            TestTypeId = 19,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3977)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 20,
+                            ConsumableId = 12,
+                            QuantityRequired = 2,
+                            TestTypeId = 20,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3978)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 21,
+                            ConsumableId = 11,
+                            QuantityRequired = 1,
+                            TestTypeId = 21,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3979)
+                        },
+                        new
+                        {
+                            TestTypeConsumableId = 22,
+                            ConsumableId = 11,
+                            QuantityRequired = 1,
+                            TestTypeId = 22,
+                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3980)
+                        });
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Models.Account.LoginUser", b =>
@@ -937,6 +2015,17 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockTransactionModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
+                        .WithMany()
+                        .HasForeignKey("ConsumableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Consumable");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Manager")
@@ -976,6 +2065,10 @@ namespace NMBHLabSys.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", null)
+                        .WithMany("TestTypes")
+                        .HasForeignKey("MeasurementUnitModelMeasurementUnitId");
+
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.SampleTypeModel", "SampleType")
                         .WithMany()
                         .HasForeignKey("SampleTypeId")
@@ -993,6 +2086,17 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("SampleType");
 
                     b.Navigation("TestCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.NotificationModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ResultModel", b =>
@@ -1053,7 +2157,7 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("TechnicianId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
-                        .WithMany("AssignedTestTypes")
+                        .WithMany("TechnicianTests")
                         .HasForeignKey("TestRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1098,14 +2202,19 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
-                    b.Navigation("AssignedTestTypes");
-
                     b.Navigation("Samples");
+
+                    b.Navigation("TechnicianTests");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", b =>
                 {
                     b.Navigation("TestTypeConsumables");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", b =>
+                {
+                    b.Navigation("TestTypes");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", b =>

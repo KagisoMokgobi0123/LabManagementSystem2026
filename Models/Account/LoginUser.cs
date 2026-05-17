@@ -5,8 +5,8 @@ namespace NMB_HLabSys.Models.Account
 {
     public class LoginUser : IdentityUser
     {
-        [Key] 
-        public int Id { get; set; }  
+        [Key]
+        public int Id { get; set; }
 
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]

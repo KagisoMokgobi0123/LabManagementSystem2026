@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 
@@ -36,12 +37,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             var technicianId = _userManager.GetUserId(User);
 
-            var tests = await _dbcontext.TestRequestTestTypes
+            var tests = await _dbcontext.TestRequestTests
                 .Include(t => t.TestType)
                 .Include(t => t.TestRequest)
                 .Where(t =>
-                    t.Status == Status.Completed &&          // must be completed
-                    t.Status != Status.Verified &&          // not yet verified
+                    t.Status == "Completed" &&          // must be completed
+                    t.Status != "Verified" &&          // not yet verified
                     t.TechnicianId != technicianId)         // cannot verify own
                 .ToListAsync();
 
@@ -53,7 +54,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             var technicianId = _userManager.GetUserId(User);
 
-            var test = await _dbcontext.TestRequestTestTypes
+            var test = await _dbcontext.TestRequestTests
                 .Include(t => t.TestType)
                 .Include(t => t.TestRequest)
                 .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
@@ -62,7 +63,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 return NotFound();
 
             // Must be completed first
-            if (test.Status != Status.Completed)
+            if (test.Status != "Completed")
             {
                 TempData["Error"] = "Only completed tests can be verified.";
                 return RedirectToAction("VerificationQueue");
@@ -87,7 +88,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             }
 
             // Approve
-            test.Status = Status.Verified;
+            test.Status = "Verified";
             test.VerifiedByTechnicianId = technicianId;
             test.VerificationDateTime = DateTime.UtcNow;
 

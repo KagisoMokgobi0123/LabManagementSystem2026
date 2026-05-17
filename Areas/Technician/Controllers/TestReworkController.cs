@@ -33,13 +33,13 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             var technicianId = _userManager.GetUserId(User);
 
-            var test = await _dbcontext.TestRequestTestTypes
+            var test = await _dbcontext.TestRequestTests
                 .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
 
             if (test == null)
                 return NotFound();
 
-            if (test.Status != Status.ReturnedForReview)
+            if (test.Status != "ToBeReviewed")
             {
                 TempData["Error"] = "Only tests sent for review can be edited.";
                 return RedirectToAction("MyTests");
@@ -55,6 +55,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 ActionByTechnicianId = technicianId,
                 ActionDateTime = DateTime.UtcNow
             };
+        
 
             _dbcontext.TestRequestTestTypeHistories.Add(history);
 
@@ -62,7 +63,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             test.ResultValue = newResult;
             test.Notes = notes;
 
-            test.Status = Status.Completed; // ready for re-verification
+            test.Status = "Completed"; // ready for re-verification
 
             await _dbcontext.SaveChangesAsync();
 

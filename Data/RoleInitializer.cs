@@ -43,9 +43,10 @@ namespace NMB_HLabSys.Data
 
     // 2. Seed Technicians (Keeping your original one)
     await SeedUser("technician01@nmbhl.com", "Rudzani Khauli", "Technician", "Technician@123!");
-
-    // 3. Seed Doctors
-    await SeedUser("doctor01@nmbhl.com", "Dr. Sarah Pillay", "Doctor", "Doctor@123!");
+            await SeedUser("technician02@nmbhl.com", "Maria Santos", "Technician", "Technician@124!");
+            await SeedUser("technician03@nmbhl.com", "Thabo Nkosi", "Technician", "Technician@125!");
+            // 3. Seed Doctors
+            await SeedUser("doctor01@nmbhl.com", "Dr. Sarah Pillay", "Doctor", "Doctor@123!");
     await SeedUser("doctor02@nmbhl.com", "Dr. Mark van Wyk", "Doctor", "Doctor@123!");
 
     // 4. Seed Patients

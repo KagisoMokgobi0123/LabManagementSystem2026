@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Technician.Models;
+using NMB_HLabSys.Areas.Technician.Models.ViewModel;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 
@@ -20,17 +22,94 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _dbcontext = context;
             _userManager = userManager;
         }
+        [HttpGet]
+        public async Task<IActionResult> Samples(DateTime? dateFrom, DateTime? dateTo, int? sampleTypeId, string status, string searchTerm)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(technicianId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
+            // Build query
+            var query = _dbcontext.Samples
+                .Include(s => s.SampleType)
+                .Include(s => s.TestRequest)
+                    .ThenInclude(tr => tr.Patient)
+                .Where(s => s.TechnicianId == technicianId);
 
+            // Apply filters
+            if (dateFrom.HasValue)
+                query = query.Where(s => s.DateReceived >= dateFrom.Value);
+
+            if (dateTo.HasValue)
+                query = query.Where(s => s.DateReceived <= dateTo.Value.Date.AddDays(1));
+
+            if (sampleTypeId.HasValue && sampleTypeId.Value > 0)
+                query = query.Where(s => s.SampleTypeId == sampleTypeId.Value);
+
+            if (!string.IsNullOrEmpty(status) && status != "All Status")
+                query = query.Where(s => s.Status == status);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query = query.Where(s => s.Barcode.Contains(searchTerm) ||
+                                         s.TestRequest.RequestNumber.Contains(searchTerm) ||
+                                         (s.TestRequest.Patient != null && s.TestRequest.Patient.FullName.Contains(searchTerm)) ||
+                                         (s.SampleType != null && s.SampleType.Name.Contains(searchTerm)));
+            }
+
+            var samples = await query
+                .OrderByDescending(s => s.DateReceived)
+                .ToListAsync();
+
+            // Load filters for dropdown
+            ViewBag.SampleTypes = await _dbcontext.SampleTypes
+                .Select(s => new SelectListItem
+                {
+                    Value = s.SampleTypeId.ToString(),
+                    Text = s.Name
+                })
+                .ToListAsync();
+
+            ViewBag.StatusList = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "", Text = "All Status" },
+        new SelectListItem { Value = "Received", Text = "Received" },
+        new SelectListItem { Value = "Pending", Text = "Pending" },
+        new SelectListItem { Value = "Processing", Text = "Processing" },
+        new SelectListItem { Value = "Completed", Text = "Completed" },
+        new SelectListItem { Value = "Rejected", Text = "Rejected" }
+    };
+
+            // Store filter values in ViewBag to persist in form
+            ViewBag.DateFrom = dateFrom?.ToString("yyyy-MM-dd");
+            ViewBag.DateTo = dateTo?.ToString("yyyy-MM-dd");
+            ViewBag.SelectedSampleTypeId = sampleTypeId;
+            ViewBag.SelectedStatus = status;
+            ViewBag.SearchTerm = searchTerm;
+
+            return View(samples);
+        }
         [HttpGet]
         public async Task<IActionResult> VerifySample(int? testRequestId = null)
         {
             // Get current technician info
             var technicianId = User.Identity?.Name;
+            if (string.IsNullOrEmpty(technicianId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
             var technician = await _userManager.FindByNameAsync(technicianId);
+            if (technician == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
             // Load sample types for dropdown
             var sampleTypes = await _dbcontext.SampleTypes
+                .Where(st => st.IsActive)
                 .Select(s => new SelectListItem
                 {
                     Value = s.SampleTypeId.ToString(),
@@ -56,7 +135,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             new SelectListItem { Value = "10", Text = "🦠 Swab" }
         };
 
-                // Optional: Show warning in TempData
                 TempData["Warning"] = "Sample types loaded from fallback data. Please seed the database.";
             }
             else
@@ -74,9 +152,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 {
                     tr.TestRequestId,
                     tr.RequestNumber,
-                    PatientName = tr.Patient.FullName,
+                    PatientName = tr.Patient != null ? tr.Patient.FullName : "N/A",
                     tr.RequestDate,
-                    tr.Urgency
+                    Urgency = tr.Urgency.ToString()
                 })
                 .ToListAsync();
 
@@ -92,7 +170,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 {
                     s.SampleId,
                     s.Barcode,
-                    RequestNumber = s.TestRequest.RequestNumber,
+                    RequestNumber = s.TestRequest != null ? s.TestRequest.RequestNumber : "N/A",
                     s.DateReceived
                 })
                 .ToListAsync();
@@ -101,14 +179,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             // Load statistics for the technician
             var today = DateTime.Now.Date;
+
+            var samplesReceivedToday = await _dbcontext.Samples
+                .CountAsync(s => s.TechnicianId == technicianId && s.DateReceived.Date == today);
+
+            var pendingRequests = await _dbcontext.TestRequests
+                .CountAsync(tr => tr.Status == "Pending" || tr.Status == "Submitted");
+
+            var urgentPending = await _dbcontext.TestRequests
+                .CountAsync(tr => (tr.Status == "Pending" || tr.Status == "Submitted") && tr.Urgency == Urgency.Stat);
+
             var stats = new
             {
-                SamplesReceivedToday = await _dbcontext.Samples
-                    .CountAsync(s => s.TechnicianId == technicianId && s.DateReceived.Date == today),
-                PendingRequests = await _dbcontext.TestRequests
-                    .CountAsync(tr => (tr.Status == "Pending" || tr.Status == "Submitted")),
-                UrgentPending = await _dbcontext.TestRequests
-                    .CountAsync(tr => (tr.Status == "Pending" || tr.Status == "Submitted") && tr.Urgency == Doctor.Models.Urgency.Stat)
+                SamplesReceivedToday = samplesReceivedToday,
+                PendingRequests = pendingRequests,
+                UrgentPending = urgentPending
             };
 
             ViewBag.Stats = stats;
@@ -119,11 +204,15 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             {
                 model.TestRequestId = testRequestId.Value;
                 var testRequest = await _dbcontext.TestRequests
+                    .Include(tr => tr.Patient)
                     .FirstOrDefaultAsync(tr => tr.TestRequestId == testRequestId.Value);
+
                 if (testRequest != null)
                 {
                     ViewBag.PreSelectedRequestNumber = testRequest.RequestNumber;
-                    ViewBag.PreSelectedPatientName = testRequest.Patient?.FullName;
+                    ViewBag.PreSelectedPatientName = testRequest.Patient?.FullName ?? "N/A";
+                    ViewBag.PreSelectedUrgency = testRequest.Urgency.ToString();
+                    ViewBag.PreSelectedClinicalNotes = testRequest.ClinicalNotes;
                 }
             }
 
@@ -245,80 +334,34 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return Json(results);
         }
-        [HttpGet] // List all samples (verified, unverified)
-        public async Task<IActionResult> Samples(DateTime? dateFrom, DateTime? dateTo, int? sampleTypeId, string status, string searchTerm)
-        {
-            var technicianId = _userManager.GetUserId(User);
-
-            // Load sample types for filter dropdown
-            ViewBag.SampleTypes = await _dbcontext.SampleTypes
-                .Select(s => new SelectListItem
-                {
-                    Value = s.SampleTypeId.ToString(),
-                    Text = s.Name
-                })
-                .ToListAsync();
-
-            // Build query
-            var query = _dbcontext.Samples
-                .Include(s => s.SampleType)
-                .Include(s => s.TestRequest)
-                    .ThenInclude(tr => tr.Patient)
-                .Include(s => s.Technician)
-                .Where(s => s.TechnicianId == technicianId);
-
-            // Apply filters
-            if (dateFrom.HasValue)
-                query = query.Where(s => s.DateReceived >= dateFrom.Value);
-
-            if (dateTo.HasValue)
-                query = query.Where(s => s.DateReceived <= dateTo.Value.Date.AddDays(1));
-
-            if (sampleTypeId.HasValue && sampleTypeId.Value > 0)
-                query = query.Where(s => s.SampleTypeId == sampleTypeId.Value);
-
-            if (!string.IsNullOrEmpty(status) && status != "All")
-            {
-                bool isReceived = status == "Received";
-                query = query.Where(s => s.IsReceived == isReceived);
-            }
-
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                query = query.Where(s => s.Barcode.Contains(searchTerm) ||
-                                         s.TestRequest.RequestNumber.Contains(searchTerm) ||
-                                         (s.TestRequest.Patient != null && s.TestRequest.Patient.FullName.Contains(searchTerm)) ||
-                                         (s.SampleType != null && s.SampleType.Name.Contains(searchTerm)));
-            }
-
-            var samples = await query
-                .OrderByDescending(s => s.DateReceived)
-                .ToListAsync();
-
-            // Store filter values in ViewBag to persist in form
-            ViewBag.DateFrom = dateFrom?.ToString("yyyy-MM-dd");
-            ViewBag.DateTo = dateTo?.ToString("yyyy-MM-dd");
-            ViewBag.SelectedSampleTypeId = sampleTypeId;
-            ViewBag.SelectedStatus = status;
-            ViewBag.SearchTerm = searchTerm;
-
-            return View(samples);
-        }
-
+    
         [HttpGet]
         public async Task<IActionResult> EditSample(int id)
         {
-            var technicianId = _userManager.GetUserId(User);
+            var technicianId = User.Identity?.Name;
+            if (string.IsNullOrEmpty(technicianId))
+            {
+                TempData["Error"] = "Session expired. Please login again.";
+                return RedirectToAction("Login", "Account");
+            }
 
+            // Find the sample with related data
             var sample = await _dbcontext.Samples
                 .Include(s => s.SampleType)
                 .Include(s => s.TestRequest)
                     .ThenInclude(tr => tr.Patient)
-                .FirstOrDefaultAsync(s => s.SampleId == id && s.TechnicianId == technicianId);
+                .FirstOrDefaultAsync(s => s.SampleId == id);
 
             if (sample == null)
             {
-                TempData["Error"] = "Sample not found or you don't have permission to edit it.";
+                TempData["Error"] = "Sample not found.";
+                return RedirectToAction("Samples");
+            }
+
+            // Check if technician has permission to edit this sample
+            if (sample.TechnicianId != technicianId)
+            {
+                TempData["Error"] = "You don't have permission to edit this sample.";
                 return RedirectToAction("Samples");
             }
 
@@ -339,20 +382,16 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditSample(int id, SampleModel model)
         {
+            var technicianId = User.Identity?.Name;
+            if (string.IsNullOrEmpty(technicianId))
+            {
+                TempData["Error"] = "Session expired. Please login again.";
+                return RedirectToAction("Login", "Account");
+            }
+
             if (id != model.SampleId)
             {
                 TempData["Error"] = "Sample ID mismatch.";
-                return RedirectToAction("Samples");
-            }
-
-            var technicianId = _userManager.GetUserId(User);
-
-            var sample = await _dbcontext.Samples
-                .FirstOrDefaultAsync(s => s.SampleId == id && s.TechnicianId == technicianId);
-
-            if (sample == null)
-            {
-                TempData["Error"] = "Sample not found or you don't have permission to edit it.";
                 return RedirectToAction("Samples");
             }
 
@@ -374,12 +413,30 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             try
             {
+                // Find the existing sample
+                var sample = await _dbcontext.Samples
+                    .FirstOrDefaultAsync(s => s.SampleId == id && s.TechnicianId == technicianId);
+
+                if (sample == null)
+                {
+                    TempData["Error"] = "Sample not found or you don't have permission to edit it.";
+                    return RedirectToAction("Samples");
+                }
+
+                // Check if sample is deleted
+                if (sample.IsDeleted)
+                {
+                    TempData["Error"] = "Cannot edit a deleted sample. Please restore it first.";
+                    return RedirectToAction("Samples");
+                }
+
                 // Update sample properties
-                sample.Barcode = model.Barcode;
+                sample.Barcode = model.Barcode?.ToUpper().Trim();
                 sample.SampleTypeId = model.SampleTypeId;
                 sample.Status = model.Status;
                 sample.IsReceived = model.IsReceived;
 
+                // If status changed to Received and wasn't received before
                 if (model.IsReceived && !sample.IsReceived)
                 {
                     sample.DateReceived = DateTime.Now;
@@ -387,30 +444,54 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                 await _dbcontext.SaveChangesAsync();
 
-                TempData["Success"] = $"Sample '{sample.Barcode}' has been updated successfully!";
-                return RedirectToAction("Samples");
+                TempData["Success"] = $"✅ Sample '{sample.Barcode}' has been updated successfully!";
+                return RedirectToAction("SampleDetails", new { id = sample.SampleId });
+            }
+            catch (DbUpdateException ex)
+            {
+                TempData["Error"] = $"Database error: {ex.InnerException?.Message ?? ex.Message}";
+                return View(model);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"An error occurred: {ex.Message}";
+                TempData["Error"] = $"❌ An error occurred: {ex.Message}";
                 return View(model);
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> DeleteSample(int id)
         {
-            var technicianId = _userManager.GetUserId(User);
+            var technicianId = User.Identity?.Name;
+            if (string.IsNullOrEmpty(technicianId))
+            {
+                TempData["Error"] = "Session expired. Please login again.";
+                return RedirectToAction("Login", "Account");
+            }
 
+            // Find the sample with related data
             var sample = await _dbcontext.Samples
                 .Include(s => s.SampleType)
                 .Include(s => s.TestRequest)
                     .ThenInclude(tr => tr.Patient)
-                .FirstOrDefaultAsync(s => s.SampleId == id && s.TechnicianId == technicianId);
+                .FirstOrDefaultAsync(s => s.SampleId == id);
 
             if (sample == null)
             {
-                TempData["Error"] = "Sample not found or you don't have permission to delete it.";
+                TempData["Error"] = "Sample not found.";
+                return RedirectToAction("Samples");
+            }
+
+            // Check if technician has permission to delete this sample
+            if (sample.TechnicianId != technicianId)
+            {
+                TempData["Error"] = "You don't have permission to delete this sample.";
+                return RedirectToAction("Samples");
+            }
+
+            // Check if sample is already deleted
+            if (sample.IsDeleted)
+            {
+                TempData["Error"] = "This sample has already been deleted.";
                 return RedirectToAction("Samples");
             }
 
@@ -419,55 +500,113 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteSampleConfirmed(int id)
+        public async Task<IActionResult> DeleteSample(int id, SampleModel model)
         {
-            var technicianId = _userManager.GetUserId(User);
-
-            var sample = await _dbcontext.Samples
-                .FirstOrDefaultAsync(s => s.SampleId == id && s.TechnicianId == technicianId);
-
-            if (sample == null)
+            var technicianId = User.Identity?.Name;
+            if (string.IsNullOrEmpty(technicianId))
             {
-                TempData["Error"] = "Sample not found or you don't have permission to delete it.";
-                return RedirectToAction("Samples");
+                TempData["Error"] = "Session expired. Please login again.";
+                return RedirectToAction("Login", "Account");
             }
 
             try
             {
-                string barcode = sample.Barcode;
-                _dbcontext.Samples.Remove(sample);
+                // Find the sample
+                var sample = await _dbcontext.Samples
+                    .Include(s => s.TestRequest)
+                    .FirstOrDefaultAsync(s => s.SampleId == id);
+
+                if (sample == null)
+                {
+                    TempData["Error"] = "Sample not found.";
+                    return RedirectToAction("Samples");
+                }
+
+                // Check if technician has permission to delete this sample
+                if (sample.TechnicianId != technicianId)
+                {
+                    TempData["Error"] = "You don't have permission to delete this sample.";
+                    return RedirectToAction("Samples");
+                }
+
+                // Check if sample is already deleted
+                if (sample.IsDeleted)
+                {
+                    TempData["Error"] = "This sample has already been deleted.";
+                    return RedirectToAction("Samples");
+                }
+
+                // Soft delete - mark as deleted instead of removing from database
+                sample.IsDeleted = true;
+                sample.DeletedAt = DateTime.Now;
+                sample.DeletedBy = technicianId;
+                sample.Status = "Deleted";
+
                 await _dbcontext.SaveChangesAsync();
 
-                TempData["Success"] = $"Sample '{barcode}' has been deleted successfully!";
+                TempData["Success"] = $"✅ Sample '{sample.Barcode}' has been deleted successfully.";
+
                 return RedirectToAction("Samples");
             }
             catch (Exception ex)
             {
-                TempData["Error"] = $"An error occurred while deleting: {ex.Message}";
+                TempData["Error"] = $"❌ An error occurred: {ex.Message}";
                 return RedirectToAction("Samples");
             }
         }
+       [HttpGet]
+public async Task<IActionResult> DetailsSample(int id)
+{
+    var technicianId = User.Identity?.Name;
+    if (string.IsNullOrEmpty(technicianId))
+    {
+        TempData["Error"] = "Session expired. Please login again.";
+        return RedirectToAction("Login", "Account");
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> SampleDetails(int id)
-        {
-            var technicianId = _userManager.GetUserId(User);
+    // Find the sample with all related data
+    var sample = await _dbcontext.Samples
+        .Include(s => s.SampleType)
+        .Include(s => s.TestRequest)
+            .ThenInclude(tr => tr.Patient)
+        .Include(s => s.TestRequest)
+            .ThenInclude(tr => tr.TechnicianTests)
+            .ThenInclude(rt => rt.TestType)
+        .Include(s => s.Technician)
+        .FirstOrDefaultAsync(s => s.SampleId == id);
 
-            var sample = await _dbcontext.Samples
-                .Include(s => s.SampleType)
-                .Include(s => s.TestRequest)
-                    .ThenInclude(tr => tr.Patient)
-                .Include(s => s.Technician)
-                .FirstOrDefaultAsync(s => s.SampleId == id && s.TechnicianId == technicianId);
+    if (sample == null)
+    {
+        TempData["Error"] = "Sample not found.";
+        return RedirectToAction("Samples");
+    }
 
-            if (sample == null)
-            {
-                TempData["Error"] = "Sample not found.";
-                return RedirectToAction("Samples");
-            }
+    // Check if technician has permission to view this sample
+    if (sample.TechnicianId != technicianId)
+    {
+        TempData["Error"] = "You don't have permission to view this sample.";
+        return RedirectToAction("Samples");
+    }
 
-            return View(sample);
-        }
+    // Get all samples for the same test request
+    var relatedSamples = await _dbcontext.Samples
+        .Include(s => s.SampleType)
+        .Where(s => s.TestRequestId == sample.TestRequestId && s.SampleId != id)
+        .OrderBy(s => s.DateReceived)
+        .ToListAsync();
+
+    ViewBag.RelatedSamples = relatedSamples;
+    
+    // Get test results for this request
+    var testResults = await _dbcontext.TestRequestTests
+        .Include(rt => rt.TestType)
+        .Where(rt => rt.TestRequestId == sample.TestRequestId)
+        .ToListAsync();
+    
+    ViewBag.TestResults = testResults;
+
+    return View(sample);
+}
 
 
 

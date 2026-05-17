@@ -35,5 +35,12 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         public bool IsReceived { get; set; }
 
+        // Soft Delete Properties
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
+        public string? DeletedBy { get; set; }
+        public DateTime? RestoredAt { get; set; }
+        public string? RestoredBy { get; set; }
+
     }
 }
