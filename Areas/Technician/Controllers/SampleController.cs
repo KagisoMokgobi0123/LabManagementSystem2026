@@ -28,7 +28,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             var technicianId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(technicianId))
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("LoginUser", "Account");
             }
 
             // Build query
@@ -98,13 +98,13 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             var technicianId = User.Identity?.Name;
             if (string.IsNullOrEmpty(technicianId))
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("LoginUser", "Account");
             }
 
             var technician = await _userManager.FindByNameAsync(technicianId);
             if (technician == null)
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("LoginUser", "Account");
             }
 
             // Load sample types for dropdown
