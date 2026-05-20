@@ -1,0 +1,117 @@
+@using NMB_HLabSys.Areas.Doctor.Models
+@model List<TestRequestItem>
+@{
+    ViewData["Title"] = "Abnormal Result Alerts";
+    Layout = "_DoctorLayout";
+}
+
+<div class="panel-header bg-danger-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Abnormal Result Alerts</h2>
+                <h5 class="text-white op-7 mb-2">Results flagged outside normal ranges</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle mr-2"></i> @ViewBag.Error
+        </div>
+    }
+
+    <!-- Filter Form -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">Filter Alerts</div>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <div class="form-group mr-3">
+                    <label class="mr-2">From Date:</label>
+                    <input type="date" name="fromDate" class="form-control"
+                           value="@(ViewBag.FromDate != null ? ((DateTime)ViewBag.FromDate).ToString("yyyy-MM-dd") : DateTime.Now.AddDays(-5).ToString("yyyy-MM-dd"))" />
+                </div>
+                <button type="submit" class="btn btn-primary btn-round">
+                    <i class="fa fa-filter mr-1"></i> Filter
+                </button>
+                <a asp-action="Alerts" class="btn btn-default btn-round ml-2">Reset (Last 5 Days)</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alerts Table -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-head-row">
+                <div class="card-title">
+                    <i class="fa fa-bell text-danger mr-2"></i>
+                    Alerts from @(ViewBag.FromDate != null ? ((DateTime)ViewBag.FromDate).ToString("dd MMM yyyy") : DateTime.Now.AddDays(-5).ToString("dd MMM yyyy"))
+                </div>
+                <div class="card-tools">
+                    <span class="badge badge-danger">@Model.Count alert(s)</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fa fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5>No alerts for the selected period.</h5>
+                    <p class="text-muted">All results are within normal ranges.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Request #</th>
+                                <th>Patient</th>
+                                <th>Test Type</th>
+                                <th>Result</th>
+                                <th>Normal Range</th>
+                                <th>Request Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr class="table-danger">
+                                    <td><strong>@item.TestRequest?.RequestNumber</strong></td>
+                                    <td>@(item.TestRequest?.Patient != null ? item.TestRequest.Patient.FullName : "—")</td>
+                                    <td>@item.TestType?.Name</td>
+                                    <td>
+                                        <span class="badge badge-danger">
+                                            @item.ResultValue @item.TestType?.MeasurementUnit
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @item.TestType?.NormalMin – @item.TestType?.NormalMax
+                                        @item.TestType?.MeasurementUnit
+                                    </td>
+                                    <td>@item.TestRequest?.RequestDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        <a asp-area="Doctor" asp-controller="TestRequestControllerDoctor"
+                                           asp-action="Details" asp-route-id="@item.TestRequest?.TestRequestId"
+                                           class="btn btn-sm btn-primary btn-round">
+                                            <i class="fa fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

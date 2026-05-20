@@ -1,0 +1,107 @@
+@using NMB_HLabSys.Areas.Doctor.Models
+@model List<TestRequestsModel>
+@{
+    ViewData["Title"] = "Report Preview";
+    Layout = "_DoctorLayout";
+}
+
+<div class="panel-header bg-info-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Report Preview</h2>
+                <h5 class="text-white op-7 mb-2">
+                    @ViewBag.DateFrom?.ToString("dd MMM yyyy") — @ViewBag.DateTo?.ToString("dd MMM yyyy")
+                </h5>
+            </div>
+            <div class="ml-md-auto py-2 py-md-0">
+                <button onclick="window.print()" class="btn btn-white btn-border btn-round mr-2">
+                    <i class="fa fa-print mr-1"></i> Print / Save as PDF
+                </button>
+                <a asp-action="Index" class="btn btn-secondary btn-round">
+                    <i class="fa fa-arrow-left mr-1"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="card" id="reportContent">
+        <div class="card-header">
+            <div class="card-head-row">
+                <div class="card-title">
+                    <i class="fa fa-file-medical mr-2"></i>
+                    All Test Requests —
+                    @ViewBag.DateFrom?.ToString("dd MMM yyyy") to @ViewBag.DateTo?.ToString("dd MMM yyyy")
+                </div>
+                <div class="card-tools">
+                    <span class="badge badge-info">@Model.Count request(s)</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5>No requests found for the selected period.</h5>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Request #</th>
+                                <th>Patient</th>
+                                <th>Request Date</th>
+                                <th>Urgency</th>
+                                <th>Test Types</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var req in Model)
+                            {
+                                <tr>
+                                    <td><strong>@req.RequestNumber</strong></td>
+                                    <td>@(req.Patient != null ? req.Patient.FullName : "—")</td>
+                                    <td>@req.RequestDate.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @{
+                                            var urgLabel = req.Urgency == Urgency.Stat   ? "STAT" :
+                                                           req.Urgency == Urgency.Urgent ? "Urgent" : "Routine";
+                                        }
+                                        @urgLabel
+                                    </td>
+                                    <td>
+                                        @if (req.TestRequestItems != null)
+                                        {
+                                            @string.Join(", ", req.TestRequestItems.Select(i => i.TestType?.Name ?? ""))
+                                        }
+                                    </td>
+                                    <td>@req.Status</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <strong>Total Requests:</strong> @Model.Count |
+                    <strong>Completed:</strong> @Model.Count(r => r.Status == "Completed") |
+                    <strong>Cancelled:</strong> @Model.Count(r => r.Status == "Cancelled")
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .panel-header, .sidebar, .main-header, .btn, .card-tools { display: none !important; }
+        .main-panel { margin: 0 !important; }
+        #reportContent { box-shadow: none !important; }
+    }
+</style>

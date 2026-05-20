@@ -5,8 +5,8 @@ namespace NMB_HLabSys.Areas.Manager.Models
     public class TestCategoryModel
     {
         [Key]
-        public int TestCategoryId { get; set; }
+        public int TestCategoryId {  get; set; }
 
-        public string Description { get; set; } = string.Empty;
+        public string Description { get; set; }
     }
 }

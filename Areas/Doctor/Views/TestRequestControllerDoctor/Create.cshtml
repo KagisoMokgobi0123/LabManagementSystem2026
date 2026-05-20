@@ -1,0 +1,257 @@
+@using NMB_HLabSys.Areas.Doctor.Models
+@model TestRequestsModel
+@{
+    ViewData["Title"] = "Create Test Request";
+    Layout = "_DoctorLayout";
+    var patients = ViewBag.Patients as List<NMB_HLabSys.Areas.Administrator.Models.Patient> ?? new();
+    var testTypes = ViewBag.TestTypes as List<NMB_HLabSys.Areas.Manager.Models.TestTypeModel> ?? new();
+    var sampleTypes = ViewBag.SampleTypes as List<NMB_HLabSys.Areas.Doctor.Models.SampleTypeModel> ?? new();
+    var preselectedPatient = ViewBag.Patient as NMB_HLabSys.Areas.Administrator.Models.Patient;
+}
+
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Create Test Request</h2>
+                <h5 class="text-white op-7 mb-2">Submit a new haematology test request</h5>
+            </div>
+            <div class="ml-md-auto py-2 py-md-0">
+                <a asp-action="Dashboard" class="btn btn-white btn-border btn-round">
+                    <i class="fa fa-arrow-left mr-1"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <form asp-action="Create" method="post" id="testRequestForm">
+        @Html.AntiForgeryToken()
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fa fa-exclamation-circle mr-2"></i> @TempData["Error"]
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:none;"></div>
+
+        <!-- Request Details -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fa fa-file-medical mr-2"></i> Request Details</div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Patient <span class="text-danger">*</span></label>
+                            @if (preselectedPatient != null)
+                            {
+                                <input type="hidden" name="PatientID" value="@preselectedPatient.PatientID" />
+                                <input class="form-control" value="@preselectedPatient.Name @preselectedPatient.Surname (@preselectedPatient.IDNumber)" readonly />
+                            }
+                            else
+                            {
+                                <select name="PatientID" class="form-control" required>
+                                    <option value="">-- Select Patient --</option>
+                                    @foreach (var p in patients)
+                                    {
+                                        <option value="@p.PatientID">@p.Name @p.Surname (@p.IDNumber)</option>
+                                    }
+                                </select>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Urgency <span class="text-danger">*</span></label>
+                            <select name="Urgency" class="form-control" required>
+                                <option value="Routine">Routine</option>
+                                <option value="Urgent">Urgent</option>
+                                <option value="STAT">STAT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="font-weight-bold">Clinical Notes</label>
+                            <textarea name="ClinicalNotes" class="form-control" rows="3"
+                                      placeholder="Enter relevant clinical notes for the laboratory..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Types -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fa fa-vials mr-2"></i> Select Test Types
+                    <span class="text-danger ml-1">* (at least one required)</span>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (!testTypes.Any())
+                {
+                    <p class="text-muted">No test types available. Please contact the laboratory manager.</p>
+                }
+                else
+                {
+                    <div class="row" id="testTypeSelection">
+                        @foreach (var tt in testTypes)
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="card border test-type-card" style="cursor:pointer;"
+                                     onclick="toggleTestType(this, @tt.TestTypeId)">
+                                    <div class="card-body p-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input test-type-check" type="checkbox"
+                                                   name="testTypeIds" value="@tt.TestTypeId"
+                                                   id="tt_@tt.TestTypeId" />
+                                            <label class="form-check-label font-weight-bold" for="tt_@tt.TestTypeId">
+                                                @tt.Name
+                                            </label>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            Sample: @(tt.SampleType?.Name ?? "—") |
+                                            Range: @tt.NormalMin–@tt.NormalMax @tt.MeasurementUnit
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div id="sampleHint" class="alert alert-info mt-2" style="display:none;">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        <strong>Samples required:</strong> <span id="sampleHintText"></span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Samples / Barcodes -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fa fa-barcode mr-2"></i> Sample Barcodes
+                    <span class="text-danger ml-1">* (at least one required)</span>
+                </div>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-success btn-round btn-sm" onclick="addBarcode()">
+                        <i class="fa fa-plus mr-1"></i> Add Sample
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="barcodeContainer">
+                    <div class="barcode-row row mb-2">
+                        <div class="col-md-5">
+                            <input type="text" name="barcodes" class="form-control"
+                                   placeholder="Enter barcode (e.g. SMP-2024-000001)" required />
+                        </div>
+                        <div class="col-md-5">
+                            <select name="sampleTypeIds" class="form-control">
+                                <option value="">-- Sample Type --</option>
+                                @foreach (var st in sampleTypes)
+                                {
+                                    <option value="@st.SampleTypeId">@st.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger btn-round btn-sm"
+                                    onclick="removeBarcode(this)" style="display:none;">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted small mt-2">
+                    <i class="fa fa-info-circle mr-1"></i>
+                    Doctor collects samples, records barcodes, then sends samples to the laboratory.
+                </p>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-4">
+            <a asp-action="Dashboard" class="btn btn-default btn-round">
+                <i class="fa fa-times mr-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-round">
+                <i class="fa fa-paper-plane mr-1"></i> Submit Test Request
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        var sampleHints = {
+            @foreach (var tt in testTypes)
+            {
+                    @:@tt.TestTypeId: "@(tt.SampleType?.Name ?? "")",
+            }
+        };
+
+        function toggleTestType(card, id) {
+            var cb = document.getElementById('tt_' + id);
+            cb.checked = !cb.checked;
+            card.classList.toggle('border-primary', cb.checked);
+            card.classList.toggle('bg-light', cb.checked);
+            updateSampleHint();
+        }
+
+        function updateSampleHint() {
+            var checked = document.querySelectorAll('.test-type-check:checked');
+            if (checked.length === 0) {
+                document.getElementById('sampleHint').style.display = 'none';
+                return;
+            }
+            var samples = new Set();
+            checked.forEach(function(cb) { samples.add(sampleHints[cb.value]); });
+            document.getElementById('sampleHintText').textContent = Array.from(samples).filter(Boolean).join(', ');
+            document.getElementById('sampleHint').style.display = 'block';
+        }
+
+        function addBarcode() {
+            var container = document.getElementById('barcodeContainer');
+            var html = `<div class="barcode-row row mb-2">
+                <div class="col-md-5">
+                    <input type="text" name="barcodes" class="form-control" placeholder="Enter barcode" required />
+                </div>
+                <div class="col-md-5">
+                    <select name="sampleTypeIds" class="form-control">
+                        <option value="">-- Sample Type --</option>
+                        @foreach (var st in sampleTypes)
+                        {
+                                @:<option value="@st.SampleTypeId">@st.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-round btn-sm" onclick="removeBarcode(this)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            if (container.querySelectorAll('.barcode-row').length > 1)
+                container.querySelector('.barcode-row .btn-danger').style.display = 'inline-block';
+        }
+
+        function removeBarcode(btn) {
+            btn.closest('.barcode-row').remove();
+            var rows = document.querySelectorAll('.barcode-row');
+            if (rows.length === 1) rows[0].querySelector('.btn-danger').style.display = 'none';
+        }
+
+        document.querySelectorAll('.test-type-check').forEach(function(cb) {
+            cb.addEventListener('change', updateSampleHint);
+        });
+    </script>
+}

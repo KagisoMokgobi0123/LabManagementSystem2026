@@ -23,6 +23,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public int SampleTypeId { get; set; }// e.g., Blood, Plasma
         public  SampleTypeModel SampleType {  get; set; } = null!;
 
+        public DateTime CollectedAt { get; set; }
         public string? TechnicianId { get; set; } = string.Empty;// e.g., Blood, Plasma
         public RegisterUser Technician { get; set; } = null!;
 

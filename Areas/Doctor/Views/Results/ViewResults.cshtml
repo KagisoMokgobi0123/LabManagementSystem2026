@@ -1,0 +1,119 @@
+@using NMB_HLabSys.Areas.Doctor.Models
+@model List<TestRequestsModel>
+@{
+    ViewData["Title"] = "Patient Test Results";
+    Layout = "_DoctorLayout";
+}
+
+<div class="panel-header bg-success-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Patient Test Results</h2>
+                <h5 class="text-white op-7 mb-2">Completed test results for your patients</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show">
+            <i class="fa fa-info-circle mr-2"></i> @TempData["Message"]
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="fa fa-exclamation-circle mr-2"></i> @TempData["Error"]
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    }
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-head-row">
+                <div class="card-title">Completed Test Requests</div>
+                <div class="card-tools">
+                    <span class="badge badge-success">@Model.Count request(s)</span>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fa fa-chart-bar fa-3x text-muted mb-3"></i>
+                    <h5>No completed results found.</h5>
+                    <p class="text-muted">Results will appear here once tests are completed and verified.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Request #</th>
+                                <th>Patient</th>
+                                <th>Date</th>
+                                <th>Tests</th>
+                                <th>Abnormal</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var req in Model)
+                            {
+                                var abnormalCount = req.TestRequestItems?.Count(i =>
+                                    i.ResultValue.HasValue && i.TestType != null &&
+                                    (i.ResultValue < i.TestType.NormalMin || i.ResultValue > i.TestType.NormalMax)) ?? 0;
+
+                                <tr>
+                                    <td><strong>@req.RequestNumber</strong></td>
+                                    <td>@(req.Patient != null ? req.Patient.FullName : "—")</td>
+                                    <td>@req.RequestDate.ToString("dd MMM yyyy")</td>
+                                    <td><span class="badge badge-secondary">@(req.TestRequestItems?.Count ?? 0)</span></td>
+                                    <td>
+                                        @if (abnormalCount > 0)
+                                        {
+                                            <span class="badge badge-danger">@abnormalCount abnormal</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-success">All normal</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var stClass = req.Status == "ReleasedByDoctor" ? "badge-primary" : "badge-success";
+                                        }
+                                        <span class="badge @stClass">@req.Status</span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="ReleaseResults" asp-route-requestId="@req.TestRequestId"
+                                           class="btn btn-sm btn-info btn-round mr-1" title="View Results">
+                                            <i class="fa fa-eye"></i> View
+                                        </a>
+                                        <a asp-action="ViewAbnormal" asp-route-fromDate="@req.RequestDate.ToString("yyyy-MM-dd")"
+                                           class="btn btn-sm btn-warning btn-round mr-1" title="Abnormal Results">
+                                            <i class="fa fa-exclamation-triangle"></i>
+                                        </a>
+                                        <a asp-action="DownloadPDF" asp-route-requestId="@req.TestRequestId"
+                                           class="btn btn-sm btn-success btn-round" title="Download PDF">
+                                            <i class="fa fa-file-pdf"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

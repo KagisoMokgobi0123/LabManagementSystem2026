@@ -1,0 +1,187 @@
+@using NMB_HLabSys.ViewModels.Doctor
+@model CreatePatientViewModel
+@{
+    ViewData["Title"] = "Register New Patient";
+    Layout = "_DoctorLayout";
+}
+
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Register New Patient</h2>
+                <h5 class="text-white op-7 mb-2">Create a patient account and capture medical history</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="fa fa-exclamation-circle mr-2"></i> @TempData["Error"]
+                <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+            </div>
+        }
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="display:none;"></div>
+
+        <!-- Personal Details -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fa fa-user mr-2"></i> Personal Details</div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Name" class="font-weight-bold">First Name <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter first name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Surname" class="font-weight-bold">Surname <span class="text-danger">*</span></label>
+                            <input asp-for="Surname" class="form-control" placeholder="Enter surname" />
+                            <span asp-validation-for="Surname" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="IDNumber" class="font-weight-bold">SA ID Number <span class="text-danger">*</span></label>
+                            <input asp-for="IDNumber" class="form-control" placeholder="13-digit SA ID number" maxlength="13" />
+                            <span asp-validation-for="IDNumber" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="DateOfBirth" class="font-weight-bold">Date of Birth <span class="text-danger">*</span></label>
+                            <input asp-for="DateOfBirth" type="date" class="form-control" />
+                            <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="CellPhone" class="font-weight-bold">Cellphone Number</label>
+                            <input asp-for="CellPhone" class="form-control" placeholder="e.g. 0821234567" />
+                            <span asp-validation-for="CellPhone" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Email" class="font-weight-bold">Email Address <span class="text-danger">*</span></label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="patient@example.com" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label asp-for="HomeAddress" class="font-weight-bold">Home Address</label>
+                            <textarea asp-for="HomeAddress" class="form-control" rows="2" placeholder="Full home address"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted small">
+                    <i class="fa fa-info-circle mr-1"></i>
+                    A temporary password will be auto-generated and emailed to the patient. They must change it on first login.
+                </p>
+            </div>
+        </div>
+
+        <!-- Medical History -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title"><i class="fa fa-heartbeat mr-2"></i> Medical History (Optional)</div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Medical Conditions -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-warning">Medical Conditions</label>
+                            <div class="border rounded p-2" style="max-height:200px;overflow-y:auto;">
+                                @if (Model.AvailableConditions != null)
+                                {
+                                    foreach (var c in Model.AvailableConditions)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="SelectedConditionIds" value="@c.Value"
+                                                   id="cond_@c.Value"
+                                            @(Model.SelectedConditionIds.Contains(int.Parse(c.Value)) ? "checked" : "") />
+                                            <label class="form-check-label" for="cond_@c.Value">@c.Text</label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allergies -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-danger">Allergies</label>
+                            <div class="border rounded p-2" style="max-height:200px;overflow-y:auto;">
+                                @if (Model.AvailableAllergies != null)
+                                {
+                                    foreach (var a in Model.AvailableAllergies)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="SelectedAllergyIds" value="@a.Value"
+                                                   id="allergy_@a.Value"
+                                            @(Model.SelectedAllergyIds.Contains(int.Parse(a.Value)) ? "checked" : "") />
+                                            <label class="form-check-label" for="allergy_@a.Value">@a.Text</label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medications -->
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="font-weight-bold text-info">Current Medications</label>
+                            <div class="border rounded p-2" style="max-height:200px;overflow-y:auto;">
+                                @if (Model.AvailableMedications != null)
+                                {
+                                    foreach (var m in Model.AvailableMedications)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox"
+                                                   name="SelectedMedicationIds" value="@m.Value"
+                                                   id="med_@m.Value"
+                                            @(Model.SelectedMedicationIds.Contains(int.Parse(m.Value)) ? "checked" : "") />
+                                            <label class="form-check-label" for="med_@m.Value">@m.Text</label>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-4">
+            <a asp-action="Index" class="btn btn-default btn-round">
+                <i class="fa fa-arrow-left mr-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary btn-round">
+                <i class="fa fa-save mr-1"></i> Register Patient
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

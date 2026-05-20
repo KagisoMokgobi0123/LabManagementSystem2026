@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Administrator.Models;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Areas.Technician.Models.ViewModel;
 using NMB_HLabSys.Models.Account;
@@ -16,8 +18,36 @@ namespace NMB_HLabSys.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
-           
+
         }
+        public DbSet<LoginUser> LoggedInUsers { get; set; }
+        public DbSet<RegisterUser> RegisterdUsers { get; set; }
+        public DbSet<MedicalConditionCategory> MedicalConditionCategories { get; set; }
+        public DbSet<ConsentRequestItem> ConsentRequestItems { get; set; }
+        public DbSet<Doctor> Doctors { get; set; }
+        public DbSet<DoctorAlert> DoctorAlerts { get; set; }
+        public DbSet<AllergyCategory> AllergyCategories { get; set; }
+
+        public DbSet<DoctorReport> DoctorReports { get; set; }
+        public DbSet<PatientConsent> PatientConsents { get; set; }
+        public DbSet<ResultRelease> ResultReleases { get; set; }
+        public DbSet<SampleTypeModel> SampleTypes { get; set; }
+        public DbSet<ReviewHistory> Reviews { get; set; }
+        public DbSet<SampleModel> Samples { get; set; }
+        public DbSet<TestRequestItem> TestRequestItems { get; set; }
+        public DbSet<TestTypeModel> TestTypes { get; set; }
+        public DbSet<TestRequestsModel> TestRequests { get; set; }
+        public DbSet<ResultModel> TestResults { get; set; }
+        public DbSet<MedicalCondition> MedicalConditions { get; set; }
+        public DbSet<Patient> Patients { get; set; }
+        public DbSet<PatientAllergy> PatientAllergies { get; set; }
+        public DbSet<PatientCondition> PatientConditions { get; set; }
+        public DbSet<PatientMedication> PatientMedications { get; set; }
+        public DbSet<AllergyModel> Allergies { get; set; }
+        public DbSet<MedicationModel> Medications { get; set; }
+        public DbSet<PatientDoctorConsent> PatientDoctorConsents { get; set; }
+        public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Always call the base method first when using Identity
@@ -55,28 +85,141 @@ namespace NMB_HLabSys.Data
                 // Other configurations...
             });
 
+            modelBuilder.Ignore<Microsoft.AspNetCore.Identity.IdentityPasskeyData>();
+
+            // Table mappings
+            modelBuilder.Entity<Doctor>()
+                .ToTable("Doctortbl");
+
+            // Decimal precision
+            modelBuilder.Entity<TestRequestItem>()
+                .Property(t => t.ResultValue)
+                .HasColumnType("decimal(18,2)");
+
+            // ── TestRequestsModel: Doctor is Identity user (string FK) ──
+            modelBuilder.Entity<TestRequestsModel>()
+                .HasOne(t => t.Doctor)
+                .WithMany()
+                .HasForeignKey(t => t.DoctorId)
+                .HasPrincipalKey(u => u.Id)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // ── TestRequestsModel: ResultRelease ──
+            modelBuilder.Entity<TestRequestsModel>()
+                .HasOne(t => t.ResultRelease)
+                .WithMany()
+                .HasForeignKey(t => t.ResultReleaseId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // ── DoctorAlert: all relationships explicitly configured ──
+            modelBuilder.Entity<DoctorAlert>(entity =>
+            {
+                // DoctorId (int) -> Doctortbl
+                entity.HasOne(a => a.Doctor)
+                    .WithMany()
+                    .HasForeignKey(a => a.DoctorId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // RequestItemId -> TestRequestItem
+                entity.HasOne(a => a.TestRequestItem)
+                    .WithMany()
+                    .HasForeignKey(a => a.RequestItemId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                // TestRequestID -> TestRequestsModel
+                entity.HasOne(a => a.TestRequests)
+                    .WithMany()
+                    .HasForeignKey(a => a.TestRequestId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            // ======================================================
+            // FIX MULTIPLE CASCADE PATHS
+            // ======================================================
+
+            modelBuilder.Entity<ConsentRequestItem>(entity =>
+            {
+                entity.HasKey(e => e.ConsentRequestItemId);
+
+                entity.HasOne(e => e.PatientConsent)
+                    .WithMany(p => p.ConsentRequestItems)
+                    .HasForeignKey(e => e.PatientConsentID)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.TestRequest)
+                    .WithMany(t => t.ConsentRequestItems)
+                    .HasForeignKey(e => e.TestRequestID)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<PatientDoctorConsent>()
+                .HasOne(p => p.Doctor)
+                .WithMany()
+                .HasForeignKey(p => p.DoctorUserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TestRequestItem>()
+                .HasOne(t => t.TestRequest)
+                .WithMany(r => r.TestRequestItems)
+                .HasForeignKey(t => t.TestRequestID)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SampleModel>()
+                .HasOne(s => s.TestRequest)
+                .WithMany()
+                .HasForeignKey(s => s.TestRequestId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ResultRelease>()
+                .HasOne(r => r.TestRequest)
+                .WithMany()
+                .HasForeignKey(r => r.TestRequestId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+
+            //modelBuilder.Entity<ResultModel>()
+            //    .HasOne(tr => tr.TestRequests)
+            //    .WithMany()
+            //    .HasForeignKey(tr => tr.RequestTestId)
+            //    .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PatientConsent>()
+    .HasOne(p => p.Doctor)
+    .WithMany(d => d.PatientConsents)
+    .HasForeignKey(p => p.DoctorId)
+    .OnDelete(DeleteBehavior.NoAction);
+
+            //// Seed data
+            //modelBuilder.Entity<SampleTypeModel>().HasData(
+            //    new SampleTypeModel { SampleTypeId = 1, Name = "Blood" },
+            //    new SampleTypeModel { SampleTypeId = 2, Name = "Urine" },
+            //    new SampleTypeModel { SampleTypeId = 3, Name = "Swab" },
+            //    new SampleTypeModel { SampleTypeId = 4, Name = "Stool" }
+            //);
+
+
             modelBuilder.Entity<ConsumableModel>().HasData(
-     new ConsumableModel { ConsumableId = 1, Name = "Test Tubes (EDTA)", QuantityOnHand = 500, ReorderLevel = 100 },
-     new ConsumableModel { ConsumableId = 2, Name = "Test Tubes (Sodium Citrate)", QuantityOnHand = 300, ReorderLevel = 75 },      // For PT/INR/aPTT
-     new ConsumableModel { ConsumableId = 3, Name = "Syringes 5ml", QuantityOnHand = 300, ReorderLevel = 50 },
-     new ConsumableModel { ConsumableId = 4, Name = "Blood Smear Slides", QuantityOnHand = 1000, ReorderLevel = 200 },              // For Blood Film
-     new ConsumableModel { ConsumableId = 5, Name = "ESR Racks and Tubes", QuantityOnHand = 50, ReorderLevel = 15 },               // For ESR
-     new ConsumableModel { ConsumableId = 6, Name = "Coagulation Test Cartridges", QuantityOnHand = 200, ReorderLevel = 50 },      // For PT/aPTT/INR/Fibrinogen
-     new ConsumableModel { ConsumableId = 7, Name = "D-Dimer Test Kits", QuantityOnHand = 100, ReorderLevel = 30 },                 // For D-Dimer
-     new ConsumableModel { ConsumableId = 8, Name = "Chemistry Analyzer Reagents", QuantityOnHand = 50, ReorderLevel = 15 },       // For Glucose/HbA1c/Lipid/LFT/RFT/CRP
-     new ConsumableModel { ConsumableId = 9, Name = "Urine Dipsticks", QuantityOnHand = 500, ReorderLevel = 100 },                  // For Urinalysis
-     new ConsumableModel { ConsumableId = 10, Name = "Microscope Slides (Urine)", QuantityOnHand = 500, ReorderLevel = 100 },      // For Urine Microscopy
-     new ConsumableModel { ConsumableId = 11, Name = "Culture Media Plates", QuantityOnHand = 300, ReorderLevel = 80 },             // For Culture tests
-     new ConsumableModel { ConsumableId = 12, Name = "Blood Culture Bottles", QuantityOnHand = 150, ReorderLevel = 40 },           // For Blood Culture
-     new ConsumableModel { ConsumableId = 13, Name = "Alcohol Swabs", QuantityOnHand = 1000, ReorderLevel = 200 },
-     new ConsumableModel { ConsumableId = 14, Name = "Gloves (Medium)", QuantityOnHand = 800, ReorderLevel = 150 },
-     new ConsumableModel { ConsumableId = 15, Name = "Gloves (Large)", QuantityOnHand = 600, ReorderLevel = 120 },
-     new ConsumableModel { ConsumableId = 16, Name = "Face Masks", QuantityOnHand = 500, ReorderLevel = 100 },
-     new ConsumableModel { ConsumableId = 17, Name = "Lab Coats (Disposable)", QuantityOnHand = 100, ReorderLevel = 25 },
-     new ConsumableModel { ConsumableId = 18, Name = "Centrifuge Tubes", QuantityOnHand = 1000, ReorderLevel = 200 },
-     new ConsumableModel { ConsumableId = 19, Name = "Pipette Tips", QuantityOnHand = 2000, ReorderLevel = 400 },
-     new ConsumableModel { ConsumableId = 20, Name = "Quality Control Materials", QuantityOnHand = 50, ReorderLevel = 15 }
- );
+         new ConsumableModel { ConsumableId = 1, Name = "Test Tubes (EDTA)", QuantityOnHand = 500, ReorderLevel = 100 },
+         new ConsumableModel { ConsumableId = 2, Name = "Test Tubes (Sodium Citrate)", QuantityOnHand = 300, ReorderLevel = 75 },      // For PT/INR/aPTT
+         new ConsumableModel { ConsumableId = 3, Name = "Syringes 5ml", QuantityOnHand = 300, ReorderLevel = 50 },
+         new ConsumableModel { ConsumableId = 4, Name = "Blood Smear Slides", QuantityOnHand = 1000, ReorderLevel = 200 },              // For Blood Film
+         new ConsumableModel { ConsumableId = 5, Name = "ESR Racks and Tubes", QuantityOnHand = 50, ReorderLevel = 15 },               // For ESR
+         new ConsumableModel { ConsumableId = 6, Name = "Coagulation Test Cartridges", QuantityOnHand = 200, ReorderLevel = 50 },      // For PT/aPTT/INR/Fibrinogen
+         new ConsumableModel { ConsumableId = 7, Name = "D-Dimer Test Kits", QuantityOnHand = 100, ReorderLevel = 30 },                 // For D-Dimer
+         new ConsumableModel { ConsumableId = 8, Name = "Chemistry Analyzer Reagents", QuantityOnHand = 50, ReorderLevel = 15 },       // For Glucose/HbA1c/Lipid/LFT/RFT/CRP
+         new ConsumableModel { ConsumableId = 9, Name = "Urine Dipsticks", QuantityOnHand = 500, ReorderLevel = 100 },                  // For Urinalysis
+         new ConsumableModel { ConsumableId = 10, Name = "Microscope Slides (Urine)", QuantityOnHand = 500, ReorderLevel = 100 },      // For Urine Microscopy
+         new ConsumableModel { ConsumableId = 11, Name = "Culture Media Plates", QuantityOnHand = 300, ReorderLevel = 80 },             // For Culture tests
+         new ConsumableModel { ConsumableId = 12, Name = "Blood Culture Bottles", QuantityOnHand = 150, ReorderLevel = 40 },           // For Blood Culture
+         new ConsumableModel { ConsumableId = 13, Name = "Alcohol Swabs", QuantityOnHand = 1000, ReorderLevel = 200 },
+         new ConsumableModel { ConsumableId = 14, Name = "Gloves (Medium)", QuantityOnHand = 800, ReorderLevel = 150 },
+         new ConsumableModel { ConsumableId = 15, Name = "Gloves (Large)", QuantityOnHand = 600, ReorderLevel = 120 },
+         new ConsumableModel { ConsumableId = 16, Name = "Face Masks", QuantityOnHand = 500, ReorderLevel = 100 },
+         new ConsumableModel { ConsumableId = 17, Name = "Lab Coats (Disposable)", QuantityOnHand = 100, ReorderLevel = 25 },
+         new ConsumableModel { ConsumableId = 18, Name = "Centrifuge Tubes", QuantityOnHand = 1000, ReorderLevel = 200 },
+         new ConsumableModel { ConsumableId = 19, Name = "Pipette Tips", QuantityOnHand = 2000, ReorderLevel = 400 },
+         new ConsumableModel { ConsumableId = 20, Name = "Quality Control Materials", QuantityOnHand = 50, ReorderLevel = 15 }
+     );
             modelBuilder.Entity<MeasurementUnitModel>().HasData(
                 new MeasurementUnitModel { MeasurementUnitId = 1, Unit = "x10³/μL", Description = "Thousand cells per microliter" },
                 new MeasurementUnitModel { MeasurementUnitId = 2, Unit = "%", Description = "Percentage" },
@@ -191,7 +334,7 @@ namespace NMB_HLabSys.Data
         VerificationDateTime = DateTime.Now.AddMinutes(-30)
     }
 );
-          
+
             modelBuilder.Entity<TestCategoryModel>().HasData(
         new TestCategoryModel
         {
@@ -380,7 +523,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 4,
-      
+
     },
     new TestTypeModel
     {
@@ -393,7 +536,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 4,
-        
+
     },
     new TestTypeModel
     {
@@ -406,7 +549,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 3,
-       
+
     },
     new TestTypeModel
     {
@@ -433,7 +576,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 1,
-    
+
     },
     new TestTypeModel
     {
@@ -446,7 +589,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 2,
-       
+
     },
     new TestTypeModel
     {
@@ -459,7 +602,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 10000m,
         TurnAroundTimeHours = 48,
-       
+
     },
 
     // ==================== MICROBIOLOGY (CategoryId = 5) ====================
@@ -474,7 +617,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 72,
-       
+
     },
     new TestTypeModel
     {
@@ -487,7 +630,7 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 48,
-       
+
     },
     new TestTypeModel
     {
@@ -500,21 +643,21 @@ namespace NMB_HLabSys.Data
         NormalMin = 0m,
         NormalMax = 0m,
         TurnAroundTimeHours = 48,
-        
+
     }
 );
 
             modelBuilder.Entity<SampleTypeModel>().HasData(
     new SampleTypeModel { SampleTypeId = 1, Name = "Blood", IsActive = true },
     new SampleTypeModel { SampleTypeId = 2, Name = "Urine", IsActive = true },
-    new SampleTypeModel { SampleTypeId = 3, Name = "Saliva" , IsActive = true },
-    new SampleTypeModel { SampleTypeId = 4, Name = "Plasma" , IsActive = true },
-    new SampleTypeModel { SampleTypeId = 5, Name = "Serum" , IsActive = true },
-    new SampleTypeModel { SampleTypeId = 6, Name = "Bone Marrow" , IsActive = true },
-    new SampleTypeModel { SampleTypeId = 7, Name = "CSF" , IsActive = true },
-    new SampleTypeModel { SampleTypeId = 8, Name = "Stool" , IsActive = true },
-    new SampleTypeModel { SampleTypeId = 9, Name = "Sputum" , IsActive = true },      // Added for TestTypeId 21
-    new SampleTypeModel { SampleTypeId = 10, Name = "Swab" , IsActive = true }        // Added for TestTypeId 22
+    new SampleTypeModel { SampleTypeId = 3, Name = "Saliva", IsActive = true },
+    new SampleTypeModel { SampleTypeId = 4, Name = "Plasma", IsActive = true },
+    new SampleTypeModel { SampleTypeId = 5, Name = "Serum", IsActive = true },
+    new SampleTypeModel { SampleTypeId = 6, Name = "Bone Marrow", IsActive = true },
+    new SampleTypeModel { SampleTypeId = 7, Name = "CSF", IsActive = true },
+    new SampleTypeModel { SampleTypeId = 8, Name = "Stool", IsActive = true },
+    new SampleTypeModel { SampleTypeId = 9, Name = "Sputum", IsActive = true },      // Added for TestTypeId 21
+    new SampleTypeModel { SampleTypeId = 10, Name = "Swab", IsActive = true }        // Added for TestTypeId 22
 );
 
             // Seed Samples
@@ -585,7 +728,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 3,
                     IsReceived = false
                 },
-             
+
                 new SampleModel
                 {
                     SampleId = 9,
@@ -597,7 +740,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 3,
                     IsReceived = false
                 }
-             
+
             );
             modelBuilder.Entity<TestTypeConsumableModel>().HasData(
     // Hematology Tests
@@ -645,6 +788,8 @@ namespace NMB_HLabSys.Data
                Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "0099GGRM",
+
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine blood test - Annual checkup",
                RequestNumber = "NMB-REQ-000001"
@@ -657,6 +802,8 @@ namespace NMB_HLabSys.Data
                Status = "Samples Received",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "00TTR1YMM",
+
                Urgency = Urgency.Urgent,
                ClinicalNotes = "Patient presenting with fever and chills - suspected infection",
                RequestNumber = "NMB-REQ-000002"
@@ -669,6 +816,8 @@ namespace NMB_HLabSys.Data
                Status = "InProgress",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "00FFD1YMM",
+
                Urgency = Urgency.Stat,
                ClinicalNotes = "Emergency - Patient collapsed, suspected DVT",
                RequestNumber = "NMB-REQ-000003"
@@ -681,6 +830,8 @@ namespace NMB_HLabSys.Data
                Status = "Completed",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "0045ESM",
+
                Urgency = Urgency.Routine,
                ClinicalNotes = "Diabetes monitoring - HbA1c and glucose levels",
                RequestNumber = "NMB-REQ-000004"
@@ -693,6 +844,8 @@ namespace NMB_HLabSys.Data
                Status = "Submitted",
                PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
+               Barcode = "005433YMV",
+
                Urgency = Urgency.Urgent,
                ClinicalNotes = "Chest pain, suspected cardiac issue - Lipid Profile and Cardiac enzymes",
                RequestNumber = "NMB-REQ-000005"
@@ -705,6 +858,8 @@ namespace NMB_HLabSys.Data
                Status = "Samples Received",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "009988HGM",
+
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine liver function test for patient on medication",
                RequestNumber = "NMB-REQ-000006"
@@ -717,6 +872,8 @@ namespace NMB_HLabSys.Data
                Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "00876YMM",
+
                Urgency = Urgency.Stat,
                ClinicalNotes = "Pre-surgery coagulation screen - STAT request",
                RequestNumber = "NMB-REQ-000007"
@@ -729,6 +886,7 @@ namespace NMB_HLabSys.Data
                Status = "Completed",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "00991YMM",
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine urinalysis - suspected UTI",
                RequestNumber = "NMB-REQ-000008"
@@ -741,6 +899,8 @@ namespace NMB_HLabSys.Data
                Status = "InProgress",
                PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
+               Barcode = "00HHHYMM",
+
                Urgency = Urgency.Urgent,
                ClinicalNotes = "Suspected blood stream infection - Blood culture",
                RequestNumber = "NMB-REQ-000009"
@@ -752,6 +912,8 @@ namespace NMB_HLabSys.Data
                RequestDate = new DateTime(2026, 5, 10),
                Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
+               Barcode = "04561YMM",
+
                DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
                Urgency = Urgency.Routine,
                ClinicalNotes = "Annual physical examination - Full blood count and chemistry panel",
@@ -763,17 +925,12 @@ namespace NMB_HLabSys.Data
 
         }
 
-        
-        public DbSet<LoginUser> LoggedInUsers { get; set; }
-        public DbSet<RegisterUser> RegisterdUsers { get; set; }
-        public DbSet<NotificationModel> Notifications { get; set; }
-        public DbSet<StockTransactionModel> StockTransactions { get; set; }
-        public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
-        public DbSet<TestTypeModel> TestTypes { get; set; }
-        public DbSet<SampleModel> Samples { get; set; }
-        public DbSet<SampleTypeModel> SampleTypes { get; set; }
-        public DbSet<TestRequestsModel> TestRequests { get; set; }
+
+
         public DbSet<TestRequestTestTypeModel> TestRequestTests { get; set; }
+
+        public DbSet<StockTransactionModel> StockTransactions { get; set; }
+
         public DbSet<ClinicalNotesModel> ClinicalNotes { get; set; }
         public DbSet<ResultModel> Results { get; set; }
         public DbSet<TestRequestTestTypeHistoryModel> TestRequestTestTypeHistories { get; set; }

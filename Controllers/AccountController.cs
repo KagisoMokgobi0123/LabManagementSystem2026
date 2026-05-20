@@ -58,7 +58,7 @@ namespace NMB_HLabSys.Controllers
                 // Check user roles and redirect accordingly
                 if (await _userManager.IsInRoleAsync(user, "Doctor"))
                 {
-                    return RedirectToAction("Dashboard", "Home");
+                    return RedirectToAction("Dashboard", "DoctorDashboard", new { area = "Doctor" });
                 }
                 else if (await _userManager.IsInRoleAsync(user, "Technician"))
                 {

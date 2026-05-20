@@ -1,0 +1,135 @@
+@using NMB_HLabSys.Areas.Patient.Models
+@model PatientConsent
+@{
+    ViewData["Title"] = "Shared Results";
+    Layout = "_DoctorLayout";
+}
+
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Shared Test Results</h2>
+                <h5 class="text-white op-7 mb-2">
+                    @Model.Patient?.Name @Model.Patient?.Surname — Access granted @Model.GrantedAt.ToString("dd MMM yyyy")
+                </h5>
+            </div>
+            <div class="ml-md-auto">
+                <a asp-action="Index" class="btn btn-white btn-border btn-round">
+                    <i class="fa fa-arrow-left mr-1"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+
+    <!-- Patient Summary -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title"><i class="fa fa-user mr-2"></i> Patient Information</div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3"><strong>Name:</strong> @Model.Patient?.Name @Model.Patient?.Surname</div>
+                <div class="col-md-3"><strong>SA ID:</strong> <code>@Model.Patient?.IDNumber</code></div>
+                <div class="col-md-3"><strong>DOB:</strong> @Model.Patient?.DateOfBirth.ToString("dd MMM yyyy")</div>
+                <div class="col-md-3"><strong>Email:</strong> @(Model.Patient?.Email ?? "—")</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Test Requests -->
+    @if (Model.ConsentRequestItems != null && Model.ConsentRequestItems.Any())
+    {
+        foreach (var item in Model.ConsentRequestItems)
+        {
+            var req = item.TestRequest;
+            if (req == null) continue;
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-head-row">
+                        <div class="card-title">
+                            <i class="fa fa-flask mr-2"></i>
+                            @req.RequestNumber — @req.RequestDate.ToString("dd MMM yyyy")
+                        </div>
+                        <div class="card-tools">
+                            @{
+                                var stClass = req.Status == "Completed" ? "badge-success" :
+                                              req.Status == "Cancelled" ? "badge-danger" :
+                                              req.Status == "ReleasedByDoctor" ? "badge-primary" : "badge-info";
+                            }
+                            <span class="badge @stClass">@req.Status</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (req.TestRequestItems != null && req.TestRequestItems.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Test Name</th>
+                                        <th>Result</th>
+                                        <th>Normal Range</th>
+                                        <th>Unit</th>
+                                        <th>Flag</th>
+                                        <th>Notes</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var testItem in req.TestRequestItems)
+                                    {
+                                        var isAbnormal = testItem.ResultValue.HasValue &&
+                                                         testItem.TestType != null &&
+                                                         (testItem.ResultValue < testItem.TestType.NormalMin ||
+                                                          testItem.ResultValue > testItem.TestType.NormalMax);
+                                        <tr class="@(isAbnormal ? "table-danger" : "")">
+                                            <td><strong>@testItem.TestType?.Name</strong></td>
+                                            <td>
+                                                <span class="@(isAbnormal ? "text-danger font-weight-bold" : "text-success")">
+                                                    @(testItem.ResultValue?.ToString() ?? "Pending")
+                                                </span>
+                                            </td>
+                                            <td>@testItem.TestType?.NormalMin – @testItem.TestType?.NormalMax</td>
+                                            <td>@testItem.TestType?.MeasurementUnit</td>
+                                            <td>
+                                                @if (isAbnormal)
+                                                {
+                                                    <span class="badge badge-danger">⚠ ABNORMAL</span>
+                                                }
+                                                else if (testItem.ResultValue.HasValue)
+                                                {
+                                                    <span class="badge badge-success">Normal</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge badge-secondary">Pending</span>
+                                                }
+                                            </td>
+                                            <td>@(string.IsNullOrEmpty(testItem.ResultNotes) ? "—" : testItem.ResultNotes)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No test items for this request.</p>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-warning">
+            <i class="fa fa-exclamation-triangle mr-2"></i>
+            No test requests have been shared for this consent.
+        </div>
+    }
+</div>
