@@ -41,7 +41,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             }
 
             var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.UserID.ToString() == userId);
+                .FirstOrDefaultAsync(d => d.UserID == userId);
 
             if (doctor == null)
                 _logger.LogWarning($"No doctor found for UserID: {userId}");

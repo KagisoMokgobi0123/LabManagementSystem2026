@@ -36,7 +36,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             if (string.IsNullOrEmpty(userId)) return 0;
 
             var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.UserID.ToString() == userId);
+                .FirstOrDefaultAsync(d => d.UserID == userId);
 
             return doctor?.DoctorId ?? 0;
         }
