@@ -36,6 +36,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .Include(s => s.SampleType)
                 .Include(s => s.TestRequest)
                     .ThenInclude(tr => tr.Patient)
+                    .Include(s => s.TestRequest)
+                     .ThenInclude(td => td.Doctor)
                 .Where(s => s.TechnicianId == technicianId);
 
             // Apply filters

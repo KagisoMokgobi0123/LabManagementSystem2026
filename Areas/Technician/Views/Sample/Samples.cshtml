@@ -354,7 +354,7 @@
                                             <div class="card-header bg-primary text-white">
                                                 <h5 class="card-title text-white mb-0">
                                                     <i class="fa fa-table"></i> Samples List
-                                                    <span class="badge badge-light ml-2">Total: @Model.Count()</span>
+                                                    <span class="badge badge-success ml-2">Total: @Model.Count()</span>
                                                 </h5>
                                             </div>
                                             <div class="card-body">
@@ -365,7 +365,8 @@
                                                                 <th>Request Number</th>
                                                                 <th>Barcode</th>
                                                                 <th>Sample Type</th>
-                                                                <th>Patient Name</th>
+                                                                <th>Patient</th>
+                                                                 <th>Doctor</th>
                                                                 <th>Date Received</th>
                                                                 <th>Urgency</th>
                                                                 <th>Status</th>
@@ -382,6 +383,7 @@
                                                                         <td>@sample.Barcode</td>
                                                                         <td>@sample.SampleType?.Name</td>
                                                                         <td>@sample.TestRequest?.Patient?.FullName</td>
+                                                                         <td>@sample.TestRequest?.Doctor?.FullName</td>
                                                                         <td>@sample.DateReceived.ToString("dd MMM yyyy HH:mm")</td>
                                                                         <td>
                                                                           @if (sample.TestRequest?.Urgency.ToString() == "Stat")
