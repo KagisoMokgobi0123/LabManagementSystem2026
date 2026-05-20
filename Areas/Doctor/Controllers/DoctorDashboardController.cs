@@ -191,7 +191,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         // ── 4. View Results ───────────────────────────────────
         public IActionResult Results(int requestId)
         {
-            var results = _context.TestResults
+            var results = _context.Results
                 .Include(r => r.TestRequestItem)
                 .Where(r => r.TestRequestItem.TestRequestID == requestId)
                 .ToList();

@@ -27,7 +27,9 @@ namespace NMB_HLabSys.Data
         public DbSet<Doctor> Doctors { get; set; }
         public DbSet<DoctorAlert> DoctorAlerts { get; set; }
         public DbSet<AllergyCategory> AllergyCategories { get; set; }
+        public DbSet<MedicationCategory> MedicationCategories { get; set; }
 
+        public DbSet<TestCategoryModel> TestCategories { get; set; }
         public DbSet<DoctorReport> DoctorReports { get; set; }
         public DbSet<PatientConsent> PatientConsents { get; set; }
         public DbSet<ResultRelease> ResultReleases { get; set; }
@@ -37,7 +39,6 @@ namespace NMB_HLabSys.Data
         public DbSet<TestRequestItem> TestRequestItems { get; set; }
         public DbSet<TestTypeModel> TestTypes { get; set; }
         public DbSet<TestRequestsModel> TestRequests { get; set; }
-        public DbSet<ResultModel> TestResults { get; set; }
         public DbSet<MedicalCondition> MedicalConditions { get; set; }
         public DbSet<Patient> Patients { get; set; }
         public DbSet<PatientAllergy> PatientAllergies { get; set; }
@@ -47,6 +48,7 @@ namespace NMB_HLabSys.Data
         public DbSet<MedicationModel> Medications { get; set; }
         public DbSet<PatientDoctorConsent> PatientDoctorConsents { get; set; }
         public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

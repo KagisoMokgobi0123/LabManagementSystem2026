@@ -155,6 +155,150 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", b =>
+                {
+                    b.Property<int>("AllergyCategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyCategoryID"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AllergyCategoryID");
+
+                    b.ToTable("AllergyCategories");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.LabTechnician", b =>
+                {
+                    b.Property<int>("LabTechnicianID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LabTechnicianID"));
+
+                    b.Property<int>("CellPhone")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EmployeeNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("LabTechnicianID");
+
+                    b.ToTable("LabTechnician");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", b =>
+                {
+                    b.Property<int>("MedicalConditionCategoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionCategoryID"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MedicalConditionCategoryID");
+
+                    b.ToTable("MedicalConditionCategories");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", b =>
+                {
+                    b.Property<int>("MedicationCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationCategoryId"));
+
+                    b.Property<string>("CategoryName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("MedicationCategoryId");
+
+                    b.ToTable("MedicationCategories");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Patient", b =>
+                {
+                    b.Property<int>("PatientID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientID"));
+
+                    b.Property<string>("CellPhone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HomeAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IDNumber")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegisterUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientID");
+
+                    b.HasIndex("RegisterUserId");
+
+                    b.ToTable("Patients");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ClinicalNotesModel", b =>
                 {
                     b.Property<int>("NotesId")
@@ -181,6 +325,340 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("ClinicalNotes");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ConsentRequestItem", b =>
+                {
+                    b.Property<int>("ConsentRequestItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConsentRequestItemId"));
+
+                    b.Property<int>("ConsentRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PatientConsentID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestRequestID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ConsentRequestItemId");
+
+                    b.HasIndex("PatientConsentID");
+
+                    b.HasIndex("TestRequestID");
+
+                    b.ToTable("ConsentRequestItems");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.Doctor", b =>
+                {
+                    b.Property<int>("DoctorId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorId"));
+
+                    b.Property<int>("HPCSANumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("DoctorId");
+
+                    b.ToTable("Doctortbl", (string)null);
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.DoctorAlert", b =>
+                {
+                    b.Property<int>("DoctorAlertId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorAlertId"));
+
+                    b.Property<DateTime>("AlertDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DoctorId1")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RequestItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestRequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TestRequestItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("DoctorAlertId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("DoctorId1");
+
+                    b.HasIndex("RequestItemId");
+
+                    b.HasIndex("TestRequestId");
+
+                    b.HasIndex("TestRequestItemId");
+
+                    b.ToTable("DoctorAlerts");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.DoctorReport", b =>
+                {
+                    b.Property<int>("DoctorReportId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorReportId"));
+
+                    b.Property<DateTime>("DateFrom")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateTo")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("GeneratedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("DoctorReportId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.ToTable("DoctorReports");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.PatientConsent", b =>
+                {
+                    b.Property<int>("PatientConsentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientConsentId"));
+
+                    b.Property<int>("DoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PatientId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PatientConsentId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("PatientConsents");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ResultRelease", b =>
+                {
+                    b.Property<int>("ResultReleaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ResultReleaseId"));
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NotifyType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReleasedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReleasedByDoctorId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestRequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ResultReleaseId");
+
+                    b.HasIndex("ReleasedByDoctorId");
+
+                    b.HasIndex("TestRequestId");
+
+                    b.ToTable("ResultReleases");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ReviewHistory", b =>
+                {
+                    b.Property<int>("ReviewHistoryID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReviewHistoryID"));
+
+                    b.HasKey("ReviewHistoryID");
+
+                    b.ToTable("Reviews");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.SampleTypeModel", b =>
+                {
+                    b.Property<int>("SampleTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SampleTypeId"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("SampleTypeId");
+
+                    b.ToTable("SampleTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            SampleTypeId = 1,
+                            IsActive = true,
+                            Name = "Blood"
+                        },
+                        new
+                        {
+                            SampleTypeId = 2,
+                            IsActive = true,
+                            Name = "Urine"
+                        },
+                        new
+                        {
+                            SampleTypeId = 3,
+                            IsActive = true,
+                            Name = "Saliva"
+                        },
+                        new
+                        {
+                            SampleTypeId = 4,
+                            IsActive = true,
+                            Name = "Plasma"
+                        },
+                        new
+                        {
+                            SampleTypeId = 5,
+                            IsActive = true,
+                            Name = "Serum"
+                        },
+                        new
+                        {
+                            SampleTypeId = 6,
+                            IsActive = true,
+                            Name = "Bone Marrow"
+                        },
+                        new
+                        {
+                            SampleTypeId = 7,
+                            IsActive = true,
+                            Name = "CSF"
+                        },
+                        new
+                        {
+                            SampleTypeId = 8,
+                            IsActive = true,
+                            Name = "Stool"
+                        },
+                        new
+                        {
+                            SampleTypeId = 9,
+                            IsActive = true,
+                            Name = "Sputum"
+                        },
+                        new
+                        {
+                            SampleTypeId = 10,
+                            IsActive = true,
+                            Name = "Swab"
+                        });
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestItem", b =>
+                {
+                    b.Property<int>("TestRequestItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestRequestItemId"));
+
+                    b.Property<int?>("AssignedTechnicianId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletionDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsAbnormal")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResultNotes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("ResultValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("StartDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestRequestID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestTypeID")
+                        .HasColumnType("int");
+
+                    b.HasKey("TestRequestItemId");
+
+                    b.HasIndex("AssignedTechnicianId");
+
+                    b.HasIndex("TestRequestID");
+
+                    b.HasIndex("TestTypeID");
+
+                    b.ToTable("TestRequestItems");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.Property<int>("TestRequestId")
@@ -189,12 +667,26 @@ namespace NMBHLabSys.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestRequestId"));
 
-                    b.Property<string>("ClinicalNotes")
+                    b.Property<string>("Barcode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CancelReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClinicalNotes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("DoctorId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("DoctorId1")
+                        .HasColumnType("int");
 
                     b.Property<string>("PatientId")
                         .IsRequired()
@@ -207,12 +699,12 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ResultReleaseId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("TestTypeModelTestTypeId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Urgency")
                         .IsRequired()
@@ -222,9 +714,11 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("DoctorId");
 
+                    b.HasIndex("DoctorId1");
+
                     b.HasIndex("PatientId");
 
-                    b.HasIndex("TestTypeModelTestTypeId");
+                    b.HasIndex("ResultReleaseId");
 
                     b.ToTable("TestRequests");
 
@@ -232,7 +726,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 1,
+                            Barcode = "0099GGRM",
                             ClinicalNotes = "Routine blood test - Annual checkup",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -243,7 +739,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 2,
+                            Barcode = "00TTR1YMM",
                             ClinicalNotes = "Patient presenting with fever and chills - suspected infection",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -254,7 +752,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 3,
+                            Barcode = "00FFD1YMM",
                             ClinicalNotes = "Emergency - Patient collapsed, suspected DVT",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -265,7 +765,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 4,
+                            Barcode = "0045ESM",
                             ClinicalNotes = "Diabetes monitoring - HbA1c and glucose levels",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -276,7 +778,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 5,
+                            Barcode = "005433YMV",
                             ClinicalNotes = "Chest pain, suspected cardiac issue - Lipid Profile and Cardiac enzymes",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
                             PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                             RequestDate = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -287,7 +791,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 6,
+                            Barcode = "009988HGM",
                             ClinicalNotes = "Routine liver function test for patient on medication",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -298,7 +804,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 7,
+                            Barcode = "00876YMM",
                             ClinicalNotes = "Pre-surgery coagulation screen - STAT request",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -309,7 +817,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 8,
+                            Barcode = "00991YMM",
                             ClinicalNotes = "Routine urinalysis - suspected UTI",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -320,7 +830,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 9,
+                            Barcode = "00HHHYMM",
                             ClinicalNotes = "Suspected blood stream infection - Blood culture",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                             PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                             RequestDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -331,7 +843,9 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 10,
+                            Barcode = "04561YMM",
                             ClinicalNotes = "Annual physical examination - Full blood count and chemistry panel",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -645,88 +1159,6 @@ namespace NMBHLabSys.Migrations
                         });
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.SampleTypeModel", b =>
-                {
-                    b.Property<int>("SampleTypeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SampleTypeId"));
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("SampleTypeId");
-
-                    b.ToTable("SampleTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            SampleTypeId = 1,
-                            IsActive = true,
-                            Name = "Blood"
-                        },
-                        new
-                        {
-                            SampleTypeId = 2,
-                            IsActive = true,
-                            Name = "Urine"
-                        },
-                        new
-                        {
-                            SampleTypeId = 3,
-                            IsActive = true,
-                            Name = "Saliva"
-                        },
-                        new
-                        {
-                            SampleTypeId = 4,
-                            IsActive = true,
-                            Name = "Plasma"
-                        },
-                        new
-                        {
-                            SampleTypeId = 5,
-                            IsActive = true,
-                            Name = "Serum"
-                        },
-                        new
-                        {
-                            SampleTypeId = 6,
-                            IsActive = true,
-                            Name = "Bone Marrow"
-                        },
-                        new
-                        {
-                            SampleTypeId = 7,
-                            IsActive = true,
-                            Name = "CSF"
-                        },
-                        new
-                        {
-                            SampleTypeId = 8,
-                            IsActive = true,
-                            Name = "Stool"
-                        },
-                        new
-                        {
-                            SampleTypeId = 9,
-                            IsActive = true,
-                            Name = "Sputum"
-                        },
-                        new
-                        {
-                            SampleTypeId = 10,
-                            IsActive = true,
-                            Name = "Swab"
-                        });
-                });
-
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockTransactionModel", b =>
                 {
                     b.Property<int>("TransactionId")
@@ -824,7 +1256,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("TestCategoryId");
 
-                    b.ToTable("TestCategoryModel");
+                    b.ToTable("TestCategories");
 
                     b.HasData(
                         new
@@ -865,15 +1297,17 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("ConsumableId")
                         .HasColumnType("int");
 
-                    b.Property<double>("MeasurementUnit")
-                        .HasColumnType("float");
+                    b.Property<int>("MeasurementUnit")
+                        .HasMaxLength(20)
+                        .HasColumnType("int");
 
                     b.Property<int?>("MeasurementUnitModelMeasurementUnitId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<decimal>("NormalMax")
                         .HasColumnType("decimal(18,2)");
@@ -892,8 +1326,6 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("TestTypeId");
 
-                    b.HasIndex("ConsumableId");
-
                     b.HasIndex("MeasurementUnitModelMeasurementUnitId");
 
                     b.HasIndex("SampleTypeId");
@@ -907,7 +1339,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 1,
                             ConsumableId = 1,
-                            MeasurementUnit = 1.0,
+                            MeasurementUnit = 1,
                             Name = "Full Blood Count (FBC)",
                             NormalMax = 11.0m,
                             NormalMin = 4.5m,
@@ -919,7 +1351,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 2,
                             ConsumableId = 1,
-                            MeasurementUnit = 2.0,
+                            MeasurementUnit = 2,
                             Name = "White Blood Cell Differential",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -931,7 +1363,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 3,
                             ConsumableId = 4,
-                            MeasurementUnit = 3.0,
+                            MeasurementUnit = 3,
                             Name = "Peripheral Blood Film",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -943,7 +1375,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 4,
                             ConsumableId = 1,
-                            MeasurementUnit = 2.0,
+                            MeasurementUnit = 2,
                             Name = "Reticulocyte Count",
                             NormalMax = 2.5m,
                             NormalMin = 0.5m,
@@ -955,7 +1387,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 5,
                             ConsumableId = 5,
-                            MeasurementUnit = 4.0,
+                            MeasurementUnit = 4,
                             Name = "Erythrocyte Sedimentation Rate (ESR)",
                             NormalMax = 20m,
                             NormalMin = 0m,
@@ -967,7 +1399,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 6,
                             ConsumableId = 6,
-                            MeasurementUnit = 5.0,
+                            MeasurementUnit = 5,
                             Name = "Prothrombin Time (PT)",
                             NormalMax = 13.5m,
                             NormalMin = 11.0m,
@@ -979,7 +1411,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 7,
                             ConsumableId = 6,
-                            MeasurementUnit = 5.0,
+                            MeasurementUnit = 5,
                             Name = "Activated Partial Thromboplastin Time (aPTT)",
                             NormalMax = 35.0m,
                             NormalMin = 25.0m,
@@ -991,7 +1423,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 8,
                             ConsumableId = 6,
-                            MeasurementUnit = 6.0,
+                            MeasurementUnit = 6,
                             Name = "International Normalized Ratio (INR)",
                             NormalMax = 1.2m,
                             NormalMin = 0.8m,
@@ -1003,7 +1435,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 9,
                             ConsumableId = 7,
-                            MeasurementUnit = 7.0,
+                            MeasurementUnit = 7,
                             Name = "D-Dimer",
                             NormalMax = 500m,
                             NormalMin = 0m,
@@ -1015,7 +1447,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 10,
                             ConsumableId = 6,
-                            MeasurementUnit = 8.0,
+                            MeasurementUnit = 8,
                             Name = "Fibrinogen Level",
                             NormalMax = 400m,
                             NormalMin = 200m,
@@ -1027,7 +1459,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 11,
                             ConsumableId = 8,
-                            MeasurementUnit = 9.0,
+                            MeasurementUnit = 9,
                             Name = "Glucose (Fasting)",
                             NormalMax = 5.5m,
                             NormalMin = 3.9m,
@@ -1039,7 +1471,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 12,
                             ConsumableId = 1,
-                            MeasurementUnit = 2.0,
+                            MeasurementUnit = 2,
                             Name = "Hemoglobin A1C (HbA1c)",
                             NormalMax = 5.6m,
                             NormalMin = 4.0m,
@@ -1051,7 +1483,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 13,
                             ConsumableId = 8,
-                            MeasurementUnit = 9.0,
+                            MeasurementUnit = 9,
                             Name = "Lipid Profile",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1063,7 +1495,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 14,
                             ConsumableId = 8,
-                            MeasurementUnit = 10.0,
+                            MeasurementUnit = 10,
                             Name = "Liver Function Test (LFT)",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1075,7 +1507,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 15,
                             ConsumableId = 8,
-                            MeasurementUnit = 9.0,
+                            MeasurementUnit = 9,
                             Name = "Renal Function Test (RFT)",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1087,7 +1519,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 16,
                             ConsumableId = 8,
-                            MeasurementUnit = 7.0,
+                            MeasurementUnit = 7,
                             Name = "C-Reactive Protein (CRP)",
                             NormalMax = 5m,
                             NormalMin = 0m,
@@ -1099,7 +1531,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 17,
                             ConsumableId = 9,
-                            MeasurementUnit = 3.0,
+                            MeasurementUnit = 3,
                             Name = "Urinalysis (Dipstick)",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1111,7 +1543,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 18,
                             ConsumableId = 10,
-                            MeasurementUnit = 1.0,
+                            MeasurementUnit = 1,
                             Name = "Urine Microscopy",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1123,7 +1555,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 19,
                             ConsumableId = 11,
-                            MeasurementUnit = 11.0,
+                            MeasurementUnit = 11,
                             Name = "Urine Culture and Sensitivity",
                             NormalMax = 10000m,
                             NormalMin = 0m,
@@ -1135,7 +1567,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 20,
                             ConsumableId = 12,
-                            MeasurementUnit = 3.0,
+                            MeasurementUnit = 3,
                             Name = "Blood Culture",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1147,7 +1579,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 21,
                             ConsumableId = 11,
-                            MeasurementUnit = 3.0,
+                            MeasurementUnit = 3,
                             Name = "Sputum Culture",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1159,7 +1591,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 22,
                             ConsumableId = 11,
-                            MeasurementUnit = 3.0,
+                            MeasurementUnit = 3,
                             Name = "Wound Swab Culture",
                             NormalMax = 0m,
                             NormalMin = 0m,
@@ -1169,30 +1601,178 @@ namespace NMBHLabSys.Migrations
                         });
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.NotificationModel", b =>
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
                 {
-                    b.Property<int>("NotificationId")
+                    b.Property<int>("AllergyId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyId"));
 
-                    b.Property<string>("DoctorId")
+                    b.Property<int>("AllergyCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AllergyName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
-                    b.Property<DateTime>("IssuedDate")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Message")
+                    b.HasKey("AllergyId");
+
+                    b.HasIndex("AllergyCategoryId");
+
+                    b.ToTable("Allergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalCondition", b =>
+                {
+                    b.Property<int>("MedicalConditionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionId"));
+
+                    b.Property<string>("ConditionName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicalConditionCategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MedicalConditionId");
+
+                    b.HasIndex("MedicalConditionCategoryId");
+
+                    b.ToTable("MedicalConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
+                {
+                    b.Property<int>("MedicationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationId"));
+
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("NotificationId");
+                    b.Property<int>("MedicationCategoryId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("DoctorId");
+                    b.Property<string>("MedicationName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
-                    b.ToTable("Notifications");
+                    b.HasKey("MedicationId");
+
+                    b.HasIndex("MedicationCategoryId");
+
+                    b.ToTable("Medications");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientAllergy", b =>
+                {
+                    b.Property<int>("PatientAllergyID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientAllergyID"));
+
+                    b.Property<int>("AllergyID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PatientAllergyID");
+
+                    b.HasIndex("AllergyID");
+
+                    b.HasIndex("PatientID");
+
+                    b.ToTable("PatientAllergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientCondition", b =>
+                {
+                    b.Property<int>("PatientConditionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientConditionID"));
+
+                    b.Property<int>("MedicalConditionID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PatientConditionID");
+
+                    b.HasIndex("MedicalConditionID");
+
+                    b.HasIndex("PatientID");
+
+                    b.ToTable("PatientConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsent", b =>
+                {
+                    b.Property<int>("PatientDoctorConsentID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientDoctorConsentID"));
+
+                    b.Property<string>("DoctorUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("PatientID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PatientDoctorConsentID");
+
+                    b.HasIndex("DoctorUserId");
+
+                    b.HasIndex("PatientID");
+
+                    b.ToTable("PatientDoctorConsents");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientMedication", b =>
+                {
+                    b.Property<int>("PatientMedicationID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientMedicationID"));
+
+                    b.Property<int>("MedicationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PatientID")
+                        .HasColumnType("int");
+
+                    b.HasKey("PatientMedicationID");
+
+                    b.HasIndex("MedicationId");
+
+                    b.HasIndex("PatientID");
+
+                    b.ToTable("PatientMedications");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ResultModel", b =>
@@ -1224,6 +1804,9 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("TestRequestItemId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("TestRequestTestTypeModelTestRequestTestTypeId")
                         .HasColumnType("int");
 
@@ -1231,9 +1814,11 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TechnicianId");
 
+                    b.HasIndex("TestRequestItemId");
+
                     b.HasIndex("TestRequestTestTypeModelTestRequestTestTypeId");
 
-                    b.ToTable("Results");
+                    b.ToTable("ResultModel");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
@@ -1247,6 +1832,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<string>("Barcode")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CollectedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("DateReceived")
                         .HasColumnType("datetime2");
@@ -1282,6 +1870,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestRequestId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TestRequestsModelTestRequestId")
+                        .HasColumnType("int");
+
                     b.HasKey("SampleId");
 
                     b.HasIndex("Barcode")
@@ -1293,6 +1884,8 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestRequestId");
 
+                    b.HasIndex("TestRequestsModelTestRequestId");
+
                     b.ToTable("Samples");
 
                     b.HasData(
@@ -1300,6 +1893,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 1,
                             Barcode = "SMP-2024-000001",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 15, 10, 30, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = true,
@@ -1312,6 +1906,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 2,
                             Barcode = "SMP-2024-000002",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 16, 11, 45, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = true,
@@ -1324,6 +1919,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 3,
                             Barcode = "SMP-2024-000003",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 17, 9, 15, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = true,
@@ -1336,6 +1932,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 4,
                             Barcode = "SMP-2024-000004",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 18, 14, 20, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = false,
@@ -1347,6 +1944,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 5,
                             Barcode = "SMP-2024-000005",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 19, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = true,
@@ -1359,6 +1957,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 6,
                             Barcode = "SMP-2024-000006",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 20, 13, 30, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = false,
@@ -1370,6 +1969,7 @@ namespace NMBHLabSys.Migrations
                         {
                             SampleId = 9,
                             Barcode = "SMP-2024-000009",
+                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DateReceived = new DateTime(2024, 1, 23, 11, 20, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = false,
@@ -1486,10 +2086,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 1,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3658),
-                            DueDate = new DateTime(2026, 5, 17, 1, 18, 41, 223, DateTimeKind.Local).AddTicks(3660),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8279),
+                            DueDate = new DateTime(2026, 5, 20, 17, 37, 58, 871, DateTimeKind.Local).AddTicks(8280),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3649),
+                            StartDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8266),
                             Status = "Submitted",
                             TestRequestId = 1,
                             TestTypeId = 1
@@ -1497,10 +2097,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 2,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3669),
-                            DueDate = new DateTime(2026, 5, 17, 0, 18, 41, 223, DateTimeKind.Local).AddTicks(3670),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8289),
+                            DueDate = new DateTime(2026, 5, 20, 16, 37, 58, 871, DateTimeKind.Local).AddTicks(8289),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3668),
+                            StartDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8288),
                             Status = "Submitted",
                             TestRequestId = 1,
                             TestTypeId = 11
@@ -1508,10 +2108,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 3,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3673),
-                            DueDate = new DateTime(2026, 5, 17, 1, 18, 41, 223, DateTimeKind.Local).AddTicks(3673),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8292),
+                            DueDate = new DateTime(2026, 5, 20, 17, 37, 58, 871, DateTimeKind.Local).AddTicks(8292),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3672),
+                            StartDateTime = new DateTime(2026, 5, 20, 13, 37, 58, 871, DateTimeKind.Local).AddTicks(8291),
                             Status = "InProgress",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 2,
@@ -1520,10 +2120,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 4,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3676),
-                            DueDate = new DateTime(2026, 5, 17, 1, 18, 41, 223, DateTimeKind.Local).AddTicks(3677),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8294),
+                            DueDate = new DateTime(2026, 5, 20, 17, 37, 58, 871, DateTimeKind.Local).AddTicks(8295),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3676),
+                            StartDateTime = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8294),
                             Status = "Submitted",
                             TestRequestId = 2,
                             TestTypeId = 6
@@ -1531,12 +2131,12 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 5,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 22, 18, 41, 223, DateTimeKind.Local).AddTicks(3681),
-                            DueDate = new DateTime(2026, 5, 16, 22, 18, 41, 223, DateTimeKind.Local).AddTicks(3682),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 14, 37, 58, 871, DateTimeKind.Local).AddTicks(8298),
+                            DueDate = new DateTime(2026, 5, 20, 14, 37, 58, 871, DateTimeKind.Local).AddTicks(8298),
                             IsAbnormal = false,
                             Notes = "Results show elevated white blood cells",
                             ResultValue = "WBC: 11.2, RBC: 4.8, HGB: 14.2, PLT: 250",
-                            StartDateTime = new DateTime(2026, 5, 16, 20, 18, 41, 223, DateTimeKind.Local).AddTicks(3680),
+                            StartDateTime = new DateTime(2026, 5, 20, 12, 37, 58, 871, DateTimeKind.Local).AddTicks(8297),
                             Status = "Completed",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 3,
@@ -1545,34 +2145,34 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 6,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3686),
-                            DueDate = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3687),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 13, 37, 58, 871, DateTimeKind.Local).AddTicks(8302),
+                            DueDate = new DateTime(2026, 5, 20, 13, 37, 58, 871, DateTimeKind.Local).AddTicks(8302),
                             IsAbnormal = false,
                             Notes = "Normal range",
                             ResultValue = "5.6 mmol/L",
-                            StartDateTime = new DateTime(2026, 5, 16, 20, 18, 41, 223, DateTimeKind.Local).AddTicks(3685),
+                            StartDateTime = new DateTime(2026, 5, 20, 12, 37, 58, 871, DateTimeKind.Local).AddTicks(8301),
                             Status = "Verified",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 3,
                             TestTypeId = 11,
-                            VerificationDateTime = new DateTime(2026, 5, 16, 21, 48, 41, 223, DateTimeKind.Local).AddTicks(3690),
+                            VerificationDateTime = new DateTime(2026, 5, 20, 14, 7, 58, 871, DateTimeKind.Local).AddTicks(8304),
                             VerificationNote = "Verified - within normal range",
                             VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
                         },
                         new
                         {
                             TestRequestTestTypeId = 7,
-                            CompletionDateTime = new DateTime(2026, 5, 16, 22, 48, 41, 223, DateTimeKind.Local).AddTicks(3693),
-                            DueDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3695),
+                            CompletionDateTime = new DateTime(2026, 5, 20, 15, 7, 58, 871, DateTimeKind.Local).AddTicks(8306),
+                            DueDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8306),
                             IsAbnormal = false,
                             Notes = "Abnormal high INR - needs review",
                             ResultValue = "INR: 3.5",
-                            StartDateTime = new DateTime(2026, 5, 16, 21, 18, 41, 223, DateTimeKind.Local).AddTicks(3693),
+                            StartDateTime = new DateTime(2026, 5, 20, 13, 37, 58, 871, DateTimeKind.Local).AddTicks(8305),
                             Status = "ToBeReviewed",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 3,
                             TestTypeId = 6,
-                            VerificationDateTime = new DateTime(2026, 5, 16, 22, 48, 41, 223, DateTimeKind.Local).AddTicks(3696),
+                            VerificationDateTime = new DateTime(2026, 5, 20, 15, 7, 58, 871, DateTimeKind.Local).AddTicks(8307),
                             VerificationNote = "Result appears abnormal. Please review clinical notes.",
                             VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
                         });
@@ -1613,7 +2213,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 1,
                             QuantityRequired = 1,
                             TestTypeId = 1,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3952)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8602)
                         },
                         new
                         {
@@ -1621,7 +2221,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 1,
                             QuantityRequired = 1,
                             TestTypeId = 2,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3955)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8604)
                         },
                         new
                         {
@@ -1629,7 +2229,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 4,
                             QuantityRequired = 2,
                             TestTypeId = 3,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3956)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8606)
                         },
                         new
                         {
@@ -1637,7 +2237,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 1,
                             QuantityRequired = 1,
                             TestTypeId = 4,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3957)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8607)
                         },
                         new
                         {
@@ -1645,7 +2245,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 5,
                             QuantityRequired = 1,
                             TestTypeId = 5,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3958)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8608)
                         },
                         new
                         {
@@ -1653,7 +2253,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 2,
                             QuantityRequired = 1,
                             TestTypeId = 6,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3960)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8609)
                         },
                         new
                         {
@@ -1661,7 +2261,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 2,
                             QuantityRequired = 1,
                             TestTypeId = 7,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3961)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8610)
                         },
                         new
                         {
@@ -1669,7 +2269,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 2,
                             QuantityRequired = 1,
                             TestTypeId = 8,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3962)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8611)
                         },
                         new
                         {
@@ -1677,7 +2277,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 7,
                             QuantityRequired = 1,
                             TestTypeId = 9,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3963)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8612)
                         },
                         new
                         {
@@ -1685,7 +2285,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 6,
                             QuantityRequired = 1,
                             TestTypeId = 10,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3967)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8614)
                         },
                         new
                         {
@@ -1693,7 +2293,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 11,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3968)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8615)
                         },
                         new
                         {
@@ -1701,7 +2301,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 12,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3969)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8615)
                         },
                         new
                         {
@@ -1709,7 +2309,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 2,
                             TestTypeId = 13,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3970)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8616)
                         },
                         new
                         {
@@ -1717,7 +2317,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 2,
                             TestTypeId = 14,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3971)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8618)
                         },
                         new
                         {
@@ -1725,7 +2325,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 15,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3972)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8619)
                         },
                         new
                         {
@@ -1733,7 +2333,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 16,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3974)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8620)
                         },
                         new
                         {
@@ -1741,7 +2341,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 9,
                             QuantityRequired = 1,
                             TestTypeId = 17,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3975)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8621)
                         },
                         new
                         {
@@ -1749,7 +2349,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 10,
                             QuantityRequired = 1,
                             TestTypeId = 18,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3976)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8622)
                         },
                         new
                         {
@@ -1757,7 +2357,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 11,
                             QuantityRequired = 1,
                             TestTypeId = 19,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3977)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8623)
                         },
                         new
                         {
@@ -1765,7 +2365,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 12,
                             QuantityRequired = 2,
                             TestTypeId = 20,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3978)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8624)
                         },
                         new
                         {
@@ -1773,7 +2373,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 11,
                             QuantityRequired = 1,
                             TestTypeId = 21,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3979)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8625)
                         },
                         new
                         {
@@ -1781,7 +2381,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 11,
                             QuantityRequired = 1,
                             TestTypeId = 22,
-                            VerificationDate = new DateTime(2026, 5, 16, 23, 18, 41, 223, DateTimeKind.Local).AddTicks(3980)
+                            VerificationDate = new DateTime(2026, 5, 20, 15, 37, 58, 871, DateTimeKind.Local).AddTicks(8626)
                         });
                 });
 
@@ -1981,6 +2581,17 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Patient", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "RegisterUser")
+                        .WithMany()
+                        .HasForeignKey("RegisterUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RegisterUser");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ClinicalNotesModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
@@ -1992,13 +2603,145 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("Doctor");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ConsentRequestItem", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.PatientConsent", "PatientConsent")
+                        .WithMany("ConsentRequestItems")
+                        .HasForeignKey("PatientConsentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
+                        .WithMany("ConsentRequestItems")
+                        .HasForeignKey("TestRequestID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("PatientConsent");
+
+                    b.Navigation("TestRequest");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.DoctorAlert", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.Doctor", null)
+                        .WithMany("Alerts")
+                        .HasForeignKey("DoctorId1");
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestItem", "TestRequestItem")
+                        .WithMany()
+                        .HasForeignKey("RequestItemId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequests")
+                        .WithMany()
+                        .HasForeignKey("TestRequestId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestItem", null)
+                        .WithMany("Alerts")
+                        .HasForeignKey("TestRequestItemId");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("TestRequestItem");
+
+                    b.Navigation("TestRequests");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.DoctorReport", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.Doctor", "Doctor")
+                        .WithMany("Reports")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.PatientConsent", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.Doctor", "Doctor")
+                        .WithMany("PatientConsents")
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.Patient", "Patient")
+                        .WithMany()
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.ResultRelease", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.Doctor", "ReleasedByDoctor")
+                        .WithMany("ResultReleases")
+                        .HasForeignKey("ReleasedByDoctorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
+                        .WithMany()
+                        .HasForeignKey("TestRequestId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ReleasedByDoctor");
+
+                    b.Navigation("TestRequest");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestItem", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.LabTechnician", "AssignedTechnician")
+                        .WithMany()
+                        .HasForeignKey("AssignedTechnicianId");
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
+                        .WithMany("TestRequestItems")
+                        .HasForeignKey("TestRequestID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
+                        .WithMany()
+                        .HasForeignKey("TestTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedTechnician");
+
+                    b.Navigation("TestRequest");
+
+                    b.Navigation("TestType");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.Doctor", null)
+                        .WithMany("TestRequests")
+                        .HasForeignKey("DoctorId1");
 
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Patient")
                         .WithMany()
@@ -2006,13 +2749,16 @@ namespace NMBHLabSys.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", null)
-                        .WithMany("TestRequests")
-                        .HasForeignKey("TestTypeModelTestTypeId");
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.ResultRelease", "ResultRelease")
+                        .WithMany()
+                        .HasForeignKey("ResultReleaseId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
+
+                    b.Navigation("ResultRelease");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockTransactionModel", b =>
@@ -2045,7 +2791,7 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
-                        .WithMany("TechnicianTestTypes")
+                        .WithMany()
                         .HasForeignKey("TestTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2059,18 +2805,12 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", b =>
                 {
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
-                        .WithMany()
-                        .HasForeignKey("ConsumableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", null)
                         .WithMany("TestTypes")
                         .HasForeignKey("MeasurementUnitModelMeasurementUnitId");
 
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.SampleTypeModel", "SampleType")
-                        .WithMany()
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.SampleTypeModel", "SampleType")
+                        .WithMany("TestTypes")
                         .HasForeignKey("SampleTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2081,22 +2821,117 @@ namespace NMBHLabSys.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Consumable");
-
                     b.Navigation("SampleType");
 
                     b.Navigation("TestCategory");
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.NotificationModel", b =>
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", "AllergyCategory")
+                        .WithMany("Allergies")
+                        .HasForeignKey("AllergyCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AllergyCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalCondition", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", "MedicalConditionCategory")
+                        .WithMany("MedicalConditions")
+                        .HasForeignKey("MedicalConditionCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicalConditionCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", "MedicationCategory")
+                        .WithMany("Medications")
+                        .HasForeignKey("MedicationCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicationCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientAllergy", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.AllergyModel", "Allergy")
+                        .WithMany("PatientAllergies")
+                        .HasForeignKey("AllergyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.Patient", "Patient")
+                        .WithMany("PatientAllergies")
+                        .HasForeignKey("PatientID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Allergy");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientCondition", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.MedicalCondition", "MedicalCondition")
+                        .WithMany("PatientConditions")
+                        .HasForeignKey("MedicalConditionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.Patient", "Patient")
+                        .WithMany("PatientConditions")
+                        .HasForeignKey("PatientID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicalCondition");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsent", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Doctor")
                         .WithMany()
-                        .HasForeignKey("DoctorId")
+                        .HasForeignKey("DoctorUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.Patient", "Patient")
+                        .WithMany("PatientDoctorConsents")
+                        .HasForeignKey("PatientID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientMedication", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.MedicationModel", "Medication")
+                        .WithMany("PatientMedications")
+                        .HasForeignKey("MedicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.Patient", "Patient")
+                        .WithMany("PatientMedications")
+                        .HasForeignKey("PatientID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Medication");
+
+                    b.Navigation("Patient");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.ResultModel", b =>
@@ -2107,17 +2942,25 @@ namespace NMBHLabSys.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestItem", "TestRequestItem")
+                        .WithMany()
+                        .HasForeignKey("TestRequestItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("NMB_HLabSys.Areas.Technician.Models.TestRequestTestTypeModel", null)
                         .WithMany("Results")
                         .HasForeignKey("TestRequestTestTypeModelTestRequestTestTypeId");
 
                     b.Navigation("Technician");
+
+                    b.Navigation("TestRequestItem");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
                 {
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.SampleTypeModel", "SampleType")
-                        .WithMany()
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.SampleTypeModel", "SampleType")
+                        .WithMany("Samples")
                         .HasForeignKey("SampleTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2127,10 +2970,14 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("TechnicianId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
-                        .WithMany("Samples")
+                        .WithMany()
                         .HasForeignKey("TestRequestId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", null)
+                        .WithMany("Samples")
+                        .HasForeignKey("TestRequestsModelTestRequestId");
 
                     b.Navigation("SampleType");
 
@@ -2190,7 +3037,7 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
-                        .WithMany("TestTypeConsumables")
+                        .WithMany()
                         .HasForeignKey("TestTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -2200,11 +3047,71 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestType");
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", b =>
+                {
+                    b.Navigation("Allergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", b =>
+                {
+                    b.Navigation("MedicalConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", b =>
+                {
+                    b.Navigation("Medications");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Patient", b =>
+                {
+                    b.Navigation("PatientAllergies");
+
+                    b.Navigation("PatientConditions");
+
+                    b.Navigation("PatientDoctorConsents");
+
+                    b.Navigation("PatientMedications");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.Doctor", b =>
+                {
+                    b.Navigation("Alerts");
+
+                    b.Navigation("PatientConsents");
+
+                    b.Navigation("Reports");
+
+                    b.Navigation("ResultReleases");
+
+                    b.Navigation("TestRequests");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.PatientConsent", b =>
+                {
+                    b.Navigation("ConsentRequestItems");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.SampleTypeModel", b =>
                 {
                     b.Navigation("Samples");
 
+                    b.Navigation("TestTypes");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestItem", b =>
+                {
+                    b.Navigation("Alerts");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
+                {
+                    b.Navigation("ConsentRequestItems");
+
+                    b.Navigation("Samples");
+
                     b.Navigation("TechnicianTests");
+
+                    b.Navigation("TestRequestItems");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", b =>
@@ -2217,13 +3124,19 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestTypes");
                 });
 
-            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", b =>
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
                 {
-                    b.Navigation("TechnicianTestTypes");
+                    b.Navigation("PatientAllergies");
+                });
 
-                    b.Navigation("TestRequests");
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalCondition", b =>
+                {
+                    b.Navigation("PatientConditions");
+                });
 
-                    b.Navigation("TestTypeConsumables");
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
+                {
+                    b.Navigation("PatientMedications");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestRequestTestTypeModel", b =>

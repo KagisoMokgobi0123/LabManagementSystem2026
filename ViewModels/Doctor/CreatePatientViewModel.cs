@@ -35,8 +35,8 @@ namespace NMB_HLabSys.ViewModels.Doctor
         public List<int> SelectedMedicationIds { get; set; } = new();
 
         // Populate dropdowns
-        public IEnumerable<SelectListItem>? AvailableConditions { get; set; }
-        public IEnumerable<SelectListItem>? AvailableAllergies { get; set; }
-        public IEnumerable<SelectListItem>? AvailableMedications { get; set; }
+        public List<SelectListItem> AvailableConditions { get; set; } = new();
+        public List<SelectListItem> AvailableAllergies { get; set; } = new();
+        public List<SelectListItem> AvailableMedications { get; set; } = new();
     }
 }
