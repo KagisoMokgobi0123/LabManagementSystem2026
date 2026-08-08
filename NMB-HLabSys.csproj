@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\Technician\Views\TestRework\**" />
+    <Content Remove="Areas\Technician\Views\TestRework\**" />
+    <EmbeddedResource Remove="Areas\Technician\Views\TestRework\**" />
+    <None Remove="Areas\Technician\Views\TestRework\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Properties\launchSettings.json" />
   </ItemGroup>
 
@@ -37,7 +44,6 @@
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Views\" />
-    <Folder Include="Areas\Technician\Views\TestRework\" />
   </ItemGroup>
 
 </Project>
