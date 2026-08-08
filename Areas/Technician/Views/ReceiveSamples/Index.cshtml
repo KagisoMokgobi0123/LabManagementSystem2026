@@ -1,0 +1,404 @@
+﻿@model IEnumerable<NMB_HLabSys.Models.TestRequestsModel>
+
+@{
+    ViewData["Title"] = "Receive Patient Sample";
+}
+
+<style>
+    body {
+        background-color: #f1f3f6;
+    }
+
+    .page-header {
+        background: white;
+        border-radius: 16px;
+        padding: 20px 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .page-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #20233c;
+        margin: 0;
+    }
+
+    .user-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6f42c1, #4b62c6);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .user-name {
+        font-weight: 600;
+        font-size: 18px;
+        color: #292929;
+    }
+
+    .user-role {
+        color: #777;
+        font-size: 15px;
+    }
+
+    .select-test-btn {
+        background-color: #198754;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 13px 22px;
+        font-size: 16px;
+        font-weight: 500;
+        margin-right: 18px;
+    }
+
+        .select-test-btn:hover {
+            background-color: #157347;
+            color: white;
+        }
+
+    .info-box {
+        background-color: #dff1ff;
+        border-left: 4px solid #0d9bf6;
+        border-radius: 4px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        color: #07566d;
+        font-size: 17px;
+    }
+
+    .procedure-box {
+        background-color: #d5f6fc;
+        border-radius: 4px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        color: #07566d;
+        font-size: 17px;
+    }
+
+    .pending-card {
+        background-color: white;
+        border-radius: 17px;
+        overflow: hidden;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    }
+
+    .pending-header {
+        background-color: #146cf5;
+        color: white;
+        padding: 20px 30px;
+        font-size: 19px;
+        font-weight: 600;
+    }
+
+    .table-container {
+        padding: 20px;
+        overflow-x: auto;
+    }
+
+    .pending-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .pending-table th {
+            color: #555;
+            font-size: 15px;
+            font-weight: 500;
+            text-align: left;
+            padding: 14px 10px;
+            border-bottom: 2px solid #222;
+            white-space: nowrap;
+        }
+
+        .pending-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+            vertical-align: middle;
+        }
+
+    .request-number {
+        font-weight: 700;
+        color: #303030;
+    }
+
+    .demo-badge {
+        background-color: #18c5e8;
+        color: white;
+        border-radius: 12px;
+        padding: 4px 10px;
+        font-size: 11px;
+        margin-left: 5px;
+    }
+
+    .urgency-badge {
+        background-color: #ffbd00;
+        color: white;
+        border-radius: 10px;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .receive-btn {
+        background-color: #198754;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 9px 15px;
+        font-size: 14px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+        .receive-btn:hover {
+            background-color: #157347;
+            color: white;
+        }
+
+    .empty-message {
+        text-align: center;
+        padding: 40px;
+        color: #777;
+        font-size: 17px;
+    }
+</style>
+
+
+<div class="container-fluid py-3">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+
+        <div>
+            <h1 class="page-title">
+                Receive Patient Sample
+            </h1>
+        </div>
+
+        <div class="user-section">
+
+            <button class="select-test-btn">
+                <i class="bi bi-plus-circle"></i>
+                Select New Test
+            </button>
+
+            <div class="user-avatar">
+                JS
+            </div>
+
+            <div>
+                <div class="user-name">
+                    John Smith
+                </div>
+
+                <div class="user-role">
+                    Lab Technician
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- DEMO / INFORMATION MESSAGE -->
+    <div class="info-box">
+
+        <strong>
+            <i class="bi bi-database-fill"></i>
+            Pending Samples:
+        </strong>
+
+        Showing @Model.Count() pending sample receipt(s).
+
+    </div>
+
+
+    <!-- PROCEDURE MESSAGE -->
+    <div class="procedure-box">
+
+        <strong>
+            <i class="bi bi-clipboard-check"></i>
+            Sample Receiving Procedure:
+        </strong>
+
+        Verify all items before confirming.
+
+    </div>
+
+
+    <!-- PENDING SAMPLE CARD -->
+    <div class="pending-card">
+
+        <div class="pending-header">
+            Pending Sample Reception
+        </div>
+
+
+        <div class="table-container">
+
+            @if (Model != null && Model.Any())
+            {
+                <table class="pending-table">
+
+                    <thead>
+                        <tr>
+
+                            <th>
+                                REQUEST #
+                            </th>
+
+                            <th>
+                                PATIENT
+                            </th>
+
+                            <th>
+                                URGENCY
+                            </th>
+
+                            <th>
+                                TEST TYPES
+                            </th>
+
+                            <th>
+                                CLINICAL NOTES
+                            </th>
+
+                            <th>
+                                ACTION
+                            </th>
+
+                        </tr>
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <!-- REQUEST NUMBER -->
+                                <td>
+
+                                    <span class="request-number">
+                                        @item.RequestNumber
+                                    </span>
+
+                                </td>
+
+
+                                <!-- PATIENT -->
+                                <td>
+
+                                    @if (item.Patient != null)
+                                    {
+                                        @item.Patient.FullName
+                                    }
+                                    else
+                                    {
+                                        <span>N/A</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- URGENCY -->
+                                <td>
+
+                                    <span class="urgency-badge">
+                                        @item.Urgency
+                                    </span>
+
+                                </td>
+
+
+                                <!-- TEST TYPE -->
+                                <td>
+
+                                    @if (item.TestType != null)
+                                    {
+                                        @item.TestType.Name
+                                    }
+                                    else
+                                    {
+                                        <span>N/A</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- CLINICAL NOTES -->
+                                <td>
+
+                                    @if (!string.IsNullOrEmpty(item.ClinicalNotes))
+                                    {
+                                        @item.ClinicalNotes
+                                    }
+                                    else
+                                    {
+                                        <span>No clinical notes</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- ACTION -->
+                                <td>
+
+                                    <a asp-area="Technician"
+                                       asp-controller="ReceiveSamples"
+                                       asp-action="Receive"
+                                       asp-route-requestNumber="@item.RequestNumber"
+                                       class="receive-btn">
+
+                                        <i class="bi bi-inbox-fill"></i>
+                                        Receive Samples
+
+                                    </a>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            }
+            else
+            {
+                <div class="empty-message">
+
+                    <i class="bi bi-inbox"></i>
+
+                    <p>
+                        There are currently no pending samples to receive.
+                    </p>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

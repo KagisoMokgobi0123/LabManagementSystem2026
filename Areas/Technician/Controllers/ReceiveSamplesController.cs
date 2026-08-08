@@ -21,11 +21,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
         // GET: Technician/ReceiveSamples
-        public IActionResult Index()
+        //loading the pending test requests
+        //that need their samples received and sending them
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            var requests = await _context.TestRequests
+                .Include(r => r.Patient)
+                .Include(r => r.Doctor)
+                .Include(r => r.TestType)
+                .Include(r => r.Samples)
+                    .ThenInclude(s => s.SampleType)
+                .Where(r => r.Status == TestRequestStatus.Submitted.ToString())
+                .ToListAsync();
 
+            return View(requests);
+        }
         // GET: Technician/ReceiveSamples/Receive
         // Its job is to load the Receive Sample page
         // and populate it with the correct

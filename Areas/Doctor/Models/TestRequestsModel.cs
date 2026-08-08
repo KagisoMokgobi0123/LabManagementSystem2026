@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Account;
 using NMB_HLabSys.Patterns.Observer;
 using System;
@@ -7,7 +9,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
-using NMB_HLabSys.Areas.Technician.Models;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
@@ -36,7 +37,14 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         [Required]
         [Display(Name = "Request Number")]
-        public string RequestNumber { get; set; }
+        public string RequestNumber { get; set; } = String.Empty;
+
+
+        [Required]
+        [ForeignKey("TestType")]
+        public int TestTypeID { get; set; }
+        public TestTypeModel TestType { get; set; }
+
 
         [Required]
         public DateTime RequestDate { get; set; }
@@ -44,10 +52,10 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         [Required]
         public Urgency Urgency { get; set; }
 
-        public string ClinicalNotes { get; set; }
+        public string ClinicalNotes { get; set; } = String.Empty;
 
         [Required]
-        public string Status { get; set; }
+        public string Status { get; set; } = String.Empty;
 
         public string? CancelReason { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -57,12 +65,11 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         public virtual ICollection<ConsentRequestItem> ConsentRequestItems { get; set; } = new List<ConsentRequestItem>();
         public virtual ICollection<TestRequestItem> TestRequestItems { get; set; } = new List<TestRequestItem>();
+        public List<SampleModel> Samples { get; set; } 
 
-        public List<SampleModel> Samples { get; set; }
+        public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new();
 
-                public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new();
-
-        public string Barcode { get; set; }
+        public string Barcode { get; set; } = String.Empty;
         public int? ResultReleaseId { get; set; }
         public ResultRelease? ResultRelease { get; set; }
 
