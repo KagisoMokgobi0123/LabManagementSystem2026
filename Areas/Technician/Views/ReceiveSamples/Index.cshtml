@@ -367,8 +367,8 @@
 					</li>
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#base">
-							<i class="fas fa-layer-group"></i>
-							<p>Verification</p>
+							<i class="fas fa-vials"></i>							
+							<p>Sample Reception</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="base">
@@ -577,18 +577,17 @@
 									Pending Samples:
 								</strong>
 
-								Showing @Model.Count() pending sample receipt(s).
+								Showing <a href="#" class="btn btn-success btn-round">
+
+								@Model.Count()
+							</a> pending sample receipt(s).
 							</h5>
                     </div>
                     <div class="ml-md-auto py-2 py-md-0">
-							<a href="#" class="btn btn-secondary btn-round">
-								<strong>
-									<i class="fas fa-clipboard-check"></i>
-									Sample Receiving Procedure:
-								</strong>
-
-								Verify all items before confirming.
-							</a>
+						<a href="#" class="btn btn-info btn-round">
+							<i class="fas fa-check-circle mr-1"></i>
+							Verified Samples
+						</a>
                     </div>
                 </div>
             </div>
@@ -632,7 +631,7 @@
 														</div>
 													</div>
 													<div class="card-body">
-											<div class="table-responsive">
+							 				<div class="table-responsive">
 
                                             @if (Model != null && Model.Any())
                                             {
@@ -642,27 +641,29 @@
                                                         <tr>
 
                                                             <th>
-                                                                REQUEST #
+                                                                Request #
+                                                            </th>
+																	<th>
+																		Doctor
+																	</th>
+                                                            <th>
+                                                                Patient
                                                             </th>
 
                                                             <th>
-                                                                PATIENT
+                                                                Urgency
                                                             </th>
 
                                                             <th>
-                                                                URGENCY
+                                                                Test Type
                                                             </th>
 
                                                             <th>
-                                                                TEST TYPES
+                                                                Clinical Notes
                                                             </th>
 
                                                             <th>
-                                                                CLINICAL NOTES
-                                                            </th>
-
-                                                            <th>
-                                                                ACTION
+                                                                Action
                                                             </th>
 
                                                         </tr>
@@ -680,6 +681,13 @@
 
                                                                     <span class="request-number">
                                                                         @item.RequestNumber
+                                                                    </span>
+
+                                                                </td>
+																  <td>
+
+                                                                    <span class="request-doctor">
+                                                                        @item.Doctor.FullName
                                                                     </span>
 
                                                                 </td>
@@ -739,20 +747,23 @@
 
                                                                 </td>
 
-
+																
                                                                 <!-- ACTION -->
 																	<td class="form-button-action">
+																			<div class="form-button-action">
+																				<button type="button"
+																						class="btn btn-link btn-success btn-sm receive-sample-btn"
+																						data-request-number="@item.RequestNumber"
+																						data-toggle="tooltip"
+																						title="Verify sample">
 
-                                                                    <a asp-area="Technician"
-                                                                       asp-controller="ReceiveSamples"
-                                                                       asp-action="Receive"
-                                                                       asp-route-requestNumber="@item.RequestNumber"
-                                                                       class="receive-btn">
+																					<i class="fas fa-inbox mr-1"></i>
+																					Receive Sample
 
-                                                                        <i class="bi bi-inbox-fill"></i>
-                                                                        Receive Samples
-
-                                                                    </a>
+																				</button>
+																			
+																			</div>
+																		
 
                                                                 </td>
 
@@ -762,7 +773,12 @@
                                                     </tbody>
 
                                                 </table>
-                                            }
+                                          
+											
+														
+												
+											
+											}
                                             else
                                             {
                                                 <div class="empty-message">
@@ -778,8 +794,12 @@
 
                                         </div>
 
-									   	</div>
-										</div>
+									
+									
+									</div>
+										
+								
+								</div>
                                     </div>
 
                                 </div>
@@ -794,107 +814,169 @@
         </div>
     </div>
 </div>
+<div class="modal fade"
+	 id="receiveSampleModal"
+	 tabindex="0"
+	 role="dialog"
+	 aria-labelledby="receiveSampleModalLabel"
+	 aria-hidden="true">
+
+	<div class="modal-dialog modal-lg modal-dialog-centered"
+		 role="document">
+
+		<div class="modal-content">
+
+			<!-- MODAL HEADER -->
+			<div class="modal-header bg-primary text-white">
+
+				<h5 class="modal-title"
+					id="receiveSampleModalLabel">
+
+					<i class="fas fa-vials mr-2"></i>
+					Receive Sample - Verification Required
+
+				</h5>
+
+				<button type="button"
+						class="close text-white"
+						data-dismiss="modal"
+						aria-label="Close">
+
+					<span aria-hidden="true">&times;</span>
+
+				</button>
+
+			</div>
+
+			<!-- AJAX PARTIAL VIEW -->
+			<div id="receiveSampleModalContent" style="width:100%">
+
+				<div class="text-center p-5">
+
+					<i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+
+					<p class="mt-2 mb-0">
+						Loading sample...
+					</p>
+
+				</div>
+
+			</div>
+
+
+
+
+
+
+			
+
+		</div>
+
+	</div>
+
+</div>
 		<script>
-				$(document).ready(function() {
+	$(document).ready(function() {
 
-					$('#basic-datatables').DataTable({
+		var table = $('#basic-datatables').DataTable({
+			searching: true,
+			paging: true,
+			pageLength: 10,
 
-						// Search
-						searching: true,
+			scrollX: true,
+			scrollY: '400px',
+			scrollCollapse: false,
 
-						// Pagination
-						paging: true,
-						pageLength: 10,
+			autoWidth: false,
 
-						// Page length options
-						lengthMenu: [
-							[10, 25, 50, 100, -1],
-							[10, 25, 50, 100, "All"]
-						],
+			dom:
+				"<'row mb-3'<'col-md-6'l><'col-md-6'f>>" +
+				"<'row mb-3'<'col-md-12'B>>" +
+				"<'row'<'col-md-12'tr>>" +
+				"<'row mt-3'<'col-md-5'i><'col-md-7'p>>",
 
-						// Sorting
-						ordering: true,
+			buttons: [
+				{
+					extend: 'pdfHtml5',
+					text: '<i class="fas fa-file-pdf"></i> PDF',
+					title: 'Pending Sample Reception',
+					exportOptions: {
+						columns: [0, 1, 2, 3, 4]
+					},
+					orientation: 'landscape',
+					pageSize: 'A4'
+				}
+			],
 
-						// Information text
-						info: true,
+			columnDefs: [
+				{
+					targets: 5,
+					orderable: false,
+					searchable: false
+				}
+			]
+		});
 
-						// Horizontal scrollbar
-						scrollX: true,
 
-						// Vertical scrollbar
-						scrollY: '400px',
+		// Fix header alignment when sidebar opens/closes
+		$('.toggle-sidebar, .sidenav-toggler').on('click', function() {
 
-						// Don't collapse vertical area
-						scrollCollapse: false,
+			setTimeout(function() {
+				table.columns.adjust().draw(false);
+			}, 350);
 
-						// Keep pagination
-						paging: true,
+		});
 
-						// Layout
-						dom:
-							"<'row mb-3'<'col-md-6'l><'col-md-6'f>>" +
-							"<'row mb-3'<'col-md-12'B>>" +
-							"<'row'<'col-md-12'tr>>" +
-							"<'row mt-3'<'col-md-5'i><'col-md-7'p>>",
 
-						// Export buttons
-						buttons: [
-							{
-								extend: 'pdfHtml5',
-								text: '<i class="fas fa-file-pdf"></i> PDF',
-								title: 'Pending Sample Reception',
+		// Fix when browser/window size changes
+		$(window).on('resize', function() {
+			table.columns.adjust();
+		});
 
-								// Do not export ACTION column
-								exportOptions: {
-									columns: [0, 1, 2, 3, 4]
-								},
+	});
+	//modal 
+	$(document).on('click', '.receive-sample-btn', function() {
 
-								orientation: 'landscape',
-								pageSize: 'A4'
-							},
-							{
-								extend: 'excelHtml5',
-								text: '<i class="fas fa-file-excel"></i> Excel',
-								title: 'Pending Sample Reception',
+		var requestNumber = $(this).data('request-number');
 
-								exportOptions: {
-									columns: [0, 1, 2, 3, 4]
-								}
-							},
-							{
-								extend: 'print',
-								text: '<i class="fas fa-print"></i> Print',
-								title: 'Pending Sample Reception',
+		// Open modal
+		$('#receiveSampleModal').modal('show');
 
-								exportOptions: {
-									columns: [0, 1, 2, 3, 4]
-								}
-							}
-						],
+		// Loading indicator
+		$('#receiveSampleModalContent').html(`
+					<div class="text-center p-5">
+						<i class="fas fa-spinner fa-spin fa-2x"></i>
+						<p class="mt-2">Loading sample...</p>
+					</div>
+				`);
 
-						// Disable sorting on ACTION column
-						columnDefs: [
-							{
-								targets: 5,
-								orderable: false,
-								searchable: false
-							}
-						],
+		var url = '@Url.Action(
+												"Receive",
+												"ReceiveSamples",
+				new { area = "Technician" })';
 
-						language: {
-							search: "Search:",
-							searchPlaceholder: "Search requests...",
-							lengthMenu: "Show _MENU_ entries",
-							info: "Showing _START_ to _END_ of _TOTAL_ requests",
-							infoEmpty: "No requests available",
-							zeroRecords: "No matching requests found"
-						}
-					});
+		$.get(url, { requestNumber: requestNumber })
+			.done(function(html) {
 
-				});
+				$('#receiveSampleModalContent').html(html);
+
+			})
+			.fail(function() {
+
+				$('#receiveSampleModalContent').html(`
+							<div class="alert alert-danger m-3">
+								<i class="fas fa-exclamation-circle mr-1"></i>
+								Unable to load the sample information.
+							</div>
+						`);
+
+			});
+	});
+
+
 		</script>
 
-	
+
 
 
 

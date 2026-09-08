@@ -139,7 +139,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     "Test request was not found."
                 );
 
-                return View(model);
+                return PartialView("_ReceiveSampleModal", model);
             }
 
             var sample = request.Samples
