@@ -43,11 +43,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // Its job is to load the Receive Sample page
         // and populate it with the correct
         // request, patient, doctor, and sample information.
+        // GET: Technician/ReceiveSamples/Receive
         [HttpGet]
         public async Task<IActionResult> Receive(string? requestNumber)
-        {   
-
+        {
             var model = new ReceiveSampleViewModel();
+
             var technician = await _userManager.GetUserAsync(User);
 
             if (technician != null)
@@ -55,59 +56,62 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 model.TechnicianName = technician.FullName;
             }
 
-            model.SampleTypes = await _context.SampleTypes
-                .Select(s => new SelectListItem
-                {
-                    Value = s.SampleTypeId.ToString(),
-                    Text = s.Name
-                })
-                .ToListAsync();
+            await LoadSampleTypesAsync(model);
 
-            if (!string.IsNullOrEmpty(requestNumber))
+            if (string.IsNullOrEmpty(requestNumber))
             {
-                var request = await _context.TestRequests
-                    .Include(r => r.Patient)
-                    .Include(r => r.Doctor)
-                    .Include(r => r.Samples)
-                    .FirstOrDefaultAsync(r => r.RequestNumber == requestNumber);
+                ModelState.AddModelError(
+                    "RequestNumber",
+                    "Request number is required."
+                );
 
-                if (request == null)
-                {
-                    ModelState.AddModelError(
-                        "RequestNumber",
-                        "Test request was not found."
-                    );
-
-                    return View(model);
-                }
-
-                var sample = request.Samples.FirstOrDefault();
-
-                model.TestRequestId = request.TestRequestId;
-                model.RequestNumber = request.RequestNumber;
-
-                if (request.Patient != null)
-                {
-                    model.PatientName = request.Patient.FullName;
-                }
-
-                if (request.Doctor != null)
-                {
-                    model.DoctorName = request.Doctor.FullName;
-                }
-
-                if (sample != null)
-                {
-                    model.SampleID = sample.SampleId;
-                    model.Barcode = sample.Barcode;
-                    model.SampleTypeId = sample.SampleTypeId;
-                }
-                // Set the receiving date/time
-                model.DateTimeReceived = DateTime.Now;
+                return PartialView("_ReceiveSampleModal", model);
             }
 
-            return View(model);
+            var request = await _context.TestRequests
+                .Include(r => r.Patient)
+                .Include(r => r.Doctor)
+                .Include(r => r.Samples)
+                .FirstOrDefaultAsync(r =>
+                    r.RequestNumber == requestNumber);
+
+            if (request == null)
+            {
+                ModelState.AddModelError(
+                    "RequestNumber",
+                    "Test request was not found."
+                );
+
+                return PartialView("_ReceiveSampleModal", model);
+            }
+
+            var sample = request.Samples.FirstOrDefault();
+
+            model.TestRequestId = request.TestRequestId;
+            model.RequestNumber = request.RequestNumber;
+
+            if (request.Patient != null)
+            {
+                model.PatientName = request.Patient.FullName;
+            }
+
+            if (request.Doctor != null)
+            {
+                model.DoctorName = request.Doctor.FullName;
+            }
+
+            if (sample != null)
+            {
+                model.SampleID = sample.SampleId;
+                model.Barcode = sample.Barcode;
+                model.SampleTypeId = sample.SampleTypeId;
+            }
+
+            model.DateTimeReceived = DateTime.Now;
+
+            return PartialView("_ReceiveSampleModal", model);
         }
+
 
         // POST: Technician/ReceiveSamples/Receive
         [HttpPost]
@@ -116,15 +120,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             if (!ModelState.IsValid)
             {
-                model.SampleTypes = await _context.SampleTypes
-                    .Select(s => new SelectListItem
-                    {
-                        Value = s.SampleTypeId.ToString(),
-                        Text = s.Name
-                    })
-                    .ToListAsync();
+                await LoadSampleTypesAsync(model);
 
-                return View(model);
+                return PartialView("_ReceiveSampleModal", model);
             }
 
             var request = await _context.TestRequests
@@ -139,6 +137,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     "Test request was not found."
                 );
 
+                await LoadSampleTypesAsync(model);
+
                 return PartialView("_ReceiveSampleModal", model);
             }
 
@@ -152,7 +152,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     "Sample was not found."
                 );
 
-                return View(model);
+                await LoadSampleTypesAsync(model);
+
+                return PartialView("_ReceiveSampleModal", model);
             }
 
             // Verify barcode
@@ -163,7 +165,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     "The barcode does not match the sample."
                 );
 
-                return View(model);
+                await LoadSampleTypesAsync(model);
+
+                return PartialView("_ReceiveSampleModal", model);
             }
 
             // Verify sample type
@@ -174,26 +178,28 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     "The sample type does not match the request."
                 );
 
-                return View(model);
+                await LoadSampleTypesAsync(model);
+
+                return PartialView("_ReceiveSampleModal", model);
             }
 
             // Get logged-in technician
-            var technicianId = User.FindFirst(
-                System.Security.Claims.ClaimTypes.NameIdentifier
-            )?.Value;
+            var technician = await _userManager.GetUserAsync(User);
 
-            if (string.IsNullOrEmpty(technicianId))
+            if (technician == null)
             {
                 ModelState.AddModelError(
                     "",
                     "Unable to identify the logged-in technician."
                 );
 
-                return View(model);
+                await LoadSampleTypesAsync(model);
+
+                return PartialView("_ReceiveSampleModal", model);
             }
 
             // Record receiving information
-            sample.TechnicianId = technicianId;
+            sample.TechnicianId = technician.Id;
             sample.DateReceived = DateTime.Now;
 
             // Update request status
@@ -202,9 +208,24 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] =
-                "Sample successfully received, sample:" + sample.Barcode + " has been verified.";
+                "Sample successfully received, sample: " +
+                sample.Barcode +
+                " has been verified.";
 
             return RedirectToAction(nameof(Index));
+        }
+
+
+        private async Task LoadSampleTypesAsync(
+            ReceiveSampleViewModel model)
+        {
+            model.SampleTypes = await _context.SampleTypes
+                .Select(s => new SelectListItem
+                {
+                    Value = s.SampleTypeId.ToString(),
+                    Text = s.Name
+                })
+                .ToListAsync();
         }
     }
 }
