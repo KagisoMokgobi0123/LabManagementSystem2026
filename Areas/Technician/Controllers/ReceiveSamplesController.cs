@@ -6,9 +6,12 @@ using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
 using Microsoft.AspNetCore.Identity;
 using NMB_HLabSys.Models.Account;
+using Microsoft.AspNetCore.Authorization;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
+    [Area("Technician")]
+    [Authorize(Roles = "Technician ")]
     public class ReceiveSamplesController : Controller
     {
         private readonly ApplicationDbContext _context;

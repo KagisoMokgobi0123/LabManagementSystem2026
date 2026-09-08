@@ -791,7 +791,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "0099GGRM",
-
+               TestTypeId = 1, // FBC
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine blood test - Annual checkup",
                RequestNumber = "NMB-REQ-000001"
@@ -805,7 +805,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00TTR1YMM",
-
+               TestTypeId = 16, // CRP
                Urgency = Urgency.Urgent,
                ClinicalNotes = "Patient presenting with fever and chills - suspected infection",
                RequestNumber = "NMB-REQ-000002"
@@ -819,7 +819,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00FFD1YMM",
-
+               TestTypeId = 6, // PT    
                Urgency = Urgency.Stat,
                ClinicalNotes = "Emergency - Patient collapsed, suspected DVT",
                RequestNumber = "NMB-REQ-000003"
@@ -833,7 +833,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "0045ESM",
-
+               TestTypeId = 12, // HbA1c
                Urgency = Urgency.Routine,
                ClinicalNotes = "Diabetes monitoring - HbA1c and glucose levels",
                RequestNumber = "NMB-REQ-000004"
@@ -847,7 +847,7 @@ namespace NMB_HLabSys.Data
                PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
                Barcode = "005433YMV",
-
+               TestTypeId = 13, // Lipid Profile
                Urgency = Urgency.Urgent,
                ClinicalNotes = "Chest pain, suspected cardiac issue - Lipid Profile and Cardiac enzymes",
                RequestNumber = "NMB-REQ-000005"
@@ -861,7 +861,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "009988HGM",
-
+               TestTypeId = 14, // LFT
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine liver function test for patient on medication",
                RequestNumber = "NMB-REQ-000006"
@@ -875,7 +875,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00876YMM",
-
+               TestTypeId = 6, // PT
                Urgency = Urgency.Stat,
                ClinicalNotes = "Pre-surgery coagulation screen - STAT request",
                RequestNumber = "NMB-REQ-000007"
@@ -889,6 +889,7 @@ namespace NMB_HLabSys.Data
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00991YMM",
+               TestTypeId = 17, // Urinalysis (Dipstick)
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine urinalysis - suspected UTI",
                RequestNumber = "NMB-REQ-000008"
@@ -902,7 +903,7 @@ namespace NMB_HLabSys.Data
                PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00HHHYMM",
-
+               TestTypeId = 20, // Blood Culture
                Urgency = Urgency.Urgent,
                ClinicalNotes = "Suspected blood stream infection - Blood culture",
                RequestNumber = "NMB-REQ-000009"
@@ -915,7 +916,7 @@ namespace NMB_HLabSys.Data
                Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                Barcode = "04561YMM",
-
+               TestTypeId = 1, // FBC
                DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
                Urgency = Urgency.Routine,
                ClinicalNotes = "Annual physical examination - Full blood count and chemistry panel",

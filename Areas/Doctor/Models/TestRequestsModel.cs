@@ -42,7 +42,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         [Required]
         [ForeignKey("TestType")]
-        public int TestTypeID { get; set; }
+        public int TestTypeId { get; set; }
         public TestTypeModel TestType { get; set; }
 
 
