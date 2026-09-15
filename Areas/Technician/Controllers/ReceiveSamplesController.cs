@@ -69,11 +69,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             }
 
             var request = await _context.TestRequests
-                .Include(r => r.Patient)
-                .Include(r => r.Doctor)
-                .Include(r => r.Samples)
-                .FirstOrDefaultAsync(r =>
-                    r.RequestNumber == requestNumber);
+     .Include(r => r.Patient)
+     .Include(r => r.Doctor)
+     .Include(r => r.Samples)
+         .ThenInclude(s => s.SampleType)
+     .FirstOrDefaultAsync(r =>
+         r.RequestNumber == requestNumber);
 
             if (request == null)
             {
@@ -105,6 +106,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 model.SampleID = sample.SampleId;
                 model.Barcode = sample.Barcode;
                 model.SampleTypeId = sample.SampleTypeId;
+                model.SampleTypeName = sample.SampleType?.Name;
             }
 
             model.DateTimeReceived = DateTime.Now;

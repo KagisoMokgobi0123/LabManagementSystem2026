@@ -273,139 +273,189 @@
                 width: 100%;
             }
     }</style>
-<div class="verification-modal-card">
-
-    <div class="verification-header">
-        <div class="verification-title">
-            <i class="fas fa-vial"></i>
-            Receive Sample - Verification Required
-        </div>
-
-        <button type="button"
-                class="verification-close"
-                data-bs-dismiss="modal"
-                aria-label="Close">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
 
     <div class="verification-body">
 
         <div class="verification-checklist">
 
-            <div class="checklist-heading">
-                <i class="fas fa-check-circle"></i>
+            <div class="checklist-heading mb-3">
+                <i class="fas fa-clipboard-check mr-1"></i>
                 Sample Verification Checklist
             </div>
 
-            <!-- REQUEST NUMBER -->
-            <div class="verification-row">
-                <input asp-for="VerifyRequestNumber"
-                       class="form-check-input verification-check"
-                       id="verifyRequestNumber" />
 
-                <label for="verifyRequestNumber">
-                    <strong>Request Number:</strong>
-                    <span>@Model.RequestNumber</span>
-                </label>
-            </div>
+            <!-- ===================== -->
+            <!-- ROW 1: THREE FIELDS   -->
+            <!-- ===================== -->
+            <div class="row">
 
+                <!-- REQUEST NUMBER -->
+                <div class="col-md-4">
 
-            <!-- TECHNICIAN -->
-            <div class="verification-row">
-                <input asp-for="VerifyTechnician"
-                       class="form-check-input verification-check"
-                       id="verifyTechnician" />
+                    <div class="verification-row">
 
-                <label for="verifyTechnician">
-                    <strong>Technician Receiving:</strong>
-                    <span>@Model.TechnicianName</span>
-                </label>
-            </div>
+                        <input asp-for="VerifyRequestNumber"
+                               type="checkbox"
+                               class="verification-check"
+                               id="verifyRequestNumber" />
 
+                        <label for="verifyRequestNumber">
 
-            <!-- BARCODE -->
-            <div class="verification-row align-items-center">
+                            <strong>Request Number</strong>
 
-                <input asp-for="VerifyBarcode"
-                       class="form-check-input verification-check"
-                       id="verifyBarcode" />
+                            <span>
+                                @Model.RequestNumber
+                            </span>
 
-                <label for="verifyBarcode" class="mb-0">
-                    <strong>Sample Barcode:</strong>
-                </label>
+                        </label>
 
-                <input type="text"
-                       value="@Model.Barcode"
-                       class="form-control verification-barcode"
-                       readonly />
+                    </div>
 
-                <span class="barcode-valid">
-                    <i class="fas fa-check"></i>
-                    Unique
-                </span>
-
-            </div>
+                </div>
 
 
-            <!-- SAMPLE TYPE -->
-            <div class="verification-row align-items-center">
+                <!-- TECHNICIAN -->
+                <div class="col-md-4">
 
-                <input asp-for="VerifySampleType"
-                       class="form-check-input verification-check"
-                       id="verifySampleType" />
+                    <div class="verification-row">
 
-                <label for="verifySampleType" class="mb-0">
-                    <strong>Sample Type:</strong>
-                </label>
+                        <input asp-for="VerifyTechnician"
+                               type="checkbox"
+                               class="verification-check"
+                               id="verifyTechnician" />
 
-                <select asp-for="SampleTypeId"
-                        asp-items="Model.SampleTypes"
-                        class="form-select verification-select">
+                        <label for="verifyTechnician">
 
-                    <option value="">
-                        Select
-                    </option>
+                            <strong>Technician Receiving</strong>
 
-                </select>
+                            <span>
+                                @Model.TechnicianName
+                            </span>
 
-            </div>
+                        </label>
 
-            <span asp-validation-for="SampleTypeId"
-                  class="text-danger verification-validation">
-            </span>
+                    </div>
+
+                </div>
 
 
-            <!-- DATE TIME -->
-            <div class="verification-row">
+                <!-- BARCODE -->
+                <div class="col-md-4">
 
-                <input asp-for="VerifyDateTime"
-                       class="form-check-input verification-check"
-                       id="verifyDateTime" />
+                    <div class="verification-row">
 
-                <label for="verifyDateTime">
-                    <strong>Date/Time Received:</strong>
+                        <input asp-for="VerifyBarcode"
+                               type="checkbox"
+                               class="verification-check"
+                               id="verifyBarcode" />
 
-                    <span>
-                        @Model.DateTimeReceived.ToString("M/d/yyyy, h:mm:ss tt")
-                    </span>
-                </label>
+                        <label for="verifyBarcode">
+
+                            <strong>Sample Barcode</strong>
+
+                            <span>
+                                @Model.Barcode
+                            </span>
+
+                            <small class="barcode-valid">
+                                <i class="fas fa-check-circle mr-1"></i>
+                                Unique
+                            </small>
+
+                        </label>
+
+                    </div>
+
+                </div>
 
             </div>
 
-        </div>
+
+            <!-- ===================== -->
+            <!-- ROW 2: THREE FIELDS   -->
+            <!-- ===================== -->
+            <div class="row">
+
+                <!-- SAMPLE TYPE -->
+                <div class="col-md-4">
+
+                    <div class="verification-row">
+
+                        <input asp-for="VerifySampleType"
+                               type="checkbox"
+                               class="verification-check"
+                               id="verifySampleType" />
+
+                        <label for="verifySampleType">
+
+                            <strong>Sample Type</strong>
+
+                            <span>
+                                @Model.SampleTypeName
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
 
 
-        <div id="verificationWarning"
-             class="verification-warning">
+                <!-- DATE / TIME -->
+                <div class="col-md-4">
 
-            Please verify all items.
+                    <div class="verification-row">
+
+                        <input asp-for="VerifyDateTime"
+                               type="checkbox"
+                               class="verification-check"
+                               id="verifyDateTime" />
+
+                        <label for="verifyDateTime">
+
+                            <strong>Date / Time Received</strong>
+
+                            <span>
+                                @Model.DateTimeReceived.ToString(
+                                    "dd/MM/yyyy HH:mm")
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <!-- VERIFICATION STATUS -->
+                <div class="col-md-12">
+
+                    <div id="verificationWarning"
+                         class="verification-warning">
+
+                        <div>
+
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+
+                            <strong>
+                                Verification Required
+                            </strong>
+
+                            <div class="mt-1">
+                                Please verify all items.
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
 
         </div>
 
     </div>
-
-
     <div class="verification-footer">
 
         <button type="button"
@@ -427,7 +477,6 @@
 
     </div>
 
-</div>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 

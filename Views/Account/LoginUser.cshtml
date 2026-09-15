@@ -8,40 +8,7 @@
 }
 
 
-@*  <form method="post" asp-action="LoginUser" asp-controller="Account" novalidate>
-                            @Html.AntiForgeryToken()
 
-                            <!-- Email/Username -->
-                            <div class="mb-3">
-                                <label asp-for="Email" class="form-label">Username</label>
-                                <input asp-for="Email" class="form-control form-control-sm" placeholder="Enter username or email" />
-                                <span asp-validation-for="Email" class="text-danger small"></span>
-                            </div>
-
-                            <!-- Password -->
-                            <div class="mb-3">
-                                <label asp-for="Password" class="form-label">Password</label>
-                                <input asp-for="Password" class="form-control form-control-sm" placeholder="Enter password" />
-                                <span asp-validation-for="Password" class="text-danger small"></span>
-                            </div>
-
-                            <!-- Remember Me -->
-                            <div class="form-check mb-3">
-                                <input asp-for="RememberMe" class="form-check-input" id="rememberMe">
-                                    <label asp-for="RememberMe" class="form-check-label">Remember Me</label>
-                                </div>
-
-                                <!-- Buttons -->
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-sm fw-semibold text-white" style="background-color:coral">Sign In</button>                                    <a asp-action="LandIn" asp-controller="Home" class="btn btn-outline-secondary btn-sm">Back</a>
-                                </div>
-
-                                <!-- Optional Forgot Password -->
-                                <div class="mt-2 text-center">
-                                    <a asp-action="ForgotPassword" asp-controller="Account" class="small text-decoration-none">Forgot your password?</a>
-                                </div>
-                            </form>
- *@ 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -59,7 +26,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #e9f0ff 0%, #d9e4f5 100%);
+            background: white;
             overflow-x: auto;
         }
 
@@ -453,7 +420,9 @@
                 </div>
             </div>
         </div>
-
+            <div class="d-grid gap-2 mt-2">
+                <a asp-action="LandIn" asp-controller="Home" class="btn btn-outline-soft btn-sm fw-medium text-dark"><i class="fas fa-chevron-left me-1"></i> Back</a>
+            </div>
         <!-- subtle footer note -->
         <div class="text-center mt-5 pt-2">
             <p class="small text-secondary opacity-75"><i class="far fa-clock me-1"></i> Secure single sign-on · Role-based access · <i class="fas fa-laptop-medical ms-1"></i> HIPAA compliant demo</p>

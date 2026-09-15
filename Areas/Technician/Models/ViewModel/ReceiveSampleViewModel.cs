@@ -18,7 +18,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string? DoctorName { get; set; }
 
         public string Barcode { get; set; } = string.Empty;
-
+        public string? SampleTypeName { get; set; }
         public int SampleTypeId { get; set; }
 
         public IEnumerable<SelectListItem>? SampleTypes { get; set; }
