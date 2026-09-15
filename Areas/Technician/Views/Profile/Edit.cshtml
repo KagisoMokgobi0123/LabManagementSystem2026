@@ -1,0 +1,166 @@
+﻿@model NMB_HLabSys.Models.Account.ViewModels.EditTechnicianProfileViewModel
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "_TechnicianLayout";
+}
+
+<div class="main-panel">
+    <div class="content">
+
+        <div class="panel-header bg-primary-gradient">
+            <div class="page-inner py-5">
+
+                <h2 class="text-white fw-bold">
+                    Edit Profile
+                </h2>
+
+                <h5 class="text-white op-7">
+                    Update your personal information
+                </h5>
+
+            </div>
+        </div>
+
+
+        <div class="page-inner mt--5">
+
+            <div class="row justify-content-center">
+
+                <div class="col-md-8">
+
+                    <div class="card">
+
+                        <div class="card-header">
+
+                            <h4 class="card-title">
+                                <i class="fas fa-user-edit text-primary mr-2"></i>
+                                Personal Information
+                            </h4>
+
+                        </div>
+
+
+                        <form asp-area="Technician"
+                              asp-controller="Profile"
+                              asp-action="Edit"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+
+                            <div class="card-body">
+
+                                <div asp-validation-summary="ModelOnly"
+                                     class="text-danger">
+                                </div>
+
+
+                                <div class="row">
+
+                                    <div class="col-md-6">
+
+                                        <div class="form-group">
+
+                                            <label asp-for="FirstName"></label>
+
+                                            <input asp-for="FirstName"
+                                                   class="form-control"
+                                                   placeholder="First name">
+
+                                            <span asp-validation-for="FirstName"
+                                                  class="text-danger">
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="col-md-6">
+
+                                        <div class="form-group">
+
+                                            <label asp-for="LastName"></label>
+
+                                            <input asp-for="LastName"
+                                                   class="form-control"
+                                                   placeholder="Last name">
+
+                                            <span asp-validation-for="LastName"
+                                                  class="text-danger">
+                                            </span>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label asp-for="Email"></label>
+
+                                    <input asp-for="Email"
+                                           class="form-control"
+                                           readonly>
+
+                                    <small class="form-text text-muted">
+                                        Your login email cannot be changed here.
+                                    </small>
+
+                                </div>
+
+
+                                <div class="form-group">
+
+                                    <label asp-for="PhoneNumber"></label>
+
+                                    <input asp-for="PhoneNumber"
+                                           class="form-control"
+                                           placeholder="Enter phone number">
+
+                                    <span asp-validation-for="PhoneNumber"
+                                          class="text-danger">
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="card-action">
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-round">
+
+                                    <i class="fas fa-save mr-2"></i>
+                                    Save Changes
+
+                                </button>
+
+
+                                <a asp-area="Technician"
+                                   asp-controller="Profile"
+                                   asp-action="Index"
+                                   class="btn btn-light btn-round">
+
+                                    Cancel
+
+                                </a>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
