@@ -183,7 +183,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             var today = DateTime.Now.Date;
 
             var samplesReceivedToday = await _dbcontext.Samples
-                .CountAsync(s => s.TechnicianId == technicianId && s.DateReceived.Date == today);
+                .CountAsync(s => s.TechnicianId == technicianId && s.DateReceived.Value.Date == today);
 
             var pendingRequests = await _dbcontext.TestRequests
                 .CountAsync(tr => tr.Status == "Pending" || tr.Status == "Submitted");

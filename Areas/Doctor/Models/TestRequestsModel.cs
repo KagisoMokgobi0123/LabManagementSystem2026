@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
@@ -65,7 +66,8 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         public virtual ICollection<ConsentRequestItem> ConsentRequestItems { get; set; } = new List<ConsentRequestItem>();
         public virtual ICollection<TestRequestItem> TestRequestItems { get; set; } = new List<TestRequestItem>();
-        public List<SampleModel> Samples { get; set; } 
+        public ICollection<SampleModel> Samples { get; set; }
+     = new List<SampleModel>();
 
         public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new();
 

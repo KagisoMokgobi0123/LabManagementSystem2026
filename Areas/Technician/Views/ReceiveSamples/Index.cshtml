@@ -285,7 +285,8 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 									<a class="dropdown-item" href="#">My Balance</a>
 									<a class="dropdown-item" href="#">Inbox</a>
 									<div class="dropdown-divider"></div>
-									<a class="dropdown-item" href="#">Account Setting</a>
+									<a href="@Url.Action("Index", "Settings", new { area = "Technician" })">
+										class="dropdown-item" href="#">Account Setting</a>
 									<div class="dropdown-divider"></div>
 									<a class="dropdown-item" href="#">Logout</a>
 								</li>
@@ -329,7 +330,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 									</a>
 								</li>
 								<li>
-									<a href="#settings">
+									<a href="@Url.Action("Index", "Settings", new { area = "Technician" })">
 										<span class="link-collapse">Settings</span>
 									</a>
 								</li>
@@ -367,8 +368,8 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					</li>
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#base">
-							<i class="fas fa-vials"></i>							
-							<p>Sample Reception</p>
+							<i class="fas fa-layer-group"></i>
+							<p>My Samples</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="base">
@@ -386,7 +387,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#sidebarLayouts">
 							<i class="fas fa-th-list"></i>
-							<p>Tests</p>
+							<p>Receive Samples</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="sidebarLayouts">
@@ -422,7 +423,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#forms">
 							<i class="fas fa-pen-square"></i>
-							<p>Forms</p>
+							<p>Assigned Tests</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="forms">
@@ -438,7 +439,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#tables">
 							<i class="fas fa-table"></i>
-							<p>Tables</p>
+							<p>Record Results</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="tables">
@@ -459,7 +460,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#maps">
 							<i class="fas fa-map-marker-alt"></i>
-							<p>Maps</p>
+							<p>View My Tests</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="maps">
@@ -475,7 +476,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#charts">
 							<i class="far fa-chart-bar"></i>
-							<p>Charts</p>
+							<p>View Requests</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="charts">
@@ -496,11 +497,11 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 					<li class="nav-item">
 						<a href="widgets.html">
 							<i class="fas fa-desktop"></i>
-							<p>Widgets</p>
+							<p>Settings</p>
 							<span class="badge badge-success">4</span>
 						</a>
 					</li>
-					<li class="nav-item">
+					@* 			<li class="nav-item">
 						<a data-toggle="collapse" href="#submenu">
 							<i class="fas fa-bars"></i>
 							<p>Menu Levels</p>
@@ -550,7 +551,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 								</li>
 							</ul>
 						</div>
-					</li>
+					</li> *@
 					<li class="mx-4 mt-2">
 						<a href="http://themekita.com/atlantis-bootstrap-dashboard.html" class="btn btn-primary btn-block"><span class="btn-label mr-2"> <i class="fa fa-heart"></i> </span>Sign Out</a>
 					</li>
@@ -584,7 +585,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 							</h5>
                     </div>
                     <div class="ml-md-auto py-2 py-md-0">
-						<a href="#" class="btn btn-info btn-round">
+					<a href="@Url.Action("VerifiedSamples", "ReceiveSamples", new { area = "Technician" })">
 							<i class="fas fa-check-circle mr-1"></i>
 							Verified Samples
 						</a>
@@ -814,6 +815,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
         </div>
     </div>
 </div>
+
 <div class="modal fade"
 	 id="receiveSampleModal"
 	 tabindex="0"
@@ -821,7 +823,7 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 	 aria-labelledby="receiveSampleModalLabel"
 	 aria-hidden="true">
 
-	<div class="modal-dialog modal-lg modal-dialog-centered"
+	<div class="modal-dialog modal-xl modal-dialog-centered"
 		 role="document">
 
 		<div class="modal-content">
@@ -875,107 +877,958 @@ ViewData["Title"] = "NMB_HLabSys | Samples Reception";
 	</div>
 
 </div>
-		<script>
-	$(document).ready(function() {
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-		var table = $('#basic-datatables').DataTable({
-			searching: true,
-			paging: true,
-			pageLength: 10,
+<script>
 
-			scrollX: true,
-			scrollY: '400px',
-			scrollCollapse: false,
+    $(document).ready(function() {
 
-			autoWidth: false,
+        // =========================================================
+        // DATATABLE
+        // =========================================================
 
-			dom:
-				"<'row mb-3'<'col-md-6'l><'col-md-6'f>>" +
-				"<'row mb-3'<'col-md-12'B>>" +
-				"<'row'<'col-md-12'tr>>" +
-				"<'row mt-3'<'col-md-5'i><'col-md-7'p>>",
+        if ($('#basic-datatables').length) {
 
-			buttons: [
-				{
-					extend: 'pdfHtml5',
-					text: '<i class="fas fa-file-pdf"></i> PDF',
-					title: 'Pending Sample Reception',
-					exportOptions: {
-						columns: [0, 1, 2, 3, 4]
-					},
-					orientation: 'landscape',
-					pageSize: 'A4'
-				}
-			],
+            var table = $('#basic-datatables').DataTable({
 
-			columnDefs: [
-				{
-					targets: 5,
-					orderable: false,
-					searchable: false
-				}
-			]
-		});
+                searching: true,
+                paging: true,
+                pageLength: 10,
+
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100]
+                ],
+
+                scrollX: true,
+                scrollY: '400px',
+                scrollCollapse: false,
+
+                autoWidth: false,
+
+                dom:
+                    "<'row mb-3'<'col-md-6'l><'col-md-6'f>>" +
+                    "<'row mb-3'<'col-md-12'B>>" +
+                    "<'row'<'col-md-12'tr>>" +
+                    "<'row mt-3'<'col-md-5'i><'col-md-7'p>>",
+
+                buttons: [
+
+                    {
+                        extend: 'pdfHtml5',
+
+                        text:
+                            '<i class="fas fa-file-pdf"></i> PDF',
+
+                        title:
+                            'Pending Sample Reception',
+
+                        filename:
+                            'NMB-HLabSys_Pending_Samples',
+
+                        exportOptions: {
+
+                            // Exclude action column
+                            columns: [0, 1, 2, 3, 4, 5]
+
+                        },
+
+                        orientation:
+                            'landscape',
+
+                        pageSize:
+                            'A4'
+                    }
+
+                ],
+
+                columnDefs: [
+
+                    {
+                        // Action column is column 6
+                        targets: 6,
+
+                        orderable: false,
+
+                        searchable: false,
+
+                        exportable: false
+                    }
+
+                ],
+
+                language: {
+
+                    search:
+                        "Search pending samples:",
+
+                    lengthMenu:
+                        "Show _MENU_ samples",
+
+                    info:
+                        "Showing _START_ to _END_ of _TOTAL_ pending samples",
+
+                    infoEmpty:
+                        "No pending samples available",
+
+                    zeroRecords:
+                        "No matching pending samples found",
+
+                    emptyTable:
+                        "No pending samples available",
+
+                    paginate: {
+
+                        previous:
+                            '<i class="fas fa-chevron-left"></i>',
+
+                        next:
+                            '<i class="fas fa-chevron-right"></i>'
+
+                    }
+
+                }
+
+            });
 
 
-		// Fix header alignment when sidebar opens/closes
-		$('.toggle-sidebar, .sidenav-toggler').on('click', function() {
+            // =====================================================
+            // FIX DATATABLE WHEN SIDEBAR CHANGES
+            // =====================================================
 
-			setTimeout(function() {
-				table.columns.adjust().draw(false);
-			}, 350);
+            $('.toggle-sidebar, .sidenav-toggler')
+                .on('click', function() {
 
-		});
+                    setTimeout(function() {
 
+                        table.columns
+                            .adjust()
+                            .draw(false);
 
-		// Fix when browser/window size changes
-		$(window).on('resize', function() {
-			table.columns.adjust();
-		});
+                    }, 350);
 
-	});
-	//modal 
-	$(document).on('click', '.receive-sample-btn', function() {
-
-		var requestNumber = $(this).data('request-number');
-
-		// Open modal
-		$('#receiveSampleModal').modal('show');
-
-		// Loading indicator
-		$('#receiveSampleModalContent').html(`
-					<div class="text-center p-5">
-						<i class="fas fa-spinner fa-spin fa-2x"></i>
-						<p class="mt-2">Loading sample...</p>
-					</div>
-				`);
-
-		var url = '@Url.Action(
-												"Receive",
-												"ReceiveSamples",
-				new { area = "Technician" })';
-
-		$.get(url, { requestNumber: requestNumber })
-			.done(function(html) {
-
-				$('#receiveSampleModalContent').html(html);
-
-			})
-			.fail(function() {
-
-				$('#receiveSampleModalContent').html(`
-							<div class="alert alert-danger m-3">
-								<i class="fas fa-exclamation-circle mr-1"></i>
-								Unable to load the sample information.
-							</div>
-						`);
-
-			});
-	});
+                });
 
 
-		</script>
+            // =====================================================
+            // FIX DATATABLE WHEN WINDOW RESIZES
+            // =====================================================
 
+            $(window).on('resize', function() {
+
+                table.columns.adjust();
+
+            });
+
+        }
+
+
+        // =========================================================
+        // ATLANTIS TOOLTIPS
+        // =========================================================
+
+        $('[data-toggle="tooltip"]').tooltip();
+
+    });
+
+
+
+    // =============================================================
+    // OPEN RECEIVE SAMPLE MODAL
+    // =============================================================
+
+    $(document).on(
+        'click',
+        '.receive-sample-btn',
+        function() {
+
+            var button =
+                $(this);
+
+            var requestNumber =
+                button.data('request-number');
+
+
+            if (!requestNumber) {
+
+                Swal.fire({
+
+                    icon:
+                        'error',
+
+                    title:
+                        'Request Number Missing',
+
+                    text:
+                        'Unable to determine the test request number.',
+
+                    confirmButtonText:
+                        'OK',
+
+                    confirmButtonColor:
+                        '#1572E8'
+
+                });
+
+                return;
+            }
+
+
+            // Disable button while loading
+            button.prop('disabled', true);
+
+
+            // =====================================================
+            // OPEN MODAL
+            // =====================================================
+
+            $('#receiveSampleModal')
+                .modal('show');
+
+
+            // =====================================================
+            // LOADING CONTENT
+            // =====================================================
+
+            $('#receiveSampleModalContent')
+                .html(`
+
+                        <div class="text-center p-5">
+
+                            <i class="
+                                fas
+                                fa-spinner
+                                fa-spin
+                                fa-2x
+                                text-primary">
+                            </i>
+
+                            <h5 class="mt-3 mb-1">
+                                Loading Sample
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Retrieving laboratory sample information...
+                            </p>
+
+                        </div>
+
+                    `);
+
+
+            // =====================================================
+            // GET RECEIVE URL
+            // =====================================================
+
+            var url =
+                '@Url.Action(
+                                        "Receive",
+                                        "ReceiveSamples",
+                        new { area = "Technician" }
+                                )';
+
+
+            // =====================================================
+            // LOAD PARTIAL VIEW
+            // =====================================================
+
+            $.get(
+                url,
+                {
+                    requestNumber:
+                        requestNumber
+                }
+            )
+
+                .done(function(html) {
+
+                    button.prop(
+                        'disabled',
+                        false
+                    );
+
+
+                    $('#receiveSampleModalContent')
+                        .html(html);
+
+
+                    // Initialise verification state
+                    updateVerificationState();
+
+                })
+
+                .fail(function(xhr) {
+
+                    button.prop(
+                        'disabled',
+                        false
+                    );
+
+
+                    $('#receiveSampleModal')
+                        .modal('hide');
+
+
+                    Swal.fire({
+
+                        icon:
+                            'error',
+
+                        title:
+                            'Unable to Load Sample',
+
+                        text:
+                            'The sample verification information could not be loaded. Please try again.',
+
+                        confirmButtonText:
+                            'OK',
+
+                        confirmButtonColor:
+                            '#1572E8'
+
+                    });
+
+                });
+
+        });
+
+
+
+    // =============================================================
+    // VERIFICATION CHECKBOX STATE
+    // =============================================================
+
+    function updateVerificationState() {
+
+        var checkboxes =
+            $('#receiveSampleModalContent')
+                .find('.verification-check');
+
+
+        // No verification checkboxes found
+        if (!checkboxes.length) {
+            return;
+        }
+
+
+        var total =
+            checkboxes.length;
+
+
+        var checked =
+            checkboxes.filter(':checked').length;
+
+
+        var allVerified =
+            total > 0 &&
+            checked === total;
+
+
+        // =========================================================
+        // ENABLE / DISABLE CONFIRM BUTTON
+        // =========================================================
+
+        $('#receiveSampleModalContent')
+            .find(
+                '#confirmReceiveBtn, ' +
+                '.confirm-receive-btn, ' +
+                'button[type="submit"]'
+            )
+            .prop(
+                'disabled',
+                !allVerified
+            );
+
+
+        // =========================================================
+        // UPDATE COUNT
+        // =========================================================
+
+        $('#verifiedCount')
+            .text(checked);
+
+
+        $('#totalVerificationCount')
+            .text(total);
+
+
+        // =========================================================
+        // UPDATE PROGRESS BAR
+        // =========================================================
+
+        var percentage =
+            total > 0
+                ? Math.round(
+                    (checked / total) * 100
+                )
+                : 0;
+
+
+        $('#verificationProgress')
+            .css(
+                'width',
+                percentage + '%'
+            )
+            .attr(
+                'aria-valuenow',
+                percentage
+            );
+
+
+        // =========================================================
+        // STATUS MESSAGE
+        // =========================================================
+
+        if (allVerified) {
+
+            $('#verificationStatus')
+                .removeClass(
+                    'text-muted text-warning'
+                )
+                .addClass(
+                    'text-success'
+                )
+                .html(
+                    '<i class="fas fa-check-circle mr-1"></i>' +
+                    'All verification checks completed.'
+                );
+
+        }
+        else {
+
+            $('#verificationStatus')
+                .removeClass(
+                    'text-success'
+                )
+                .addClass(
+                    'text-muted'
+                )
+                .html(
+                    '<i class="fas fa-shield-alt mr-1"></i>' +
+                    checked +
+                    ' of ' +
+                    total +
+                    ' verification checks completed.'
+                );
+
+        }
+
+    }
+
+
+
+    // =============================================================
+    // VERIFICATION CHECKBOX CHANGED
+    // =============================================================
+
+    $(document).on(
+        'change',
+        '#receiveSampleModalContent .verification-check',
+        function() {
+
+            updateVerificationState();
+
+        });
+
+
+
+    // =============================================================
+    // RECEIVE SAMPLE FORM SUBMIT
+    // =============================================================
+
+    $(document).on(
+        'submit',
+        '#receiveSampleForm',
+        function(e) {
+
+            e.preventDefault();
+
+
+            var form =
+                $(this);
+
+
+            var submitButton =
+                form.find(
+                    'button[type="submit"]'
+                );
+
+
+            // =====================================================
+            // VERIFY ALL CHECKBOXES CLIENT SIDE
+            // =====================================================
+
+            var checkboxes =
+                form.find(
+                    '.verification-check'
+                );
+
+
+            var unchecked =
+                checkboxes.filter(
+                    ':not(:checked)'
+                );
+
+
+            if (checkboxes.length > 0 &&
+                unchecked.length > 0) {
+
+                Swal.fire({
+
+                    icon:
+                        'warning',
+
+                    title:
+                        'Verification Required',
+
+                    text:
+                        'Please verify all sample information before receiving the sample.',
+
+                    confirmButtonText:
+                        'OK',
+
+                    confirmButtonColor:
+                        '#1572E8'
+
+                });
+
+                return;
+            }
+
+
+            // =====================================================
+            // CONFIRM WITH TECHNICIAN
+            // =====================================================
+
+            Swal.fire({
+
+                icon:
+                    'question',
+
+                title:
+                    'Receive This Sample?',
+
+                html:
+                    'You are about to confirm that the sample ' +
+                    'information has been checked and verified.<br><br>' +
+
+                    '<strong>This sample will be marked as received and verified.</strong>',
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    '<i class="fas fa-check-circle mr-1"></i>' +
+                    ' Confirm & Receive',
+
+                cancelButtonText:
+                    '<i class="fas fa-times mr-1"></i>' +
+                    ' Cancel',
+
+                confirmButtonColor:
+                    '#31CE36',
+
+                cancelButtonColor:
+                    '#6c757d',
+
+                reverseButtons:
+                    true,
+
+                focusCancel:
+                    true
+
+            }).then(function(result) {
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+
+                // =================================================
+                // DISABLE SUBMIT
+                // =================================================
+
+                submitButton
+                    .prop(
+                        'disabled',
+                        true
+                    );
+
+
+                // =================================================
+                // SHOW PROCESSING SWEETALERT
+                // =================================================
+
+                Swal.fire({
+
+                    title:
+                        'Receiving Sample',
+
+                    html:
+                        'Please wait while the laboratory verification is being saved...',
+
+                    allowOutsideClick:
+                        false,
+
+                    allowEscapeKey:
+                        false,
+
+                    showConfirmButton:
+                        false,
+
+                    didOpen: function() {
+
+                        Swal.showLoading();
+
+                    }
+
+                });
+
+
+                // =================================================
+                // SUBMIT RECEIVE FORM
+                // =================================================
+
+                $.ajax({
+
+                    url:
+                        form.attr('action'),
+
+                    type:
+                        'POST',
+
+                    data:
+                        form.serialize(),
+
+                    dataType:
+                        'json',
+
+
+                    // =============================================
+                    // SUCCESSFUL HTTP REQUEST
+                    // =============================================
+
+                    success: function(response) {
+
+                        submitButton
+                            .prop(
+                                'disabled',
+                                false
+                            );
+
+
+                        // =========================================
+                        // SAMPLE SUCCESSFULLY RECEIVED
+                        // =========================================
+
+                        if (response &&
+                            response.success === true) {
+
+
+                            $('#receiveSampleModal')
+                                .modal('hide');
+
+
+                            Swal.fire({
+
+                                icon:
+                                    'success',
+
+                                title:
+                                    response.title ||
+                                    'Sample Verified!',
+
+                                html:
+
+                                    '<div class="text-left">' +
+
+                                    '<p class="mb-3">' +
+
+                                    (
+                                        response.message ||
+                                        'The sample has been successfully received and verified.'
+                                    ) +
+
+                                    '</p>' +
+
+
+                                    '<div class="alert alert-success mb-0">' +
+
+                                    '<div class="mb-2">' +
+
+                                    '<strong>' +
+                                    '<i class="fas fa-barcode mr-1"></i>' +
+                                    'Barcode:' +
+                                    '</strong> ' +
+
+                                    (
+                                        response.barcode ||
+                                        'N/A'
+                                    ) +
+
+                                    '</div>' +
+
+
+                                    '<div class="mb-2">' +
+
+                                    '<strong>' +
+                                    '<i class="fas fa-user-check mr-1"></i>' +
+                                    'Verified By:' +
+                                    '</strong> ' +
+
+                                    (
+                                        response.technician ||
+                                        'N/A'
+                                    ) +
+
+                                    '</div>' +
+
+
+                                    '<div>' +
+
+                                    '<strong>' +
+                                    '<i class="far fa-clock mr-1"></i>' +
+                                    'Date Received:' +
+                                    '</strong> ' +
+
+                                    (
+                                        response.receivedAt ||
+                                        'N/A'
+                                    ) +
+
+                                    '</div>' +
+
+                                    '</div>' +
+
+                                    '</div>',
+
+                                confirmButtonText:
+                                    '<i class="fas fa-check mr-1"></i> OK',
+
+                                confirmButtonColor:
+                                    '#1572E8',
+
+                                allowOutsideClick:
+                                    false,
+
+                                allowEscapeKey:
+                                    false
+
+                            }).then(function() {
+
+
+                                // =================================
+                                // REFRESH PENDING SAMPLES
+                                // =================================
+                                //
+                                // Because IsReceived = true and the
+                                // TestRequest status is SamplesReceived,
+                                // the sample should disappear from the
+                                // pending list after reload.
+                                // =================================
+
+                                window.location.reload();
+
+                            });
+
+
+                            return;
+
+                        }
+
+
+                        // =========================================
+                        // CONTROLLER VALIDATION / BUSINESS ERROR
+                        // =========================================
+
+                        Swal.fire({
+
+                            icon:
+                                response.icon ||
+                                'error',
+
+                            title:
+                                response.title ||
+                                'Verification Failed',
+
+                            html:
+                                response.message ||
+                                'The sample could not be received.',
+
+                            confirmButtonText:
+                                'OK',
+
+                            confirmButtonColor:
+                                '#1572E8'
+
+                        });
+
+                    },
+
+
+                    // =============================================
+                    // AJAX / SERVER ERROR
+                    // =============================================
+
+                    error: function(xhr) {
+
+                        submitButton
+                            .prop(
+                                'disabled',
+                                false
+                            );
+
+
+                        var title =
+                            'Unable to Receive Sample';
+
+
+                        var message =
+                            'An unexpected error occurred while receiving the sample. Please try again.';
+
+
+                        // =========================================
+                        // BAD REQUEST
+                        // =========================================
+
+                        if (xhr.status === 400) {
+
+                            title =
+                                'Invalid Request';
+
+                            message =
+                                'The sample request could not be processed. Please refresh the page and try again.';
+
+                        }
+
+
+                        // =========================================
+                        // UNAUTHORIZED
+                        // =========================================
+
+                        else if (xhr.status === 401) {
+
+                            title =
+                                'Session Expired';
+
+                            message =
+                                'Your session has expired. Please sign in again.';
+
+                        }
+
+
+                        // =========================================
+                        // FORBIDDEN
+                        // =========================================
+
+                        else if (xhr.status === 403) {
+
+                            title =
+                                'Access Denied';
+
+                            message =
+                                'You are not authorized to receive this sample.';
+
+                        }
+
+
+                        // =========================================
+                        // NOT FOUND
+                        // =========================================
+
+                        else if (xhr.status === 404) {
+
+                            title =
+                                'Sample Not Found';
+
+                            message =
+                                'The requested sample could not be found.';
+
+                        }
+
+
+                        // =========================================
+                        // SERVER ERROR
+                        // =========================================
+
+                        else if (xhr.status >= 500) {
+
+                            title =
+                                'Server Error';
+
+                            message =
+                                'A server error occurred while saving the sample verification.';
+
+                        }
+
+
+                        Swal.fire({
+
+                            icon:
+                                'error',
+
+                            title:
+                                title,
+
+                            text:
+                                message,
+
+                            confirmButtonText:
+                                'OK',
+
+                            confirmButtonColor:
+                                '#1572E8'
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+        });
+
+
+
+    // =============================================================
+    // MODAL CLOSED
+    // =============================================================
+
+    $('#receiveSampleModal')
+        .on(
+            'hidden.bs.modal',
+            function() {
+
+                // Reset modal content so old sample information
+                // isn't briefly displayed when another sample opens.
+
+                $('#receiveSampleModalContent')
+                    .html(`
+
+                            <div class="text-center p-5">
+
+                                <i class="
+                                    fas
+                                    fa-spinner
+                                    fa-spin
+                                    fa-2x
+                                    text-primary">
+                                </i>
+
+                                <p class="mt-2 mb-0">
+                                    Loading sample...
+                                </p>
+
+                            </div>
+
+                        `);
+
+            }
+        );
+
+</script>
 
 
 
