@@ -663,88 +663,163 @@ namespace NMB_HLabSys.Data
 );
 
             // Seed Samples
+            // ==========================================================
+            // SEED SAMPLES
+            // One sample corresponds to each seeded TestRequest
+            // ==========================================================
+
             modelBuilder.Entity<SampleModel>().HasData(
-            new SampleModel
-            {
-                SampleId = 1,
-                Barcode = "SMP-2024-000001",
-                SampleTypeId = 1,
-                TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                DateReceived = new DateTime(2024, 1, 15, 10, 30, 0),
-                Status = "Received",
-                TestRequestId = 1,
-                IsReceived = true
-            },
+
+                // Request 1 - FBC -> Blood
+                new SampleModel
+                {
+                    SampleId = 1,
+                    TestRequestId = 1,
+                    Barcode = "0099GGRM",
+                    SampleTypeId = 1,
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 1, 8, 0, 0)
+                },
+
+                // Request 2 - CRP -> Plasma
                 new SampleModel
                 {
                     SampleId = 2,
-                    Barcode = "SMP-2024-000002",
-                    SampleTypeId = 2,
-                    TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                    DateReceived = new DateTime(2024, 1, 16, 11, 45, 0),
-                    Status = "Received",
-                    TestRequestId = 1,
-                    IsReceived = true
+                    TestRequestId = 2,
+                    Barcode = "00TTR1YMM",
+                    SampleTypeId = 4,
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 2, 8, 0, 0)
                 },
+
+                // Request 3 - PT -> Plasma
                 new SampleModel
                 {
                     SampleId = 3,
-                    Barcode = "SMP-2024-000003",
-                    SampleTypeId = 3,
-                    TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                    DateReceived = new DateTime(2024, 1, 17, 09, 15, 0),
-                    Status = "Received",
-                    TestRequestId = 2,
-                    IsReceived = true
+                    TestRequestId = 3,
+                    Barcode = "00FFD1YMM",
+                    SampleTypeId = 4,
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 3, 8, 0, 0)
                 },
+
+                // Request 4 - HbA1c -> Blood
                 new SampleModel
                 {
                     SampleId = 4,
-                    Barcode = "SMP-2024-000004",
+                    TestRequestId = 4,
+                    Barcode = "0045ESM",
                     SampleTypeId = 1,
                     TechnicianId = null,
-                    DateReceived = new DateTime(2024, 1, 18, 14, 20, 0),
-                    Status = "Pending",
-                    TestRequestId = 2,
-                    IsReceived = false
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 4, 8, 0, 0)
                 },
+
+                // Request 5 - Lipid Profile -> Plasma
                 new SampleModel
                 {
                     SampleId = 5,
-                    Barcode = "SMP-2024-000005",
+                    TestRequestId = 5,
+                    Barcode = "005433YMV",
                     SampleTypeId = 4,
-                    TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                    DateReceived = new DateTime(2024, 1, 19, 08, 00, 0),
-                    Status = "Received",
-                    TestRequestId = 3,
-                    IsReceived = true
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 5, 8, 0, 0)
                 },
+
+                // Request 6 - LFT -> Plasma
                 new SampleModel
                 {
                     SampleId = 6,
-                    Barcode = "SMP-2024-000006",
-                    SampleTypeId = 5,
+                    TestRequestId = 6,
+                    Barcode = "009988HGM",
+                    SampleTypeId = 4,
                     TechnicianId = null,
-                    DateReceived = new DateTime(2024, 1, 20, 13, 30, 0),
-                    Status = "Pending",
-                    TestRequestId = 3,
-                    IsReceived = false
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 6, 8, 0, 0)
                 },
 
+                // Request 7 - PT -> Plasma
+                new SampleModel
+                {
+                    SampleId = 7,
+                    TestRequestId = 7,
+                    Barcode = "00876YMM",
+                    SampleTypeId = 4,
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 7, 8, 0, 0)
+                },
+
+                // Request 8 - Urinalysis -> Urine
+                new SampleModel
+                {
+                    SampleId = 8,
+                    TestRequestId = 8,
+                    Barcode = "00991YMM",
+                    SampleTypeId = 2,
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 8, 8, 0, 0)
+                },
+
+                // Request 9 - Blood Culture -> Blood
                 new SampleModel
                 {
                     SampleId = 9,
-                    Barcode = "SMP-2024-000009",
-                    SampleTypeId = 3,
+                    TestRequestId = 9,
+                    Barcode = "00HHHYMM",
+                    SampleTypeId = 1,
                     TechnicianId = null,
-                    DateReceived = new DateTime(2024, 1, 23, 11, 20, 0),
-                    Status = "Pending",
-                    TestRequestId = 3,
-                    IsReceived = false
-                }
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 9, 8, 0, 0)
+                },
 
-            );
-            modelBuilder.Entity<TestTypeConsumableModel>().HasData(
+                // Request 10 - FBC -> Blood
+                new SampleModel
+                {
+                    SampleId = 10,
+                    TestRequestId = 10,
+                    Barcode = "04561YMM",
+                    SampleTypeId = 1,
+                    TechnicianId = null,
+                    DateReceived = null,
+                    Status = "Submitted",
+                    IsReceived = false,
+                    IsDeleted = false,
+                    CollectedAt = new DateTime(2026, 5, 10, 8, 0, 0)
+                }
+            ); modelBuilder.Entity<TestTypeConsumableModel>().HasData(
     // Hematology Tests
     new TestTypeConsumableModel { TestTypeConsumableId = 1, TestTypeId = 1, ConsumableId = 1, QuantityRequired = 1 },  // FBC - EDTA Tube
     new TestTypeConsumableModel { TestTypeConsumableId = 2, TestTypeId = 2, ConsumableId = 1, QuantityRequired = 1 },  // WBC Diff - EDTA Tube
@@ -787,21 +862,23 @@ namespace NMB_HLabSys.Data
            {
                TestRequestId = 1,
                RequestDate = new DateTime(2026, 5, 1),
-               Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "0099GGRM",
                TestTypeId = 1, // FBC
                Urgency = Urgency.Routine,
                ClinicalNotes = "Routine blood test - Annual checkup",
-               RequestNumber = "NMB-REQ-000001"
+               RequestNumber = "NMB-REQ-000001",
+               Status = "Submitted"
+             
            },
            // Test Request 2 - Urgent
            new TestRequestsModel
            {
                TestRequestId = 2,
                RequestDate = new DateTime(2026, 5, 2),
-               Status = "Samples Received",
+               Status = "Submitted",
+     
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00TTR1YMM",
@@ -815,7 +892,7 @@ namespace NMB_HLabSys.Data
            {
                TestRequestId = 3,
                RequestDate = new DateTime(2026, 5, 3),
-               Status = "InProgress",
+               Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "00FFD1YMM",
@@ -829,7 +906,7 @@ namespace NMB_HLabSys.Data
            {
                TestRequestId = 4,
                RequestDate = new DateTime(2026, 5, 4),
-               Status = "Completed",
+               Status = "Submitted",
                PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
                Barcode = "0045ESM",
@@ -843,7 +920,7 @@ namespace NMB_HLabSys.Data
            {
                TestRequestId = 5,
                RequestDate = new DateTime(2026, 5, 5),
-               Status = "Submitted",
+               Status = "InProgress",
                PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
                Barcode = "005433YMV",

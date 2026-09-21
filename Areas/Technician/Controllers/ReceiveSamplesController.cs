@@ -72,64 +72,113 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return View(requests);
         }        // Its job is to load the Receive Sample page
-        // and populate it with the correct
-        // request, patient, doctor, and sample information.
-        // GET: Technician/ReceiveSamples/Receive
+                 // and populate it with the correct
+                 // request, patient, doctor, and sample information.
+                 // GET: Technician/ReceiveSamples/Receive
         [HttpGet]
-        public async Task<IActionResult> Receive(string? requestNumber)
+         public async Task<IActionResult> Receive(string? requestNumber)
         {
+            // ============================================================
+            // 1. INITIALIZE MODEL
+            // ============================================================
+
             var model = new ReceiveSampleViewModel
             {
                 DateTimeReceived = DateTime.Now
             };
 
-            // ============================================
-            // 1. GET LOGGED-IN TECHNICIAN
-            // ============================================
-            var technician = await _userManager.GetUserAsync(User);
+
+            // ============================================================
+            // 2. GET LOGGED-IN TECHNICIAN
+            // ============================================================
+
+            var technician =
+                await _userManager.GetUserAsync(User);
+
+            if (technician == null)
+            {
+                model.TechnicianName = "Unknown Technician";
+
+                ModelState.AddModelError(
+                    "",
+                    "Unable to identify the logged-in laboratory technician.");
+
+                return PartialView(
+                    "_ReceiveSampleModal",
+                    model);
+            }
 
             model.TechnicianName =
-                technician?.FullName ?? "Unknown Technician";
+                technician.FullName;
 
 
-            // ============================================
-            // 2. VALIDATE REQUEST NUMBER
-            // ============================================
+            // ============================================================
+            // 3. VALIDATE REQUEST NUMBER
+            // ============================================================
+
             if (string.IsNullOrWhiteSpace(requestNumber))
             {
                 ModelState.AddModelError(
                     nameof(model.RequestNumber),
                     "Request number is required.");
 
-                return PartialView("_ReceiveSampleModal", model);
+                return PartialView(
+                    "_ReceiveSampleModal",
+                    model);
             }
 
+            requestNumber =
+                requestNumber.Trim();
 
-            // ============================================
-            // 3. FIND TEST REQUEST
-            // ============================================
+
+            // ============================================================
+            // 4. LOAD TEST REQUEST
+            //
+            // IMPORTANT:
+            // Load TestType -> SampleType relationship.
+            // ============================================================
+
             var request = await _context.TestRequests
                 .AsNoTracking()
+
                 .Include(r => r.Patient)
                 .Include(r => r.Doctor)
+
+                .Include(r => r.TestType)
+                    .ThenInclude(t => t.SampleType)
+
                 .FirstOrDefaultAsync(r =>
                     r.RequestNumber == requestNumber);
 
+
+            // ============================================================
+            // 5. REQUEST NOT FOUND
+            // ============================================================
+
             if (request == null)
             {
+                model.RequestNumber =
+                    requestNumber;
+
                 ModelState.AddModelError(
                     nameof(model.RequestNumber),
-                    "Test request was not found.");
+                    $"Test request {requestNumber} was not found.");
 
-                return PartialView("_ReceiveSampleModal", model);
+                return PartialView(
+                    "_ReceiveSampleModal",
+                    model);
             }
 
 
-            // ============================================
-            // 4. POPULATE REQUEST DETAILS
-            // ============================================
-            model.TestRequestId = request.TestRequestId;
-            model.RequestNumber = request.RequestNumber;
+            // ============================================================
+            // 6. POPULATE REQUEST DETAILS
+            // ============================================================
+
+            model.TestRequestId =
+                request.TestRequestId;
+
+            model.RequestNumber =
+                request.RequestNumber;
 
             model.PatientName =
                 request.Patient?.FullName ?? "N/A";
@@ -138,53 +187,179 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 request.Doctor?.FullName ?? "N/A";
 
 
-            // ============================================
-            // 5. FIND SAMPLE FOR THIS REQUEST
-            // ============================================
+            // ============================================================
+            // 7. BARCODE
+            //
+            // Your TestRequests table already contains the barcode.
+            // ============================================================
+
+            model.Barcode =
+                request.Barcode?.Trim() ?? string.Empty;
+
+
+            // ============================================================
+            // 8. FIND EXISTING SAMPLE RECORD
+            // ============================================================
+
             var sample = await _context.Samples
                 .AsNoTracking()
+
                 .Include(s => s.SampleType)
+
                 .FirstOrDefaultAsync(s =>
                     s.TestRequestId == request.TestRequestId &&
                     !s.IsDeleted);
 
-            if (sample == null)
-            {
-                ModelState.AddModelError(
-                    "",
-                    $"No sample is linked to request {request.RequestNumber}.");
 
-                return PartialView("_ReceiveSampleModal", model);
+            // ============================================================
+            // 9. IF SAMPLE RECORD EXISTS
+            // ============================================================
+
+            if (sample != null)
+            {
+                model.SampleID =
+                    sample.SampleId;
+
+
+                // --------------------------------------------------------
+                // Prefer barcode from Sample if available.
+                // Otherwise use TestRequest barcode.
+                // --------------------------------------------------------
+
+                if (!string.IsNullOrWhiteSpace(sample.Barcode))
+                {
+                    model.Barcode =
+                        sample.Barcode.Trim();
+                }
+
+
+                // --------------------------------------------------------
+                // Prefer actual Sample.SampleType
+                // --------------------------------------------------------
+
+                if (sample.SampleTypeId > 0)
+                {
+                    model.SampleTypeId =
+                        sample.SampleTypeId;
+
+                    model.SampleTypeName =
+                        sample.SampleType?.Name
+                        ?? "Unknown Sample Type";
+                }
             }
 
 
-            // ============================================
-            // 6. POPULATE SAMPLE DETAILS
-            // ============================================
-            model.SampleID = sample.SampleId;
+            // ============================================================
+            // 10. GET REQUIRED SAMPLE TYPE FROM TEST TYPE
+            //
+            // This is the important fix.
+            //
+            // TestRequest
+            //      ↓
+            // TestType
+            //      ↓
+            // SampleTypeId
+            //      ↓
+            // SampleType
+            //
+            // Example:
+            //
+            // Lipid Profile
+            //      ↓
+            // Blood
+            //
+            // ============================================================
 
-            model.Barcode =
-                sample.Barcode;
+            if (model.SampleTypeId <= 0 &&
+                request.TestType != null &&
+                request.TestType.SampleTypeId > 0)
+            {
+                model.SampleTypeId =
+                    request.TestType.SampleTypeId;
 
-            model.SampleTypeId =
-                sample.SampleTypeId;
-
-            model.SampleTypeName =
-                sample.SampleType?.Name ?? "Unknown Sample Type";
-
-
-            // ============================================
-            // 7. DATE/TIME SAMPLE IS BEING RECEIVED
-            // ============================================
-            model.DateTimeReceived = DateTime.Now;
+                model.SampleTypeName =
+                    request.TestType.SampleType?.Name
+                    ?? "Unknown Sample Type";
+            }
 
 
-            // ============================================
-            // 8. RETURN MODAL
-            // ============================================
-            return PartialView("_ReceiveSampleModal", model);
+            // ============================================================
+            // 11. SAMPLE TYPE STILL NOT FOUND
+            // ============================================================
+
+            if (model.SampleTypeId <= 0)
+            {
+                model.SampleTypeName =
+                    "Sample type not found";
+
+                ModelState.AddModelError(
+                    nameof(model.SampleTypeId),
+                    $"No sample type has been configured for test type " +
+                    $"'{request.TestType?.Name ?? "Unknown Test"}'.");
+            }
+
+
+            // ============================================================
+            // 12. BARCODE VALIDATION
+            // ============================================================
+
+            if (string.IsNullOrWhiteSpace(model.Barcode))
+            {
+                ModelState.AddModelError(
+                    nameof(model.Barcode),
+                    $"No barcode is available for request " +
+                    $"{request.RequestNumber}.");
+            }
+
+
+            // ============================================================
+            // 13. IF NO SAMPLE ROW EXISTS
+            //
+            // IMPORTANT:
+            // We can display request/test information,
+            // but SampleID remains 0 because no Sample row exists.
+            // ============================================================
+
+            if (sample == null)
+            {
+                model.SampleID = 0;
+
+                ModelState.AddModelError(
+                    "",
+                    $"No Sample record is currently linked to " +
+                    $"request {request.RequestNumber}.");
+            }
+
+
+            // ============================================================
+            // 14. CHECK ALREADY RECEIVED
+            // ============================================================
+
+            if (sample != null &&
+                sample.IsReceived)
+            {
+                ModelState.AddModelError(
+                    "",
+                    $"Sample {model.Barcode} has already been received.");
+            }
+
+
+            // ============================================================
+            // 15. DATE / TIME
+            // ============================================================
+
+            model.DateTimeReceived =
+                DateTime.Now;
+
+
+            // ============================================================
+            // 16. RETURN MODAL
+            // ============================================================
+
+            return PartialView(
+                "_ReceiveSampleModal",
+                model);
         }
-
         // POST: Technician/ReceiveSamples/Receive
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -60,9 +60,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         public string? CancelReason { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        //public ICollection<SampleModel> Samples { get; set; } = new List<SampleModel>(); // uncomment after migration
-        // public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new(); // uncomment after migration
+     
 
         public virtual ICollection<ConsentRequestItem> ConsentRequestItems { get; set; } = new List<ConsentRequestItem>();
         public virtual ICollection<TestRequestItem> TestRequestItems { get; set; } = new List<TestRequestItem>();

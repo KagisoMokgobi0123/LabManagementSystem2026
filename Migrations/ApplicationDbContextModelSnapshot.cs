@@ -752,7 +752,7 @@ namespace NMBHLabSys.Migrations
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             RequestNumber = "NMB-REQ-000002",
-                            Status = "Samples Received",
+                            Status = "Submitted",
                             TestTypeId = 16,
                             Urgency = "Urgent"
                         },
@@ -766,7 +766,7 @@ namespace NMBHLabSys.Migrations
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             RequestNumber = "NMB-REQ-000003",
-                            Status = "InProgress",
+                            Status = "Submitted",
                             TestTypeId = 6,
                             Urgency = "Stat"
                         },
@@ -780,7 +780,7 @@ namespace NMBHLabSys.Migrations
                             PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
                             RequestDate = new DateTime(2026, 5, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             RequestNumber = "NMB-REQ-000004",
-                            Status = "Completed",
+                            Status = "Submitted",
                             TestTypeId = 12,
                             Urgency = "Routine"
                         },
@@ -794,7 +794,7 @@ namespace NMBHLabSys.Migrations
                             PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
                             RequestDate = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             RequestNumber = "NMB-REQ-000005",
-                            Status = "Submitted",
+                            Status = "InProgress",
                             TestTypeId = 13,
                             Urgency = "Urgent"
                         },
@@ -1851,7 +1851,7 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime>("CollectedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateReceived")
+                    b.Property<DateTime?>("DateReceived")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -1907,90 +1907,112 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 1,
-                            Barcode = "SMP-2024-000001",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 15, 10, 30, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "0099GGRM",
+                            CollectedAt = new DateTime(2026, 5, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
-                            IsReceived = true,
+                            IsReceived = false,
                             SampleTypeId = 1,
-                            Status = "Received",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
+                            Status = "Submitted",
                             TestRequestId = 1
                         },
                         new
                         {
                             SampleId = 2,
-                            Barcode = "SMP-2024-000002",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 16, 11, 45, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "00TTR1YMM",
+                            CollectedAt = new DateTime(2026, 5, 2, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
-                            IsReceived = true,
-                            SampleTypeId = 2,
-                            Status = "Received",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 1
+                            IsReceived = false,
+                            SampleTypeId = 4,
+                            Status = "Submitted",
+                            TestRequestId = 2
                         },
                         new
                         {
                             SampleId = 3,
-                            Barcode = "SMP-2024-000003",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 17, 9, 15, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "00FFD1YMM",
+                            CollectedAt = new DateTime(2026, 5, 3, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
-                            IsReceived = true,
-                            SampleTypeId = 3,
-                            Status = "Received",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 2
+                            IsReceived = false,
+                            SampleTypeId = 4,
+                            Status = "Submitted",
+                            TestRequestId = 3
                         },
                         new
                         {
                             SampleId = 4,
-                            Barcode = "SMP-2024-000004",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 18, 14, 20, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "0045ESM",
+                            CollectedAt = new DateTime(2026, 5, 4, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 1,
-                            Status = "Pending",
-                            TestRequestId = 2
+                            Status = "Submitted",
+                            TestRequestId = 4
                         },
                         new
                         {
                             SampleId = 5,
-                            Barcode = "SMP-2024-000005",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 19, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "005433YMV",
+                            CollectedAt = new DateTime(2026, 5, 5, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
-                            IsReceived = true,
+                            IsReceived = false,
                             SampleTypeId = 4,
-                            Status = "Received",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 3
+                            Status = "Submitted",
+                            TestRequestId = 5
                         },
                         new
                         {
                             SampleId = 6,
-                            Barcode = "SMP-2024-000006",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 20, 13, 30, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "009988HGM",
+                            CollectedAt = new DateTime(2026, 5, 6, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = false,
-                            SampleTypeId = 5,
-                            Status = "Pending",
-                            TestRequestId = 3
+                            SampleTypeId = 4,
+                            Status = "Submitted",
+                            TestRequestId = 6
+                        },
+                        new
+                        {
+                            SampleId = 7,
+                            Barcode = "00876YMM",
+                            CollectedAt = new DateTime(2026, 5, 7, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 4,
+                            Status = "Submitted",
+                            TestRequestId = 7
+                        },
+                        new
+                        {
+                            SampleId = 8,
+                            Barcode = "00991YMM",
+                            CollectedAt = new DateTime(2026, 5, 8, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 2,
+                            Status = "Submitted",
+                            TestRequestId = 8
                         },
                         new
                         {
                             SampleId = 9,
-                            Barcode = "SMP-2024-000009",
-                            CollectedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DateReceived = new DateTime(2024, 1, 23, 11, 20, 0, 0, DateTimeKind.Unspecified),
+                            Barcode = "00HHHYMM",
+                            CollectedAt = new DateTime(2026, 5, 9, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = false,
-                            SampleTypeId = 3,
-                            Status = "Pending",
-                            TestRequestId = 3
+                            SampleTypeId = 1,
+                            Status = "Submitted",
+                            TestRequestId = 9
+                        },
+                        new
+                        {
+                            SampleId = 10,
+                            Barcode = "04561YMM",
+                            CollectedAt = new DateTime(2026, 5, 10, 8, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 1,
+                            Status = "Submitted",
+                            TestRequestId = 10
                         });
                 });
 
@@ -2101,10 +2123,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 1,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2286),
-                            DueDate = new DateTime(2026, 9, 8, 10, 11, 30, 488, DateTimeKind.Local).AddTicks(2288),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1630),
+                            DueDate = new DateTime(2026, 9, 21, 13, 21, 41, 207, DateTimeKind.Local).AddTicks(1631),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2270),
+                            StartDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1621),
                             Status = "Submitted",
                             TestRequestId = 1,
                             TestTypeId = 1
@@ -2112,10 +2134,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 2,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2300),
-                            DueDate = new DateTime(2026, 9, 8, 9, 11, 30, 488, DateTimeKind.Local).AddTicks(2301),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1643),
+                            DueDate = new DateTime(2026, 9, 21, 12, 21, 41, 207, DateTimeKind.Local).AddTicks(1644),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2300),
+                            StartDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1642),
                             Status = "Submitted",
                             TestRequestId = 1,
                             TestTypeId = 11
@@ -2123,10 +2145,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 3,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2305),
-                            DueDate = new DateTime(2026, 9, 8, 10, 11, 30, 488, DateTimeKind.Local).AddTicks(2306),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1647),
+                            DueDate = new DateTime(2026, 9, 21, 13, 21, 41, 207, DateTimeKind.Local).AddTicks(1648),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2304),
+                            StartDateTime = new DateTime(2026, 9, 21, 9, 21, 41, 207, DateTimeKind.Local).AddTicks(1646),
                             Status = "InProgress",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 2,
@@ -2135,10 +2157,10 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 4,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2309),
-                            DueDate = new DateTime(2026, 9, 8, 10, 11, 30, 488, DateTimeKind.Local).AddTicks(2310),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1651),
+                            DueDate = new DateTime(2026, 9, 21, 13, 21, 41, 207, DateTimeKind.Local).AddTicks(1652),
                             IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2308),
+                            StartDateTime = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1650),
                             Status = "Submitted",
                             TestRequestId = 2,
                             TestTypeId = 6
@@ -2146,12 +2168,12 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 5,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 7, 11, 30, 488, DateTimeKind.Local).AddTicks(2314),
-                            DueDate = new DateTime(2026, 9, 8, 7, 11, 30, 488, DateTimeKind.Local).AddTicks(2316),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 10, 21, 41, 207, DateTimeKind.Local).AddTicks(1655),
+                            DueDate = new DateTime(2026, 9, 21, 10, 21, 41, 207, DateTimeKind.Local).AddTicks(1656),
                             IsAbnormal = false,
                             Notes = "Results show elevated white blood cells",
                             ResultValue = "WBC: 11.2, RBC: 4.8, HGB: 14.2, PLT: 250",
-                            StartDateTime = new DateTime(2026, 9, 8, 5, 11, 30, 488, DateTimeKind.Local).AddTicks(2313),
+                            StartDateTime = new DateTime(2026, 9, 21, 8, 21, 41, 207, DateTimeKind.Local).AddTicks(1655),
                             Status = "Completed",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 3,
@@ -2160,34 +2182,34 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 6,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2321),
-                            DueDate = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2322),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 9, 21, 41, 207, DateTimeKind.Local).AddTicks(1660),
+                            DueDate = new DateTime(2026, 9, 21, 9, 21, 41, 207, DateTimeKind.Local).AddTicks(1661),
                             IsAbnormal = false,
                             Notes = "Normal range",
                             ResultValue = "5.6 mmol/L",
-                            StartDateTime = new DateTime(2026, 9, 8, 5, 11, 30, 488, DateTimeKind.Local).AddTicks(2319),
+                            StartDateTime = new DateTime(2026, 9, 21, 8, 21, 41, 207, DateTimeKind.Local).AddTicks(1659),
                             Status = "Verified",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 3,
                             TestTypeId = 11,
-                            VerificationDateTime = new DateTime(2026, 9, 8, 6, 41, 30, 488, DateTimeKind.Local).AddTicks(2325),
+                            VerificationDateTime = new DateTime(2026, 9, 21, 9, 51, 41, 207, DateTimeKind.Local).AddTicks(1664),
                             VerificationNote = "Verified - within normal range",
                             VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
                         },
                         new
                         {
                             TestRequestTestTypeId = 7,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 7, 41, 30, 488, DateTimeKind.Local).AddTicks(2329),
-                            DueDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2331),
+                            CompletionDateTime = new DateTime(2026, 9, 21, 10, 51, 41, 207, DateTimeKind.Local).AddTicks(1669),
+                            DueDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(1669),
                             IsAbnormal = false,
                             Notes = "Abnormal high INR - needs review",
                             ResultValue = "INR: 3.5",
-                            StartDateTime = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2328),
+                            StartDateTime = new DateTime(2026, 9, 21, 9, 21, 41, 207, DateTimeKind.Local).AddTicks(1668),
                             Status = "ToBeReviewed",
                             TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
                             TestRequestId = 3,
                             TestTypeId = 6,
-                            VerificationDateTime = new DateTime(2026, 9, 8, 7, 41, 30, 488, DateTimeKind.Local).AddTicks(2333),
+                            VerificationDateTime = new DateTime(2026, 9, 21, 10, 51, 41, 207, DateTimeKind.Local).AddTicks(1671),
                             VerificationNote = "Result appears abnormal. Please review clinical notes.",
                             VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
                         });
@@ -2228,7 +2250,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 1,
                             QuantityRequired = 1,
                             TestTypeId = 1,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2878)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2090)
                         },
                         new
                         {
@@ -2236,7 +2258,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 1,
                             QuantityRequired = 1,
                             TestTypeId = 2,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2882)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2094)
                         },
                         new
                         {
@@ -2244,7 +2266,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 4,
                             QuantityRequired = 2,
                             TestTypeId = 3,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2884)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2095)
                         },
                         new
                         {
@@ -2252,7 +2274,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 1,
                             QuantityRequired = 1,
                             TestTypeId = 4,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2886)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2096)
                         },
                         new
                         {
@@ -2260,7 +2282,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 5,
                             QuantityRequired = 1,
                             TestTypeId = 5,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2888)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2098)
                         },
                         new
                         {
@@ -2268,7 +2290,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 2,
                             QuantityRequired = 1,
                             TestTypeId = 6,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2890)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2099)
                         },
                         new
                         {
@@ -2276,7 +2298,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 2,
                             QuantityRequired = 1,
                             TestTypeId = 7,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2892)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2107)
                         },
                         new
                         {
@@ -2284,7 +2306,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 2,
                             QuantityRequired = 1,
                             TestTypeId = 8,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2893)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2120)
                         },
                         new
                         {
@@ -2292,7 +2314,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 7,
                             QuantityRequired = 1,
                             TestTypeId = 9,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2895)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2122)
                         },
                         new
                         {
@@ -2300,7 +2322,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 6,
                             QuantityRequired = 1,
                             TestTypeId = 10,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2896)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2123)
                         },
                         new
                         {
@@ -2308,7 +2330,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 11,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2898)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2124)
                         },
                         new
                         {
@@ -2316,7 +2338,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 12,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2899)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2125)
                         },
                         new
                         {
@@ -2324,7 +2346,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 2,
                             TestTypeId = 13,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2901)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2127)
                         },
                         new
                         {
@@ -2332,7 +2354,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 2,
                             TestTypeId = 14,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2902)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2128)
                         },
                         new
                         {
@@ -2340,7 +2362,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 15,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2904)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2129)
                         },
                         new
                         {
@@ -2348,7 +2370,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 8,
                             QuantityRequired = 1,
                             TestTypeId = 16,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2905)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2130)
                         },
                         new
                         {
@@ -2356,7 +2378,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 9,
                             QuantityRequired = 1,
                             TestTypeId = 17,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2907)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2131)
                         },
                         new
                         {
@@ -2364,7 +2386,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 10,
                             QuantityRequired = 1,
                             TestTypeId = 18,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2908)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2133)
                         },
                         new
                         {
@@ -2372,7 +2394,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 11,
                             QuantityRequired = 1,
                             TestTypeId = 19,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2910)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2134)
                         },
                         new
                         {
@@ -2380,7 +2402,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 12,
                             QuantityRequired = 2,
                             TestTypeId = 20,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2912)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2135)
                         },
                         new
                         {
@@ -2388,7 +2410,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 11,
                             QuantityRequired = 1,
                             TestTypeId = 21,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2914)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2136)
                         },
                         new
                         {
@@ -2396,7 +2418,7 @@ namespace NMBHLabSys.Migrations
                             ConsumableId = 11,
                             QuantityRequired = 1,
                             TestTypeId = 22,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2916)
+                            VerificationDate = new DateTime(2026, 9, 21, 11, 21, 41, 207, DateTimeKind.Local).AddTicks(2138)
                         });
                 });
 
