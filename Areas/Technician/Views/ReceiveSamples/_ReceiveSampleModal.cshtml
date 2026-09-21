@@ -722,21 +722,55 @@
     @Html.AntiForgeryToken()
 
 
-    <!-- ============================================================
-         HIDDEN VALUES
-         ============================================================ -->
+    <input type="hidden"
+           id="TestRequestId"
+           name="TestRequestId"
+           value="@Model.TestRequestId" />
 
-    <input type="hidden" asp-for="TestRequestId" />
-    <input type="hidden" asp-for="RequestNumber" />
-    <input type="hidden" asp-for="SampleID" />
-    <input type="hidden" asp-for="Barcode" />
-    <input type="hidden" asp-for="SampleTypeId" />
-    <input type="hidden" asp-for="SampleTypeName" />
-    <input type="hidden" asp-for="TechnicianName" />
-    <input type="hidden" asp-for="PatientName" />
-    <input type="hidden" asp-for="DoctorName" />
-    <input type="hidden" asp-for="DateTimeReceived" />
+    <input type="hidden"
+           id="RequestNumber"
+           name="RequestNumber"
+           value="@Model.RequestNumber" />
 
+    <input type="hidden"
+           id="SampleID"
+           name="SampleID"
+           value="@Model.SampleID" />
+
+    <input type="hidden"
+           id="Barcode"
+           name="Barcode"
+           value="@Model.Barcode" />
+
+    <input type="hidden"
+           id="SampleTypeId"
+           name="SampleTypeId"
+           value="@Model.SampleTypeId" />
+
+    <input type="hidden"
+           id="SampleTypeName"
+           name="SampleTypeName"
+           value="@Model.SampleTypeName" />
+
+    <input type="hidden"
+           id="TechnicianName"
+           name="TechnicianName"
+           value="@Model.TechnicianName" />
+
+    <input type="hidden"
+           id="PatientName"
+           name="PatientName"
+           value="@Model.PatientName" />
+
+    <input type="hidden"
+           id="DoctorName"
+           name="DoctorName"
+           value="@Model.DoctorName" />
+
+    <input type="hidden"
+           id="DateTimeReceived"
+           name="DateTimeReceived"
+           value="@Model.DateTimeReceived.ToString("yyyy-MM-ddTHH:mm:ss")" />
 
     <div class="verification-body">
 
@@ -1271,19 +1305,30 @@
 
 
 <script>
-
     (function() {
 
         /* =========================================================
-           FIND THE AJAX PARTIAL CONTENT
+           RECEIVE SAMPLE MODAL
+           VERIFICATION SCRIPT
            ========================================================= */
 
         const container =
-            document.getElementById(
-                "receiveSampleModalContent"
-            );
+            document.getElementById("receiveSampleModalContent");
 
         if (!container) {
+            return;
+        }
+
+
+        /* =========================================================
+           FORM
+           ========================================================= */
+
+        const form =
+            container.querySelector("#receiveSampleForm");
+
+        if (!form) {
+            console.error("Receive Sample form was not found.");
             return;
         }
 
@@ -1293,33 +1338,70 @@
            ========================================================= */
 
         const checks =
-            container.querySelectorAll(
-                ".verification-check"
-            );
-
+            container.querySelectorAll(".verification-check");
 
         const confirmButton =
-            container.querySelector(
-                "#confirmReceiveBtn"
-            );
-
+            container.querySelector("#confirmReceiveBtn");
 
         const warning =
-            container.querySelector(
-                "#verificationWarning"
-            );
-
+            container.querySelector("#verificationWarning");
 
         const progress =
-            container.querySelector(
-                "#verificationProgress"
-            );
-
+            container.querySelector("#verificationProgress");
 
         const statusBadge =
-            container.querySelector(
-                "#verificationStatusBadge"
+            container.querySelector("#verificationStatusBadge");
+
+
+        /* =========================================================
+           REQUIRED HIDDEN VALUES
+           ========================================================= */
+
+        const requestNumber =
+            form.querySelector('[name="RequestNumber"]');
+
+        const sampleId =
+            form.querySelector('[name="SampleID"]');
+
+        const barcode =
+            form.querySelector('[name="Barcode"]');
+
+        const sampleTypeId =
+            form.querySelector('[name="SampleTypeId"]');
+
+
+        /* =========================================================
+           CHECK REQUIRED FORM VALUES
+           ========================================================= */
+
+        function requiredValuesPresent() {
+
+            const requestNumberValid =
+                requestNumber &&
+                requestNumber.value.trim() !== "";
+
+            const sampleIdValid =
+                sampleId &&
+                sampleId.value.trim() !== "" &&
+                sampleId.value !== "0";
+
+            const barcodeValid =
+                barcode &&
+                barcode.value.trim() !== "";
+
+            const sampleTypeValid =
+                sampleTypeId &&
+                sampleTypeId.value.trim() !== "" &&
+                sampleTypeId.value !== "0";
+
+
+            return (
+                requestNumberValid &&
+                sampleIdValid &&
+                barcodeValid &&
+                sampleTypeValid
             );
+        }
 
 
         /* =========================================================
@@ -1331,19 +1413,30 @@
             const checkedCount =
                 Array.from(checks)
                     .filter(function(check) {
-
                         return check.checked;
-
-                    }).length;
+                    })
+                    .length;
 
 
             const totalCount =
                 checks.length;
 
 
+            /*
+             * There should be exactly five verification items.
+             */
             const allChecked =
-                totalCount > 0 &&
-                checkedCount === totalCount;
+                totalCount === 5 &&
+                checkedCount === 5;
+
+
+            const formValuesValid =
+                requiredValuesPresent();
+
+
+            const verificationComplete =
+                allChecked &&
+                formValuesValid;
 
 
             /* -----------------------------------------------------
@@ -1357,7 +1450,6 @@
                     " of " +
                     totalCount +
                     " items verified";
-
             }
 
 
@@ -1368,8 +1460,7 @@
             if (confirmButton) {
 
                 confirmButton.disabled =
-                    !allChecked;
-
+                    !verificationComplete;
             }
 
 
@@ -1379,29 +1470,22 @@
 
             if (statusBadge) {
 
-                if (allChecked) {
+                if (verificationComplete) {
 
-                    statusBadge.classList.add(
-                        "complete"
-                    );
+                    statusBadge.classList.add("complete");
 
                     statusBadge.innerHTML =
                         '<i class="fas fa-check-circle"></i>' +
                         '<span>Verification Complete</span>';
 
-                }
-                else {
+                } else {
 
-                    statusBadge.classList.remove(
-                        "complete"
-                    );
+                    statusBadge.classList.remove("complete");
 
                     statusBadge.innerHTML =
                         '<i class="fas fa-clock"></i>' +
                         '<span>Pending Verification</span>';
-
                 }
-
             }
 
 
@@ -1411,23 +1495,42 @@
 
             if (warning) {
 
-                if (allChecked) {
+                if (!formValuesValid) {
+
+                    warning.classList.remove(
+                        "verification-success"
+                    );
+
+                    warning.innerHTML = `
+                            <div class="lab-alert-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Sample Information Missing
+                                </strong>
+
+                                <span>
+                                    Some required sample information is
+                                    unavailable. Please close this window
+                                    and try receiving the sample again.
+                                </span>
+                            </div>
+                        `;
+
+                } else if (allChecked) {
 
                     warning.classList.add(
                         "verification-success"
                     );
 
-
                     warning.innerHTML = `
-
                             <div class="lab-alert-icon">
-
                                 <i class="fas fa-check-circle"></i>
-
                             </div>
 
                             <div>
-
                                 <strong>
                                     Verification Complete
                                 </strong>
@@ -1437,29 +1540,21 @@
                                     successfully verified. You can now
                                     receive the sample into the laboratory.
                                 </span>
-
                             </div>
-
                         `;
 
-                }
-                else {
+                } else {
 
                     warning.classList.remove(
                         "verification-success"
                     );
 
-
                     warning.innerHTML = `
-
                             <div class="lab-alert-icon">
-
                                 <i class="fas fa-shield-alt"></i>
-
                             </div>
 
                             <div>
-
                                 <strong>
                                     Sample Verification Required
                                 </strong>
@@ -1469,15 +1564,10 @@
                                     physical sample before receiving it
                                     into the laboratory.
                                 </span>
-
                             </div>
-
                         `;
-
                 }
-
             }
-
         }
 
 
@@ -1491,7 +1581,128 @@
                 "change",
                 updateVerificationStatus
             );
+        });
 
+
+        /* =========================================================
+           FINAL SUBMIT VALIDATION
+           ========================================================= */
+
+        form.addEventListener("submit", function(event) {
+
+            const checkedCount =
+                Array.from(checks)
+                    .filter(function(check) {
+                        return check.checked;
+                    })
+                    .length;
+
+
+            if (checkedCount !== 5) {
+
+                event.preventDefault();
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Verification Incomplete",
+                    text:
+                        "Please verify all five sample details before receiving the sample.",
+                    confirmButtonText: "OK"
+                });
+
+                return;
+            }
+
+
+            if (!requiredValuesPresent()) {
+
+                event.preventDefault();
+
+                let missing = [];
+
+                if (!requestNumber ||
+                    requestNumber.value.trim() === "") {
+
+                    missing.push("Request Number");
+                }
+
+                if (!sampleId ||
+                    sampleId.value.trim() === "" ||
+                    sampleId.value === "0") {
+
+                    missing.push("Sample ID");
+                }
+
+                if (!barcode ||
+                    barcode.value.trim() === "") {
+
+                    missing.push("Barcode");
+                }
+
+                if (!sampleTypeId ||
+                    sampleTypeId.value.trim() === "" ||
+                    sampleTypeId.value === "0") {
+
+                    missing.push("Sample Type");
+                }
+
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Sample Information Missing",
+                    html:
+                        "The following information was not loaded:<br><br>" +
+                        "<strong>" +
+                        missing.join("<br>") +
+                        "</strong>",
+                    confirmButtonText: "OK"
+                });
+
+                return;
+            }
+
+
+            /* -----------------------------------------------------
+               DIAGNOSTIC OUTPUT
+               ----------------------------------------------------- */
+
+            console.log(
+                "========== RECEIVE SAMPLE =========="
+            );
+
+            console.log(
+                "RequestNumber:",
+                requestNumber.value
+            );
+
+            console.log(
+                "SampleID:",
+                sampleId.value
+            );
+
+            console.log(
+                "Barcode:",
+                barcode.value
+            );
+
+            console.log(
+                "SampleTypeId:",
+                sampleTypeId.value
+            );
+
+            console.log(
+                "Verification:",
+                checkedCount + "/5"
+            );
+
+            console.log(
+                "Serialized Form:",
+                $(form).serialize()
+            );
+
+            console.log(
+                "===================================="
+            );
         });
 
 
@@ -1502,5 +1713,4 @@
         updateVerificationStatus();
 
     })();
-
 </script>

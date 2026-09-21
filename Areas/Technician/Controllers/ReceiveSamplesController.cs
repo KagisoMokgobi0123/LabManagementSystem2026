@@ -188,128 +188,118 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // POST: Technician/ReceiveSamples/Receive
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Receive(
-            ReceiveSampleViewModel model)
+        public async Task<IActionResult> Receive(ReceiveSampleViewModel model)
         {
             try
             {
-                // ====================================================
-                // 1. VERIFICATION CHECKLIST
-                // ====================================================
+                // ============================================================
+                // 1. VALIDATE REQUIRED POSTED VALUES
+                // ============================================================
 
-                if (!model.VerifyRequestNumber ||
-                    !model.VerifyTechnician ||
-                    !model.VerifyBarcode ||
-                    !model.VerifySampleType ||
-                    !model.VerifyDateTime)
+                if (string.IsNullOrWhiteSpace(model.RequestNumber))
                 {
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Verification Required",
-
-                        message =
-                            "Please verify all items before receiving the sample.",
-
-                        icon =
-                            "warning"
+                        title = "Request Number Missing",
+                        message = "The request number was not submitted.",
+                        icon = "error"
                     });
                 }
 
-
-                // ====================================================
-                // 2. MODEL VALIDATION
-                // ====================================================
-
-                if (!ModelState.IsValid)
+                if (string.IsNullOrWhiteSpace(model.Barcode))
                 {
-                    var errors = ModelState
-
-                        .Where(x =>
-                            x.Value != null &&
-                            x.Value.Errors.Count > 0)
-
-                        .SelectMany(x =>
-                            x.Value!.Errors)
-
-                        .Select(x =>
-                            x.ErrorMessage)
-
-                        .Where(x =>
-                            !string.IsNullOrWhiteSpace(x))
-
-                        .ToList();
-
-
                     return Json(new
                     {
                         success = false,
+                        title = "Barcode Missing",
+                        message = "The sample barcode was not submitted.",
+                        icon = "error"
+                    });
+                }
 
-                        title =
-                            "Validation Error",
-
-                        message =
-                            errors.Any()
-                                ? string.Join("<br>", errors)
-                                : "Please check the sample information and try again.",
-
-                        icon =
-                            "error"
+                if (model.SampleTypeId <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        title = "Sample Type Missing",
+                        message = "The sample type was not submitted correctly.",
+                        icon = "error"
                     });
                 }
 
 
-                // ====================================================
-                // 3. GET REQUEST
-                // ====================================================
+                // ============================================================
+                // 2. LOAD TEST REQUEST
+                // ============================================================
 
                 var request = await _context.TestRequests
-
                     .Include(r => r.Patient)
-
                     .Include(r => r.Doctor)
-
-                    .Include(r => r.Samples)
-
-                        .ThenInclude(s =>
-                            s.SampleType)
-
                     .FirstOrDefaultAsync(r =>
-                        r.RequestNumber ==
-                        model.RequestNumber);
-
+                        r.RequestNumber == model.RequestNumber);
 
                 if (request == null)
                 {
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Request Not Found",
-
+                        title = "Request Not Found",
                         message =
-                            "The test request could not be found.",
-
-                        icon =
-                            "error"
+                            $"Test request {model.RequestNumber} could not be found.",
+                        icon = "error"
                     });
                 }
 
 
-                // ====================================================
-                // 4. FIND SAMPLE
-                // ====================================================
+                // ============================================================
+                // 3. NORMALIZE SUBMITTED BARCODE
+                // ============================================================
 
-                var sample = request.Samples
+                var submittedBarcode =
+                    model.Barcode.Trim();
 
-                    .FirstOrDefault(s =>
-                        s.SampleId ==
-                        model.SampleID &&
-                        !s.IsDeleted);
+
+                // ============================================================
+                // 4. FIND SAMPLE DIRECTLY FROM DATABASE
+                //
+                // Do NOT depend on the posted SampleID.
+                // The physical sample is identified using:
+                //
+                //      TestRequestId + Barcode
+                //
+                // ============================================================
+
+                var sample = await _context.Samples
+                    .Include(s => s.SampleType)
+                    .FirstOrDefaultAsync(s =>
+                        s.TestRequestId == request.TestRequestId &&
+                        !s.IsDeleted &&
+                        s.Barcode == submittedBarcode);
+
+
+                // ============================================================
+                // 5. FALLBACK CASE-INSENSITIVE BARCODE LOOKUP
+                // ============================================================
+
+                if (sample == null)
+                {
+                    var requestSamples = await _context.Samples
+                        .Include(s => s.SampleType)
+                        .Where(s =>
+                            s.TestRequestId == request.TestRequestId &&
+                            !s.IsDeleted)
+                        .ToListAsync();
+
+                    sample = requestSamples
+                        .FirstOrDefault(s =>
+                            !string.IsNullOrWhiteSpace(s.Barcode) &&
+                            string.Equals(
+                                s.Barcode.Trim(),
+                                submittedBarcode,
+                                StringComparison.OrdinalIgnoreCase));
+                }
 
 
                 if (sample == null)
@@ -317,142 +307,112 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Sample Not Found",
-
+                        title = "Sample Not Found",
                         message =
-                            "The selected sample could not be found.",
-
-                        icon =
-                            "error"
+                            $"No active sample with barcode {submittedBarcode} " +
+                            $"is linked to request {request.RequestNumber}.",
+                        icon = "error"
                     });
                 }
 
 
-                // ====================================================
-                // 5. ALREADY RECEIVED?
-                // ====================================================
+                // ============================================================
+                // 6. PREVENT DUPLICATE RECEPTION
+                // ============================================================
 
                 if (sample.IsReceived)
                 {
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Already Verified",
-
+                        title = "Sample Already Received",
                         message =
-                            $"Sample {sample.Barcode} has already been received and verified.",
-
-                        icon =
-                            "info"
+                            $"Sample {sample.Barcode} has already been received into the laboratory.",
+                        icon = "info"
                     });
                 }
 
 
-                // ====================================================
-                // 6. VERIFY BARCODE
-                // ====================================================
+                // ============================================================
+                // 7. VERIFY DATABASE BARCODE
+                // ============================================================
 
                 if (!string.Equals(
                     sample.Barcode?.Trim(),
-                    model.Barcode?.Trim(),
+                    submittedBarcode,
                     StringComparison.OrdinalIgnoreCase))
                 {
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Barcode Verification Failed",
-
+                        title = "Barcode Verification Failed",
                         message =
-                            "The barcode does not match the sample registered for this request.",
-
-                        icon =
-                            "error"
+                            "The submitted barcode does not match the barcode stored in the database.",
+                        icon = "error"
                     });
                 }
 
 
-                // ====================================================
-                // 7. VERIFY SAMPLE TYPE
-                // ====================================================
+                // ============================================================
+                // 8. VERIFY SAMPLE TYPE
+                // ============================================================
 
-                if (sample.SampleTypeId !=
-                    model.SampleTypeId)
+                if (sample.SampleTypeId != model.SampleTypeId)
                 {
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Sample Type Mismatch",
-
+                        title = "Sample Type Mismatch",
                         message =
-                            "The sample type does not match the requested sample.",
-
-                        icon =
-                            "error"
+                            $"The submitted sample type does not match the " +
+                            $"sample type registered for {sample.Barcode}.",
+                        icon = "error"
                     });
                 }
 
 
-                // ====================================================
-                // 8. GET LOGGED-IN TECHNICIAN
-                // ====================================================
+                // ============================================================
+                // 9. GET LOGGED-IN TECHNICIAN
+                // ============================================================
 
                 var technician =
                     await _userManager.GetUserAsync(User);
-
 
                 if (technician == null)
                 {
                     return Json(new
                     {
                         success = false,
-
-                        title =
-                            "Technician Not Found",
-
+                        title = "Technician Not Found",
                         message =
                             "Unable to identify the logged-in laboratory technician.",
-
-                        icon =
-                            "error"
+                        icon = "error"
                     });
                 }
 
 
-                // ====================================================
-                // 9. UPDATE SAMPLE
-                // ====================================================
+                // ============================================================
+                // 10. RECEIVE SAMPLE
+                // ============================================================
 
-                var receivedAt =
-                    DateTime.Now;
-
+                var receivedAt = DateTime.Now;
 
                 sample.TechnicianId =
                     technician.Id;
 
-
                 sample.DateReceived =
                     receivedAt;
 
-
                 sample.IsReceived =
                     true;
-
 
                 sample.Status =
                     "Samples Received";
 
 
-                // ====================================================
-                // 10. UPDATE REQUEST
-                // ====================================================
+                // ============================================================
+                // 11. UPDATE REQUEST STATUS
+                // ============================================================
 
                 request.Status =
                     TestRequestStatus
@@ -460,109 +420,88 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         .ToString();
 
 
-                // ====================================================
-                // 11. SAVE DATABASE
-                // ====================================================
+                // ============================================================
+                // 12. SAVE DATABASE CHANGES
+                // ============================================================
 
                 await _context.SaveChangesAsync();
 
 
-                // ====================================================
-                // 12. SUCCESS JSON FOR SWEETALERT
-                // ====================================================
+                // ============================================================
+                // 13. RETURN SWEETALERT SUCCESS RESPONSE
+                // ============================================================
 
                 return Json(new
                 {
                     success = true,
 
-                    title =
-                        "Sample Verified!",
+                    title = "Sample Received!",
 
                     message =
-                        $"Sample {sample.Barcode} has been successfully verified and received.",
+                        $"Sample {sample.Barcode} has been successfully " +
+                        $"verified and received into the laboratory.",
 
-                    icon =
-                        "success",
+                    icon = "success",
+
+                    requestNumber =
+                        request.RequestNumber,
 
                     barcode =
                         sample.Barcode,
+
+                    sampleType =
+                        sample.SampleType?.Name ?? "N/A",
 
                     technician =
                         technician.FullName,
 
                     receivedAt =
-                        receivedAt.ToString(
-                            "dd MMM yyyy HH:mm")
+                        receivedAt.ToString("dd MMM yyyy HH:mm"),
+
+                    status =
+                        sample.Status
                 });
             }
 
 
-            // ========================================================
-            // DATABASE UPDATE ERROR
-            // ========================================================
+            // ================================================================
+            // DATABASE ERROR
+            // ================================================================
 
             catch (DbUpdateException ex)
             {
                 var message =
+                    ex.InnerException?.Message ??
                     ex.Message;
-
-
-                if (ex.InnerException != null)
-                {
-                    message +=
-                        "<br><br>" +
-                        "<strong>Database Error:</strong><br>" +
-                        ex.InnerException.Message;
-                }
-
 
                 return Json(new
                 {
                     success = false,
-
-                    title =
-                        "Database Error",
-
+                    title = "Database Error",
                     message =
+                        "The sample could not be saved to the database.<br><br>" +
                         message,
-
-                    icon =
-                        "error"
+                    icon = "error"
                 });
             }
 
 
-            // ========================================================
+            // ================================================================
             // GENERAL ERROR
-            // ========================================================
+            // ================================================================
 
             catch (Exception ex)
             {
                 var message =
+                    ex.InnerException?.Message ??
                     ex.Message;
-
-
-                if (ex.InnerException != null)
-                {
-                    message +=
-                        "<br><br>" +
-                        "<strong>Inner Exception:</strong><br>" +
-                        ex.InnerException.Message;
-                }
-
 
                 return Json(new
                 {
                     success = false,
-
-                    title =
-                        "Unable to Receive Sample",
-
-                    message =
-                        message,
-
-                    icon =
-                        "error"
+                    title = "Unable to Receive Sample",
+                    message = message,
+                    icon = "error"
                 });
             }
         }
