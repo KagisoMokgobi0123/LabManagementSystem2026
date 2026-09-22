@@ -185,7 +185,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 request.Patient?.FullName ?? "N/A";
 
             model.DoctorName =
-                request.Doctor?.FullName ?? "N/A";
+                request.Doctor?.ApplicationUser.FullName ?? "N/A";
 
 
             // ============================================================

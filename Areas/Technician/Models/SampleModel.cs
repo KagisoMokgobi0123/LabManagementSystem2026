@@ -28,7 +28,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string? TechnicianId { get; set; } = string.Empty;// e.g., Blood, Plasma
         public ApplicationUser Technician { get; set; } = null!;
 
-        public DateTime DateReceived { get; set; } = DateTime.Now;
+        //public DateTime DateReceived { get; set; } = DateTime.Now;
 
         public DateTime? DateReceived { get; set; }
         public string Status { get; set; } = string.Empty;

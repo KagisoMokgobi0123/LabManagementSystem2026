@@ -610,7 +610,7 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TestTypeID")
+                    b.Property<int>("TestTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Urgency")
@@ -625,7 +625,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("ResultReleaseId");
 
-                    b.HasIndex("TestTypeID");
+                    b.HasIndex("TestTypeId");
 
                     b.ToTable("TestRequests");
                 });
@@ -2047,7 +2047,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasOne("NMB_HLabSys.Models.Laboratory.TestType", "TestType")
                         .WithMany()
-                        .HasForeignKey("TestTypeID")
+                        .HasForeignKey("TestTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

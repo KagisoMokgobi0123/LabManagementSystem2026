@@ -12,13 +12,8 @@ using NMB_HLabSys.Data;
 namespace NMBHLabSys.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
-    [Migration("20260915165701_InitialCreate")]
+    [Migration("20260922184751_InitialCreate")]
     partial class InitialCreate
-========
-    [Migration("20260908061132_FixMigrationErrors")]
-    partial class FixMigrationErrors
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -618,11 +613,7 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
-                    b.Property<int>("TestTypeID")
-========
                     b.Property<int>("TestTypeId")
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
                         .HasColumnType("int");
 
                     b.Property<string>("Urgency")
@@ -637,157 +628,9 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("ResultReleaseId");
 
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
-                    b.HasIndex("TestTypeID");
-
-                    b.ToTable("TestRequests");
-========
                     b.HasIndex("TestTypeId");
 
                     b.ToTable("TestRequests");
-
-                    b.HasData(
-                        new
-                        {
-                            TestRequestId = 1,
-                            Barcode = "0099GGRM",
-                            ClinicalNotes = "Routine blood test - Annual checkup",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000001",
-                            Status = "Submitted",
-                            TestTypeId = 1,
-                            Urgency = "Routine"
-                        },
-                        new
-                        {
-                            TestRequestId = 2,
-                            Barcode = "00TTR1YMM",
-                            ClinicalNotes = "Patient presenting with fever and chills - suspected infection",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000002",
-                            Status = "Samples Received",
-                            TestTypeId = 16,
-                            Urgency = "Urgent"
-                        },
-                        new
-                        {
-                            TestRequestId = 3,
-                            Barcode = "00FFD1YMM",
-                            ClinicalNotes = "Emergency - Patient collapsed, suspected DVT",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000003",
-                            Status = "InProgress",
-                            TestTypeId = 6,
-                            Urgency = "Stat"
-                        },
-                        new
-                        {
-                            TestRequestId = 4,
-                            Barcode = "0045ESM",
-                            ClinicalNotes = "Diabetes monitoring - HbA1c and glucose levels",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000004",
-                            Status = "Completed",
-                            TestTypeId = 12,
-                            Urgency = "Routine"
-                        },
-                        new
-                        {
-                            TestRequestId = 5,
-                            Barcode = "005433YMV",
-                            ClinicalNotes = "Chest pain, suspected cardiac issue - Lipid Profile and Cardiac enzymes",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
-                            PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
-                            RequestDate = new DateTime(2026, 5, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000005",
-                            Status = "Submitted",
-                            TestTypeId = 13,
-                            Urgency = "Urgent"
-                        },
-                        new
-                        {
-                            TestRequestId = 6,
-                            Barcode = "009988HGM",
-                            ClinicalNotes = "Routine liver function test for patient on medication",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 6, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000006",
-                            Status = "Samples Received",
-                            TestTypeId = 14,
-                            Urgency = "Routine"
-                        },
-                        new
-                        {
-                            TestRequestId = 7,
-                            Barcode = "00876YMM",
-                            ClinicalNotes = "Pre-surgery coagulation screen - STAT request",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 7, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000007",
-                            Status = "Submitted",
-                            TestTypeId = 6,
-                            Urgency = "Stat"
-                        },
-                        new
-                        {
-                            TestRequestId = 8,
-                            Barcode = "00991YMM",
-                            ClinicalNotes = "Routine urinalysis - suspected UTI",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000008",
-                            Status = "Completed",
-                            TestTypeId = 17,
-                            Urgency = "Routine"
-                        },
-                        new
-                        {
-                            TestRequestId = 9,
-                            Barcode = "00HHHYMM",
-                            ClinicalNotes = "Suspected blood stream infection - Blood culture",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "e6eec045-31c8-42c6-b67d-11bb28d980be",
-                            PatientId = "7b0c0099-788d-4e4a-94f5-0f07c0b2013c",
-                            RequestDate = new DateTime(2026, 5, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000009",
-                            Status = "InProgress",
-                            TestTypeId = 20,
-                            Urgency = "Urgent"
-                        },
-                        new
-                        {
-                            TestRequestId = 10,
-                            Barcode = "04561YMM",
-                            ClinicalNotes = "Annual physical examination - Full blood count and chemistry panel",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            DoctorId = "53d244f0-97dd-4a05-97ea-625f6237a3d7",
-                            PatientId = "fd5dcbfa-644b-438f-9bf4-a7158300009f",
-                            RequestDate = new DateTime(2026, 5, 10, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-000010",
-                            Status = "Submitted",
-                            TestTypeId = 1,
-                            Urgency = "Routine"
-                        });
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.CalendarEvent", b =>
@@ -1049,7 +892,7 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime>("CollectedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateReceived")
+                    b.Property<DateTime?>("DateReceived")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
@@ -1201,104 +1044,6 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("VerifiedByTechnicianId");
 
                     b.ToTable("TestRequestTests");
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
-========
-
-                    b.HasData(
-                        new
-                        {
-                            TestRequestTestTypeId = 1,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2286),
-                            DueDate = new DateTime(2026, 9, 8, 10, 11, 30, 488, DateTimeKind.Local).AddTicks(2288),
-                            IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2270),
-                            Status = "Submitted",
-                            TestRequestId = 1,
-                            TestTypeId = 1
-                        },
-                        new
-                        {
-                            TestRequestTestTypeId = 2,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2300),
-                            DueDate = new DateTime(2026, 9, 8, 9, 11, 30, 488, DateTimeKind.Local).AddTicks(2301),
-                            IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2300),
-                            Status = "Submitted",
-                            TestRequestId = 1,
-                            TestTypeId = 11
-                        },
-                        new
-                        {
-                            TestRequestTestTypeId = 3,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2305),
-                            DueDate = new DateTime(2026, 9, 8, 10, 11, 30, 488, DateTimeKind.Local).AddTicks(2306),
-                            IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2304),
-                            Status = "InProgress",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 2,
-                            TestTypeId = 1
-                        },
-                        new
-                        {
-                            TestRequestTestTypeId = 4,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2309),
-                            DueDate = new DateTime(2026, 9, 8, 10, 11, 30, 488, DateTimeKind.Local).AddTicks(2310),
-                            IsAbnormal = false,
-                            StartDateTime = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2308),
-                            Status = "Submitted",
-                            TestRequestId = 2,
-                            TestTypeId = 6
-                        },
-                        new
-                        {
-                            TestRequestTestTypeId = 5,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 7, 11, 30, 488, DateTimeKind.Local).AddTicks(2314),
-                            DueDate = new DateTime(2026, 9, 8, 7, 11, 30, 488, DateTimeKind.Local).AddTicks(2316),
-                            IsAbnormal = false,
-                            Notes = "Results show elevated white blood cells",
-                            ResultValue = "WBC: 11.2, RBC: 4.8, HGB: 14.2, PLT: 250",
-                            StartDateTime = new DateTime(2026, 9, 8, 5, 11, 30, 488, DateTimeKind.Local).AddTicks(2313),
-                            Status = "Completed",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 3,
-                            TestTypeId = 1
-                        },
-                        new
-                        {
-                            TestRequestTestTypeId = 6,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2321),
-                            DueDate = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2322),
-                            IsAbnormal = false,
-                            Notes = "Normal range",
-                            ResultValue = "5.6 mmol/L",
-                            StartDateTime = new DateTime(2026, 9, 8, 5, 11, 30, 488, DateTimeKind.Local).AddTicks(2319),
-                            Status = "Verified",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 3,
-                            TestTypeId = 11,
-                            VerificationDateTime = new DateTime(2026, 9, 8, 6, 41, 30, 488, DateTimeKind.Local).AddTicks(2325),
-                            VerificationNote = "Verified - within normal range",
-                            VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
-                        },
-                        new
-                        {
-                            TestRequestTestTypeId = 7,
-                            CompletionDateTime = new DateTime(2026, 9, 8, 7, 41, 30, 488, DateTimeKind.Local).AddTicks(2329),
-                            DueDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2331),
-                            IsAbnormal = false,
-                            Notes = "Abnormal high INR - needs review",
-                            ResultValue = "INR: 3.5",
-                            StartDateTime = new DateTime(2026, 9, 8, 6, 11, 30, 488, DateTimeKind.Local).AddTicks(2328),
-                            Status = "ToBeReviewed",
-                            TechnicianId = "2ec716df-770e-465e-a7b7-8d3926b560a2",
-                            TestRequestId = 3,
-                            TestTypeId = 6,
-                            VerificationDateTime = new DateTime(2026, 9, 8, 7, 41, 30, 488, DateTimeKind.Local).AddTicks(2333),
-                            VerificationNote = "Result appears abnormal. Please review clinical notes.",
-                            VerifiedByTechnicianId = "af381d22-8f2c-4401-ae8b-b31bb60e1c39"
-                        });
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.TestTypeConsumableModel", b =>
@@ -1328,187 +1073,6 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("TestTypeId");
 
                     b.ToTable("TestTypeConsumables");
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
-========
-
-                    b.HasData(
-                        new
-                        {
-                            TestTypeConsumableId = 1,
-                            ConsumableId = 1,
-                            QuantityRequired = 1,
-                            TestTypeId = 1,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2878)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 2,
-                            ConsumableId = 1,
-                            QuantityRequired = 1,
-                            TestTypeId = 2,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2882)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 3,
-                            ConsumableId = 4,
-                            QuantityRequired = 2,
-                            TestTypeId = 3,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2884)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 4,
-                            ConsumableId = 1,
-                            QuantityRequired = 1,
-                            TestTypeId = 4,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2886)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 5,
-                            ConsumableId = 5,
-                            QuantityRequired = 1,
-                            TestTypeId = 5,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2888)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 6,
-                            ConsumableId = 2,
-                            QuantityRequired = 1,
-                            TestTypeId = 6,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2890)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 7,
-                            ConsumableId = 2,
-                            QuantityRequired = 1,
-                            TestTypeId = 7,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2892)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 8,
-                            ConsumableId = 2,
-                            QuantityRequired = 1,
-                            TestTypeId = 8,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2893)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 9,
-                            ConsumableId = 7,
-                            QuantityRequired = 1,
-                            TestTypeId = 9,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2895)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 10,
-                            ConsumableId = 6,
-                            QuantityRequired = 1,
-                            TestTypeId = 10,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2896)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 11,
-                            ConsumableId = 8,
-                            QuantityRequired = 1,
-                            TestTypeId = 11,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2898)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 12,
-                            ConsumableId = 8,
-                            QuantityRequired = 1,
-                            TestTypeId = 12,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2899)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 13,
-                            ConsumableId = 8,
-                            QuantityRequired = 2,
-                            TestTypeId = 13,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2901)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 14,
-                            ConsumableId = 8,
-                            QuantityRequired = 2,
-                            TestTypeId = 14,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2902)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 15,
-                            ConsumableId = 8,
-                            QuantityRequired = 1,
-                            TestTypeId = 15,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2904)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 16,
-                            ConsumableId = 8,
-                            QuantityRequired = 1,
-                            TestTypeId = 16,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2905)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 17,
-                            ConsumableId = 9,
-                            QuantityRequired = 1,
-                            TestTypeId = 17,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2907)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 18,
-                            ConsumableId = 10,
-                            QuantityRequired = 1,
-                            TestTypeId = 18,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2908)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 19,
-                            ConsumableId = 11,
-                            QuantityRequired = 1,
-                            TestTypeId = 19,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2910)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 20,
-                            ConsumableId = 12,
-                            QuantityRequired = 2,
-                            TestTypeId = 20,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2912)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 21,
-                            ConsumableId = 11,
-                            QuantityRequired = 1,
-                            TestTypeId = 21,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2914)
-                        },
-                        new
-                        {
-                            TestTypeConsumableId = 22,
-                            ConsumableId = 11,
-                            QuantityRequired = 1,
-                            TestTypeId = 22,
-                            VerificationDate = new DateTime(2026, 9, 8, 8, 11, 30, 488, DateTimeKind.Local).AddTicks(2916)
-                        });
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Models.Account.PasswordResetOtp", b =>
@@ -2484,15 +2048,9 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("ResultReleaseId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
                     b.HasOne("NMB_HLabSys.Models.Laboratory.TestType", "TestType")
                         .WithMany()
-                        .HasForeignKey("TestTypeID")
-========
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
-                        .WithMany()
                         .HasForeignKey("TestTypeId")
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -2503,51 +2061,6 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("PatientUser");
 
                     b.Navigation("ResultRelease");
-<<<<<<<< HEAD:Migrations/20260915165701_InitialCreate.Designer.cs
-========
-
-                    b.Navigation("TestType");
-                });
-
-            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockTransactionModel", b =>
-                {
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
-                        .WithMany()
-                        .HasForeignKey("ConsumableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Consumable");
-                });
-
-            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel", b =>
-                {
-                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Manager")
-                        .WithMany()
-                        .HasForeignKey("ManagerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", null)
-                        .WithMany("TechnicianTestTypes")
-                        .HasForeignKey("RegisterUserId");
-
-                    b.HasOne("NMB_HLabSys.Models.Account.RegisterUser", "Technician")
-                        .WithMany()
-                        .HasForeignKey("TechnicianId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
-                        .WithMany()
-                        .HasForeignKey("TestTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Manager");
-
-                    b.Navigation("Technician");
->>>>>>>> 1f5b7f211eec80f93882cef307f6f0e6b85bafeb:Migrations/20260908061132_FixMigrationErrors.Designer.cs
 
                     b.Navigation("TestType");
                 });

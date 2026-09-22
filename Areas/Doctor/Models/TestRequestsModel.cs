@@ -11,7 +11,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
-
+using PatientModel = NMB_HLabSys.Areas.Administrator.Models.Patient;
+using TestTypeModel = NMB_HLabSys.Models.Laboratory.TestType;
+using DoctorModel = NMB_HLabSys.Models.Users.Doctor;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {

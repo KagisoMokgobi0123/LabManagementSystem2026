@@ -1006,7 +1006,7 @@ namespace NMBHLabSys.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PatientId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     RequestNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TestTypeID = table.Column<int>(type: "int", nullable: false),
+                    TestTypeId = table.Column<int>(type: "int", nullable: false),
                     RequestDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Urgency = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ClinicalNotes = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -1042,8 +1042,8 @@ namespace NMBHLabSys.Migrations
                         principalTable: "ResultReleases",
                         principalColumn: "ResultReleaseId");
                     table.ForeignKey(
-                        name: "FK_TestRequests_TestTypes_TestTypeID",
-                        column: x => x.TestTypeID,
+                        name: "FK_TestRequests_TestTypes_TestTypeId",
+                        column: x => x.TestTypeId,
                         principalTable: "TestTypes",
                         principalColumn: "TestTypeId",
                         onDelete: ReferentialAction.Cascade);
@@ -1059,7 +1059,7 @@ namespace NMBHLabSys.Migrations
                     SampleTypeId = table.Column<int>(type: "int", nullable: false),
                     CollectedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TechnicianId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    DateReceived = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DateReceived = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TestRequestId = table.Column<int>(type: "int", nullable: false),
                     IsReceived = table.Column<bool>(type: "bit", nullable: false),
@@ -1590,9 +1590,9 @@ namespace NMBHLabSys.Migrations
                 column: "ResultReleaseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestRequests_TestTypeID",
+                name: "IX_TestRequests_TestTypeId",
                 table: "TestRequests",
-                column: "TestTypeID");
+                column: "TestTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestRequestTests_TechnicianId",
