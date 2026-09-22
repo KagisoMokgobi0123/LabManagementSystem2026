@@ -10,8 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
-using PatientModel = NMB_HLabSys.Areas.Administrator.Models.Patient;
-using DoctorModel = NMB_HLabSys.Models.Users.Doctor;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 
 namespace NMB_HLabSys.Areas.Doctor.Models
@@ -52,8 +51,8 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         [Required]
         [ForeignKey("TestType")]
-        public int TestTypeID { get; set; }
-        public TestType TestType { get; set; }
+        public int TestTypeId { get; set; }
+        public TestTypeModel TestType { get; set; }
 
 
         [Required]
@@ -69,13 +68,12 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         public string? CancelReason { get; set; }
         public DateTime CreatedAt { get; set; }
-
-        //public ICollection<SampleModel> Samples { get; set; } = new List<SampleModel>(); // uncomment after migration
-        // public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new(); // uncomment after migration
+     
 
         public virtual ICollection<ConsentRequestItem> ConsentRequestItems { get; set; } = new List<ConsentRequestItem>();
         public virtual ICollection<TestRequestItem> TestRequestItems { get; set; } = new List<TestRequestItem>();
-        public List<SampleModel> Samples { get; set; } 
+        public ICollection<SampleModel> Samples { get; set; }
+     = new List<SampleModel>();
 
         public List<TestRequestTestTypeModel> TechnicianTests { get; set; } = new();
 

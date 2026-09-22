@@ -1,0 +1,1716 @@
+﻿@using NMB_HLabSys.Areas.Technician.Models
+@model ReceiveSampleViewModel
+
+<style>
+
+    /* ============================================================
+           NMB-HLabSys
+           RECEIVE SAMPLE - LABORATORY VERIFICATION
+           ============================================================ */
+
+    :root {
+        --lab-primary: #1268e8;
+        --lab-primary-dark: #0b55c5;
+        --lab-primary-soft: #edf5ff;
+        --lab-success: #159a62;
+        --lab-success-dark: #108553;
+        --lab-success-soft: #eaf8f1;
+        --lab-warning: #d99200;
+        --lab-warning-soft: #fff8e6;
+        --lab-danger: #d64545;
+        --lab-heading: #172b4d;
+        --lab-text: #425466;
+        --lab-muted: #7c8da1;
+        --lab-border: #dfe7f0;
+        --lab-background: #f5f8fc;
+        --lab-white: #ffffff;
+    }
+
+
+    /* ============================================================
+           LARGE BOOTSTRAP MODAL
+           ============================================================ */
+
+    #receiveSampleModal .modal-dialog {
+        width: 96vw;
+        max-width: 1500px !important;
+        margin: 1.5rem auto;
+    }
+
+    #receiveSampleModal .modal-content {
+        width: 100%;
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 24px 70px rgba(23, 43, 77, 0.20);
+    }
+
+    #receiveSampleModalContent {
+        width: 100%;
+    }
+
+
+    /* ============================================================
+           FORM
+           ============================================================ */
+
+    .receive-sample-form {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+
+    /* ============================================================
+           BODY
+           ============================================================ */
+
+    .verification-body {
+        width: 100%;
+        padding: 26px 30px;
+        background: var(--lab-background);
+    }
+
+
+    /* ============================================================
+           TOP VERIFICATION ALERT
+           ============================================================ */
+
+    .lab-verification-alert {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 18px;
+        padding: 14px 17px;
+        background: var(--lab-warning-soft);
+        border: 1px solid #f2d890;
+        border-left: 4px solid #e5a321;
+        border-radius: 10px;
+        transition: all .25s ease;
+    }
+
+    .lab-alert-icon {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ffedbb;
+        border-radius: 50%;
+        color: #a66c00;
+        font-size: 16px;
+    }
+
+    .lab-verification-alert strong {
+        display: block;
+        margin-bottom: 2px;
+        color: #5c4500;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .lab-verification-alert span {
+        display: block;
+        color: #7c6b3d;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+
+    /* Verification completed */
+
+    .lab-verification-alert.verification-success {
+        background: var(--lab-success-soft);
+        border-color: #b7e5cf;
+        border-left-color: var(--lab-success);
+    }
+
+        .lab-verification-alert.verification-success
+        .lab-alert-icon {
+            background: #d8f2e5;
+            color: var(--lab-success);
+        }
+
+        .lab-verification-alert.verification-success strong {
+            color: #116c47;
+        }
+
+        .lab-verification-alert.verification-success span {
+            color: #4b7b66;
+        }
+
+
+    /* ============================================================
+           MAIN CHECKLIST PANEL
+           ============================================================ */
+
+    .lab-verification-panel {
+        width: 100%;
+        overflow: hidden;
+        background: var(--lab-white);
+        border: 1px solid var(--lab-border);
+        border-radius: 13px;
+        box-shadow: 0 4px 18px rgba(23, 43, 77, .05);
+    }
+
+
+    /* ============================================================
+           PANEL HEADER
+           ============================================================ */
+
+    .lab-panel-header {
+        min-height: 82px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 17px 22px;
+        background: #ffffff;
+        border-bottom: 1px solid #e8eef5;
+    }
+
+    .lab-panel-eyebrow {
+        display: block;
+        margin-bottom: 4px;
+        color: #8190a3;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+    }
+
+    .lab-panel-header h5 {
+        display: flex;
+        align-items: center;
+        margin: 0;
+        color: var(--lab-heading);
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+        .lab-panel-header h5 i {
+            margin-right: 8px;
+            color: var(--lab-primary);
+        }
+
+    .lab-panel-header p {
+        margin: 4px 0 0;
+        color: var(--lab-muted);
+        font-size: 11px;
+    }
+
+
+    /* ============================================================
+           PENDING STATUS
+           ============================================================ */
+
+    .lab-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+        padding: 7px 12px;
+        background: #fff5da;
+        border: 1px solid #f3dda0;
+        border-radius: 20px;
+        color: #936500;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+        .lab-status-badge.complete {
+            background: var(--lab-success-soft);
+            border-color: #b7e5cf;
+            color: var(--lab-success);
+        }
+
+
+    /* ============================================================
+           VERIFICATION GRID
+           ============================================================ */
+
+    .lab-verification-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        padding: 22px;
+    }
+
+
+    /* ============================================================
+           FIELD CARDS
+           ============================================================ */
+
+    .lab-field-card {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        min-width: 0;
+        min-height: 140px;
+        margin: 0;
+        padding: 18px;
+        background: #ffffff;
+        border: 1px solid #dde6ef;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
+    }
+
+        .lab-field-card:hover {
+            background: #fbfdff;
+            border-color: #9fc6f5;
+            box-shadow: 0 5px 14px rgba(18, 104, 232, .07);
+            transform: translateY(-1px);
+        }
+
+
+    /* ============================================================
+           CHECKBOX
+           ============================================================ */
+
+    .verification-check,
+    .lab-checkbox {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        flex: 0 0 20px;
+        margin: 2px 13px 0 0;
+        cursor: pointer;
+        accent-color: var(--lab-primary);
+    }
+
+
+    /* ============================================================
+           FIELD CONTENT
+           ============================================================ */
+
+    .lab-field-content {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .lab-field-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .lab-field-icon {
+        width: 31px;
+        height: 31px;
+        flex: 0 0 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--lab-primary-soft);
+        border-radius: 7px;
+        color: var(--lab-primary);
+        font-size: 12px;
+        transition: all .18s ease;
+    }
+
+    .lab-field-label {
+        min-width: 0;
+        color: #66788c;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.3;
+        text-transform: uppercase;
+        letter-spacing: .35px;
+    }
+
+
+    /* ============================================================
+           FIELD VALUES
+           ============================================================ */
+
+    .lab-field-value {
+        width: 100%;
+        min-width: 0;
+        margin-bottom: 6px;
+        color: var(--lab-heading);
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .lab-field-help {
+        display: block;
+        color: #95a3b3;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+
+    /* ============================================================
+           BARCODE
+           ============================================================ */
+
+    .barcode-number {
+        display: inline-block;
+        max-width: 100%;
+        padding: 5px 8px;
+        background: #f1f6fc;
+        border: 1px solid #e0e8f2;
+        border-radius: 5px;
+        color: #29435e;
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        overflow-wrap: anywhere;
+    }
+
+    .lab-valid-value {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 5px;
+        color: var(--lab-success);
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+        .lab-valid-value i {
+            font-size: 11px;
+        }
+
+
+    /* ============================================================
+           ERRORS
+           ============================================================ */
+
+    .lab-error-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--lab-danger);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .verification-validation {
+        display: block;
+        margin-top: 4px;
+        color: var(--lab-danger);
+        font-size: 10px;
+    }
+
+
+    /* ============================================================
+           VERIFIED FIELD
+           ============================================================ */
+
+    .lab-field-card:has(.verification-check:checked) {
+        background: #f7fbff;
+        border-color: #71aaf0;
+        box-shadow: inset 0 0 0 1px rgba(18, 104, 232, .08);
+    }
+
+        .lab-field-card:has(.verification-check:checked)
+        .lab-field-icon {
+            background: var(--lab-primary);
+            color: #ffffff;
+        }
+
+        .lab-field-card:has(.verification-check:checked)::after {
+            content: "VERIFIED";
+            position: absolute;
+            top: 9px;
+            right: 9px;
+            padding: 3px 6px;
+            background: #e8f7f0;
+            border-radius: 4px;
+            color: var(--lab-success);
+            font-size: 7px;
+            font-weight: 800;
+            letter-spacing: .5px;
+        }
+
+
+    /* ============================================================
+           PATIENT CARD
+           ============================================================ */
+
+    .lab-information-card {
+        cursor: default;
+        background: #fafcff;
+    }
+
+        .lab-information-card:hover {
+            transform: none;
+            border-color: #dde6ef;
+            box-shadow: none;
+        }
+
+    .lab-info-placeholder {
+        width: 20px;
+        flex: 0 0 20px;
+        margin-right: 13px;
+    }
+
+
+    /* ============================================================
+           PROGRESS FOOTER
+           ============================================================ */
+
+    .lab-verification-footer {
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px 20px;
+        background: #f9fbfd;
+        border-top: 1px solid #e5ecf3;
+    }
+
+    .lab-progress-information {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .lab-progress-icon {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eaf3ff;
+        border-radius: 50%;
+        color: var(--lab-primary);
+        font-size: 12px;
+    }
+
+    .lab-progress-information strong {
+        display: block;
+        color: #344563;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .lab-progress-information span {
+        display: block;
+        margin-top: 1px;
+        color: #8492a6;
+        font-size: 10px;
+    }
+
+    .lab-security {
+        color: #8a99aa;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+        .lab-security i {
+            margin-right: 4px;
+            color: var(--lab-success);
+        }
+
+
+    /* ============================================================
+           ACTION FOOTER
+           ============================================================ */
+
+    .verification-footer {
+        min-height: 78px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 30px;
+        background: #ffffff;
+        border-top: 1px solid #e2e9f0;
+    }
+
+
+    /* Cancel */
+
+    .verification-cancel {
+        min-width: 105px;
+        min-height: 43px;
+        padding: 0 18px;
+        border: 1px solid #d5dde6;
+        border-radius: 7px;
+        background: #ffffff;
+        color: #526273;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all .2s ease;
+    }
+
+        .verification-cancel:hover {
+            background: #f4f6f8;
+            border-color: #bdc8d3;
+            color: #344563;
+        }
+
+
+    /* Confirm */
+
+    .verification-confirm {
+        min-height: 43px;
+        padding: 0 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        border: none;
+        border-radius: 7px;
+        background: var(--lab-success);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        box-shadow: 0 3px 9px rgba(21, 154, 98, .20);
+        transition: all .2s ease;
+    }
+
+        .verification-confirm:hover:not(:disabled) {
+            background: var(--lab-success-dark);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 13px rgba(21, 154, 98, .25);
+        }
+
+        .verification-confirm:disabled {
+            background: #aebbc6;
+            color: #eef2f5;
+            cursor: not-allowed;
+            opacity: 1;
+            box-shadow: none;
+        }
+
+
+    /* ============================================================
+           LARGE DESKTOP
+           ============================================================ */
+
+    @@media (min-width: 1400px) {
+
+        #receiveSampleModal .modal-dialog {
+            width: 94vw;
+            max-width: 1500px !important;
+        }
+
+        .lab-verification-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+
+    /* ============================================================
+           LAPTOP
+           ============================================================ */
+
+    @@media (min-width: 992px) and (max-width: 1399px) {
+
+        #receiveSampleModal .modal-dialog {
+            width: 96vw;
+            max-width: 1250px !important;
+        }
+
+        .lab-verification-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+
+    /* ============================================================
+           TABLET
+           ============================================================ */
+
+    @@media (min-width: 601px) and (max-width: 991px) {
+
+        #receiveSampleModal .modal-dialog {
+            width: 95vw;
+            max-width: 900px !important;
+        }
+
+        .verification-body {
+            padding: 18px;
+        }
+
+        .lab-verification-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            padding: 16px;
+        }
+
+        .lab-field-card {
+            min-height: 125px;
+            padding: 15px;
+        }
+    }
+
+
+    /* ============================================================
+           MOBILE
+           ============================================================ */
+
+    @@media (max-width: 600px) {
+
+        #receiveSampleModal .modal-dialog {
+            width: calc(100% - 16px);
+            max-width: none !important;
+            margin: 8px auto;
+        }
+
+        .verification-body {
+            padding: 10px;
+        }
+
+        .lab-verification-alert {
+            align-items: flex-start;
+        }
+
+        .lab-panel-header {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 14px;
+        }
+
+        .lab-status-badge {
+            align-self: flex-start;
+        }
+
+        .lab-verification-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 12px;
+        }
+
+        .lab-field-card {
+            min-height: 110px;
+            padding: 13px;
+        }
+
+        .lab-verification-footer {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .verification-footer {
+            flex-direction: column-reverse;
+            padding: 12px;
+        }
+
+            .verification-footer .btn,
+            .verification-cancel,
+            .verification-confirm {
+                width: 100%;
+            }
+    }
+
+</style>
+
+
+<form asp-area="Technician"
+      asp-controller="ReceiveSamples"
+      asp-action="Receive"
+      method="post"
+      id="receiveSampleForm"
+      class="receive-sample-form">
+
+    @Html.AntiForgeryToken()
+
+
+    <input type="hidden"
+           id="TestRequestId"
+           name="TestRequestId"
+           value="@Model.TestRequestId" />
+
+    <input type="hidden"
+           id="RequestNumber"
+           name="RequestNumber"
+           value="@Model.RequestNumber" />
+
+    <input type="hidden"
+           id="SampleID"
+           name="SampleID"
+           value="@Model.SampleID" />
+
+    <input type="hidden"
+           id="Barcode"
+           name="Barcode"
+           value="@Model.Barcode" />
+
+    <input type="hidden"
+           id="SampleTypeId"
+           name="SampleTypeId"
+           value="@Model.SampleTypeId" />
+
+    <input type="hidden"
+           id="SampleTypeName"
+           name="SampleTypeName"
+           value="@Model.SampleTypeName" />
+
+    <input type="hidden"
+           id="TechnicianName"
+           name="TechnicianName"
+           value="@Model.TechnicianName" />
+
+    <input type="hidden"
+           id="PatientName"
+           name="PatientName"
+           value="@Model.PatientName" />
+
+    <input type="hidden"
+           id="DoctorName"
+           name="DoctorName"
+           value="@Model.DoctorName" />
+
+    <input type="hidden"
+           id="DateTimeReceived"
+           name="DateTimeReceived"
+           value="@Model.DateTimeReceived.ToString("yyyy-MM-ddTHH:mm:ss")" />
+
+    <div class="verification-body">
+
+
+        <!-- ========================================================
+             VERIFICATION ALERT
+             ======================================================== -->
+
+        <div id="verificationWarning"
+             class="lab-verification-alert">
+
+            <div class="lab-alert-icon">
+
+                <i class="fas fa-shield-alt"></i>
+
+            </div>
+
+            <div>
+
+                <strong>
+                    Sample Verification Required
+                </strong>
+
+                <span>
+                    Confirm each item below against the physical
+                    sample before receiving it into the laboratory.
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================================
+             VERIFICATION PANEL
+             ======================================================== -->
+
+        <div class="lab-verification-panel">
+
+
+            <!-- ====================================================
+                 PANEL HEADER
+                 ==================================================== -->
+
+            <div class="lab-panel-header">
+
+                <div>
+
+                    <span class="lab-panel-eyebrow">
+                        SAMPLE RECEIVING
+                    </span>
+
+                    <h5>
+
+                        <i class="fas fa-clipboard-check"></i>
+
+                        Verification Checklist
+
+                    </h5>
+
+                    <p>
+                        Verify the request and specimen information.
+                    </p>
+
+                </div>
+
+
+                <div id="verificationStatusBadge"
+                     class="lab-status-badge">
+
+                    <i class="fas fa-clock"></i>
+
+                    <span>
+                        Pending Verification
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================
+                 VERIFICATION GRID
+                 ==================================================== -->
+
+            <div class="lab-verification-grid">
+
+
+                <!-- =================================================
+                     REQUEST NUMBER
+                     ================================================= -->
+
+                <label class="lab-field-card"
+                       for="verifyRequestNumber">
+
+                    <input asp-for="VerifyRequestNumber"
+                           type="checkbox"
+                           class="verification-check lab-checkbox"
+                           id="verifyRequestNumber" />
+
+
+                    <div class="lab-field-content">
+
+                        <div class="lab-field-top">
+
+                            <div class="lab-field-icon">
+
+                                <i class="fas fa-file-medical"></i>
+
+                            </div>
+
+                            <span class="lab-field-label">
+                                Request Number
+                            </span>
+
+                        </div>
+
+
+                        <div class="lab-field-value">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.RequestNumber))
+                            {
+                                @Model.RequestNumber
+                            }
+                            else
+                            {
+                                <span class="lab-error-value">
+
+                                    <i class="fas fa-exclamation-circle"></i>
+
+                                    Request number unavailable
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <small class="lab-field-help">
+                            Laboratory request identifier
+                        </small>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     TECHNICIAN
+                     ================================================= -->
+
+                <label class="lab-field-card"
+                       for="verifyTechnician">
+
+                    <input asp-for="VerifyTechnician"
+                           type="checkbox"
+                           class="verification-check lab-checkbox"
+                           id="verifyTechnician" />
+
+
+                    <div class="lab-field-content">
+
+                        <div class="lab-field-top">
+
+                            <div class="lab-field-icon">
+
+                                <i class="fas fa-user-md"></i>
+
+                            </div>
+
+                            <span class="lab-field-label">
+                                Technician Receiving
+                            </span>
+
+                        </div>
+
+
+                        <div class="lab-field-value">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.TechnicianName))
+                            {
+                                @Model.TechnicianName
+                            }
+                            else
+                            {
+                                <span class="lab-error-value">
+
+                                    <i class="fas fa-exclamation-circle"></i>
+
+                                    Technician unavailable
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <small class="lab-field-help">
+                            Logged-in laboratory technician
+                        </small>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     BARCODE
+                     ================================================= -->
+
+                <label class="lab-field-card"
+                       for="verifyBarcode">
+
+                    <input asp-for="VerifyBarcode"
+                           type="checkbox"
+                           class="verification-check lab-checkbox"
+                           id="verifyBarcode" />
+
+
+                    <div class="lab-field-content">
+
+                        <div class="lab-field-top">
+
+                            <div class="lab-field-icon">
+
+                                <i class="fas fa-barcode"></i>
+
+                            </div>
+
+                            <span class="lab-field-label">
+                                Sample Barcode
+                            </span>
+
+                        </div>
+
+
+                        <div class="lab-field-value">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Barcode))
+                            {
+                                <span class="barcode-number">
+
+                                    @Model.Barcode
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="lab-error-value">
+
+                                    <i class="fas fa-exclamation-circle"></i>
+
+                                    No barcode
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Barcode))
+                        {
+                            <small class="lab-valid-value">
+
+                                <i class="fas fa-check-circle"></i>
+
+                                Barcode verified as unique
+
+                            </small>
+                        }
+
+
+                        <span asp-validation-for="Barcode"
+                              class="verification-validation">
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     SAMPLE TYPE
+                     ================================================= -->
+
+                <label class="lab-field-card"
+                       for="verifySampleType">
+
+                    <input asp-for="VerifySampleType"
+                           type="checkbox"
+                           class="verification-check lab-checkbox"
+                           id="verifySampleType" />
+
+
+                    <div class="lab-field-content">
+
+                        <div class="lab-field-top">
+
+                            <div class="lab-field-icon">
+
+                                <i class="fas fa-vial"></i>
+
+                            </div>
+
+                            <span class="lab-field-label">
+                                Sample Type
+                            </span>
+
+                        </div>
+
+
+                        <div class="lab-field-value">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.SampleTypeName))
+                            {
+                                @Model.SampleTypeName
+                            }
+                            else
+                            {
+                                <span class="lab-error-value">
+
+                                    <i class="fas fa-exclamation-circle"></i>
+
+                                    Sample type not found
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <small class="lab-field-help">
+                            Required specimen type
+                        </small>
+
+
+                        <span asp-validation-for="SampleTypeId"
+                              class="verification-validation">
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     DATE / TIME
+                     ================================================= -->
+
+                <label class="lab-field-card"
+                       for="verifyDateTime">
+
+                    <input asp-for="VerifyDateTime"
+                           type="checkbox"
+                           class="verification-check lab-checkbox"
+                           id="verifyDateTime" />
+
+
+                    <div class="lab-field-content">
+
+                        <div class="lab-field-top">
+
+                            <div class="lab-field-icon">
+
+                                <i class="fas fa-calendar-check"></i>
+
+                            </div>
+
+                            <span class="lab-field-label">
+                                Date / Time Received
+                            </span>
+
+                        </div>
+
+
+                        <div class="lab-field-value">
+
+                            @Model.DateTimeReceived.ToString(
+                                "dd MMM yyyy")
+
+                        </div>
+
+
+                        <small class="lab-field-help">
+
+                            <i class="far fa-clock mr-1"></i>
+
+                            @Model.DateTimeReceived.ToString(
+                                "HH:mm")
+
+                        </small>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     PATIENT INFORMATION
+                     ================================================= -->
+
+                <div class="lab-field-card lab-information-card">
+
+                    <div class="lab-info-placeholder"></div>
+
+
+                    <div class="lab-field-content">
+
+                        <div class="lab-field-top">
+
+                            <div class="lab-field-icon">
+
+                                <i class="fas fa-user"></i>
+
+                            </div>
+
+                            <span class="lab-field-label">
+                                Patient
+                            </span>
+
+                        </div>
+
+
+                        <div class="lab-field-value">
+
+                            @if (!string.IsNullOrWhiteSpace(Model.PatientName))
+                            {
+                                @Model.PatientName
+                            }
+                            else
+                            {
+                                <span class="lab-error-value">
+
+                                    <i class="fas fa-exclamation-circle"></i>
+
+                                    Patient unavailable
+
+                                </span>
+                            }
+
+                        </div>
+
+
+                        <small class="lab-field-help">
+                            Patient associated with request
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ====================================================
+                 PROGRESS
+                 ==================================================== -->
+
+            <div class="lab-verification-footer">
+
+                <div class="lab-progress-information">
+
+                    <div class="lab-progress-icon">
+
+                        <i class="fas fa-info-circle"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <strong>
+                            Verification progress
+                        </strong>
+
+                        <span id="verificationProgress">
+                            0 of 5 items verified
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="lab-security">
+
+                    <i class="fas fa-lock"></i>
+
+                    Secure laboratory workflow
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ============================================================
+         ACTION FOOTER
+         ============================================================ -->
+
+    <div class="verification-footer">
+
+
+        <button type="button"
+                class="btn verification-cancel"
+                data-dismiss="modal">
+
+            <i class="fas fa-times mr-1"></i>
+
+            Cancel
+
+        </button>
+
+
+        <button type="submit"
+                id="confirmReceiveBtn"
+                class="btn verification-confirm"
+                disabled>
+
+            <i class="fas fa-check-circle"></i>
+
+            Confirm &amp; Set Status to "Samples Received"
+
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+    (function() {
+
+        /* =========================================================
+           RECEIVE SAMPLE MODAL
+           VERIFICATION SCRIPT
+           ========================================================= */
+
+        const container =
+            document.getElementById("receiveSampleModalContent");
+
+        if (!container) {
+            return;
+        }
+
+
+        /* =========================================================
+           FORM
+           ========================================================= */
+
+        const form =
+            container.querySelector("#receiveSampleForm");
+
+        if (!form) {
+            console.error("Receive Sample form was not found.");
+            return;
+        }
+
+
+        /* =========================================================
+           ELEMENTS
+           ========================================================= */
+
+        const checks =
+            container.querySelectorAll(".verification-check");
+
+        const confirmButton =
+            container.querySelector("#confirmReceiveBtn");
+
+        const warning =
+            container.querySelector("#verificationWarning");
+
+        const progress =
+            container.querySelector("#verificationProgress");
+
+        const statusBadge =
+            container.querySelector("#verificationStatusBadge");
+
+
+        /* =========================================================
+           REQUIRED HIDDEN VALUES
+           ========================================================= */
+
+        const requestNumber =
+            form.querySelector('[name="RequestNumber"]');
+
+        const sampleId =
+            form.querySelector('[name="SampleID"]');
+
+        const barcode =
+            form.querySelector('[name="Barcode"]');
+
+        const sampleTypeId =
+            form.querySelector('[name="SampleTypeId"]');
+
+
+        /* =========================================================
+           CHECK REQUIRED FORM VALUES
+           ========================================================= */
+
+        function requiredValuesPresent() {
+
+            const requestNumberValid =
+                requestNumber &&
+                requestNumber.value.trim() !== "";
+
+            const sampleIdValid =
+                sampleId &&
+                sampleId.value.trim() !== "" &&
+                sampleId.value !== "0";
+
+            const barcodeValid =
+                barcode &&
+                barcode.value.trim() !== "";
+
+            const sampleTypeValid =
+                sampleTypeId &&
+                sampleTypeId.value.trim() !== "" &&
+                sampleTypeId.value !== "0";
+
+
+            return (
+                requestNumberValid &&
+                sampleIdValid &&
+                barcodeValid &&
+                sampleTypeValid
+            );
+        }
+
+
+        /* =========================================================
+           UPDATE VERIFICATION STATUS
+           ========================================================= */
+
+        function updateVerificationStatus() {
+
+            const checkedCount =
+                Array.from(checks)
+                    .filter(function(check) {
+                        return check.checked;
+                    })
+                    .length;
+
+
+            const totalCount =
+                checks.length;
+
+
+            /*
+             * There should be exactly five verification items.
+             */
+            const allChecked =
+                totalCount === 5 &&
+                checkedCount === 5;
+
+
+            const formValuesValid =
+                requiredValuesPresent();
+
+
+            const verificationComplete =
+                allChecked &&
+                formValuesValid;
+
+
+            /* -----------------------------------------------------
+               PROGRESS
+               ----------------------------------------------------- */
+
+            if (progress) {
+
+                progress.textContent =
+                    checkedCount +
+                    " of " +
+                    totalCount +
+                    " items verified";
+            }
+
+
+            /* -----------------------------------------------------
+               CONFIRM BUTTON
+               ----------------------------------------------------- */
+
+            if (confirmButton) {
+
+                confirmButton.disabled =
+                    !verificationComplete;
+            }
+
+
+            /* -----------------------------------------------------
+               STATUS BADGE
+               ----------------------------------------------------- */
+
+            if (statusBadge) {
+
+                if (verificationComplete) {
+
+                    statusBadge.classList.add("complete");
+
+                    statusBadge.innerHTML =
+                        '<i class="fas fa-check-circle"></i>' +
+                        '<span>Verification Complete</span>';
+
+                } else {
+
+                    statusBadge.classList.remove("complete");
+
+                    statusBadge.innerHTML =
+                        '<i class="fas fa-clock"></i>' +
+                        '<span>Pending Verification</span>';
+                }
+            }
+
+
+            /* -----------------------------------------------------
+               TOP ALERT
+               ----------------------------------------------------- */
+
+            if (warning) {
+
+                if (!formValuesValid) {
+
+                    warning.classList.remove(
+                        "verification-success"
+                    );
+
+                    warning.innerHTML = `
+                            <div class="lab-alert-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Sample Information Missing
+                                </strong>
+
+                                <span>
+                                    Some required sample information is
+                                    unavailable. Please close this window
+                                    and try receiving the sample again.
+                                </span>
+                            </div>
+                        `;
+
+                } else if (allChecked) {
+
+                    warning.classList.add(
+                        "verification-success"
+                    );
+
+                    warning.innerHTML = `
+                            <div class="lab-alert-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Verification Complete
+                                </strong>
+
+                                <span>
+                                    All sample information has been
+                                    successfully verified. You can now
+                                    receive the sample into the laboratory.
+                                </span>
+                            </div>
+                        `;
+
+                } else {
+
+                    warning.classList.remove(
+                        "verification-success"
+                    );
+
+                    warning.innerHTML = `
+                            <div class="lab-alert-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Sample Verification Required
+                                </strong>
+
+                                <span>
+                                    Confirm each item below against the
+                                    physical sample before receiving it
+                                    into the laboratory.
+                                </span>
+                            </div>
+                        `;
+                }
+            }
+        }
+
+
+        /* =========================================================
+           CHECKBOX EVENTS
+           ========================================================= */
+
+        checks.forEach(function(check) {
+
+            check.addEventListener(
+                "change",
+                updateVerificationStatus
+            );
+        });
+
+
+        /* =========================================================
+           FINAL SUBMIT VALIDATION
+           ========================================================= */
+
+        form.addEventListener("submit", function(event) {
+
+            const checkedCount =
+                Array.from(checks)
+                    .filter(function(check) {
+                        return check.checked;
+                    })
+                    .length;
+
+
+            if (checkedCount !== 5) {
+
+                event.preventDefault();
+
+                Swal.fire({
+                    icon: "warning",
+                    title: "Verification Incomplete",
+                    text:
+                        "Please verify all five sample details before receiving the sample.",
+                    confirmButtonText: "OK"
+                });
+
+                return;
+            }
+
+
+            if (!requiredValuesPresent()) {
+
+                event.preventDefault();
+
+                let missing = [];
+
+                if (!requestNumber ||
+                    requestNumber.value.trim() === "") {
+
+                    missing.push("Request Number");
+                }
+
+                if (!sampleId ||
+                    sampleId.value.trim() === "" ||
+                    sampleId.value === "0") {
+
+                    missing.push("Sample ID");
+                }
+
+                if (!barcode ||
+                    barcode.value.trim() === "") {
+
+                    missing.push("Barcode");
+                }
+
+                if (!sampleTypeId ||
+                    sampleTypeId.value.trim() === "" ||
+                    sampleTypeId.value === "0") {
+
+                    missing.push("Sample Type");
+                }
+
+
+                Swal.fire({
+                    icon: "error",
+                    title: "Sample Information Missing",
+                    html:
+                        "The following information was not loaded:<br><br>" +
+                        "<strong>" +
+                        missing.join("<br>") +
+                        "</strong>",
+                    confirmButtonText: "OK"
+                });
+
+                return;
+            }
+
+
+            /* -----------------------------------------------------
+               DIAGNOSTIC OUTPUT
+               ----------------------------------------------------- */
+
+            console.log(
+                "========== RECEIVE SAMPLE =========="
+            );
+
+            console.log(
+                "RequestNumber:",
+                requestNumber.value
+            );
+
+            console.log(
+                "SampleID:",
+                sampleId.value
+            );
+
+            console.log(
+                "Barcode:",
+                barcode.value
+            );
+
+            console.log(
+                "SampleTypeId:",
+                sampleTypeId.value
+            );
+
+            console.log(
+                "Verification:",
+                checkedCount + "/5"
+            );
+
+            console.log(
+                "Serialized Form:",
+                $(form).serialize()
+            );
+
+            console.log(
+                "===================================="
+            );
+        });
+
+
+        /* =========================================================
+           INITIAL STATE
+           ========================================================= */
+
+        updateVerificationStatus();
+
+    })();
+</script>

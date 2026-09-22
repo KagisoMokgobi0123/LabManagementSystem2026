@@ -1,210 +1,232 @@
 ﻿@model NMB_HLabSys.Areas.Technician.Models.ReceiveSampleViewModel
 
 @{
-    ViewData["Title"] = "Receive Sample";
+	ViewData["Title"] = "NMB_HLabSys | Receive Samples";
+	Layout = "_TechnicianLayout";
 }
+<div class="main-panel">
+	<div class="content">
+		<div class="panel-header bg-primary-gradient">
+			<div class="page-inner py-5">
+				<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+					<div>
+                        <h2 class="text-white pb-2 fw-bold">
+                            📦 Receive Sample - Verification Required
+                        </h2>
+						<h5 class="text-white op-7 mb-2">Lab Technician Receive Samples</h5>
+					</div>
+					<div class="ml-md-auto py-2 py-md-0">
+						<a href="#" class="btn btn-secondary btn-round">Receive Sample</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="page-inner mt--5">
+			<div class="row mt--2">
+				<div class="col-md-6">
+					<div class="card full-height">
+						<div class="card-body">
+                            <div class="modal-content">
 
-<div class="modal-content">
+                            <form asp-action="Receive"
+                                  asp-controller="ReceiveSamples"
+                                  asp-area="Technician"
+                                  method="post">
 
-    <div class="modal-header bg-primary text-white">
+                                @Html.AntiForgeryToken()
 
-        <h4 class="modal-title">
-            📦 Receive Sample - Verification Required
-        </h4>
+                                <input asp-for="TestRequestId" type="hidden" />
 
-    </div>
+                                <input asp-for="SampleID" type="hidden" />
 
-    <form asp-action="Receive"
-          asp-controller="ReceiveSamples"
-          asp-area="Technician"
-          method="post">
+                                <input asp-for="RequestNumber" type="hidden" />
 
-        @Html.AntiForgeryToken()
+                                <input asp-for="Barcode" type="hidden" />
 
-        <input asp-for="TestRequestId" type="hidden" />
+                                <input asp-for="SampleTypeId" type="hidden" />
 
-        <input asp-for="SampleID" type="hidden" />
+                                <input asp-for="DateTimeReceived" type="hidden" />
 
-        <input asp-for="RequestNumber" type="hidden" />
+                                <div class="modal-body">
 
-        <input asp-for="Barcode" type="hidden" />
+                                    <div class="card bg-light">
 
-        <input asp-for="SampleTypeId" type="hidden" />
+                                        <div class="card-body">
 
-        <input asp-for="DateTimeReceived" type="hidden" />
+                                            <h5>
+                                                ✔ Sample Verification Checklist
+                                            </h5>
 
-        <div class="modal-body">
 
-            <div class="card bg-light">
+                                            <!-- Request Number -->
 
-                <div class="card-body">
+                                            <div class="form-check mb-3">
 
-                    <h5>
-                        ✔ Sample Verification Checklist
-                    </h5>
+                                                <input asp-for="VerifyRequestNumber"
+                                                       class="form-check-input verification-check"
+                                                       type="checkbox"
+                                                       id="verifyRequestNumber" />
 
+                                                <label class="form-check-label"
+                                                       for="verifyRequestNumber">
 
-                    <!-- Request Number -->
+                                                    <strong>Request Number:</strong>
 
-                    <div class="form-check mb-3">
+                                                    @Model.RequestNumber
 
-                        <input asp-for="VerifyRequestNumber"
-                               class="form-check-input verification-check"
-                               type="checkbox"
-                               id="verifyRequestNumber" />
+                                                </label>
 
-                        <label class="form-check-label"
-                               for="verifyRequestNumber">
+                                            </div>
 
-                            <strong>Request Number:</strong>
 
-                            @Model.RequestNumber
+                                            <!-- Technician -->
 
-                        </label>
+                                            <div class="form-check mb-3">
 
-                    </div>
+                                                <input asp-for="VerifyTechnician"
+                                                       class="form-check-input verification-check"
+                                                       type="checkbox"
+                                                       id="verifyTechnician" />
 
+                                                <label class="form-check-label"
+                                                       for="verifyTechnician">
 
-                    <!-- Technician -->
+                                                    <strong>Technician Receiving:</strong>
 
-                    <div class="form-check mb-3">
+                                                    @Model.TechnicianName
 
-                        <input asp-for="VerifyTechnician"
-                               class="form-check-input verification-check"
-                               type="checkbox"
-                               id="verifyTechnician" />
+                                                </label>
 
-                        <label class="form-check-label"
-                               for="verifyTechnician">
+                                            </div>
 
-                            <strong>Technician Receiving:</strong>
 
-                           @Model.TechnicianName
+                                            <!-- Barcode -->
 
-                        </label>
+                                            <div class="form-check mb-3">
 
-                    </div>
+                                                <input asp-for="VerifyBarcode"
+                                                       class="form-check-input verification-check"
+                                                       type="checkbox"
+                                                       id="verifyBarcode" />
 
+                                                <label class="form-check-label"
+                                                       for="verifyBarcode">
 
-                    <!-- Barcode -->
+                                                    <strong>Sample Barcode:</strong>
 
-                    <div class="form-check mb-3">
+                                                    @Model.Barcode
 
-                        <input asp-for="VerifyBarcode"
-                               class="form-check-input verification-check"
-                               type="checkbox"
-                               id="verifyBarcode" />
+                                                    <span class="text-success ms-3">
+                                                        ✓ Unique
+                                                    </span>
 
-                        <label class="form-check-label"
-                               for="verifyBarcode">
+                                                </label>
 
-                            <strong>Sample Barcode:</strong>
+                                            </div>
 
-                            @Model.Barcode
 
-                            <span class="text-success ms-3">
-                                ✓ Unique
-                            </span>
+                                            <!-- Sample Type -->
 
-                        </label>
+                                            <div class="form-check mb-3">
 
-                    </div>
+                                                <input asp-for="VerifySampleType"
+                                                       class="form-check-input verification-check"
+                                                       type="checkbox"
+                                                       id="verifySampleType" />
 
+                                                <label class="form-check-label"
+                                                       for="verifySampleType">
 
-                    <!-- Sample Type -->
+                                                    <strong>Sample Type:</strong>
 
-                    <div class="form-check mb-3">
+                                                    <select asp-for="SampleTypeId"
+                                                            asp-items="Model.SampleTypes"
+                                                            class="form-select d-inline-block"
+                                                            style="width: 200px;">
 
-                        <input asp-for="VerifySampleType"
-                               class="form-check-input verification-check"
-                               type="checkbox"
-                               id="verifySampleType" />
+                                                        <option value="">
+                                                            Select
+                                                        </option>
 
-                        <label class="form-check-label"
-                               for="verifySampleType">
+                                                    </select>
 
-                            <strong>Sample Type:</strong>
+                                                </label>
 
-                            <select asp-for="SampleTypeId"
-                                    asp-items="Model.SampleTypes"
-                                    class="form-select d-inline-block"
-                                    style="width: 200px;">
+                                            </div>
 
-                                <option value="">
-                                    Select
-                                </option>
 
-                            </select>
+                                            <!-- Date/Time -->
 
-                        </label>
+                                            <div class="form-check mb-3">
 
-                    </div>
+                                                <input asp-for="VerifyDateTime"
+                                                       class="form-check-input verification-check"
+                                                       type="checkbox"
+                                                       id="verifyDateTime" />
 
+                                                <label class="form-check-label"
+                                                       for="verifyDateTime">
 
-                    <!-- Date/Time -->
+                                                    <strong>Date/Time Received:</strong>
 
-                    <div class="form-check mb-3">
+                                                    @Model.DateTimeReceived.ToString("d/M/yyyy, h:mm:ss tt")
 
-                        <input asp-for="VerifyDateTime"
-                               class="form-check-input verification-check"
-                               type="checkbox"
-                               id="verifyDateTime" />
+                                                </label>
 
-                        <label class="form-check-label"
-                               for="verifyDateTime">
+                                            </div>
 
-                            <strong>Date/Time Received:</strong>
+                                        </div>
 
-                            @Model.DateTimeReceived.ToString("d/M/yyyy, h:mm:ss tt")
+                                    </div>
 
-                        </label>
 
-                    </div>
+                                    <!-- Warning -->
 
-                </div>
+                                    <div id="verificationWarning"
+                                         class="alert alert-warning mt-3">
 
-            </div>
+                                        Please verify all items before confirming.
 
+                                    </div>
 
-            <!-- Warning -->
+                                </div>
 
-            <div id="verificationWarning"
-                 class="alert alert-warning mt-3">
 
-                Please verify all items before confirming.
+                                <!-- Footer -->
 
-            </div>
+                                <div class="modal-footer">
 
-        </div>
+                                    <a asp-action="Index"
+                                       asp-controller="ReceiveSamples"
+                                       asp-area="Technician"
+                                       class="btn btn-secondary">
 
+                                        Cancel
 
-        <!-- Footer -->
+                                    </a>
 
-        <div class="modal-footer">
+                                    <button type="submit"
+                                            id="confirmButton"
+                                            class="btn btn-success"
+                                            disabled>
 
-            <a asp-action="Index"
-               asp-controller="ReceiveSamples"
-               asp-area="Technician"
-               class="btn btn-secondary">
+                                        ✔ Confirm & Set Status to "Samples Received"
 
-                Cancel
+                                    </button>
 
-            </a>
+                                </div>
 
-            <button type="submit"
-                    id="confirmButton"
-                    class="btn btn-success"
-                    disabled>
-
-                ✔ Confirm & Set Status to "Samples Received"
-
-            </button>
-
-        </div>
-
-    </form>
-
+                            </form>
+						</div>
+                        </div>
+					</div>
+				</div>
+			</div>
+		
+		</div>
+	</div>
 </div>
+
 
 
 @section Scripts {

@@ -1,404 +1,2735 @@
 ﻿@model IEnumerable<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
 
 @{
-    ViewData["Title"] = "Receive Patient Sample";
+ViewData["Title"] = "NMB_HLabSys | Samples Reception";
+    Layout = "_TechnicianLayout";
 }
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
+	<link rel="icon" href="~/assets/img/icon.ico" type="image/x-icon"/>
+	
+	<!-- Fonts and icons -->
+	<script src="~/assets/js/plugin/webfont/webfont.min.js"></script>
+	<script>
+		WebFont.load({
+			google: {"families":["Lato:300,400,700,900"]},
+			custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['../../assets/css/fonts.min.css']},
+			active: function() {
+				sessionStorage.fonts = true;
+			}
+		});
+	</script>
 
-<style>
-    body {
-        background-color: #f1f3f6;
-    }
-    .page-header {
-        background: white; 
+	<!-- CSS Files -->
+	<link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
+	<link rel="stylesheet" href="~/assets/css/atlantis.min.css">
 
-        border-radius: 16px;
-        padding: 20px 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+	<!--datatables links-->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+	<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
 
-    .page-title {
-        font-size: 28px;
-        font-weight: 600;
-        color: #20233c;
-        margin: 0;
-    }
+	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+</head>
+<div class="wrapper">
+	<div class="main-header">
+		<!-- Logo Header -->
+		<div class="logo-header" data-background-color="blue">
 
-    .user-section {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
+			<a href="index.html" class="logo">
+				<img src="~/assets/img/logo.svg" alt="navbar brand" class="navbar-brand">
+			</a>
+			<button class="navbar-toggler sidenav-toggler ml-auto" type="button" data-toggle="collapse" data-target="collapse" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon">
+					<i class="icon-menu"></i>
+				</span>
+			</button>
+			<button class="topbar-toggler more"><i class="icon-options-vertical"></i></button>
+			<div class="nav-toggle">
+				<button class="btn btn-toggle toggle-sidebar">
+					<i class="icon-menu"></i>
+				</button>
+			</div>
+		</div>
+		<!-- End Logo Header -->
+		<nav class="navbar navbar-header navbar-expand-lg" data-background-color="blue">
 
-    .user-avatar {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #6f42c1, #4b62c6);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 20px;
-    }
+			<div class="container-fluid">
+				<div class="collapse" id="search-nav">
+					<form class="navbar-left navbar-form nav-search mr-md-3">
+						<div class="input-group">
+							<div class="input-group-prepend">
+								<button type="submit" class="btn btn-search pr-1">
+									<i class="fa fa-search search-icon"></i>
+								</button>
+							</div>
+							<input type="text" placeholder="Search ..." class="form-control">
+						</div>
+					</form>
+				</div>
+				<ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+					<li class="nav-item toggle-nav-search hidden-caret">
+						<a class="nav-link" data-toggle="collapse" href="#search-nav" role="button" aria-expanded="false" aria-controls="search-nav">
+							<i class="fa fa-search"></i>
+						</a>
+					</li>
+					<li class="nav-item dropdown hidden-caret">
+						<a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<i class="fa fa-envelope"></i>
+						</a>
+						<ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+							<li>
+								<div class="dropdown-title d-flex justify-content-between align-items-center">
+									Messages
+									<a href="#" class="small">Mark all as read</a>
+								</div>
+							</li>
+							<li>
+								<div class="message-notif-scroll scrollbar-outer">
+									<div class="notif-center">
+										<a href="#">
+											<div class="notif-img">
+												<img src="~/assets/img/jm_denis.jpg" alt="Img Profile">
+											</div>
+											<div class="notif-content">
+												<span class="subject">Jimmy Denis</span>
+												<span class="block">
+													How are you ?
+												</span>
+												<span class="time">5 minutes ago</span>
+											</div>
+										</a>
+										<a href="#">
+											<div class="notif-img">
+												<img src="~/assets/img/chadengle.jpg" alt="Img Profile">
+											</div>
+											<div class="notif-content">
+												<span class="subject">Chad</span>
+												<span class="block">
+													Ok, Thanks !
+												</span>
+												<span class="time">12 minutes ago</span>
+											</div>
+										</a>
+										<a href="#">
+											<div class="notif-img">
+												<img src="~/assets/img/mlane.jpg" alt="Img Profile">
+											</div>
+											<div class="notif-content">
+												<span class="subject">Jhon Doe</span>
+												<span class="block">
+													Ready for the meeting today...
+												</span>
+												<span class="time">12 minutes ago</span>
+											</div>
+										</a>
+										<a href="#">
+											<div class="notif-img">
+												<img src="~/assets/img/talha.jpg" alt="Img Profile">
+											</div>
+											<div class="notif-content">
+												<span class="subject">Talha</span>
+												<span class="block">
+													Hi, Apa Kabar ?
+												</span>
+												<span class="time">17 minutes ago</span>
+											</div>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li>
+								<a class="see-all" href="javascript:void(0);">See all messages<i class="fa fa-angle-right"></i> </a>
+							</li>
+						</ul>
+					</li>
+					<li class="nav-item dropdown hidden-caret">
+						<a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<i class="fa fa-bell"></i>
+							<span class="notification">4</span>
+						</a>
+						<ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+							<li>
+								<div class="dropdown-title">You have 4 new notification</div>
+							</li>
+							<li>
+								<div class="notif-scroll scrollbar-outer">
+									<div class="notif-center">
+										<a href="#">
+											<div class="notif-icon notif-primary"> <i class="fa fa-user-plus"></i> </div>
+											<div class="notif-content">
+												<span class="block">
+													New user registered
+												</span>
+												<span class="time">5 minutes ago</span>
+											</div>
+										</a>
+										<a href="#">
+											<div class="notif-icon notif-success"> <i class="fa fa-comment"></i> </div>
+											<div class="notif-content">
+												<span class="block">
+													Rahmad commented on Admin
+												</span>
+												<span class="time">12 minutes ago</span>
+											</div>
+										</a>
+										<a href="#">
+											<div class="notif-img">
+												<img src="~/assets/img/profile2.jpg" alt="Img Profile">
+											</div>
+											<div class="notif-content">
+												<span class="block">
+													Reza send messages to you
+												</span>
+												<span class="time">12 minutes ago</span>
+											</div>
+										</a>
+										<a href="#">
+											<div class="notif-icon notif-danger"> <i class="fa fa-heart"></i> </div>
+											<div class="notif-content">
+												<span class="block">
+													Farrah liked Admin
+												</span>
+												<span class="time">17 minutes ago</span>
+											</div>
+										</a>
+									</div>
+								</div>
+							</li>
+							<li>
+								<a class="see-all" href="javascript:void(0);">See all notifications<i class="fa fa-angle-right"></i> </a>
+							</li>
+						</ul>
+					</li>
+					<li class="nav-item dropdown hidden-caret">
+						<a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+							<i class="fas fa-layer-group"></i>
+						</a>
+						<div class="dropdown-menu quick-actions quick-actions-info animated fadeIn">
+							<div class="quick-actions-header">
+								<span class="title mb-1">Quick Actions</span>
+								<span class="subtitle op-8">Shortcuts</span>
+							</div>
+							<div class="quick-actions-scroll scrollbar-outer">
+								<div class="quick-actions-items">
+									<div class="row m-0">
+										<a class="col-6 col-md-4 p-0" href="#">
+											<div class="quick-actions-item">
+												<i class="flaticon-file-1"></i>
+												<span class="text">Generated Report</span>
+											</div>
+										</a>
+										<a class="col-6 col-md-4 p-0" href="#">
+											<div class="quick-actions-item">
+												<i class="flaticon-database"></i>
+												<span class="text">Create New Database</span>
+											</div>
+										</a>
+										<a class="col-6 col-md-4 p-0" href="#">
+											<div class="quick-actions-item">
+												<i class="flaticon-pen"></i>
+												<span class="text">Create New Post</span>
+											</div>
+										</a>
+										<a class="col-6 col-md-4 p-0" href="#">
+											<div class="quick-actions-item">
+												<i class="flaticon-interface-1"></i>
+												<span class="text">Create New Task</span>
+											</div>
+										</a>
+										<a class="col-6 col-md-4 p-0" href="#">
+											<div class="quick-actions-item">
+												<i class="flaticon-list"></i>
+												<span class="text">Completed Tasks</span>
+											</div>
+										</a>
+										<a class="col-6 col-md-4 p-0" href="#">
+											<div class="quick-actions-item">
+												<i class="flaticon-file"></i>
+												<span class="text">Create New Invoice</span>
+											</div>
+										</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					</li>
+					<li class="nav-item dropdown hidden-caret">
+						<a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#" aria-expanded="false">
+							<div class="avatar-sm">
+								<img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+							</div>
+						</a>
+						<ul class="dropdown-menu dropdown-user animated fadeIn">
+							<div class="dropdown-user-scroll scrollbar-outer">
+								<li>
+									<div class="user-box">
+										<div class="avatar-lg"><img src="~/assets/img/profile.jpg" alt="image profile" class="avatar-img rounded"></div>
+										<div class="u-text">
+											<h4>Hizrian</h4>
+											<p class="text-muted">hello@example.com</p><a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+										</div>
+									</div>
 
-    .user-name {
-        font-weight: 600;
-        font-size: 18px;
-        color: #292929;
-    }
+								</li>
+								<li>
+									<div class="dropdown-divider"></div>
+									<a class="dropdown-item" href="#">My Profile</a>
+									<a class="dropdown-item" href="#">My Balance</a>
+									<a class="dropdown-item" href="#">Inbox</a>
+									<div class="dropdown-divider"></div>
+									<a href="@Url.Action("Index", "Settings", new { area = "Technician" })">
+										class="dropdown-item" href="#">Account Setting</a>
+									<div class="dropdown-divider"></div>
+									<a class="dropdown-item" href="#">Logout</a>
+								</li>
+							</div>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</nav>
+		<!-- End Navbar -->
+	</div>
 
-    .user-role {
-        color: #777;
-        font-size: 15px;
-    }
+	<!-- Sidebar -->
+	<div class="sidebar sidebar-style-2">
+		<div class="sidebar-wrapper scrollbar scrollbar-inner">
+			<div class="sidebar-content">
+				<div class="user">
+					<div class="avatar-sm float-left mr-2">
+						<img src="~/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle">
+					</div>
+					<div class="info">
+						<a data-toggle="collapse" href="#collapseExample" aria-expanded="true">
+							<span>
+								Rudzani Khauli
+								<span class="user-level">Lab Technician</span>
+								<span class="caret"></span>
+							</span>
+						</a>
+						<div class="clearfix"></div>
 
-    .select-test-btn {
-        background-color: #198754;
-        color: white;
-        border: none;
-        border-radius: 10px;
-        padding: 13px 22px;
-        font-size: 16px;
-        font-weight: 500;
-        margin-right: 18px;
-    }
+						<div class="collapse in" id="collapseExample">
+							<ul class="nav">
+								<li>
+									<a href="#profile">
+										<span class="link-collapse">My Profile</span>
+									</a>
+								</li>
+								<li>
+									<a href="#edit">
+										<span class="link-collapse">Edit Profile</span>
+									</a>
+								</li>
+								<li>
+									<a href="@Url.Action("Index", "Settings", new { area = "Technician" })">
+										<span class="link-collapse">Settings</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<ul class="nav nav-primary">
+					<li class="nav-item active">
+						<a data-toggle="collapse" href="#dashboard" class="collapsed" aria-expanded="false">
+							<i class="fas fa-home"></i>
+							<p>Dashboard</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="dashboard">
+							<ul class="nav nav-collapse">
+								<li>
+									<a href="~/demo1/index.html">
+										<span class="sub-item">Workload Analytics</span>
+									</a>
+								</li>
+								<li>
+									<a href="~/demo2/index.html">
+										<span class="sub-item">Generate Reports</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-section">
+						<span class="sidebar-mini-icon">
+							<i class="fa fa-ellipsis-h"></i>
+						</span>
+						<h4 class="text-section">Menu</h4>
+					</li>
+					<li class="nav-item">
+						<a data-toggle="collapse" href="#base">
+							<i class="fas fa-layer-group"></i>
+							<p>My Samples</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="base">
+							<ul class="nav nav-collapse">
 
-        .select-test-btn:hover {
-            background-color: #157347;
-            color: white;
-        }
+								<li>
+									<a href="@Url.Action("Index", "ReceiveSamples", new { area = "Technician" })">
+										<span class="sub-item">Samples</span>
+									</a>
+								</li>
 
-    .info-box {
-        background-color: #dff1ff;
-        border-left: 4px solid #0d9bf6;
-        border-radius: 4px;
-        padding: 18px 20px;
-        margin-bottom: 20px;
-        color: #07566d;
-        font-size: 17px;
-    }
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a data-toggle="collapse" href="#sidebarLayouts">
+							<i class="fas fa-th-list"></i>
+							<p>Receive Samples</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="sidebarLayouts">
+							<ul class="nav nav-collapse">
+								<li>
+									<a href="sidebar-style-1.html">
+										<span class="sub-item">Assigned Test Types</span>
+									</a>
+								</li>
+								<li>
+									<a href="overlay-sidebar.html">
+										<span class="sub-item">Select Test Type</span>
+									</a>
+								</li>
+								<li>
+									<a href="compact-sidebar.html">
+										<span class="sub-item">Results</span>
+									</a>
+								</li>
+								@* <li>
+									<a href="static-sidebar.html">
+										<span class="sub-item">Static Sidebar</span>
+									</a>
+								</li> *@
+								@* 	<li>
+									<a href="icon-menu.html">
+										<span class="sub-item">Icon Menu</span>
+									</a>
+								</li> *@
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a data-toggle="collapse" href="#forms">
+							<i class="fas fa-pen-square"></i>
+							<p>Assigned Tests</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="forms">
+							<ul class="nav nav-collapse">
+								<li>
+									<a href="forms/forms.html">
+										<span class="sub-item">Basic Form</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a data-toggle="collapse" href="#tables">
+							<i class="fas fa-table"></i>
+							<p>Record Results</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="tables">
+							<ul class="nav nav-collapse">
+								<li>
+									<a href="tables/tables.html">
+										<span class="sub-item">Basic Table</span>
+									</a>
+								</li>
+								<li>
+									<a href="tables/datatables.html">
+										<span class="sub-item">Datatables</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a data-toggle="collapse" href="#maps">
+							<i class="fas fa-map-marker-alt"></i>
+							<p>View My Tests</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="maps">
+							<ul class="nav nav-collapse">
+								<li>
+									<a href="maps/jqvmap.html">
+										<span class="sub-item">JQVMap</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a data-toggle="collapse" href="#charts">
+							<i class="far fa-chart-bar"></i>
+							<p>View Requests</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="charts">
+							<ul class="nav nav-collapse">
+								<li>
+									<a href="charts/charts.html">
+										<span class="sub-item">Chart Js</span>
+									</a>
+								</li>
+								<li>
+									<a href="charts/sparkline.html">
+										<span class="sub-item">Sparkline</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li>
+					<li class="nav-item">
+						<a href="widgets.html">
+							<i class="fas fa-desktop"></i>
+							<p>Settings</p>
+							<span class="badge badge-success">4</span>
+						</a>
+					</li>
+					@* 			<li class="nav-item">
+						<a data-toggle="collapse" href="#submenu">
+							<i class="fas fa-bars"></i>
+							<p>Menu Levels</p>
+							<span class="caret"></span>
+						</a>
+						<div class="collapse" id="submenu">
+							<ul class="nav nav-collapse">
+								<li>
+									<a data-toggle="collapse" href="#subnav1">
+										<span class="sub-item">Level 1</span>
+										<span class="caret"></span>
+									</a>
+									<div class="collapse" id="subnav1">
+										<ul class="nav nav-collapse subnav">
+											<li>
+												<a href="#">
+													<span class="sub-item">Level 2</span>
+												</a>
+											</li>
+											<li>
+												<a href="#">
+													<span class="sub-item">Level 2</span>
+												</a>
+											</li>
+										</ul>
+									</div>
+								</li>
+								<li>
+									<a data-toggle="collapse" href="#subnav2">
+										<span class="sub-item">Level 1</span>
+										<span class="caret"></span>
+									</a>
+									<div class="collapse" id="subnav2">
+										<ul class="nav nav-collapse subnav">
+											<li>
+												<a href="#">
+													<span class="sub-item">Level 2</span>
+												</a>
+											</li>
+										</ul>
+									</div>
+								</li>
+								<li>
+									<a href="#">
+										<span class="sub-item">Level 1</span>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</li> *@
+					<li class="mx-4 mt-2">
+						<a href="http://themekita.com/atlantis-bootstrap-dashboard.html" class="btn btn-primary btn-block"><span class="btn-label mr-2"> <i class="fa fa-heart"></i> </span>Sign Out</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<!-- End Sidebar -->
 
-    .procedure-box {
-        background-color: #d5f6fc;
-        border-radius: 4px;
-        padding: 18px 20px;
-        margin-bottom: 20px;
-        color: #07566d;
-        font-size: 17px;
-    }
 
-    .pending-card {
-        background-color: white;
-        border-radius: 17px;
-        overflow: hidden;
-        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
-    }
+<div class="main-panel">
+    <div class="content">
+        <div class="panel-header bg-primary-gradient">
+            <div class="page-inner py-5">
+                <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+                    <div>
+                        <h2 class="text-white pb-2 fw-bold">
+                            Doctor Test Requests - Sample Receiving
 
-    .pending-header {
-        background-color: #146cf5;
-        color: white;
-        padding: 20px 30px;
-        font-size: 19px;
-        font-weight: 600;
-    }
+                        </h2>
+							<h5 class="text-white op-7 mb-2">
+								<strong>
+									<i class="bi bi-database-fill"></i>
+									Pending Samples:
+								</strong>
 
-    .table-container {
-        padding: 20px;
-        overflow-x: auto;
-    }
+								Showing <a href="#" class="btn btn-success btn-round">
 
-    .pending-table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-        .pending-table th {
-            color: #555;
-            font-size: 15px;
-            font-weight: 500;
-            text-align: left;
-            padding: 14px 10px;
-            border-bottom: 2px solid #222;
-            white-space: nowrap;
-        }
-
-        .pending-table td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #ddd;
-            color: #333;
-            vertical-align: middle;
-        }
-
-    .request-number {
-        font-weight: 700;
-        color: #303030;
-    }
-
-    .demo-badge {
-        background-color: #18c5e8;
-        color: white;
-        border-radius: 12px;
-        padding: 4px 10px;
-        font-size: 11px;
-        margin-left: 5px;
-    }
-
-    .urgency-badge {
-        background-color: #ffbd00;
-        color: white;
-        border-radius: 10px;
-        padding: 7px 12px;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    .receive-btn {
-        background-color: #198754;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 9px 15px;
-        font-size: 14px;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-
-        .receive-btn:hover {
-            background-color: #157347;
-            color: white;
-        }
-
-    .empty-message {
-        text-align: center;
-        padding: 40px;
-        color: #777;
-        font-size: 17px;
-    }
-</style>
-
-
-<div class="container-fluid py-3">
-
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-
-        <div>
-            <h1 class="page-title">
-                Receive Patient Sample
-            </h1>
+								@Model.Count()
+							</a> pending sample receipt(s).
+							</h5>
+                    </div>
+                    <div class="ml-md-auto py-2 py-md-0">
+					<a href="@Url.Action("VerifiedSamples", "ReceiveSamples", new { area = "Technician" })">
+							<i class="fas fa-check-circle mr-1"></i>
+							Verified Samples
+						</a>
+                    </div>
+                </div>
+            </div>
         </div>
+        <div class="page-inner mt--5">
+            <div class="row mt--2">
+                <div class="col-md-12">
+                    <div class="card full-height">
+                        <div class="card-body">
+                            <div class="modal-content">
 
-        <div class="user-section">
+                                <div class="container-fluid py-3">
 
-            <button class="select-test-btn">
-                <i class="bi bi-plus-circle"></i>
-                Select New Test
-            </button>
+                               
 
-            <div class="user-avatar">
-                JS
+
+
+
+                                    <!-- PENDING SAMPLE CARD -->
+                                    <div class="pending-card">
+
+                                      
+
+											<div class="col-md-12">
+												
+													<div class="card-header">
+														<h4 class="card-title">
+															Pending Sample Reception
+														</h4>
+														<div class="ml-md-auto py-2 py-md-0">
+														<div class="btn btn-warning btn-round" style=" font-size: 11px;
+															padding: 4px 10px;
+															line-height: 1.2;">
+																<strong>
+																	<i class="fas fa-clipboard-check"></i>
+																	Sample Receiving Procedure:
+																</strong>
+
+																Verify all items before confirming.
+															</div>
+														</div>
+													</div>
+													<div class="card-body">
+							 				<div class="table-responsive">
+
+                                            @if (Model != null && Model.Any())
+                                            {
+													<table id="basic-datatables"
+														   class="display table table-bordered table-striped table-hover">
+                                                    <thead>
+                                                        <tr>
+
+                                                            <th>
+                                                                Request #
+                                                            </th>
+																	<th>
+																		Doctor
+																	</th>
+                                                            <th>
+                                                                Patient
+                                                            </th>
+
+                                                            <th>
+                                                                Urgency
+                                                            </th>
+
+                                                            <th>
+                                                                Test Type
+                                                            </th>
+
+                                                            <th>
+                                                                Clinical Notes
+                                                            </th>
+
+                                                            <th>
+                                                                Action
+                                                            </th>
+
+                                                        </tr>
+                                                    </thead>
+
+
+                                                    <tbody>
+
+                                                        @foreach (var item in Model)
+                                                        {
+                                                            <tr>
+
+                                                                <!-- REQUEST NUMBER -->
+                                                                <td>
+
+                                                                    <span class="request-number">
+                                                                        @item.RequestNumber
+                                                                    </span>
+
+                                                                </td>
+																  <td>
+
+                                                                    <span class="request-doctor">
+                                                                        @item.Doctor.FullName
+                                                                    </span>
+
+                                                                </td>
+
+
+                                                                <!-- PATIENT -->
+                                                                <td>
+
+                                                                    @if (item.Patient != null)
+                                                                    {
+                                                                        @item.Patient.FullName
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>N/A</span>
+                                                                    }
+
+                                                                </td>
+
+
+                                                                <!-- URGENCY -->
+                                                                <td>
+
+                                                                    <span class="urgency-badge">
+                                                                        @item.Urgency
+                                                                    </span>
+
+                                                                </td>
+
+
+                                                                <!-- TEST TYPE -->
+                                                                <td>
+
+                                                                    @if (item.TestType != null)
+                                                                    {
+                                                                        @item.TestType.Name
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>N/A</span>
+                                                                    }
+
+                                                                </td>
+
+
+                                                                <!-- CLINICAL NOTES -->
+                                                                <td>
+
+                                                                    @if (!string.IsNullOrEmpty(item.ClinicalNotes))
+                                                                    {
+                                                                        @item.ClinicalNotes
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>No clinical notes</span>
+                                                                    }
+
+                                                                </td>
+
+																
+                                                                <!-- ACTION -->
+																	<td class="form-button-action">
+																			<div class="form-button-action">
+																				<button type="button"
+																						class="btn btn-link btn-success btn-sm receive-sample-btn"
+																						data-request-number="@item.RequestNumber"
+																						data-toggle="tooltip"
+																						title="Verify sample">
+
+																					<i class="fas fa-inbox mr-1"></i>
+																					Receive Sample
+
+																				</button>
+																			
+																			</div>
+																		
+
+                                                                </td>
+
+                                                            </tr>
+                                                        }
+
+                                                    </tbody>
+
+                                                </table>
+                                          
+											
+														
+												
+											
+											}
+                                            else
+                                            {
+                                                <div class="empty-message">
+
+                                                    <i class="bi bi-inbox"></i>
+
+                                                    <p>
+                                                        There are currently no pending samples to receive.
+                                                    </p>
+
+                                                </div>
+                                            }
+
+                                        </div>
+
+									
+									
+									</div>
+										
+								
+								</div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <div class="user-name">
-                    John Smith
-                </div>
-
-                <div class="user-role">
-                    Lab Technician
-                </div>
-            </div>
-
         </div>
-
     </div>
+</div>
+
+<div class="modal fade"
+	 id="receiveSampleModal"
+	 tabindex="0"
+	 role="dialog"
+	 aria-labelledby="receiveSampleModalLabel"
+	 aria-hidden="true">
+
+	<div class="modal-dialog modal-xl modal-dialog-centered"
+		 role="document">
+
+		<div class="modal-content">
+
+			<!-- MODAL HEADER -->
+			<div class="modal-header bg-primary text-white">
+
+				<h5 class="modal-title"
+					id="receiveSampleModalLabel">
+
+					<i class="fas fa-vials mr-2"></i>
+					Receive Sample - Verification Required
+
+				</h5>
+
+				<button type="button"
+						class="close text-white"
+						data-dismiss="modal"
+						aria-label="Close">
+
+					<span aria-hidden="true">&times;</span>
+
+				</button>
+
+			</div>
+
+			<!-- AJAX PARTIAL VIEW -->
+			<div id="receiveSampleModalContent" style="width:100%">
+
+				<div class="text-center p-5">
+
+					<i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+
+					<p class="mt-2 mb-0">
+						Loading sample...
+					</p>
+
+				</div>
+
+			</div>
 
 
-    <!-- DEMO / INFORMATION MESSAGE -->
-    <div class="info-box">
-
-        <strong>
-            <i class="bi bi-database-fill"></i>
-            Pending Samples:
-        </strong>
-
-        Showing @Model.Count() pending sample receipt(s).
-
-    </div>
 
 
-    <!-- PROCEDURE MESSAGE -->
-    <div class="procedure-box">
-
-        <strong>
-            <i class="bi bi-clipboard-check"></i>
-            Sample Receiving Procedure:
-        </strong>
-
-        Verify all items before confirming.
-
-    </div>
 
 
-    <!-- PENDING SAMPLE CARD -->
-    <div class="pending-card">
+			
 
-        <div class="pending-header">
-            Pending Sample Reception
-        </div>
+		</div>
 
-
-        <div class="table-container">
-
-            @if (Model != null && Model.Any())
-            {
-                <table class="pending-table">
-
-                    <thead>
-                        <tr>
-
-                            <th>
-                                REQUEST #
-                            </th>
-
-                            <th>
-                                PATIENT
-                            </th>
-
-                            <th>
-                                URGENCY
-                            </th>
-
-                            <th>
-                                TEST TYPES
-                            </th>
-
-                            <th>
-                                CLINICAL NOTES
-                            </th>
-
-                            <th>
-                                ACTION
-                            </th>
-
-                        </tr>
-                    </thead>
-
-
-                    <tbody>
-
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-
-                                <!-- REQUEST NUMBER -->
-                                <td>
-
-                                    <span class="request-number">
-                                        @item.RequestNumber
-                                    </span>
-
-                                </td>
-
-
-                                <!-- PATIENT -->
-                                <td>
-
-                                    @if (item.Patient != null)
-                                    {
-                                        @item.Patient.FullName
-                                    }
-                                    else
-                                    {
-                                        <span>N/A</span>
-                                    }
-
-                                </td>
-
-
-                                <!-- URGENCY -->
-                                <td>
-
-                                    <span class="urgency-badge">
-                                        @item.Urgency
-                                    </span>
-
-                                </td>
-
-
-                                <!-- TEST TYPE -->
-                                <td>
-
-                                    @if (item.TestType != null)
-                                    {
-                                        @item.TestType.Name
-                                    }
-                                    else
-                                    {
-                                        <span>N/A</span>
-                                    }
-
-                                </td>
-
-
-                                <!-- CLINICAL NOTES -->
-                                <td>
-
-                                    @if (!string.IsNullOrEmpty(item.ClinicalNotes))
-                                    {
-                                        @item.ClinicalNotes
-                                    }
-                                    else
-                                    {
-                                        <span>No clinical notes</span>
-                                    }
-
-                                </td>
-
-
-                                <!-- ACTION -->
-                                <td>
-
-                                    <a asp-area="Technician"
-                                       asp-controller="ReceiveSamples"
-                                       asp-action="Receive"
-                                       asp-route-requestNumber="@item.RequestNumber"
-                                       class="receive-btn">
-
-                                        <i class="bi bi-inbox-fill"></i>
-                                        Receive Samples
-
-                                    </a>
-
-                                </td>
-
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-            }
-            else
-            {
-                <div class="empty-message">
-
-                    <i class="bi bi-inbox"></i>
-
-                    <p>
-                        There are currently no pending samples to receive.
-                    </p>
-
-                </div>
-            }
-
-        </div>
-
-    </div>
+	</div>
 
 </div>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+
+    // ================================================================
+    // NMB-HLabSys
+    // RECEIVE SAMPLE - CLEAN + DIAGNOSTIC VERSION
+    // ================================================================
+
+
+    // ================================================================
+    // LOGGING HELPERS
+    // ================================================================
+
+    function receiveLog(message, data) {
+
+        if (typeof data !== 'undefined') {
+            console.log(
+                '[ReceiveSamples] ' + message,
+                data
+            );
+        }
+        else {
+            console.log(
+                '[ReceiveSamples] ' + message
+            );
+        }
+    }
+
+
+    function receiveError(message, data) {
+
+        console.error(
+            '[ReceiveSamples] ' + message,
+            data || ''
+        );
+    }
+
+
+
+    // ================================================================
+    // CLEAN BOOTSTRAP MODAL STATE
+    // ================================================================
+
+    function cleanupReceiveModalState() {
+
+        receiveLog(
+            'Cleaning modal state.'
+        );
+
+
+        // Remove Bootstrap backdrops only.
+        // Do NOT remove SweetAlert containers.
+        $('.modal-backdrop').remove();
+
+
+        if ($('.modal.show').length === 0) {
+
+            $('body')
+                .removeClass('modal-open')
+                .css({
+                    'padding-right': '',
+                    'overflow': ''
+                });
+        }
+    }
+
+
+
+    // ================================================================
+    // CHECK FOR DUPLICATE RECEIVE MODALS
+    // ================================================================
+
+    function diagnoseReceiveModal() {
+
+        var modals =
+            $('[id="receiveSampleModal"]');
+
+
+        receiveLog(
+            'Receive modal count:',
+            modals.length
+        );
+
+
+        if (modals.length > 1) {
+
+            receiveError(
+                'Duplicate #receiveSampleModal detected.',
+                modals.length
+            );
+
+
+            // Keep first modal only
+            modals
+                .slice(1)
+                .remove();
+
+
+            receiveLog(
+                'Duplicate Receive Sample modal removed.'
+            );
+        }
+
+
+        var contentContainers =
+            $('[id="receiveSampleModalContent"]');
+
+
+        receiveLog(
+            'Modal content container count:',
+            contentContainers.length
+        );
+    }
+
+
+
+    // ================================================================
+    // DOCUMENT READY
+    // ================================================================
+
+    $(document).ready(function() {
+
+        receiveLog(
+            'Receive Samples page loaded.'
+        );
+
+
+        diagnoseReceiveModal();
+
+
+        // ============================================================
+        // CLEAN OLD BACKDROP
+        // ============================================================
+
+        if (
+            !$('#receiveSampleModal')
+                .hasClass('show')
+        ) {
+
+            cleanupReceiveModalState();
+        }
+
+
+
+        // ============================================================
+        // DATATABLE
+        // ============================================================
+
+        if ($('#basic-datatables').length) {
+
+            var table =
+                $('#basic-datatables')
+                    .DataTable({
+
+                        searching: true,
+
+                        paging: true,
+
+                        pageLength: 10,
+
+
+                        lengthMenu: [
+                            [10, 25, 50, 100],
+                            [10, 25, 50, 100]
+                        ],
+
+
+                        scrollX: true,
+
+                        scrollY: '400px',
+
+                        scrollCollapse: false,
+
+                        autoWidth: false,
+
+
+                        dom:
+                            "<'row mb-3'<'col-md-6'l><'col-md-6'f>>" +
+                            "<'row mb-3'<'col-md-12'B>>" +
+                            "<'row'<'col-md-12'tr>>" +
+                            "<'row mt-3'<'col-md-5'i><'col-md-7'p>>",
+
+
+                        buttons: [
+
+                            {
+                                extend:
+                                    'pdfHtml5',
+
+                                text:
+                                    '<i class="fas fa-file-pdf"></i> PDF',
+
+                                title:
+                                    'Pending Sample Reception',
+
+                                filename:
+                                    'NMB-HLabSys_Pending_Samples',
+
+                                exportOptions: {
+                                    columns:
+                                        [0, 1, 2, 3, 4, 5]
+                                },
+
+                                orientation:
+                                    'landscape',
+
+                                pageSize:
+                                    'A4'
+                            }
+
+                        ],
+
+
+                        columnDefs: [
+
+                            {
+                                targets: 6,
+
+                                orderable: false,
+
+                                searchable: false,
+
+                                exportable: false
+                            }
+
+                        ],
+
+
+                        language: {
+
+                            search:
+                                'Search pending samples:',
+
+                            lengthMenu:
+                                'Show _MENU_ samples',
+
+                            info:
+                                'Showing _START_ to _END_ of _TOTAL_ pending samples',
+
+                            infoEmpty:
+                                'No pending samples available',
+
+                            zeroRecords:
+                                'No matching pending samples found',
+
+                            emptyTable:
+                                'No pending samples available',
+
+                            paginate: {
+
+                                previous:
+                                    '<i class="fas fa-chevron-left"></i>',
+
+                                next:
+                                    '<i class="fas fa-chevron-right"></i>'
+
+                            }
+
+                        }
+
+                    });
+
+
+
+            // Atlantis sidebar resize
+            $('.toggle-sidebar, .sidenav-toggler')
+                .on(
+                    'click',
+                    function() {
+
+                        setTimeout(
+                            function() {
+
+                                table
+                                    .columns
+                                    .adjust()
+                                    .draw(false);
+
+                            },
+                            350
+                        );
+                    }
+                );
+
+
+            // Browser resize
+            $(window)
+                .on(
+                    'resize',
+                    function() {
+
+                        table
+                            .columns
+                            .adjust();
+                    }
+                );
+        }
+
+
+
+        // ============================================================
+        // TOOLTIPS
+        // ============================================================
+
+        $('[data-toggle="tooltip"]')
+            .tooltip();
+
+    });
+
+
+
+    // ================================================================
+    // OPEN RECEIVE SAMPLE
+    // ================================================================
+
+    $(document).on(
+        'click',
+        '.receive-sample-btn',
+        function(e) {
+
+            e.preventDefault();
+
+            e.stopPropagation();
+
+
+            receiveLog(
+                'Receive Sample clicked.'
+            );
+
+
+            diagnoseReceiveModal();
+
+
+            var button =
+                $(this);
+
+
+            var requestNumber =
+                button.data(
+                    'request-number'
+                );
+
+
+            receiveLog(
+                'Request Number:',
+                requestNumber
+            );
+
+
+
+            // ========================================================
+            // REQUEST NUMBER REQUIRED
+            // ========================================================
+
+            if (!requestNumber) {
+
+                Swal.fire({
+
+                    icon:
+                        'error',
+
+                    title:
+                        'Request Number Missing',
+
+                    text:
+                        'Unable to determine the test request number.',
+
+                    confirmButtonText:
+                        'OK',
+
+                    confirmButtonColor:
+                        '#1572E8'
+
+                });
+
+
+                return;
+            }
+
+
+
+            // ========================================================
+            // RECEIVE MODAL MUST EXIST
+            // ========================================================
+
+            var receiveModal =
+                $('#receiveSampleModal');
+
+
+            if (!receiveModal.length) {
+
+                receiveError(
+                    '#receiveSampleModal was not found.'
+                );
+
+
+                Swal.fire({
+
+                    icon:
+                        'error',
+
+                    title:
+                        'Receive Modal Missing',
+
+                    text:
+                        'The Receive Sample modal could not be found.',
+
+                    confirmButtonText:
+                        'OK',
+
+                    confirmButtonColor:
+                        '#1572E8'
+
+                });
+
+
+                return;
+            }
+
+
+
+            button.prop(
+                'disabled',
+                true
+            );
+
+
+
+            // ========================================================
+            // CLEAN OLD MODAL STATE
+            // ========================================================
+
+            if (
+                !receiveModal
+                    .hasClass('show')
+            ) {
+
+                cleanupReceiveModalState();
+            }
+
+
+
+            // ========================================================
+            // LOADING CONTENT
+            // ========================================================
+
+            $('#receiveSampleModalContent')
+                .html(`
+
+                        <div class="text-center p-5">
+
+                            <i class="
+                                fas
+                                fa-spinner
+                                fa-spin
+                                fa-2x
+                                text-primary">
+                            </i>
+
+                            <h5 class="mt-3 mb-1">
+                                Loading Sample
+                            </h5>
+
+                            <p class="text-muted mb-0">
+                                Retrieving laboratory sample information...
+                            </p>
+
+                        </div>
+
+                    `);
+
+
+
+            // ========================================================
+            // GET RECEIVE URL
+            // ========================================================
+
+            var receiveUrl =
+                '@Url.Action(
+                                        "Receive",
+                                        "ReceiveSamples",
+                        new { area = "Technician" }
+                                )';
+
+
+
+            receiveLog(
+                'GET URL:',
+                receiveUrl
+            );
+
+
+
+            // ========================================================
+            // GET SAMPLE PARTIAL
+            // ========================================================
+
+            $.ajax({
+
+                url:
+                    receiveUrl,
+
+                type:
+                    'GET',
+
+                data: {
+
+                    requestNumber:
+                        requestNumber
+                },
+
+
+                // ====================================================
+                // GET SUCCESS
+                // ====================================================
+
+                success:
+                    function(html) {
+
+                        button.prop(
+                            'disabled',
+                            false
+                        );
+
+
+                        receiveLog(
+                            'Receive partial loaded.'
+                        );
+
+
+
+                        // =============================================
+                        // CHECK FOR NESTED MODAL
+                        // =============================================
+
+                        var parsed =
+                            $('<div>')
+                                .html(html);
+
+
+                        var nestedModal =
+                            parsed.find(
+                                '#receiveSampleModal'
+                            );
+
+
+                        if (
+                            nestedModal.length > 0
+                        ) {
+
+                            receiveError(
+                                '_ReceiveSampleModal contains another #receiveSampleModal.'
+                            );
+
+
+                            Swal.fire({
+
+                                icon:
+                                    'error',
+
+                                title:
+                                    'Duplicate Modal Detected',
+
+                                html:
+                                    'The <strong>_ReceiveSampleModal</strong> partial contains another ' +
+                                    '<code>#receiveSampleModal</code>.<br><br>' +
+                                    'Remove the outer Bootstrap modal from the partial.',
+
+                                confirmButtonText:
+                                    'OK',
+
+                                confirmButtonColor:
+                                    '#1572E8'
+
+                            });
+
+
+                            return;
+                        }
+
+
+
+                        // =============================================
+                        // INSERT PARTIAL
+                        // =============================================
+
+                        $('#receiveSampleModalContent')
+                            .html(html);
+
+
+
+                        // =============================================
+                        // INITIALISE CHECKBOXES
+                        // =============================================
+
+                        updateVerificationState();
+
+
+
+                        // =============================================
+                        // OPEN ONE MODAL ONLY
+                        // =============================================
+
+                        if (
+                            !receiveModal
+                                .hasClass('show')
+                        ) {
+
+                            receiveLog(
+                                'Opening Receive Sample modal.'
+                            );
+
+
+                            receiveModal.modal({
+
+                                backdrop:
+                                    true,
+
+                                keyboard:
+                                    true,
+
+                                show:
+                                    true
+                            });
+                        }
+                    },
+
+
+                // ====================================================
+                // GET ERROR
+                // ====================================================
+
+                error:
+                    function(
+                        xhr,
+                        status,
+                        error
+                    ) {
+
+                        button.prop(
+                            'disabled',
+                            false
+                        );
+
+
+                        receiveError(
+                            'GET Receive failed.',
+                            {
+                                statusCode:
+                                    xhr.status,
+
+                                status:
+                                    status,
+
+                                error:
+                                    error,
+
+                                response:
+                                    xhr.responseText
+                            }
+                        );
+
+
+                        receiveModal
+                            .modal('hide');
+
+
+                        cleanupReceiveModalState();
+
+
+                        Swal.fire({
+
+                            icon:
+                                'error',
+
+                            title:
+                                'Unable to Load Sample',
+
+                            html:
+                                'The sample information could not be loaded.' +
+                                '<br><br>' +
+                                '<strong>HTTP Status:</strong> ' +
+                                xhr.status,
+
+                            confirmButtonText:
+                                'OK',
+
+                            confirmButtonColor:
+                                '#1572E8'
+
+                        });
+                    }
+
+            });
+
+        }
+    );
+
+
+
+    // ================================================================
+    // UPDATE VERIFICATION STATE
+    // ================================================================
+
+    function updateVerificationState() {
+
+        var container =
+            $('#receiveSampleModalContent');
+
+
+        var checkboxes =
+            container.find(
+                '.verification-check'
+            );
+
+
+        if (!checkboxes.length) {
+
+            receiveLog(
+                'No verification checkboxes found.'
+            );
+
+            return;
+        }
+
+
+        var total =
+            checkboxes.length;
+
+
+        var checked =
+            checkboxes
+                .filter(':checked')
+                .length;
+
+
+        var allVerified =
+            total > 0 &&
+            checked === total;
+
+
+
+        receiveLog(
+            'Verification:',
+            {
+                checked:
+                    checked,
+
+                total:
+                    total,
+
+                complete:
+                    allVerified
+            }
+        );
+
+
+
+        // ============================================================
+        // CONFIRM BUTTON
+        // ============================================================
+
+        container
+            .find(
+                '#confirmReceiveBtn, ' +
+                '.confirm-receive-btn, ' +
+                'button[type="submit"]'
+            )
+            .prop(
+                'disabled',
+                !allVerified
+            );
+
+
+
+        // ============================================================
+        // COUNTER
+        // ============================================================
+
+        $('#verifiedCount')
+            .text(checked);
+
+
+        $('#totalVerificationCount')
+            .text(total);
+
+
+
+        // ============================================================
+        // PROGRESS
+        // ============================================================
+
+        var percentage =
+            total > 0
+                ? Math.round(
+                    (checked / total) *
+                    100
+                )
+                : 0;
+
+
+        $('#verificationProgress')
+            .css(
+                'width',
+                percentage + '%'
+            )
+            .attr(
+                'aria-valuenow',
+                percentage
+            );
+
+
+
+        // ============================================================
+        // STATUS
+        // ============================================================
+
+        if (allVerified) {
+
+            $('#verificationStatus')
+
+                .removeClass(
+                    'text-muted text-warning'
+                )
+
+                .addClass(
+                    'text-success'
+                )
+
+                .html(
+                    '<i class="fas fa-check-circle mr-1"></i>' +
+                    'All verification checks completed.'
+                );
+        }
+        else {
+
+            $('#verificationStatus')
+
+                .removeClass(
+                    'text-success'
+                )
+
+                .addClass(
+                    'text-muted'
+                )
+
+                .html(
+                    '<i class="fas fa-shield-alt mr-1"></i>' +
+                    checked +
+                    ' of ' +
+                    total +
+                    ' verification checks completed.'
+                );
+        }
+    }
+
+
+
+    // ================================================================
+    // VERIFICATION CHECKBOX CHANGED
+    // ================================================================
+
+    $(document).on(
+        'change',
+        '#receiveSampleModalContent .verification-check',
+        function() {
+
+            updateVerificationState();
+        }
+    );
+
+
+
+    // ================================================================
+    // RECEIVE SAMPLE FORM SUBMIT
+    // ONE SUBMIT HANDLER ONLY
+    // ================================================================
+
+    $(document).on(
+        'submit',
+        '#receiveSampleForm',
+        function(e) {
+
+            e.preventDefault();
+
+            e.stopPropagation();
+
+
+            receiveLog(
+                'Receive form submitted.'
+            );
+
+
+            var form =
+                $(this);
+
+
+            var submitButton =
+                form.find(
+                    'button[type="submit"]'
+                );
+
+
+            var checkboxes =
+                form.find(
+                    '.verification-check'
+                );
+
+
+            var unchecked =
+                checkboxes
+                    .filter(
+                        ':not(:checked)'
+                    );
+
+
+
+            // ========================================================
+            // CLIENT VERIFICATION
+            // ========================================================
+
+            if (
+                checkboxes.length > 0 &&
+                unchecked.length > 0
+            ) {
+
+                Swal.fire({
+
+                    target:
+                        document.getElementById(
+                            'receiveSampleModal'
+                        ),
+
+                    backdrop:
+                        false,
+
+                    icon:
+                        'warning',
+
+                    title:
+                        'Verification Required',
+
+                    text:
+                        'Please verify all sample information before receiving the sample.',
+
+                    confirmButtonText:
+                        'OK',
+
+                    confirmButtonColor:
+                        '#1572E8'
+
+                });
+
+
+                return;
+            }
+
+
+
+            // ========================================================
+            // DIAGNOSTIC FORM DATA
+            // ========================================================
+
+            receiveLog(
+                'POST URL:',
+                form.attr('action')
+            );
+
+
+            receiveLog(
+                'Submitted fields:',
+                form.serializeArray()
+            );
+
+
+
+            // ========================================================
+            // CONFIRM RECEIVE
+            // ========================================================
+
+            Swal.fire({
+
+                target:
+                    document.getElementById(
+                        'receiveSampleModal'
+                    ),
+
+                backdrop:
+                    false,
+
+                icon:
+                    'question',
+
+                title:
+                    'Receive This Sample?',
+
+                html:
+                    'You are about to confirm that all sample information ' +
+                    'has been checked and verified.' +
+                    '<br><br>' +
+                    '<strong>' +
+                    'The sample will be marked as Samples Received.' +
+                    '</strong>',
+
+                showCancelButton:
+                    true,
+
+                confirmButtonText:
+                    '<i class="fas fa-check-circle mr-1"></i>' +
+                    ' Confirm & Receive',
+
+                cancelButtonText:
+                    '<i class="fas fa-times mr-1"></i>' +
+                    ' Cancel',
+
+                confirmButtonColor:
+                    '#31CE36',
+
+                cancelButtonColor:
+                    '#6c757d',
+
+                reverseButtons:
+                    true
+
+            })
+                .then(
+                    function(result) {
+
+                        if (
+                            !result.isConfirmed
+                        ) {
+
+                            receiveLog(
+                                'Receive cancelled.'
+                            );
+
+                            return;
+                        }
+
+
+
+                        // =================================================
+                        // DISABLE BUTTON
+                        // =================================================
+
+                        submitButton.prop(
+                            'disabled',
+                            true
+                        );
+
+
+
+                        // =================================================
+                        // LOADING
+                        // =================================================
+
+                        Swal.fire({
+
+                            target:
+                                document.getElementById(
+                                    'receiveSampleModal'
+                                ),
+
+                            backdrop:
+                                false,
+
+                            title:
+                                'Receiving Sample',
+
+                            html:
+                                'Please wait while the sample verification is being saved...',
+
+                            allowOutsideClick:
+                                false,
+
+                            allowEscapeKey:
+                                false,
+
+                            showConfirmButton:
+                                false,
+
+                            didOpen:
+                                function() {
+
+                                    Swal.showLoading();
+                                }
+
+                        });
+
+
+
+                        // =================================================
+                        // POST RECEIVE
+                        // =================================================
+
+                        $.ajax({
+                            url: '@Url.Action(
+        "Receive",
+        "ReceiveSamples",
+                new { area = "Technician" }
+                                                        )',
+
+    type: 'POST',
+
+                            data: form.serialize(),
+
+                            dataType: 'json',
+
+
+                            // =============================================
+                            // SUCCESS
+                            // =============================================
+
+                            success:
+                                function(
+                                    response,
+                                    textStatus,
+                                    xhr
+                                ) {
+
+                                    submitButton.prop(
+                                        'disabled',
+                                        false
+                                    );
+
+
+                                    receiveLog(
+                                        'POST JSON response:',
+                                        {
+                                            status:
+                                                xhr.status,
+
+                                            contentType:
+                                                xhr.getResponseHeader(
+                                                    'Content-Type'
+                                                ),
+
+                                            response:
+                                                response
+                                        }
+                                    );
+
+
+
+                                    // =====================================
+                                    // EMPTY RESPONSE
+                                    // =====================================
+
+                                    if (!response) {
+
+                                        Swal.fire({
+
+                                            target:
+                                                document.getElementById(
+                                                    'receiveSampleModal'
+                                                ),
+
+                                            backdrop:
+                                                false,
+
+                                            icon:
+                                                'error',
+
+                                            title:
+                                                'Empty Response',
+
+                                            text:
+                                                'The server returned an empty response.',
+
+                                            confirmButtonText:
+                                                'OK',
+
+                                            confirmButtonColor:
+                                                '#1572E8'
+
+                                        });
+
+
+                                        return;
+                                    }
+
+
+
+                                    // =====================================
+                                    // CONTROLLER RETURNED FAILURE
+                                    // =====================================
+
+                                    if (
+                                        response.success !==
+                                        true
+                                    ) {
+
+                                        receiveError(
+                                            'Controller rejected sample.',
+                                            response
+                                        );
+
+
+                                        Swal.fire({
+
+                                            target:
+                                                document.getElementById(
+                                                    'receiveSampleModal'
+                                                ),
+
+                                            backdrop:
+                                                false,
+
+                                            icon:
+                                                response.icon ||
+                                                'error',
+
+                                            title:
+                                                response.title ||
+                                                'Unable to Receive Sample',
+
+                                            html:
+                                                response.message ||
+                                                'The sample could not be received.',
+
+                                            confirmButtonText:
+                                                'OK',
+
+                                            confirmButtonColor:
+                                                '#1572E8'
+
+                                        });
+
+
+                                        return;
+                                    }
+
+
+
+                                    // =====================================
+                                    // SAMPLE SAVED SUCCESSFULLY
+                                    // =====================================
+
+                                    receiveLog(
+                                        'Sample received successfully.',
+                                        response
+                                    );
+
+
+                                    Swal.close();
+
+
+
+                                    var receiveModal =
+                                        $('#receiveSampleModal');
+
+
+
+                                    // =====================================
+                                    // WAIT FOR RECEIVE MODAL TO CLOSE
+                                    // =====================================
+
+                                    receiveModal
+                                        .one(
+                                            'hidden.bs.modal.receiveSuccess',
+                                            function() {
+
+                                                cleanupReceiveModalState();
+
+
+                                                Swal.fire({
+
+                                                    icon:
+                                                        'success',
+
+                                                    title:
+                                                        response.title ||
+                                                        'Sample Received!',
+
+                                                    html:
+
+                                                        '<div class="text-left">' +
+
+                                                        '<p class="mb-3">' +
+
+                                                        (
+                                                            response.message ||
+                                                            'The sample has been successfully received.'
+                                                        ) +
+
+                                                        '</p>' +
+
+
+                                                        '<div class="alert alert-success mb-0">' +
+
+
+                                                        '<div class="mb-2">' +
+
+                                                        '<strong>' +
+                                                        '<i class="fas fa-barcode mr-1"></i>' +
+                                                        'Barcode:' +
+                                                        '</strong> ' +
+
+                                                        (
+                                                            response.barcode ||
+                                                            'N/A'
+                                                        ) +
+
+                                                        '</div>' +
+
+
+                                                        '<div class="mb-2">' +
+
+                                                        '<strong>' +
+                                                        '<i class="fas fa-user-check mr-1"></i>' +
+                                                        'Verified By:' +
+                                                        '</strong> ' +
+
+                                                        (
+                                                            response.technician ||
+                                                            'N/A'
+                                                        ) +
+
+                                                        '</div>' +
+
+
+                                                        '<div>' +
+
+                                                        '<strong>' +
+                                                        '<i class="far fa-clock mr-1"></i>' +
+                                                        'Date Received:' +
+                                                        '</strong> ' +
+
+                                                        (
+                                                            response.receivedAt ||
+                                                            'N/A'
+                                                        ) +
+
+                                                        '</div>' +
+
+
+                                                        '</div>' +
+
+                                                        '</div>',
+
+                                                    confirmButtonText:
+                                                        'OK',
+
+                                                    confirmButtonColor:
+                                                        '#1572E8',
+
+                                                    allowOutsideClick:
+                                                        false,
+
+                                                    allowEscapeKey:
+                                                        false
+
+                                                })
+                                                    .then(
+                                                        function() {
+
+                                                            window.location.href =
+                                                                '@Url.Action(
+                                                                                                                        "VerifiedSamples",
+                                                                                                                        "ReceiveSamples",
+                                                                                                                        new { area = "Technician" }
+                                                                                                                                )';
+
+                                                        }
+                                                    );
+                                            }
+                                        );
+
+
+
+                                    receiveModal
+                                        .modal('hide');
+                                },
+
+
+
+                            // =============================================
+                            // AJAX / JSON / HTTP ERROR
+                            // =============================================
+
+                            error:
+                                function(
+                                    xhr,
+                                    status,
+                                    error
+                                ) {
+
+                                    submitButton.prop(
+                                        'disabled',
+                                        false
+                                    );
+
+
+                                    // =====================================
+                                    // FULL CONSOLE DIAGNOSTIC
+                                    // =====================================
+
+                                    console.error(
+                                        '========== RECEIVE SAMPLE ERROR =========='
+                                    );
+
+
+                                    console.error(
+                                        'POST URL:',
+                                        form.attr('action')
+                                    );
+
+
+                                    console.error(
+                                        'HTTP Status:',
+                                        xhr.status
+                                    );
+
+
+                                    console.error(
+                                        'jQuery Status:',
+                                        status
+                                    );
+
+
+                                    console.error(
+                                        'Error:',
+                                        error
+                                    );
+
+
+                                    console.error(
+                                        'Content-Type:',
+                                        xhr.getResponseHeader(
+                                            'Content-Type'
+                                        )
+                                    );
+
+
+                                    console.error(
+                                        'Response JSON:',
+                                        xhr.responseJSON
+                                    );
+
+
+                                    console.error(
+                                        'Response Text:',
+                                        xhr.responseText
+                                    );
+
+
+                                    console.error(
+                                        'Submitted Fields:',
+                                        form.serializeArray()
+                                    );
+
+
+                                    console.error(
+                                        '=========================================='
+                                    );
+
+
+
+                                    // =====================================
+                                    // DEFAULT
+                                    // =====================================
+
+                                    var title =
+                                        'Unable to Receive Sample';
+
+
+                                    var message =
+                                        'The server could not process the sample reception.';
+
+
+
+                                    // =====================================
+                                    // CONTROLLER JSON ERROR
+                                    // =====================================
+
+                                    if (
+                                        xhr.responseJSON
+                                    ) {
+
+                                        title =
+                                            xhr.responseJSON.title ||
+                                            title;
+
+
+                                        message =
+                                            xhr.responseJSON.message ||
+                                            message;
+                                    }
+
+
+
+                                    // =====================================
+                                    // HTML RETURNED INSTEAD OF JSON
+                                    // =====================================
+
+                                    else if (
+                                        status ===
+                                        'parsererror'
+                                    ) {
+
+                                        title =
+                                            'Server Returned HTML';
+
+
+                                        var responseText =
+                                            xhr.responseText ||
+                                            '';
+
+
+                                        var preview =
+                                            responseText;
+
+
+                                        if (
+                                            preview.length >
+                                            1500
+                                        ) {
+
+                                            preview =
+                                                preview.substring(
+                                                    0,
+                                                    1500
+                                                ) +
+                                                '...';
+                                        }
+
+
+
+                                        message =
+
+                                            '<div class="text-left">' +
+
+                                            '<p>' +
+                                            'The Receive POST reached the server, but ASP.NET returned HTML/text instead of JSON.' +
+                                            '</p>' +
+
+
+                                            '<p class="mb-1">' +
+
+                                            '<strong>' +
+                                            'HTTP Status:' +
+                                            '</strong> ' +
+
+                                            xhr.status +
+
+                                            '</p>' +
+
+
+                                            '<p class="mb-3">' +
+
+                                            '<strong>' +
+                                            'Content-Type:' +
+                                            '</strong> ' +
+
+                                            (
+                                                xhr.getResponseHeader(
+                                                    'Content-Type'
+                                                ) ||
+                                                'Unknown'
+                                            ) +
+
+                                            '</p>' +
+
+
+                                            '<hr>' +
+
+
+                                            '<p class="mb-1">' +
+
+                                            '<strong>' +
+                                            'Returned response:' +
+                                            '</strong>' +
+
+                                            '</p>' +
+
+
+                                            '<pre style="' +
+
+                                            'max-height:220px;' +
+                                            'overflow:auto;' +
+                                            'white-space:pre-wrap;' +
+                                            'font-size:11px;' +
+                                            'text-align:left;' +
+                                            'background:#f5f5f5;' +
+                                            'padding:10px;' +
+                                            'border-radius:5px;' +
+
+                                            '">' +
+
+                                            $('<div>')
+                                                .text(preview)
+                                                .html() +
+
+                                            '</pre>' +
+
+
+                                            '<p class="text-muted mt-2 mb-0">' +
+
+                                            'The complete response is available in the browser console.' +
+
+                                            '</p>' +
+
+                                            '</div>';
+                                    }
+
+
+
+                                    // =====================================
+                                    // 400
+                                    // =====================================
+
+                                    else if (
+                                        xhr.status ===
+                                        400
+                                    ) {
+
+                                        title =
+                                            'Invalid Request';
+
+
+                                        message =
+                                            'ASP.NET rejected the request. Check the submitted values and anti-forgery token.';
+                                    }
+
+
+
+                                    // =====================================
+                                    // 401
+                                    // =====================================
+
+                                    else if (
+                                        xhr.status ===
+                                        401
+                                    ) {
+
+                                        title =
+                                            'Session Expired';
+
+
+                                        message =
+                                            'Your login session has expired. Please sign in again.';
+                                    }
+
+
+
+                                    // =====================================
+                                    // 403
+                                    // =====================================
+
+                                    else if (
+                                        xhr.status ===
+                                        403
+                                    ) {
+
+                                        title =
+                                            'Access Denied';
+
+
+                                        message =
+                                            'You are not authorized to receive this sample.';
+                                    }
+
+
+
+                                    // =====================================
+                                    // 404
+                                    // =====================================
+
+                                    else if (
+                                        xhr.status ===
+                                        404
+                                    ) {
+
+                                        title =
+                                            'Receive Action Not Found';
+
+
+                                        message =
+                                            'The Receive POST action could not be found.';
+                                    }
+
+
+
+                                    // =====================================
+                                    // 500+
+                                    // =====================================
+
+                                    else if (
+                                        xhr.status >=
+                                        500
+                                    ) {
+
+                                        title =
+                                            'Server Error';
+
+
+                                        message =
+                                            'A server-side error occurred while receiving the sample.';
+                                    }
+
+
+
+                                    // =====================================
+                                    // DISPLAY ERROR INSIDE RECEIVE MODAL
+                                    // =====================================
+
+                                    Swal.fire({
+
+                                        target:
+                                            document.getElementById(
+                                                'receiveSampleModal'
+                                            ),
+
+                                        backdrop:
+                                            false,
+
+                                        icon:
+                                            'error',
+
+                                        title:
+                                            title,
+
+                                        html:
+                                            message,
+
+                                        width:
+                                            700,
+
+                                        confirmButtonText:
+                                            'OK',
+
+                                        confirmButtonColor:
+                                            '#1572E8'
+
+                                    });
+                                }
+
+                        });
+
+                    }
+                );
+
+        }
+    );
+
+
+
+    // ================================================================
+    // RECEIVE MODAL SHOWN
+    // ================================================================
+
+    $('#receiveSampleModal')
+        .on(
+            'shown.bs.modal',
+            function() {
+
+                receiveLog(
+                    'Receive Sample modal shown.'
+                );
+
+
+                receiveLog(
+                    'Visible Bootstrap modals:',
+                    $('.modal.show').length
+                );
+
+
+                receiveLog(
+                    'Bootstrap backdrops:',
+                    $('.modal-backdrop').length
+                );
+
+
+
+                // ====================================================
+                // KEEP ONLY ONE BOOTSTRAP BACKDROP
+                // ====================================================
+
+                var backdrops =
+                    $('.modal-backdrop');
+
+
+                if (
+                    backdrops.length > 1
+                ) {
+
+                    receiveError(
+                        'Duplicate Bootstrap backdrops detected.',
+                        backdrops.length
+                    );
+
+
+                    backdrops
+                        .slice(
+                            0,
+                            backdrops.length - 1
+                        )
+                        .remove();
+                }
+            }
+        );
+
+
+
+    // ================================================================
+    // RECEIVE MODAL CLOSED
+    // ================================================================
+
+    $('#receiveSampleModal')
+        .on(
+            'hidden.bs.modal',
+            function() {
+
+                receiveLog(
+                    'Receive Sample modal closed.'
+                );
+
+
+                // ====================================================
+                // RESET CONTENT
+                // ====================================================
+
+                $('#receiveSampleModalContent')
+                    .html(`
+
+                            <div class="text-center p-5">
+
+                                <i class="
+                                    fas
+                                    fa-spinner
+                                    fa-spin
+                                    fa-2x
+                                    text-primary">
+                                </i>
+
+                                <p class="mt-2 mb-0">
+                                    Loading sample...
+                                </p>
+
+                            </div>
+
+                        `);
+
+
+
+                // ====================================================
+                // CLEAN ORPHAN BACKDROP
+                // ====================================================
+
+                cleanupReceiveModalState();
+
+            }
+        );
+
+</script>

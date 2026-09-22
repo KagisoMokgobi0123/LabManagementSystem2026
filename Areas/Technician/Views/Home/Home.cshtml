@@ -243,6 +243,7 @@
 											<p class="text-muted">hello@example.com</p><a href="profile.html" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
 										</div>
 									</div>
+							
 								</li>
 								<li>
 									<div class="dropdown-divider"></div>
@@ -289,12 +290,13 @@
 									</a>
 								</li>
 								<li>
-									<a href="#edit">
+									<a href="@Url.Action("Index", "Settings", new { area = "Technician" })">
 										<span class="link-collapse">Edit Profile</span>
 									</a>
 								</li>
 								<li>
-									<a href="#settings">
+									<a href="@Url.Action("Index", "Settings", new { area = "Technician" })">
+
 										<span class="link-collapse">Settings</span>
 									</a>
 								</li>
@@ -333,14 +335,14 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#base">
 							<i class="fas fa-layer-group"></i>
-							<p>Verification</p>
+							<p>My Samples</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="base">
 							<ul class="nav nav-collapse">
 							
 								<li>
-								<a href="@Url.Action("VerifySample", "Sample", new { area = "Technician" })">
+								<a href="@Url.Action("Index", "ReceiveSamples", new { area = "Technician" })">
 										<span class="sub-item">Samples</span>
 									</a>
 								</li>
@@ -351,7 +353,7 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#sidebarLayouts">
 							<i class="fas fa-th-list"></i>
-							<p>Tests</p>
+							<p>Receive Samples</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="sidebarLayouts">
@@ -387,7 +389,7 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#forms">
 							<i class="fas fa-pen-square"></i>
-							<p>Forms</p>
+							<p>Assigned Tests</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="forms">
@@ -403,7 +405,7 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#tables">
 							<i class="fas fa-table"></i>
-							<p>Tables</p>
+							<p>Record Results</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="tables">
@@ -424,7 +426,7 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#maps">
 							<i class="fas fa-map-marker-alt"></i>
-							<p>Maps</p>
+							<p>View My Tests</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="maps">
@@ -440,7 +442,7 @@
 					<li class="nav-item">
 						<a data-toggle="collapse" href="#charts">
 							<i class="far fa-chart-bar"></i>
-							<p>Charts</p>
+							<p>View Requests</p>
 							<span class="caret"></span>
 						</a>
 						<div class="collapse" id="charts">
@@ -461,11 +463,11 @@
 					<li class="nav-item">
 						<a href="widgets.html">
 							<i class="fas fa-desktop"></i>
-							<p>Widgets</p>
+							<p>Settings</p>
 							<span class="badge badge-success">4</span>
 						</a>
 					</li>
-					<li class="nav-item">
+		@* 			<li class="nav-item">
 						<a data-toggle="collapse" href="#submenu">
 							<i class="fas fa-bars"></i>
 							<p>Menu Levels</p>
@@ -515,7 +517,7 @@
 								</li>
 							</ul>
 						</div>
-					</li>
+					</li> *@
 					<li class="mx-4 mt-2">
 						<a href="http://themekita.com/atlantis-bootstrap-dashboard.html" class="btn btn-primary btn-block"><span class="btn-label mr-2"> <i class="fa fa-heart"></i> </span>Sign Out</a>
 					</li>
@@ -1047,25 +1049,25 @@
 			<div class="container-fluid">
 				<nav class="pull-left">
 					<ul class="nav">
-						<li class="nav-item">
+						@* <li class="nav-item">
 							<a class="nav-link" href="https://www.themekita.com">
 								ThemeKita
 							</a>
-						</li>
+						</li> *@
 						<li class="nav-item">
 							<a class="nav-link" href="#">
 								Help
 							</a>
 						</li>
-						<li class="nav-item">
+						@* <li class="nav-item">
 							<a class="nav-link" href="#">
 								Licenses
 							</a>
-						</li>
+						</li> *@
 					</ul>
 				</nav>
 				<div class="copyright ml-auto">
-					2018, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">ThemeKita</a>
+					2026, made with <i class="fa fa-heart heart text-danger"></i> by <a href="https://www.themekita.com">Nelson Mandela Bay HLab</a>
 				</div>
 			</div>
 		</footer>

@@ -889,7 +889,7 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime>("CollectedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DateReceived")
+                    b.Property<DateTime?>("DateReceived")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")

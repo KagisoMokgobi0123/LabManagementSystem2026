@@ -30,6 +30,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         public DateTime DateReceived { get; set; } = DateTime.Now;
 
+        public DateTime? DateReceived { get; set; }
         public string Status { get; set; } = string.Empty;
 
         public int TestRequestId { get; set; }

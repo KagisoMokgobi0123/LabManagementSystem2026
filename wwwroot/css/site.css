@@ -29,3 +29,394 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700;800&display=swap');
+
+:root {
+    --lab-navy: #123B5D;
+    --lab-blue: #1976A3;
+    --lab-cyan: #22A7C7;
+    --lab-light: #F4F9FC;
+    --lab-text: #405466;
+    --lab-white: #FFFFFF;
+}
+
+.nmb-home {
+    font-family: 'Inter', sans-serif;
+    background: #f7fafc;
+}
+
+    .nmb-home h1,
+    .nmb-home h2,
+    .nmb-home h3,
+    .nmb-home h4,
+    .nmb-home h5 {
+        font-family: 'Poppins', sans-serif;
+    }
+
+/* HERO */
+
+.nmb-hero {
+    padding: 75px 35px;
+    background: linear-gradient(105deg, rgba(8, 48, 76, .98) 0%, rgba(16, 91, 128, .95) 55%, rgba(23, 135, 165, .90) 100%);
+    color: white;
+    overflow: hidden;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 30px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .4px;
+    margin-bottom: 22px;
+}
+
+.nmb-hero h1 {
+    font-size: 46px;
+    line-height: 1.15;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+    .nmb-hero h1 span {
+        color: #8DE4F2;
+    }
+
+.nmb-hero p {
+    max-width: 650px;
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(255,255,255,.85);
+}
+
+.hero-buttons {
+    margin-top: 30px;
+}
+
+.btn-lab-primary,
+.btn-lab-outline {
+    padding: 12px 23px;
+    border-radius: 8px;
+    font-weight: 600;
+    display: inline-block;
+    margin: 5px;
+}
+
+.btn-lab-primary {
+    background: white;
+    color: var(--lab-navy);
+}
+
+    .btn-lab-primary:hover {
+        background: #eaf7fb;
+        color: var(--lab-blue);
+    }
+
+.btn-lab-outline {
+    color: white;
+    border: 1px solid rgba(255,255,255,.55);
+}
+
+    .btn-lab-outline:hover {
+        background: rgba(255,255,255,.12);
+        color: white;
+    }
+
+.hero-image-wrapper {
+    position: relative;
+    padding: 15px;
+}
+
+.hero-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0,0,0,.25);
+}
+
+.hero-floating-card {
+    position: absolute;
+    left: -5px;
+    bottom: 45px;
+    background: white;
+    color: var(--lab-navy);
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.20);
+    display: flex;
+    align-items: center;
+}
+
+.hero-floating-icon {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e6f7fb;
+    color: var(--lab-cyan);
+    border-radius: 50%;
+    margin-right: 12px;
+    font-size: 20px;
+}
+
+.hero-floating-card small {
+    display: block;
+    color: #718496;
+}
+
+/* GENERAL SECTIONS */
+
+.lab-services,
+.about-haematology,
+.lab-video-section,
+.workflow-section {
+    padding: 70px 35px;
+}
+
+.section-heading {
+    max-width: 700px;
+    margin: 0 auto 45px;
+}
+
+    .section-heading span,
+    .section-label {
+        color: var(--lab-cyan);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+    }
+
+    .section-heading h2,
+    .about-content h2 {
+        color: var(--lab-navy);
+        font-size: 30px;
+        font-weight: 700;
+        margin-top: 8px;
+    }
+
+    .section-heading p,
+    .about-content p {
+        color: var(--lab-text);
+        line-height: 1.8;
+    }
+
+/* SERVICES */
+
+.lab-service-card {
+    background: white;
+    height: 100%;
+    padding: 30px 25px;
+    border-radius: 14px;
+    box-shadow: 0 5px 25px rgba(20, 65, 90, .08);
+    border: 1px solid #edf3f6;
+    transition: .3s ease;
+}
+
+    .lab-service-card:hover {
+        transform: translateY(-7px);
+        box-shadow: 0 15px 35px rgba(20, 65, 90, .15);
+    }
+
+.service-icon {
+    width: 60px;
+    height: 60px;
+    background: #eaf8fb;
+    color: var(--lab-blue);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+    margin-bottom: 20px;
+}
+
+.lab-service-card h4 {
+    color: var(--lab-navy);
+    font-size: 18px;
+}
+
+.lab-service-card p {
+    color: #71808e;
+    line-height: 1.7;
+}
+
+/* ABOUT */
+
+.about-haematology {
+    background: white;
+}
+
+.about-image-grid {
+    position: relative;
+    padding-right: 45px;
+    padding-bottom: 40px;
+}
+
+.about-main-image {
+    width: 90%;
+    height: 400px;
+    object-fit: cover;
+    border-radius: 18px;
+}
+
+.about-small-image {
+    position: absolute;
+    width: 210px;
+    height: 155px;
+    object-fit: cover;
+    right: 5px;
+    bottom: 0;
+    border: 7px solid white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.about-content h2 span {
+    color: var(--lab-blue);
+}
+
+.haematology-points {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 25px;
+    color: var(--lab-navy);
+    font-weight: 600;
+}
+
+    .haematology-points i {
+        color: var(--lab-cyan);
+        margin-right: 7px;
+    }
+
+/* VIDEO */
+
+.lab-video-section {
+    background: var(--lab-light);
+}
+
+.video-container {
+    max-width: 900px;
+    margin: auto;
+    position: relative;
+    padding-bottom: 50.625%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(18,59,93,.18);
+}
+
+    .video-container iframe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
+/* WORKFLOW */
+
+.workflow-section {
+    background: white;
+}
+
+.workflow {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.workflow-item {
+    position: relative;
+    text-align: center;
+    flex: 1;
+    max-width: 190px;
+    padding: 25px 15px;
+}
+
+    .workflow-item > i {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e9f8fb;
+        color: var(--lab-blue);
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+.workflow-number {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--lab-cyan);
+    margin-bottom: 8px;
+}
+
+.workflow-item h5 {
+    color: var(--lab-navy);
+    font-weight: 600;
+}
+
+.workflow-item p {
+    font-size: 13px;
+    color: #71808e;
+}
+
+.workflow-arrow {
+    display: flex;
+    align-items: center;
+    color: #b6dce7;
+}
+
+/* MOBILE */
+
+@media (max-width: 991px) {
+
+    .nmb-hero h1 {
+        font-size: 36px;
+    }
+
+    .workflow {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .workflow-arrow {
+        transform: rotate(90deg);
+        margin: 5px 0;
+    }
+
+    .workflow-item {
+        max-width: 350px;
+    }
+}
+
+@media (max-width: 576px) {
+
+    .nmb-hero,
+    .lab-services,
+    .about-haematology,
+    .lab-video-section,
+    .workflow-section {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+        .nmb-hero h1 {
+            font-size: 30px;
+        }
+
+    .hero-image {
+        height: 280px;
+    }
+
+    .haematology-points {
+        grid-template-columns: 1fr;
+    }
+}
