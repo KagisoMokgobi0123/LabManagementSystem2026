@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Data;
-using NMB_HLabSys.Services;
+using NMB_HLabSys.Services.Interfaces;
 
 namespace NMB_HLabSys.Areas.Technician.Data
 {

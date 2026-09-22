@@ -1,83 +1,59 @@
-﻿using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NMB_HLabSys.Models.Laboratory;
+using NMB_HLabSys.Services.Interfaces;
 
 namespace NMB_HLabSys.Areas.Manager.Controllers
 {
+    [Area("Manager")]
+     [Authorize(Roles = "LabManager")]
     public class TestTypeController : Controller
     {
-        // GET: TestTypeController
-        public ActionResult Index()
+        private readonly ILabManagerService _service;
+
+        public TestTypeController(ILabManagerService service)
         {
-            return View();
+            _service = service;
         }
 
-        // GET: TestTypeController/Details/5
-        public ActionResult Details(int id)
+        // GET: /Manager/TestType  (testtype.html)
+        public async Task<IActionResult> Index()
         {
-            return View();
+            ViewBag.Categories = await _service.GetCategoriesAsync();
+            ViewBag.SampleTypes = await _service.GetSampleTypesAsync();
+
+            var testTypes = await _service.GetTestTypesAsync();
+            return View(testTypes);
         }
 
-        // GET: TestTypeController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: TestTypeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public async Task<IActionResult> Create(TestType testType)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            if (!ModelState.IsValid) return RedirectToAction(nameof(Index));
+            await _service.CreateTestTypeAsync(testType);
+            TempData["Success"] = $"Test type '{testType.Name}' added successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: TestTypeController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: TestTypeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public async Task<IActionResult> Edit(TestType testType)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            if (!ModelState.IsValid) return RedirectToAction(nameof(Index));
+            await _service.UpdateTestTypeAsync(testType);
+            TempData["Success"] = $"Test type '{testType.Name}' updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: TestTypeController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: TestTypeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+            await _service.DeleteTestTypeAsync(id);
+            TempData["Success"] = "Test type removed successfully.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -1,0 +1,162 @@
+@model IReadOnlyList<Order>
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="page-header">
+    <h4 class="page-title">Orders</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home"><a asp-area="Manager" asp-controller="Dashboard" asp-action="Index"><i class="flaticon-home"></i></a></li>
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a href="#">Orders</a></li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Active Orders</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Consumable</th>
+                                <th>Ordered Date</th>
+                                <th>Delivered Date</th>
+                                <th>Qty Ordered</th>
+                                <th>Qty Delivered</th>
+                                <th>Delivery Status</th>
+                                <th>Cancellation Reason</th>
+                                <th>Cancellation Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>@order.Consumable?.Name</td>
+                                    <td>@order.OrderedDate.ToString("yyyy/MM/dd")</td>
+                                    <td>@(order.DeliveredDate?.ToString("yyyy/MM/dd") ?? "-")</td>
+                                    <td>@order.QtyOrdered</td>
+                                    <td>@(order.QtyDelivered?.ToString() ?? "-")</td>
+                                    <td>@order.DeliveryStatus</td>
+                                    <td>@(order.CancellationReason ?? "-")</td>
+                                    <td>@(order.CancellationDate?.ToString("yyyy/MM/dd") ?? "-")</td>
+                                    <td>
+                                        @switch (order.Status)
+                                        {
+                                            case OrderStatus.Completed:
+                                                <span class="badge badge-success">Completed</span>
+                                                break;
+                                            case OrderStatus.Cancelled:
+                                                <span class="badge badge-danger">Cancelled</span>
+                                                break;
+                                            default:
+                                                <span class="badge badge-warning">Pending</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="form-button-action">
+                                            @if (order.Status == OrderStatus.Pending)
+                                            {
+                                                <button type="button" class="btn btn-link btn-primary btn-lg edit-order-btn"
+                                                        data-id="@order.OrderId" data-status="@order.Status"
+                                                        data-toggle="modal" data-target="#editOrderModal" title="Update Status">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-link btn-danger cancel-order-btn"
+                                                        data-id="@order.OrderId"
+                                                        data-toggle="modal" data-target="#cancelOrderModal" title="Cancel Order">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr><td colspan="10" class="text-center text-muted">No orders placed yet.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE ORDER STATUS MODAL -->
+<div class="modal fade" id="editOrderModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-area="Manager" asp-controller="Orders" asp-action="UpdateStatus" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header no-bd">
+                    <h5 class="modal-title">Update Order Status</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="orderId" id="editOrderId" />
+                    <div class="form-group form-group-default">
+                        <label>Status</label>
+                        <select name="status" id="editStatus" class="form-control">
+                            <option value="Pending">Pending</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer no-bd">
+                    <button type="submit" id="updateStatusBtn" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CANCEL ORDER MODAL -->
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-area="Manager" asp-controller="Orders" asp-action="Cancel" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header no-bd">
+                    <h5 class="modal-title">Cancel Order</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="orderId" id="cancelOrderId" />
+                    <div class="form-group form-group-default">
+                        <label>Cancellation Reason</label>
+                        <textarea name="cancelReason" id="cancelReason" class="form-control" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer no-bd">
+                    <button type="submit" id="confirmCancelOrder" class="btn btn-danger">Confirm Cancellation</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('.edit-order-btn').on('click', function () {
+                $('#editOrderId').val($(this).data('id'));
+                $('#editStatus').val($(this).data('status'));
+            });
+            $('.cancel-order-btn').on('click', function () {
+                $('#cancelOrderId').val($(this).data('id'));
+            });
+        });
+    </script>
+}

@@ -1,0 +1,108 @@
+@model NMB_HLabSys.Areas.Manager.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="panel-header bg-primary-gradient">
+    <div class="page-inner py-5">
+        <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row">
+            <div>
+                <h2 class="text-white pb-2 fw-bold">Dashboard</h2>
+            </div>
+            <div class="ml-md-auto py-2 py-md-0">
+                <a asp-area="Manager" asp-controller="Users" asp-action="Index" class="btn btn-white btn-border btn-round mr-2">Manage Users</a>
+                <a asp-area="Manager" asp-controller="Orders" asp-action="Index" class="btn btn-secondary btn-round">View Orders</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-inner mt--5">
+    <div class="row mt--2">
+        <div class="col-md-3">
+            <div class="card full-height">
+                <div class="card-body">
+                    <div class="card-title">Total Consumables</div>
+                    <div class="card-category">@Model.TotalConsumables</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card full-height">
+                <div class="card-body">
+                    <div class="card-title">Pending Orders</div>
+                    <div class="card-category">@Model.PendingOrders</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card full-height">
+                <div class="card-body">
+                    <div class="card-title">Low Stock Items</div>
+                    <div class="card-category">@Model.LowStockItems</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card full-height">
+                <div class="card-body">
+                    <div class="card-title">Total Users</div>
+                    <div class="card-category">@Model.TotalUsers</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">Recently Registered Users</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Role</th>
+                                    <th>Email Address</th>
+                                    <th>Phone Number</th>
+                                    <th>Registered</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.RecentUsers)
+                                {
+                                    <tr>
+                                        <td>@user.FullName @user.Surname</td>
+                                        <td><span class="badge badge-secondary">@user.UserName</span></td>
+                                        <td>@user.Email</td>
+                                        <td>@user.PhoneNumber</td>
+                                        <td>
+                                            @if (user.IsActive)
+                                            {
+                                                <span class="badge badge-success">Active</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-warning">Inactive</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                                @if (!Model.RecentUsers.Any())
+                                {
+                                    <tr><td colspan="6" class="text-center text-muted">No users registered yet.</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

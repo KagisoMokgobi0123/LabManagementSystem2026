@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
-using NMB_HLabSys.Areas.Doctor.Models;
+using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Models.Users;
 using PatientModel = NMB_HLabSys.Areas.Administrator.Models.Patient;
 
 namespace NMB_HLabSys.Areas.Doctor.Controllers
@@ -14,9 +16,11 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
     public class DoctorDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public DoctorDashboardController(ApplicationDbContext context, UserManager<RegisterUser> userManager)
+        public DoctorDashboardController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -33,49 +37,71 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 return 0;
             }
 
-            var doctor = _context.Doctors.FirstOrDefault(d => d.UserID.ToString() == userIdString);
+            var doctor = _context.Doctors
+                .FirstOrDefault(d =>
+                    d.UserID.ToString() == userIdString);
+
             return doctor?.DoctorId ?? 0;
         }
 
         // ── 1. Dashboard ──────────────────────────────────────
         public IActionResult Dashboard()
-        {
-            var doctorId = GetDoctorId();
+{
+    var doctorId = GetDoctorId();
 
-            // Set ViewBag properties for the dashboard
-            ViewBag.TotalPatients = _context.Patients.Count();
-            ViewBag.PendingTests = _context.TestRequests
-                .Count(r => r.DoctorId == doctorId.ToString() && r.Status == TestRequestStatus.Submitted.ToString());
-            ViewBag.CompletedTests = _context.TestRequests
-                .Count(r => r.DoctorId == doctorId.ToString() && r.Status == TestRequestStatus.Completed.ToString());
-            ViewBag.ActiveAlerts = _context.DoctorAlerts
-                .Count(a => a.DoctorId == doctorId && a.CreatedAt >= DateTime.Now.AddDays(-5));
-            ViewBag.RecentRequests = _context.TestRequests
-                .Include(r => r.Patient)
-                .Where(r => r.DoctorId == doctorId.ToString())
-                .OrderByDescending(r => r.RequestDate)
-                .Take(10)
-                .ToList();
+        // Set ViewBag properties for the dashboard
+        ViewBag.TotalPatients = _context.Patients.Count();
 
-            return View();
-        }
+    ViewBag.PendingTests = _context.TestRequests
+        .Count(r =>
+            r.DoctorId == doctorId &&
+            r.Status == TestRequestStatus.Submitted.ToString());
+
+    ViewBag.CompletedTests = _context.TestRequests
+        .Count(r =>
+            r.DoctorId == doctorId &&
+            r.Status == TestRequestStatus.Completed.ToString());
+
+    ViewBag.ActiveAlerts = _context.DoctorAlerts
+        .Count(a =>
+            a.DoctorId == doctorId &&
+            a.CreatedAt >= DateTime.Now.AddDays(-5));
+
+    ViewBag.RecentRequests = _context.TestRequests
+        .Include(r => r.Patient)
+        .Where(r =>
+            r.DoctorId == doctorId)
+        .OrderByDescending(r => r.RequestDate)
+        .Take(10)
+        .ToList();
+
+    return View();
+}
 
         // ── 2. Manage Patients ────────────────────────────────
         public IActionResult Patients()
         {
             var patients = _context.Patients.ToList();
+
             return View(patients);
         }
 
         public IActionResult PatientDetails(int id)
         {
             var patient = _context.Patients
-                .Include(p => p.PatientConditions).ThenInclude(pc => pc.MedicalCondition)
-                .Include(p => p.PatientAllergies).ThenInclude(pa => pa.Allergy)
-                .Include(p => p.PatientMedications).ThenInclude(pm => pm.Medication)
+                .Include(p => p.PatientConditions)
+                    .ThenInclude(pc => pc.MedicalCondition)
+                .Include(p => p.PatientAllergies)
+                    .ThenInclude(pa => pa.Allergy)
+                .Include(p => p.PatientMedications)
+                    .ThenInclude(pm => pm.Medication)
                 .FirstOrDefault(p => p.PatientID == id);
 
-            if (patient == null) return NotFound();
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
             return View(patient);
         }
 
@@ -86,70 +112,110 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreatePatient(PatientModel patient)
+        public async Task<IActionResult> CreatePatient(
+            PatientModel patient)
         {
-            if (!ModelState.IsValid) return View(patient);
+            if (!ModelState.IsValid)
+            {
+                return View(patient);
+            }
 
             _context.Patients.Add(patient);
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Patients));
         }
 
         public IActionResult EditPatient(int id)
         {
             var patient = _context.Patients.Find(id);
-            if (patient == null) return NotFound();
+
+            if (patient == null)
+            {
+                return NotFound();
+            }
+
             return View(patient);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditPatient(PatientModel patient)
+        public async Task<IActionResult> EditPatient(
+            PatientModel patient)
         {
-            if (!ModelState.IsValid) return View(patient);
+            if (!ModelState.IsValid)
+            {
+                return View(patient);
+            }
 
             _context.Patients.Update(patient);
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Patients));
         }
 
         // ── 3. Test Requests ──────────────────────────────────
+
         public IActionResult TestRequests()
         {
             var doctorId = GetDoctorId();
+
             var requests = _context.TestRequests
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
-                .Where(r => r.DoctorId == doctorId.ToString())
+                .Where(r =>
+                    r.DoctorId == doctorId)
                 .OrderByDescending(r => r.RequestDate)
                 .ToList();
+
             return View(requests);
         }
+
 
         public IActionResult CreateTestRequest()
         {
             ViewBag.Patients = _context.Patients.ToList();
             ViewBag.TestTypes = _context.TestTypes.ToList();
+
             return View();
         }
 
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateTestRequest(TestRequestsModel request)
+        public async Task<IActionResult> CreateTestRequest(
+            TestRequestsModel request)
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Patients = _context.Patients.ToList();
+                ViewBag.Patients =
+                    _context.Patients.ToList();
+
+                ViewBag.TestTypes =
+                    _context.TestTypes.ToList();
+
                 return View(request);
             }
 
-            request.DoctorId = GetDoctorId().ToString();
-            request.RequestDate = DateTime.Now;
-            request.CreatedAt = DateTime.Now;
-            request.Status = TestRequestStatus.Submitted.ToString();
+            // DoctorId is an INT because it references Doctor.DoctorId.
+            request.DoctorId =
+                GetDoctorId();
+
+            request.RequestDate =
+                DateTime.Now;
+
+            request.CreatedAt =
+                DateTime.Now;
+
+            request.Status =
+                TestRequestStatus.Submitted.ToString();
 
             _context.TestRequests.Add(request);
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(TestRequests));
         }
 
@@ -159,32 +225,55 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
                 .Include(r => r.Samples)
-                .FirstOrDefault(r => r.TestRequestId == id);
+                .FirstOrDefault(r =>
+                    r.TestRequestId == id);
 
-            if (request == null) return NotFound();
+            if (request == null)
+            {
+                return NotFound();
+            }
+
             return View(request);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CancelTestRequest(int id, string cancelReason)
+        public async Task<IActionResult> CancelTestRequest(
+            int id,
+            string cancelReason)
         {
-            var request = _context.TestRequests.Find(id);
-            if (request == null) return NotFound();
+            var request =
+                _context.TestRequests.Find(id);
 
-            // Doctor can only cancel if Submitted or SamplesReceived
-            if (request.Status != TestRequestStatus.Submitted.ToString() &&
-                request.Status != TestRequestStatus.SamplesReceived.ToString())
+            if (request == null)
             {
-                TempData["Error"] = "Test request can only be cancelled if status is Submitted or Samples Received.";
-                return RedirectToAction(nameof(TestRequestDetails), new { id });
+                return NotFound();
             }
 
-            request.Status = TestRequestStatus.Cancelled.ToString();
-            request.CancelReason = cancelReason;
+            // Doctor can only cancel if Submitted or SamplesReceived
+            if (request.Status !=
+                    TestRequestStatus.Submitted.ToString() &&
+                request.Status !=
+                    TestRequestStatus.SamplesReceived.ToString())
+            {
+                TempData["Error"] =
+                    "Test request can only be cancelled if status is Submitted or Samples Received.";
+
+                return RedirectToAction(
+                    nameof(TestRequestDetails),
+                    new { id });
+            }
+
+            request.Status =
+                TestRequestStatus.Cancelled.ToString();
+
+            request.CancelReason =
+                cancelReason;
 
             _context.TestRequests.Update(request);
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(TestRequests));
         }
 
@@ -193,67 +282,93 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         {
             var results = _context.Results
                 .Include(r => r.TestRequestItem)
-                .Where(r => r.TestRequestItem.TestRequestID == requestId)
+                .Where(r =>
+                    r.TestRequestItem.TestRequestID ==
+                    requestId)
                 .ToList();
+
             return View(results);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ReleaseResults(int requestId, string releaseNote)
+        public async Task<IActionResult> ReleaseResults(
+            int requestId,
+            string releaseNote)
         {
             var request = _context.TestRequests
                 .Include(r => r.ResultRelease)
-                .FirstOrDefault(r => r.TestRequestId == requestId);
+                .FirstOrDefault(r =>
+                    r.TestRequestId == requestId);
 
-            if (request == null) return NotFound();
+            if (request == null)
+            {
+                return NotFound();
+            }
 
-            request.Status = TestRequestStatus.ReleasedByDoctor.ToString();
+            request.Status =
+                TestRequestStatus.ReleasedByDoctor.ToString();
 
             if (request.ResultRelease == null)
             {
-                request.ResultRelease = new ResultRelease
-                {
-                    TestRequestId = requestId,
-                    Note = releaseNote,
-                    ReleasedAt = DateTime.Now
-                };
+                request.ResultRelease =
+                    new ResultRelease
+                    {
+                        TestRequestId = requestId,
+                        Note = releaseNote,
+                        ReleasedAt = DateTime.Now
+                    };
             }
 
             _context.TestRequests.Update(request);
+
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(TestRequests));
         }
 
         // ── 5. Alerts ─────────────────────────────────────────
-        public IActionResult Alerts(DateTime? fromDate = null)
+        public IActionResult Alerts(
+            DateTime? fromDate = null)
         {
             try
             {
                 var doctorId = GetDoctorId();
+
                 if (doctorId == 0)
                 {
-                    ViewBag.Error = "No doctor profile found. Please contact administrator.";
-                    return View(new List<TestRequestItem>());
+                    ViewBag.Error =
+                        "No doctor profile found. Please contact administrator.";
+
+                    return View(
+                        new List<TestRequestItem>());
                 }
 
-                // Get abnormal results for tests ordered by this doctor in last 5 days
+                // Get abnormal results for tests ordered by this doctor
+                // from the selected date or the last 5 days.
                 var alerts = _context.TestRequestItems
                     .Include(t => t.TestRequest)
-                    //.Include(t => t.TestResults)
-                    .Where(t => t.TestRequest.DoctorId == doctorId.ToString()
-                     //   && t.TestResults.Any(r => r.IsAbnormal == true)
-                        && t.TestRequest.RequestDate >= (fromDate ?? DateTime.Now.AddDays(-5)))
+                    .Where(t =>
+                        t.TestRequest.DoctorId == doctorId
+                        && t.TestRequest.RequestDate >=
+                            (fromDate ??
+                             DateTime.Now.AddDays(-5)))
                     .ToList();
 
                 return View(alerts);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in Alerts: {ex.Message}");
-                ViewBag.Error = "Unable to load alerts. Please try again later.";
-                return View(new List<TestRequestItem>());
+                Console.WriteLine(
+                    $"Error in Alerts: {ex.Message}");
+
+                ViewBag.Error =
+                    "Unable to load alerts. Please try again later.";
+
+                return View(
+                    new List<TestRequestItem>());
             }
+
         }
     }
 }

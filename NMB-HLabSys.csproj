@@ -8,10 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\Manager\Data\**" />
     <Compile Remove="Areas\Technician\Views\TestRework\**" />
+    <Content Remove="Areas\Manager\Data\**" />
     <Content Remove="Areas\Technician\Views\TestRework\**" />
+    <EmbeddedResource Remove="Areas\Manager\Data\**" />
     <EmbeddedResource Remove="Areas\Technician\Views\TestRework\**" />
+    <None Remove="Areas\Manager\Data\**" />
     <None Remove="Areas\Technician\Views\TestRework\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Areas\Manager\Controllers\gvh5guig.glj~" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,8 +47,8 @@
     <Folder Include="Areas\Administrator\Views\" />
     <Folder Include="Areas\Doctor\Data\" />
     <Folder Include="Areas\Doctor\Views\TestRequest\" />
-    <Folder Include="Areas\Manager\Data\" />
-    <Folder Include="Areas\Manager\Views\TestType\" />
+    <Folder Include="Areas\Manager\Views\MyProfile\" />
+    <Folder Include="Areas\Manager\Views\TechnicianTestType\" />
     <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Views\" />

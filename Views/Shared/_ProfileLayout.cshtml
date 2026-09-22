@@ -1,0 +1,123 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>
+        @ViewData["Title"] - NMB-HLabSys
+    </title>
+
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+          name="viewport" />
+
+    <link rel="icon"
+          href="~/assets/img/icon1.svg"
+          asp-append-version="true" />
+
+
+    <!-- ============================================================
+         Fonts
+         ============================================================ -->
+
+    <script src="~/assets/js/plugin/webfont/webfont.min.js"></script>
+
+    <script>
+
+            WebFont.load({
+
+                google: {
+                    families: ["Lato:300,400,700,900"]
+                },
+
+                custom: {
+
+                    families: [
+                        "Flaticon",
+                        "Font Awesome 5 Solid",
+                        "Font Awesome 5 Regular",
+                        "Font Awesome 5 Brands",
+                        "simple-line-icons"
+                    ],
+
+                    urls: [
+                        "@Url.Content("~/assets/css/fonts.min.css")"
+                    ]
+
+                },
+
+                active: function () {
+
+                    sessionStorage.fonts = true;
+
+                }
+
+            });
+
+    </script>
+
+
+    <!-- ============================================================
+         CSS
+         ============================================================ -->
+
+    <link rel="stylesheet"
+          href="~/assets/css/bootstrap.min.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/assets/css/atlantis.min.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/assets/css/fontawesome-all.min.css"
+          asp-append-version="true" />
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <main role="main" class="pb-3">
+
+            @RenderBody()
+
+        </main>
+
+    </div>
+
+
+    <footer class="border-top footer text-muted">
+
+        <div class="container">
+
+            &copy; 2026 - NMB_HLabSys -
+
+            <a asp-area=""
+                   asp-controller="Home"
+                   asp-action="Privacy">
+                Privacy
+            </a>
+
+        </div>
+
+    </footer>
+
+
+    <!-- ============================================================
+         JavaScript
+         ============================================================ -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

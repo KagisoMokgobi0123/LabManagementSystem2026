@@ -14,9 +14,9 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
     public class ResultsController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterUser> _userManager;
+        private readonly UserManager<RegisterViewModel> _userManager;
 
-        public ResultsController(ApplicationDbContext context, UserManager<RegisterUser> userManager)
+        public ResultsController(ApplicationDbContext context, UserManager<RegisterViewModel> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -37,17 +37,21 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         public IActionResult ViewResults()
         {
             var doctorId = GetCurrentDoctorId();
-            if (doctorId == 0) return Unauthorized();
+            if (doctorId == 0)
+                return Unauthorized();
 
             var requests = _context.TestRequests
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
                     .ThenInclude(i => i.TestType)
-                .Where(r => r.DoctorId == doctorId.ToString() && r.TestRequestItems.Any(i => i.ResultValue.HasValue))
+                .Where(r =>
+                    r.DoctorId == doctorId &&
+                    r.TestRequestItems.Any(i => i.ResultValue.HasValue))
                 .OrderByDescending(r => r.RequestDate)
                 .ToList();
 
             return View(requests);
+
         }
 
         // GET: /Doctor/Results/ViewAbnormal
@@ -55,27 +59,33 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         public IActionResult ViewAbnormal(DateTime? fromDate)
         {
             var doctorId = GetCurrentDoctorId();
-            if (doctorId == 0) return Unauthorized();
+            if (doctorId == 0)
+                return Unauthorized();
 
-            var cutoff = fromDate ?? DateTime.Now.AddDays(-5);
+            var cutoff =
+                fromDate ?? DateTime.Now.AddDays(-5);
 
             var abnormalItems = _context.TestRequestItems
                 .Include(i => i.TestRequest)
                     .ThenInclude(r => r.Patient)
                 .Include(i => i.TestType)
                 .Where(i =>
-                    i.TestRequest.DoctorId == doctorId.ToString() &&
+                    i.TestRequest.DoctorId == doctorId &&
                     i.ResultValue.HasValue &&
                     i.TestType != null &&
-                    (i.ResultValue < i.TestType.NormalMin ||
-                     i.ResultValue > i.TestType.NormalMax) &&
+                    (
+                        i.ResultValue < i.TestType.NormalMin ||
+                        i.ResultValue > i.TestType.NormalMax
+                    ) &&
                     i.CompletionDateTime.HasValue &&
                     i.CompletionDateTime.Value >= cutoff)
                 .OrderByDescending(i => i.CompletionDateTime)
                 .ToList();
 
             ViewBag.FromDate = cutoff;
+
             return View(abnormalItems);
+
         }
 
         // GET: /Doctor/Results/ReleaseResults/5
@@ -83,23 +93,30 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         public IActionResult ReleaseResults(int requestId)
         {
             var doctorId = GetCurrentDoctorId();
-            if (doctorId == 0) return Unauthorized();
+            if (doctorId == 0)
+                return Unauthorized();
 
             var request = _context.TestRequests
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
                     .ThenInclude(i => i.TestType)
-                .FirstOrDefault(r => r.TestRequestId == requestId && r.DoctorId == doctorId.ToString());
+                .FirstOrDefault(r =>
+                    r.TestRequestId == requestId &&
+                    r.DoctorId == doctorId);
 
-            if (request == null) return NotFound();
+            if (request == null)
+                return NotFound();
 
             if (request.Status != "Completed")
             {
-                TempData["Error"] = "Results can only be released once all tests are completed.";
+                TempData["Error"] =
+                    "Results can only be released once all tests are completed.";
+
                 return RedirectToAction("ViewResults");
             }
 
             return View(request);
+
         }
 
         // POST: /Doctor/Results/ReleaseResults
@@ -108,46 +125,65 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         public IActionResult ReleaseResults(int requestId, string note, string notifyType)
         {
             var doctorId = GetCurrentDoctorId();
-            if (doctorId == 0) return Unauthorized();
+            if (doctorId == 0)
+                return Unauthorized();
 
             var request = _context.TestRequests
-                .FirstOrDefault(r => r.TestRequestId == requestId && r.DoctorId == doctorId.ToString());
+                .FirstOrDefault(r =>
+                    r.TestRequestId == requestId &&
+                    r.DoctorId == doctorId);
 
-            if (request == null) return NotFound();
+            if (request == null)
+                return NotFound();
 
             var release = new ResultRelease
             {
                 TestRequestId = requestId,
+                ReleasedByDoctorId = doctorId,
                 ReleasedAt = DateTime.Now,
                 Note = note
             };
 
             _context.ResultReleases.Add(release);
-            request.Status = TestRequestStatus.ReleasedByDoctor.ToString();
+
+            request.Status =
+                TestRequestStatus.ReleasedByDoctor.ToString();
+
             _context.SaveChanges();
 
-            TempData["Message"] = "Results released to patient.";
+            TempData["Message"] =
+                "Results released to patient.";
+
             return RedirectToAction("ViewResults");
+
         }
 
         // GET: /Doctor/Results/DownloadPDF/5
         public IActionResult DownloadPDF(int requestId)
         {
             var doctorId = GetCurrentDoctorId();
-            if (doctorId == 0) return Unauthorized();
+            if (doctorId == 0)
+                return Unauthorized();
 
             var request = _context.TestRequests
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
                     .ThenInclude(i => i.TestType)
                 .Include(r => r.Doctor)
-                .FirstOrDefault(r => r.TestRequestId == requestId && r.DoctorId == doctorId.ToString());
+                .FirstOrDefault(r =>
+                    r.TestRequestId == requestId &&
+                    r.DoctorId == doctorId);
 
-            if (request == null) return NotFound();
+            if (request == null)
+                return NotFound();
 
             // TODO: Generate PDF using iTextSharp or DinkToPdf
-            TempData["Message"] = "PDF generation not yet implemented.";
+
+            TempData["Message"] =
+                "PDF generation not yet implemented.";
+
             return RedirectToAction("ViewResults");
+
         }
         [AllowAnonymous]
         public IActionResult Debug()

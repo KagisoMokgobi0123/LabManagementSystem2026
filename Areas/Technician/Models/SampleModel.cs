@@ -1,6 +1,7 @@
 ﻿using NMB_HLabSys.Areas.Doctor.Models;
-using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Models.Laboratory;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Models.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,11 +22,11 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         [Required(ErrorMessage ="Sample type is required. Please select test type.")]
         public int SampleTypeId { get; set; }// e.g., Blood, Plasma
-        public  SampleTypeModel SampleType {  get; set; } = null!;
+        public  SampleType SampleType {  get; set; } = null!;
 
         public DateTime CollectedAt { get; set; }
         public string? TechnicianId { get; set; } = string.Empty;// e.g., Blood, Plasma
-        public RegisterUser Technician { get; set; } = null!;
+        public ApplicationUser Technician { get; set; } = null!;
 
         public DateTime DateReceived { get; set; } = DateTime.Now;
 

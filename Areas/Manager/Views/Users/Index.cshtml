@@ -1,0 +1,490 @@
+@using NMB_HLabSys.Models.Identity
+
+@{
+    ViewData["Title"] = "Manage Users";
+
+    var doctors =
+        ViewBag.Doctors as IReadOnlyList<ApplicationUser>;
+
+    var technicians =
+        ViewBag.Technicians as IReadOnlyList<ApplicationUser>;
+}
+
+
+<div class="page-header">
+    <h4 class="page-title">Manage Users</h4>
+
+    <ul class="breadcrumbs">
+        <li class="nav-home">
+            <a asp-area="Manager"
+                   asp-controller="Dashboard"
+                   asp-action="Index">
+
+                <i class="flaticon-home"></i>
+            </a>
+        </li>
+
+        <li class="separator">
+            <i class="flaticon-right-arrow"></i>
+        </li>
+
+        <li class="nav-item">
+            <a href="#">
+                Manage Users
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+
+<!-- DOCTORS -->
+
+<div class="row">
+
+    <div class="col-md-12">
+
+        <div class="card">
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+
+                    <table class="display table table-striped table-hover">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Name</th>
+
+                                <th>Surname</th>
+
+                                <th>HPCSA Number</th>
+
+                                <th>Email Address</th>
+
+                                <th>Contact Number</th>
+
+                                <th>Status</th>
+
+                                <th>Password Status</th>
+
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+
+                            @if (doctors != null)
+                            {
+
+                                foreach (var doctor in doctors)
+                                {
+
+
+                                    <tr>
+
+
+                                        <td>
+                                            @doctor.FullName
+                                        </td>
+
+
+                                        <td>
+                                            @doctor.Surname
+                                        </td>
+
+
+                                        <td>
+                                            @doctor.Doctor?.HPCSANumber
+                                        </td>
+
+
+                                        <td>
+                                            @doctor.Email
+                                        </td>
+
+
+                                        <td>
+                                            @doctor.PhoneNumber
+                                        </td>
+
+
+
+                                        <td>
+
+                                            @if (doctor.IsActive)
+                                            {
+                                                <span class="badge badge-success">
+                                                    Active
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">
+                                                    Inactive
+                                                </span>
+                                            }
+
+                                        </td>
+
+
+
+                                        <td>
+
+                                            @if (doctor.MustChangePassword)
+                                            {
+                                                <span class="badge badge-warning">
+                                                    Temporary
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-success">
+                                                    Set
+                                                </span>
+                                            }
+
+                                        </td>
+
+
+
+                                        <td>
+
+
+                                            <div class="form-button-action">
+
+
+                                                <form asp-area="Manager"
+                                                      asp-controller="Users"
+                                                      asp-action="Deactivate"
+                                                      method="post"
+                                                      class="d-inline">
+
+
+                                                    @Html.AntiForgeryToken()
+
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@doctor.Id" />
+
+
+
+                                                    <button type="submit"
+                                                            class="btn btn-link btn-danger"
+                                                            title="Deactivate">
+
+
+                                                        <i class="fa fa-times"></i>
+
+
+                                                    </button>
+
+
+                                                </form>
+
+
+                                            </div>
+
+
+                                        </td>
+
+
+                                    </tr>
+
+                                }
+
+                            }
+
+
+
+                            @if (doctors == null || !doctors.Any())
+                            {
+
+                                <tr>
+
+                                    <td colspan="8"
+                                        class="text-center text-muted">
+
+                                        No doctors registered yet.
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- TECHNICIANS TABLE -->
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="card">
+
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title">
+                        Manage Lab Technician Users
+                    </h4>
+                </div>
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="display table table-striped table-hover">
+
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Surname</th>
+                                <th>SA ID Number</th>
+                                <th>Employee Number</th>
+                                <th>Email Address</th>
+                                <th>Contact Number</th>
+                                <th>Assigned Test Types</th>
+                                <th>Status</th>
+                                <th>Password Status</th>
+                                <th>First Login</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+
+                        <tbody>
+
+
+                            @if (technicians != null)
+                            {
+
+                                foreach (var tech in technicians)
+                                {
+
+                                    <tr>
+
+                                        <td>
+                                            @tech.FullName
+                                        </td>
+
+
+                                        <td>
+                                            @tech.Surname
+                                        </td>
+
+
+                                        <td>
+                                            @(tech.UserProfile?.IDNumber ?? "-")
+                                        </td>
+
+
+                                        <td>
+                                            @(tech.TechnicianProfile?.EmployeeNumber ?? "-")
+                                        </td>
+
+
+                                        <td>
+                                            @tech.Email
+                                        </td>
+
+
+                                        <td>
+                                            @tech.PhoneNumber
+                                        </td>
+
+
+                                        <td>
+
+                                            @if (tech.IsActive)
+                                            {
+                                                <span class="badge badge-success">
+                                                    Active
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">
+                                                    Disabled
+                                                </span>
+                                            }
+
+                                        </td>
+
+
+
+                                        <td>
+
+                                            @if (tech.MustChangePassword)
+                                            {
+                                                <span class="badge badge-warning">
+                                                    Temporary
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-success">
+                                                    Set
+                                                </span>
+                                            }
+
+                                        </td>
+
+
+
+                                        <td>
+
+                                            @(tech.MustChangePassword
+                                                ? "Yes"
+                                                : "No")
+
+                                        </td>
+
+
+
+                                        <td>
+
+                                            <div class="form-button-action">
+
+
+                                                <!-- RESET PASSWORD -->
+
+                                                <form asp-area="Manager"
+                                                      asp-controller="Users"
+                                                      asp-action="ResetPassword"
+                                                      method="post"
+                                                      class="d-inline">
+
+
+                                                    @Html.AntiForgeryToken()
+
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@tech.Id" />
+
+
+                                                    <button type="submit"
+                                                            class="btn btn-link btn-primary"
+                                                            title="Reset Password">
+
+                                                        <i class="fa fa-key"></i>
+
+                                                    </button>
+
+
+                                                </form>
+
+
+
+                                                <!-- TOGGLE STATUS -->
+
+                                                <form asp-area="Manager"
+                                                      asp-controller="Users"
+                                                      asp-action="Deactivate"
+                                                      method="post"
+                                                      class="d-inline">
+
+
+                                                    @Html.AntiForgeryToken()
+
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="@tech.Id" />
+
+
+                                                    @if (tech.IsActive)
+                                                    {
+
+                                                        <button type="submit"
+                                                                class="btn btn-link btn-danger"
+                                                                title="Deactivate">
+
+                                                            <i class="fa fa-times"></i>
+
+                                                        </button>
+
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <button type="submit"
+                                                                class="btn btn-link btn-success"
+                                                                title="Activate">
+
+                                                            <i class="fa fa-check"></i>
+
+                                                        </button>
+
+                                                    }
+
+
+                                                </form>
+
+
+                                            </div>
+
+                                        </td>
+
+
+                                    </tr>
+
+                                }
+
+                            }
+
+
+
+                            @if (technicians == null || !technicians.Any())
+                            {
+
+                                <tr>
+
+                                    <td colspan="11"
+                                        class="text-center text-muted">
+
+                                        No lab technicians registered yet.
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>

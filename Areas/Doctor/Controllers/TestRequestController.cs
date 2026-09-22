@@ -7,20 +7,20 @@ using NMB_HLabSys.Areas.Technician.Data;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
-using NMB_HLabSys.Services;
+using NMB_HLabSys.Services.Interfaces;
 
 namespace NMB_HLabSys.Areas.Doctor.Controllers
 {
     public class TestRequestController : Controller
     {
-        private readonly UserManager<RegisterUser> _userManager;
-        private readonly SignInManager<RegisterUser> _signInManager;
+        private readonly UserManager<RegisterViewModel> _userManager;
+        private readonly SignInManager<RegisterViewModel> _signInManager;
         private readonly ApplicationDbContext _dbcontext;
         private readonly IEmailService _emailService;
 
         public TestRequestController(
-            UserManager<RegisterUser> userManager,
-            SignInManager<RegisterUser> signInManager,
+            UserManager<RegisterViewModel> userManager,
+            SignInManager<RegisterViewModel> signInManager,
             ApplicationDbContext dbcontext,
             IEmailService emailService)
         {

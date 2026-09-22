@@ -2,6 +2,7 @@
 using NMB_HLabSys.Areas.Doctor.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NMB_HLabSys.Models.Identity;
 
 namespace NMB_HLabSys.Areas.Technician.Models
 {
@@ -16,7 +17,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         public string TechnicianId { get; set; } = string.Empty;
 
-        public RegisterUser Technician { get; set; } = null!;
+        public ApplicationUser Technician { get; set; } = null!;
 
         public string ResultValues { get; set; } = string.Empty;
 

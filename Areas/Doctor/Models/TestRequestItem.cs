@@ -6,6 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Models.Inventory;
+using NMB_HLabSys.Models.Laboratory;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
@@ -46,7 +48,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
 
         // Navigation properties
         public TestRequestsModel TestRequest { get; set; }
-       public TestTypeModel TestType { get; set; }
+       public TestType TestType { get; set; }
         public LabTechnician AssignedTechnician { get; set; }
         public List<DoctorAlert> Alerts { get; set; }
 

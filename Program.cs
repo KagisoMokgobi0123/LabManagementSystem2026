@@ -3,73 +3,191 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Services;
+using NMB_HLabSys.Services.Implementations;
+using NMB_HLabSys.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// ============================================================
+// DATABASE
+// ============================================================
+
+builder.Services.AddDbContext<ApplicationDbContext>(
+    options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("Con")));
+
+
+// ============================================================
+// MVC
+// ============================================================
 
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();  // ← added
 
-builder.Services.AddIdentity<RegisterUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+// ============================================================
+// HTTP CONTEXT
+// ============================================================
 
-// Add Session services
+builder.Services.AddHttpContextAccessor();
+
+
+// ============================================================
+// SESSION
+// ============================================================
+//
+// DoctorDashboardController currently uses:
+//
+//     HttpContext.Session.GetString("UserId")
+//
+// Therefore ASP.NET Core Session must be registered.
+//
+
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
+
     options.Cookie.HttpOnly = true;
+
     options.Cookie.IsEssential = true;
 });
 
+
+// ============================================================
+// IDENTITY
+// ============================================================
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(
+    options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireNonAlphanumeric = true;
+        options.Password.RequiredLength = 8;
+
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+
+// ============================================================
+// APPLICATION SERVICES
+// ============================================================
+
+builder.Services.AddScoped<IAccountService, AccountService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddScoped<IOtpService, OtpService>();
+
+builder.Services.AddScoped<IProfileService, ProfileService>();
+
+builder.Services.AddScoped<IUserManagementService, UserManagementService>();
+
+builder.Services.AddScoped<ILabManagerService, LabManagerService>();
+
+builder.Services.AddScoped<IReportService, ReportService>();
+
+//builder.Services.AddScoped<IPasswordGeneratorService, PasswordGeneratorService>();
+
+builder.Services.AddScoped<ILocationService, LocationService>();
+
+
+// ============================================================
+// BUILD APPLICATION
+// ============================================================
+
 var app = builder.Build();
 
-// Seed roles and default users
+
+// ============================================================
+// SEED ROLES / DEFAULT USERS
+// ============================================================
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var userManager = services.GetRequiredService<UserManager<RegisterUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-    await RoleInitializer.InitializeAsync(userManager, roleManager);
+    var roleManager =
+        services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    await RoleInitializer.InitializeAsync(roleManager);
 }
 
-// Configure the HTTP request pipeline
+
+// ============================================================
+// HTTP REQUEST PIPELINE
+// ============================================================
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+
     app.UseHsts();
 }
 
+
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
 
 app.UseRouting();
 
-// Enable Session before authentication/authorization
+
+// ============================================================
+// SESSION
+// ============================================================
+//
+// IMPORTANT:
+// UseSession() must be placed after UseRouting()
+// and before the controllers execute.
+//
+
 app.UseSession();
 
+
+// ============================================================
+// AUTHENTICATION / AUTHORIZATION
+// ============================================================
+
 app.UseAuthentication();
+
 app.UseAuthorization();
+
+
+// ============================================================
+// STATIC ASSETS
+// ============================================================
 
 app.MapStaticAssets();
 
+
+// ============================================================
+// AREA ROUTING
+// ============================================================
+
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+    pattern:
+        "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+
+// ============================================================
+// DEFAULT ROUTING
+// ============================================================
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern:
+        "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
+
 
 app.Run();

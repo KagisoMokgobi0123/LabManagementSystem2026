@@ -1,0 +1,311 @@
+@model IReadOnlyList<TestType>
+@{
+    ViewData["Title"] = "Test Types";
+    var categories = ViewBag.Categories as IReadOnlyList<Category>;
+    var sampleTypes = ViewBag.SampleTypes as IReadOnlyList<SampleType>;
+}
+
+<div class="page-header">
+    <h4 class="page-title">Test Type</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home"><a asp-area="Manager" asp-controller="Dashboard" asp-action="Index"><i class="flaticon-home"></i></a></li>
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a href="#">Test Type</a></li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex align-items-center">
+                    <h4 class="card-title">Test Types</h4>
+                    <button class="btn btn-primary btn-round ml-auto" data-toggle="modal" data-target="#addTestTypeModal">
+                        <i class="fa fa-plus"></i> Add Test Type
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Category</th>
+                                <th>Sample Type</th>
+                                <th>MeasurementUnit</th>
+                                <th>Normal Range</th>
+                                <th>Turn Around</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var testType in Model)
+                            {
+                                <tr>
+                                    <td>@testType.Name</td>
+                                    <td>@testType.Category?.Name</td>
+                                    <td>@testType.SampleType?.Name</td>
+                                    <td>@testType.MeasurementUnit</td>
+                                    <td>@testType.NormalMin - @testType.NormalMax</td>
+                                    <td>@testType.TurnAroundTimeHours hrs</td>
+                                    <td>
+                                        @if (testType.Status == TestTypeStatus.Active)
+                                        {
+                                            <span class="badge badge-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="form-button-action">
+                                            <button type="button" class="btn btn-link btn-primary btn-lg edit-testtype-btn"
+                                                    data-id="@testType.TestTypeId" data-name="@testType.Name" data-category="@testType.CategoryId"
+                                                    data-sampletype="@testType.SampleTypeId" data-unit="@testType.MeasurementUnit"
+                                                    data-min="@testType.NormalMin" data-max="@testType.NormalMax"
+                                                    data-turnaround="@testType.TurnAroundTimeHours" data-status="@testType.Status"
+                                                    data-toggle="modal" data-target="#editTestTypeModal" title="Edit Test Type">
+                                                <i class="fa fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-link btn-danger remove-testtype-btn"
+                                                    data-id="@testType.TestTypeId" data-name="@testType.Name"
+                                                    data-toggle="modal" data-target="#removeTestTypeModal" title="Remove Test Type">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr><td colspan="8" class="text-center text-muted">No test types added yet.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    // Shared partial rendering for the Category/SampleType/MeasurementUnit dropdown fields,
+    // reused by both the Add and Edit forms below.
+}
+
+<!-- ADD TEST TYPE MODAL -->
+<div class="modal fade" id="addTestTypeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-area="Manager" asp-controller="TestType" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header no-bd">
+                    <h5 class="modal-title"><span class="fw-mediumbold">Add</span> <span class="fw-light">Test Type</span></h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group form-group-default">
+                        <label>Test Name</label>
+                        <input name="Name" type="text" class="form-control" placeholder="Enter test name" required />
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Test Category</label>
+                        <select name="CategoryId" class="form-control" required>
+                            <option value="">Select Test Category</option>
+                            @if (categories != null)
+                            {
+                                foreach (var category in categories)
+                                {
+                                    <option value="@category.CategoryId">@category.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Sample Type</label>
+                        <select name="SampleTypeId" class="form-control" required>
+                            <option value="">Select Sample Type</option>
+                            @if (sampleTypes != null)
+                            {
+                                foreach (var sampleType in sampleTypes)
+                                {
+                                    <option value="@sampleType.SampleTypeId">@sampleType.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>MeasurementUnit</label>
+                        <select name="MeasurementUnit" class="form-control">
+                            <option value="">Select MeasurementUnit</option>
+                            <option value="mg/dL">mg/dL</option>
+                            <option value="mmol/L">mmol/L</option>
+                            <option value="g/dL">g/dL</option>
+                            <option value="%">%</option>
+                            <option value="U/L">U/L</option>
+                            <option value="ng/mL">ng/mL</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group form-group-default">
+                                <label>Normal Min</label>
+                                <input name="NormalMin" type="number" step="0.01" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group form-group-default">
+                                <label>Normal Max</label>
+                                <input name="NormalMax" type="number" step="0.01" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Turn Around Time (hours)</label>
+                        <input name="TurnAroundTimeHours" type="number" class="form-control" />
+                    </div>
+                    <input type="hidden" name="Status" value="Active" />
+                </div>
+                <div class="modal-footer no-bd">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT TEST TYPE MODAL -->
+<div class="modal fade" id="editTestTypeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-area="Manager" asp-controller="TestType" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header no-bd">
+                    <h5 class="modal-title">Edit Test Type</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="editTestTypeId" />
+                    <div class="form-group form-group-default">
+                        <label>Test Name</label>
+                        <input name="Name" id="editTestName" type="text" class="form-control" required />
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Test Category</label>
+                        <select name="CategoryId" id="editTestCategory" class="form-control" required>
+                            @if (categories != null)
+                            {
+                                foreach (var category in categories)
+                                {
+                                    <option value="@category.CategoryId">@category.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Sample Type</label>
+                        <select name="SampleTypeId" id="editSampleType" class="form-control" required>
+                            @if (sampleTypes != null)
+                            {
+                                foreach (var sampleType in sampleTypes)
+                                {
+                                    <option value="@sampleType.SampleTypeId">@sampleType.Name</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>MeasurementUnit</label>
+                        <select name="MeasurementUnit" id="editUnit" class="form-control">
+                            <option value="mg/dL">mg/dL</option>
+                            <option value="mmol/L">mmol/L</option>
+                            <option value="g/dL">g/dL</option>
+                            <option value="%">%</option>
+                            <option value="U/L">U/L</option>
+                            <option value="ng/mL">ng/mL</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group form-group-default">
+                                <label>Normal Min</label>
+                                <input name="NormalMin" id="editNormalMin" type="number" step="0.01" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group form-group-default">
+                                <label>Normal Max</label>
+                                <input name="NormalMax" id="editNormalMax" type="number" step="0.01" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Turn Around Time (hours)</label>
+                        <input name="TurnAroundTimeHours" id="editTurnAroundTime" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group form-group-default">
+                        <label>Status</label>
+                        <select name="Status" id="editTestTypeStatus" class="form-control">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer no-bd">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- REMOVE TEST TYPE MODAL -->
+<div class="modal fade" id="removeTestTypeModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-area="Manager" asp-controller="TestType" asp-action="Delete" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-header no-bd">
+                    <h5 class="modal-title">Remove Test Type</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="removeTestTypeId" />
+                    <p>Are you sure you want to remove <strong id="removeTestTypeName"></strong>?</p>
+                </div>
+                <div class="modal-footer no-bd">
+                    <button type="submit" class="btn btn-danger">Remove</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $('.edit-testtype-btn').on('click', function () {
+                var btn = $(this);
+                $('#editTestTypeId').val(btn.data('id'));
+                $('#editTestName').val(btn.data('name'));
+                $('#editTestCategory').val(btn.data('category'));
+                $('#editSampleType').val(btn.data('sampletype'));
+                $('#editUnit').val(btn.data('unit'));
+                $('#editNormalMin').val(btn.data('min'));
+                $('#editNormalMax').val(btn.data('max'));
+                $('#editTurnAroundTime').val(btn.data('turnaround'));
+                $('#editTestTypeStatus').val(btn.data('status'));
+            });
+            $('.remove-testtype-btn').on('click', function () {
+                $('#removeTestTypeId').val($(this).data('id'));
+                $('#removeTestTypeName').text($(this).data('name'));
+            });
+        });
+    </script>
+}
