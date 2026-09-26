@@ -70,7 +70,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return 0;
 
-            var doctor = _context.Doctors.FirstOrDefault(d => d.UserID == userId);
+            var doctor = _context.Doctors.FirstOrDefault(d => d.ApplicationUserId == userId);
             return doctor?.DoctorId ?? 0;
         }
     }

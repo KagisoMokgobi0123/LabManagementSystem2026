@@ -50,13 +50,19 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
 
             if (doctorId == 0)
             {
-                TempData["Error"] = "Please login as a doctor to generate reports.";
-                return RedirectToAction("Dashboard", "DoctorDashboard");
+                TempData["Error"] =
+                    "Please login as a doctor to generate reports.";
+
+                return RedirectToAction(
+                    "Dashboard",
+                    "DoctorDashboard");
             }
 
             if (dateFrom > dateTo)
             {
-                TempData["Error"] = "Date from cannot be later than date to.";
+                TempData["Error"] =
+                    "Date from cannot be later than date to.";
+
                 return RedirectToAction("Index");
             }
 
@@ -65,9 +71,10 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 .Include(r => r.TestRequestItems)
                     .ThenInclude(i => i.TestType)
                 .Where(r =>
-                    r.DoctorId == doctorId.ToString() &&
+                    r.DoctorId == doctorId &&
                     r.RequestDate >= dateFrom &&
-                    r.RequestDate <= dateTo.AddDays(1).AddTicks(-1))
+                    r.RequestDate <=
+                        dateTo.AddDays(1).AddTicks(-1))
                 .OrderBy(r => r.RequestDate)
                 .ToList();
 
@@ -85,8 +92,13 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             ViewBag.DateFrom = dateFrom;
             ViewBag.DateTo = dateTo;
 
-            TempData["Message"] = "Report generated successfully.";
-            return View("ReportPreview", requests);
+            TempData["Message"] =
+                "Report generated successfully.";
+
+            return View(
+                "ReportPreview",
+                requests);
+
         }
 
         private int GetCurrentDoctorId()

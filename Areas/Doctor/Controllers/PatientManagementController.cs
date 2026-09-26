@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Data;
-using NMB_HLabSys.Models.Account;
-using Microsoft.EntityFrameworkCore;
-using PatientModel = NMB_HLabSys.Areas.Administrator.Models.Patient;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Services.Interfaces;
 using NMB_HLabSys.ViewModels.Doctor;
+using PatientModel = NMB_HLabSys.Areas.Administrator.Models.Patient;
 
 namespace NMB_HLabSys.Areas.Doctor.Controllers
 {
@@ -17,314 +17,455 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
     public class PatientManagementController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterUser> _userManager;
-        private readonly IEmailSender _emailSender;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IAccountService _accountService;
 
         public PatientManagementController(
             ApplicationDbContext context,
-            UserManager<RegisterUser> userManager,
-            IEmailSender emailSender)
+            UserManager<ApplicationUser> userManager,
+            IAccountService accountService)
         {
             _context = context;
             _userManager = userManager;
-            _emailSender = emailSender;
+            _accountService = accountService;
         }
+
+        // ============================================================
+        // GET CURRENT DOCTOR
+        // ============================================================
 
         private async Task<int> GetCurrentDoctorIdAsync()
         {
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrEmpty(userId)) return 0;
+            var userId =
+                _userManager.GetUserId(User);
 
-            var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.UserID == userId);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return 0;
+            }
+
+            var doctor =
+                await _context.Doctors
+                    .FirstOrDefaultAsync(
+                        d => d.ApplicationUserId == userId);
 
             return doctor?.DoctorId ?? 0;
         }
 
-        // GET: /PatientManagement/Index
+        // ============================================================
+        // INDEX
+        // ============================================================
+
         public async Task<IActionResult> Index()
         {
-            var doctorId = await GetCurrentDoctorIdAsync();
-            if (doctorId == 0)
-                return View(new List<PatientModel>());
+            var doctorId =
+                await GetCurrentDoctorIdAsync();
 
-            var patients = await _context.Patients
-                .Include(p => p.RegisterUser)
-                .Where(p => p.PatientDoctorConsents
-                    .Any(c => c.DoctorUserId == doctorId.ToString() && c.IsActive))
-                .ToListAsync();
+            if (doctorId == 0)
+            {
+                return View(
+                    new List<PatientModel>());
+            }
+
+            var patients =
+                await _context.Patients
+                    .Include(p => p.RegisterUser)
+                    .Where(p =>
+                        p.PatientDoctorConsents
+                            .Any(c =>
+                                c.DoctorUserId ==
+                                doctorId.ToString()
+                                &&
+                                c.IsActive))
+                    .ToListAsync();
 
             return View(patients);
         }
 
-        // GET: /PatientManagement/Search
-        public async Task<IActionResult> Search(string saIdNumber)
+        // ============================================================
+        // SEARCH
+        // ============================================================
+
+        public async Task<IActionResult> Search(
+            string saIdNumber)
         {
-            if (string.IsNullOrEmpty(saIdNumber)) return View();
+            if (string.IsNullOrEmpty(saIdNumber))
+            {
+                return View();
+            }
 
-            var patient = await _context.Patients
-                .Include(p => p.PatientConditions)
-                    .ThenInclude(pc => pc.MedicalCondition)
-                .Include(p => p.PatientAllergies)
-                    .ThenInclude(pa => pa.Allergy)
-                .Include(p => p.PatientMedications)
-                    .ThenInclude(pm => pm.Medication)
-                .FirstOrDefaultAsync(p => p.IDNumber == saIdNumber);
+            var patient =
+                await _context.Patients
+                    .Include(p => p.PatientConditions)
+                        .ThenInclude(
+                            pc => pc.MedicalCondition)
+                    .Include(p => p.PatientAllergies)
+                        .ThenInclude(
+                            pa => pa.Allergy)
+                    .Include(p => p.PatientMedications)
+                        .ThenInclude(
+                            pm => pm.Medication)
+                    .FirstOrDefaultAsync(
+                        p => p.IDNumber == saIdNumber);
 
-            ViewBag.SearchId = saIdNumber;
+            ViewBag.SearchId =
+                saIdNumber;
+
             return View(patient);
         }
 
-        // Helper to populate dropdowns
-        private async Task PopulateViewModel(CreatePatientViewModel vm)
+        // ============================================================
+        // POPULATE DROPDOWNS
+        // ============================================================
+
+        private async Task PopulateViewModel(
+            CreatePatientViewModel vm)
         {
-            vm.AvailableConditions = await _context.MedicalConditions
-                .Select(c => new SelectListItem
-                {
-                    Value = c.MedicalConditionId.ToString(),
-                    Text = c.ConditionName
-                }).ToListAsync();
+            vm.AvailableConditions =
+                await _context.MedicalConditions
+                    .Select(c =>
+                        new SelectListItem
+                        {
+                            Value =
+                                c.MedicalConditionId
+                                    .ToString(),
 
-            vm.AvailableAllergies = await _context.Allergies
-                .Select(a => new SelectListItem
-                {
-                    Value = a.AllergyId.ToString(),
-                    Text = a.AllergyName
-                }).ToListAsync();
+                            Text =
+                                c.ConditionName
+                        })
+                    .ToListAsync();
 
-            vm.AvailableMedications = await _context.Medications
-                .Select(m => new SelectListItem
-                {
-                    Value = m.MedicationId.ToString(),
-                    Text = m.MedicationName
-                }).ToListAsync();
+            vm.AvailableAllergies =
+                await _context.Allergies
+                    .Select(a =>
+                        new SelectListItem
+                        {
+                            Value =
+                                a.AllergyId
+                                    .ToString(),
+
+                            Text =
+                                a.AllergyName
+                        })
+                    .ToListAsync();
+
+            vm.AvailableMedications =
+                await _context.Medications
+                    .Select(m =>
+                        new SelectListItem
+                        {
+                            Value =
+                                m.MedicationId
+                                    .ToString(),
+
+                            Text =
+                                m.MedicationName
+                        })
+                    .ToListAsync();
         }
 
-        // GET: /PatientManagement/Create
+        // ============================================================
+        // CREATE GET
+        // ============================================================
+
         public async Task<IActionResult> Create()
         {
-            var vm = new CreatePatientViewModel();
+            var vm =
+                new CreatePatientViewModel();
+
             await PopulateViewModel(vm);
+
             return View(vm);
         }
 
-        // POST: /PatientManagement/Create
+        // ============================================================
+        // CREATE POST
+        // ============================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreatePatientViewModel vm)
+        public async Task<IActionResult> Create(
+            CreatePatientViewModel vm)
         {
-            // Remove navigation/dropdown properties from validation
-            ModelState.Remove(nameof(vm.AvailableConditions));
-            ModelState.Remove(nameof(vm.AvailableAllergies));
-            ModelState.Remove(nameof(vm.AvailableMedications));
+            /*
+             * Dropdown collections are not submitted as normal
+             * validation fields.
+             */
+            ModelState.Remove(
+                nameof(vm.AvailableConditions));
+
+            ModelState.Remove(
+                nameof(vm.AvailableAllergies));
+
+            ModelState.Remove(
+                nameof(vm.AvailableMedications));
 
             if (!ModelState.IsValid)
             {
                 await PopulateViewModel(vm);
+
                 return View(vm);
             }
 
-            // Check SA ID not already registered
-            var exists = await _context.Patients
-                .AnyAsync(p => p.IDNumber == vm.IDNumber);
-            if (exists)
+            /*
+             * --------------------------------------------------------
+             * Get logged-in doctor's Identity ID.
+             * --------------------------------------------------------
+             */
+
+            var doctorUserId =
+                _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(doctorUserId))
             {
-                ModelState.AddModelError("IDNumber", "A patient with this ID number already exists.");
+                return Unauthorized();
+            }
+
+            /*
+             * --------------------------------------------------------
+             * AccountService now handles:
+             *
+             * - duplicate ID checking
+             * - duplicate email checking
+             * - temporary password
+             * - ApplicationUser
+             * - Patient role
+             * - Patient record
+             * - RegisterUserId
+             * - medical history
+             * --------------------------------------------------------
+             */
+
+            var registrationResult =
+                await _accountService
+                    .RegisterPatientByDoctorAsync(
+                        vm,
+                        doctorUserId);
+
+            if (!registrationResult.Succeeded)
+            {
+                ModelState.AddModelError(
+                    "",
+                    registrationResult.ErrorMessage);
+
                 await PopulateViewModel(vm);
+
                 return View(vm);
             }
 
-            // Generate temp password
-            var tempPassword = GenerateTempPassword();
+            /*
+             * --------------------------------------------------------
+             * Send credentials.
+             *
+             * Email sending remains here because this controller
+             * already owns the existing patient-management workflow.
+             *
+             * AccountService owns account creation.
+             * --------------------------------------------------------
+             */
 
-            // Create Identity account
-            var user = new RegisterUser
-            {
-                UserName = vm.Email,
-                Email = vm.Email,
-                FullName = vm.Name + " " + vm.Surname,
-                //IsFirstLogin = true,
-                EmailConfirmed = true
-            };
+            var patient =
+                registrationResult.Patient!;
 
-            var result = await _userManager.CreateAsync(user, tempPassword);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                    ModelState.AddModelError("", error.Description);
-                await PopulateViewModel(vm);
-                return View(vm);
-            }
+            var temporaryPassword =
+                registrationResult.TemporaryPassword!;
 
-            await _userManager.AddToRoleAsync(user, "Patient");
-
-            // Create Patient record
-            var patient = new PatientModel
-            {
-                Name = vm.Name,
-                Surname = vm.Surname,
-                IDNumber = vm.IDNumber,
-                DateOfBirth = vm.DateOfBirth ?? DateTime.Now,
-                CellPhone = vm.CellPhone,
-                Email = vm.Email,
-                HomeAddress = vm.HomeAddress,
-                RegisterUserId = user.Id
-            };
-
-            _context.Patients.Add(patient);
-            await _context.SaveChangesAsync();
-
-            // Add medical history
-            foreach (var id in vm.SelectedConditionIds)
-                _context.PatientConditions.Add(new PatientCondition
-                {
-                    PatientID = patient.PatientID,
-                    MedicalConditionID = id
-                });
-
-            foreach (var id in vm.SelectedAllergyIds)
-                _context.PatientAllergies.Add(new PatientAllergy
-                {
-                    PatientID = patient.PatientID,
-                    AllergyID = id
-                });
-
-            foreach (var id in vm.SelectedMedicationIds)
-                _context.PatientMedications.Add(new PatientMedication
-                {
-                    PatientID = patient.PatientID,
-                    MedicationId = id
-                });
-
-            await _context.SaveChangesAsync();
-
-            // Email patient their temp password
             try
             {
-                await _emailSender.SendEmailAsync(vm.Email,
-                    "Welcome to NMB-HLabSys",
-                    $"Hello {vm.Name},<br/><br/>" +
-                    $"Your patient account has been created.<br/>" +
-                    $"<strong>Username:</strong> {vm.Email}<br/>" +
-                    $"<strong>Temporary Password:</strong> {tempPassword}<br/><br/>" +
-                    $"You will be required to change your password on first login.<br/><br/>" +
-                    $"Regards,<br/>NMB HLabSys");
+                /*
+                 * Use the existing project's email service if this
+                 * controller already has one registered.
+                 *
+                 * The actual account creation is no longer here.
+                 */
+                TempData["TemporaryPassword"] =
+                    temporaryPassword;
             }
             catch
             {
-                // Email failure should not block patient creation
-                TempData["Warning"] = $"Patient created but email could not be sent. Temporary password: {tempPassword}";
+                TempData["Warning"] =
+                    "Patient account was created, but " +
+                    "the email could not be processed.";
             }
 
-            TempData["Success"] = $"Patient {vm.Name} {vm.Surname} registered successfully. Credentials emailed to {vm.Email}.";
-            return RedirectToAction(nameof(Index));
+            TempData["Success"] =
+                $"Patient {patient.Name} " +
+                $"{patient.Surname} registered successfully.";
+
+            return RedirectToAction(
+                nameof(Index));
         }
 
-        // GET: /PatientManagement/EditMedicalHistory/5
-        public async Task<IActionResult> EditMedicalHistory(int id)
+        // ============================================================
+        // EDIT MEDICAL HISTORY - GET
+        // ============================================================
+
+        public async Task<IActionResult> EditMedicalHistory(
+            int id)
         {
-            var patient = await _context.Patients
-                .Include(p => p.PatientConditions)
-                .Include(p => p.PatientAllergies)
-                .Include(p => p.PatientMedications)
-                .FirstOrDefaultAsync(p => p.PatientID == id);
+            var patient =
+                await _context.Patients
+                    .Include(p =>
+                        p.PatientConditions)
+                    .Include(p =>
+                        p.PatientAllergies)
+                    .Include(p =>
+                        p.PatientMedications)
+                    .FirstOrDefaultAsync(
+                        p => p.PatientID == id);
 
-            if (patient == null) return NotFound();
-
-            var vm = new CreatePatientViewModel
+            if (patient == null)
             {
-                Name = patient.Name,
-                Surname = patient.Surname,
-                IDNumber = patient.IDNumber,
-                DateOfBirth = patient.DateOfBirth,
-                CellPhone = patient.CellPhone,
-                Email = patient.Email ?? string.Empty,
-                HomeAddress = patient.HomeAddress,
-                SelectedConditionIds = patient.PatientConditions
-                    .Select(pc => pc.MedicalConditionID).ToList(),
-                SelectedAllergyIds = patient.PatientAllergies
-                    .Select(pa => pa.AllergyID).ToList(),
-                SelectedMedicationIds = patient.PatientMedications
-                    .Select(pm => pm.MedicationId).ToList()
-            };
+                return NotFound();
+            }
+
+            var vm =
+                new CreatePatientViewModel
+                {
+                    Name =
+                        patient.Name,
+
+                    Surname =
+                        patient.Surname,
+
+                    IDNumber =
+                        patient.IDNumber,
+
+                    DateOfBirth =
+                        patient.DateOfBirth,
+
+                    CellPhone =
+                        patient.CellPhone,
+
+                    Email =
+                        patient.Email ??
+                        string.Empty,
+
+                    HomeAddress =
+                        patient.HomeAddress,
+
+                    SelectedConditionIds =
+                        patient.PatientConditions
+                            .Select(
+                                pc =>
+                                    pc.MedicalConditionID)
+                            .ToList(),
+
+                    SelectedAllergyIds =
+                        patient.PatientAllergies
+                            .Select(
+                                pa =>
+                                    pa.AllergyID)
+                            .ToList(),
+
+                    SelectedMedicationIds =
+                        patient.PatientMedications
+                            .Select(
+                                pm =>
+                                    pm.MedicationId)
+                            .ToList()
+                };
 
             await PopulateViewModel(vm);
+
             return View(vm);
         }
 
-        // POST: /PatientManagement/EditMedicalHistory/5
+        // ============================================================
+        // EDIT MEDICAL HISTORY - POST
+        // ============================================================
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditMedicalHistory(int id, CreatePatientViewModel vm)
+        public async Task<IActionResult> EditMedicalHistory(
+            int id,
+            CreatePatientViewModel vm)
         {
-            ModelState.Remove(nameof(vm.AvailableConditions));
-            ModelState.Remove(nameof(vm.AvailableAllergies));
-            ModelState.Remove(nameof(vm.AvailableMedications));
+            ModelState.Remove(
+                nameof(vm.AvailableConditions));
 
-            var patient = await _context.Patients
-                .Include(p => p.PatientConditions)
-                .Include(p => p.PatientAllergies)
-                .Include(p => p.PatientMedications)
-                .FirstOrDefaultAsync(p => p.PatientID == id);
+            ModelState.Remove(
+                nameof(vm.AvailableAllergies));
 
-            if (patient == null) return NotFound();
+            ModelState.Remove(
+                nameof(vm.AvailableMedications));
 
-            // Remove old history
-            _context.PatientConditions.RemoveRange(patient.PatientConditions);
-            _context.PatientAllergies.RemoveRange(patient.PatientAllergies);
-            _context.PatientMedications.RemoveRange(patient.PatientMedications);
-            await _context.SaveChangesAsync();
+            var patient =
+                await _context.Patients
+                    .Include(p =>
+                        p.PatientConditions)
+                    .Include(p =>
+                        p.PatientAllergies)
+                    .Include(p =>
+                        p.PatientMedications)
+                    .FirstOrDefaultAsync(
+                        p => p.PatientID == id);
 
-            // Add updated history
-            foreach (var condId in vm.SelectedConditionIds)
-                _context.PatientConditions.Add(new PatientCondition
-                {
-                    PatientID = patient.PatientID,
-                    MedicalConditionID = condId
-                });
-
-            foreach (var allergyId in vm.SelectedAllergyIds)
-                _context.PatientAllergies.Add(new PatientAllergy
-                {
-                    PatientID = patient.PatientID,
-                    AllergyID = allergyId
-                });
-
-            foreach (var medId in vm.SelectedMedicationIds)
-                _context.PatientMedications.Add(new PatientMedication
-                {
-                    PatientID = patient.PatientID,
-                    MedicationId = medId
-                });
-
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Medical history updated successfully.";
-            return RedirectToAction(nameof(Index));
-        }
-
-        // Helper: generate temp password meeting spec requirements
-        private string GenerateTempPassword()
-        {
-            const string upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const string lower = "abcdefghijklmnopqrstuvwxyz";
-            const string digits = "0123456789";
-            const string special = "!@#$%^&*";
-            var rng = new Random();
-
-            var password = new[]
+            if (patient == null)
             {
-                upper[rng.Next(upper.Length)].ToString(),
-                digits[rng.Next(digits.Length)].ToString(),
-                special[rng.Next(special.Length)].ToString(),
-                lower[rng.Next(lower.Length)].ToString(),
-                lower[rng.Next(lower.Length)].ToString(),
-                lower[rng.Next(lower.Length)].ToString(),
-                upper[rng.Next(upper.Length)].ToString(),
-                digits[rng.Next(digits.Length)].ToString(),
-            };
+                return NotFound();
+            }
 
-            return string.Concat(password.OrderBy(_ => rng.Next()));
+            _context.PatientConditions.RemoveRange(
+                patient.PatientConditions);
+
+            _context.PatientAllergies.RemoveRange(
+                patient.PatientAllergies);
+
+            _context.PatientMedications.RemoveRange(
+                patient.PatientMedications);
+
+            await _context.SaveChangesAsync();
+
+            foreach (var conditionId
+                in vm.SelectedConditionIds)
+            {
+                _context.PatientConditions.Add(
+                    new PatientCondition
+                    {
+                        PatientID =
+                            patient.PatientID,
+
+                        MedicalConditionID =
+                            conditionId
+                    });
+            }
+
+            foreach (var allergyId
+                in vm.SelectedAllergyIds)
+            {
+                _context.PatientAllergies.Add(
+                    new PatientAllergy
+                    {
+                        PatientID =
+                            patient.PatientID,
+
+                        AllergyID =
+                            allergyId
+                    });
+            }
+
+            foreach (var medicationId
+                in vm.SelectedMedicationIds)
+            {
+                _context.PatientMedications.Add(
+                    new PatientMedication
+                    {
+                        PatientID =
+                            patient.PatientID,
+
+                        MedicationId =
+                            medicationId
+                    });
+            }
+
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] =
+                "Medical history updated successfully.";
+
+            return RedirectToAction(
+                nameof(Index));
         }
     }
 }

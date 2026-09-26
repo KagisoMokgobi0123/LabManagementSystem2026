@@ -7,6 +7,7 @@ using NMB_HLabSys.Data;
 using Microsoft.AspNetCore.Identity;
 using NMB_HLabSys.Models.Account;
 using Microsoft.AspNetCore.Authorization;
+using NMB_HLabSys.Models.Identity;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
@@ -15,9 +16,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
     public class ReceiveSamplesController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ReceiveSamplesController(ApplicationDbContext context, UserManager<RegisterUser> userManager)
+        public ReceiveSamplesController(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -194,7 +195,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 request.Patient?.FullName ?? "N/A";
 
             model.DoctorName =
-                request.Doctor?.FullName ?? "N/A";
+                request.Doctor?.ApplicationUser.FullName ?? "N/A";
 
 
             // ============================================================

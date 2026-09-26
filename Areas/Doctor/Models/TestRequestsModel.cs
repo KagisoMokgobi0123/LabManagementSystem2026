@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Models.Laboratory;
 using NMB_HLabSys.Patterns.Observer;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Web;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PatientModel = NMB_HLabSys.Areas.Administrator.Models.Patient;
+using TestTypeModel = NMB_HLabSys.Models.Laboratory.TestType;
+using DoctorModel = NMB_HLabSys.Models.Users.Doctor;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
@@ -30,11 +34,17 @@ namespace NMB_HLabSys.Areas.Doctor.Models
     }
     public class TestRequestsModel
     {
+
         [Key]
         public int TestRequestId { get; set; }
 
         public string PatientId { get; set; } = string.Empty;
-        public RegisterUser Patient { get; set; } = null!;
+
+        [ForeignKey(nameof(PatientId))]
+        public virtual ApplicationUser PatientUser { get; set; } = null!;
+
+        public virtual PatientModel Patient { get; set; } = null!;
+
 
         [Required]
         [Display(Name = "Request Number")]
@@ -73,11 +83,12 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         public int? ResultReleaseId { get; set; }
         public ResultRelease? ResultRelease { get; set; }
 
-        // ── Doctor foreign key (string to match ASP.NET Identity) ──
+        [Required]
         [Display(Name = "Doctor")]
-        [ForeignKey("Doctor")]
-        public string DoctorId { get; set; } = string.Empty;
-        public RegisterUser Doctor { get; set; } = null!;
+        public int DoctorId { get; set; }
+
+        public virtual DoctorModel Doctor { get; set; } = null!;
+
 
         // --- Observer list ---
         private readonly List<ITestRequestObserver> _observers = new();

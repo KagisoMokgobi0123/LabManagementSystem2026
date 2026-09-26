@@ -5,9 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
-
-using NMB_HLabSys.Data;
+using NMB_HLabSys.Models.Inventory;
+using NMB_HLabSys.Models.Laboratory;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Data;
+using NMB_HLabSys.Models.Identity;
+
 
 namespace NMB_HLabSys.Areas.Doctor.Controllers
 {
@@ -16,10 +19,10 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
     public class TestRequestControllerDoctor : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<TestRequestControllerDoctor> _logger;
 
-        public TestRequestControllerDoctor(ApplicationDbContext context, UserManager<RegisterUser> userManager, ILogger<TestRequestControllerDoctor> logger)
+        public TestRequestControllerDoctor(ApplicationDbContext context, UserManager<ApplicationUser> userManager, ILogger<TestRequestControllerDoctor> logger)
         {
             _context = context;
             _userManager = userManager;
@@ -41,7 +44,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             }
 
             var doctor = await _context.Doctors
-                .FirstOrDefaultAsync(d => d.UserID == userId);
+                .FirstOrDefaultAsync(d => d.ApplicationUserId == userId);
 
             if (doctor == null)
                 _logger.LogWarning($"No doctor found for UserID: {userId}");
@@ -61,18 +64,24 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             var doctorId = await GetCurrentDoctorIdAsync();
             if (doctorId == 0)
             {
-                TempData["Error"] = "Doctor profile not found. Please contact administrator.";
-                return RedirectToAction("LoginUser", "Account", new { area = "" });
+                TempData["Error"] =
+                    "Doctor profile not found. Please contact administrator.";
+
+                return RedirectToAction(
+                    "LoginUser",
+                    "Account",
+                    new { area = "" });
             }
 
             var requests = await _context.TestRequests
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
-                .Where(r => r.DoctorId == doctorId.ToString())
+                .Where(r => r.DoctorId == doctorId)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
             return View(requests);
+
         }
 
         public IActionResult Test()
@@ -94,12 +103,12 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 .OrderBy(p => p.Name)
                 .ToListAsync();
 
-            var testTypes = await _context.Set<TestTypeModel>()
+            var testTypes = await _context.Set<TestType>()
                 .Include(t => t.SampleType)
                 .OrderBy(t => t.Name)
                 .ToListAsync();
 
-            var sampleTypes = await _context.Set<SampleTypeModel>()
+            var sampleTypes = await _context.Set<SampleType>()
                 .OrderBy(s => s.Name)
                 .ToListAsync();
 
@@ -121,64 +130,135 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
             var doctorId = await GetCurrentDoctorIdAsync();
             if (doctorId == 0)
             {
-                TempData["Error"] = "Doctor not authenticated. Please login again.";
-                return RedirectToAction("LoginUser", "Account", new { area = "" });
+                TempData["Error"] =
+                    "Doctor not authenticated. Please login again.";
+
+                return RedirectToAction(
+                    "LoginUser",
+                    "Account",
+                    new { area = "" });
             }
 
             if (testTypeIds == null || testTypeIds.Count == 0)
-                ModelState.AddModelError("", "At least one test type must be selected.");
+            {
+                ModelState.AddModelError(
+                    "",
+                    "At least one test type must be selected.");
+            }
 
             if (barcodes == null || barcodes.Count == 0)
-                ModelState.AddModelError("", "At least one sample barcode must be provided.");
+            {
+                ModelState.AddModelError(
+                    "",
+                    "At least one sample barcode must be provided.");
+            }
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Patients = await _context.Patients.OrderBy(p => p.Name).ToListAsync();
-                ViewBag.TestTypes = await _context.Set<TestTypeModel>()
-                    .Include(t => t.SampleType)
-                    .OrderBy(t => t.Name)
-                    .ToListAsync();
-                ViewBag.SampleTypes = await _context.Set<SampleTypeModel>()
-                    .OrderBy(s => s.Name)
-                    .ToListAsync();
-                ViewBag.Patient = await _context.Patients.FindAsync(request.PatientId);
+                ViewBag.Patients =
+                    await _context.Patients
+                        .OrderBy(p => p.Name)
+                        .ToListAsync();
+
+                ViewBag.TestTypes =
+                    await _context.Set<TestType>()
+                        .Include(t => t.SampleType)
+                        .OrderBy(t => t.Name)
+                        .ToListAsync();
+
+                ViewBag.SampleTypes =
+                    await _context.Set<SampleType>()
+                        .OrderBy(s => s.Name)
+                        .ToListAsync();
+
+                ViewBag.Patient =
+                    await _context.Patients
+                        .FindAsync(request.PatientId);
+
                 return View(request);
             }
 
-            request.RequestNumber = "REQ-" + DateTime.Now.ToString("yyyyMMdd") + "-" + Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
-            request.DoctorId = doctorId.ToString();
+            request.RequestNumber =
+                "REQ-" +
+                DateTime.Now.ToString("yyyyMMdd") +
+                "-" +
+                Guid.NewGuid()
+                    .ToString()
+                    .Substring(0, 4)
+                    .ToUpper();
+
+            // DoctorId is INT.
+            request.DoctorId = doctorId;
+
             request.RequestDate = DateTime.Now;
             request.CreatedAt = DateTime.Now;
-            request.Status = TestRequestStatus.Submitted.ToString();
+            request.Status =
+                TestRequestStatus.Submitted.ToString();
 
             _context.TestRequests.Add(request);
+
             await _context.SaveChangesAsync();
+
+            // ========================================================
+            // TEST REQUEST ITEMS
+            // ========================================================
 
             foreach (var testTypeId in testTypeIds)
             {
-                _context.TestRequestItems.Add(new TestRequestItem
-                {
-                    TestRequestID = request.TestRequestId,
-                    TestTypeID = testTypeId,
-                    Status = TestItemStatus.Submitted
-                });
+                _context.TestRequestItems.Add(
+                    new TestRequestItem
+                    {
+                        TestRequestID =
+                            request.TestRequestId,
+
+                        TestTypeID =
+                            testTypeId,
+
+                        Status =
+                            TestItemStatus.Submitted
+                    });
             }
+
+            // ========================================================
+            // SAMPLES
+            // ========================================================
 
             for (int i = 0; i < barcodes.Count; i++)
             {
-                _context.Samples.Add(new SampleModel
-                {
-                    TestRequestId = request.TestRequestId,
-                    Barcode = barcodes[i],
-                    SampleTypeId = (sampleTypeIds != null && sampleTypeIds.Count > i) ? sampleTypeIds[i] : 0,
-                    CollectedAt = DateTime.Now
-                });
+                _context.Samples.Add(
+                    new SampleModel
+                    {
+                        TestRequestId =
+                            request.TestRequestId,
+
+                        Barcode =
+                            barcodes[i],
+
+                        SampleTypeId =
+                            (
+                                sampleTypeIds != null &&
+                                sampleTypeIds.Count > i
+                            )
+                                ? sampleTypeIds[i]
+                                : 0,
+
+                        CollectedAt =
+                            DateTime.Now
+                    });
             }
 
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "Test request submitted successfully.";
-            return RedirectToAction("Details", new { id = request.TestRequestId });
+            TempData["Message"] =
+                "Test request submitted successfully.";
+
+            return RedirectToAction(
+                "Details",
+                new
+                {
+                    id = request.TestRequestId
+                });
+
         }
 
         public async Task<IActionResult> Details(int id)
@@ -194,7 +274,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                         .ThenInclude(t => t.SampleType)
                 .Include(r => r.Samples)
                     .ThenInclude(s => s.SampleType)
-                .FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId.ToString());
+                .FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId);
 
             if (request == null)
                 return NotFound();
@@ -206,19 +286,34 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         {
             var doctorId = await GetCurrentDoctorIdAsync();
             if (doctorId == 0)
-                return RedirectToAction("LoginUser", "Account", new { area = "" });
+            {
+                return RedirectToAction(
+                    "LoginUser",
+                    "Account",
+                    new { area = "" });
+            }
 
             var requests = _context.TestRequests
                 .Include(r => r.Patient)
                 .Include(r => r.TestRequestItems)
-                .Where(r => r.DoctorId == doctorId.ToString())
+                .Where(r => r.DoctorId == doctorId)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(statusFilter))
-                requests = requests.Where(r => r.Status == statusFilter);
+            {
+                requests = requests.Where(
+                    r => r.Status == statusFilter);
+            }
 
-            ViewBag.StatusFilter = statusFilter;
-            return View(await requests.OrderByDescending(r => r.RequestDate).ToListAsync());
+            ViewBag.StatusFilter =
+                statusFilter;
+
+            return View(
+                await requests
+                    .OrderByDescending(
+                        r => r.RequestDate)
+                    .ToListAsync());
+
         }
 
         [HttpPost]
@@ -230,7 +325,7 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 return RedirectToAction("LoginUser", "Account", new { area = "" });
 
             var request = await _context.TestRequests
-                .FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId.ToString());
+                .FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId);
 
             if (request == null)
                 return NotFound();

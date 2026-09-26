@@ -3,22 +3,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using NMB_HLabSys.Areas.Doctor.Models;
-using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Models.Laboratory.Enums;
+using NMB_HLabSys.Models.Inventory.Enums;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Models.Identity;
+
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
     public class TestRequestTestTypeController : Controller
     {
         private readonly ApplicationDbContext _dbcontext;
-        private readonly UserManager<RegisterUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<TestRequestTestTypeController> _logger;
 
         public TestRequestTestTypeController(
             ApplicationDbContext context,
-            UserManager<RegisterUser> userManager,
+            UserManager<ApplicationUser> userManager,
             ILogger<TestRequestTestTypeController> logger)
         {
             _dbcontext = context;
@@ -157,77 +160,144 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 return RedirectToAction("AvailableTests");
             }
 
-            // Check consumables availability
+            // ============================================================
+            // CHECK REQUIRED CONSUMABLES
+            // ============================================================
+
             var consumables = await _dbcontext.TestTypeConsumables
-                .Include(tc => tc.Consumable)
-                .Where(c => c.TestTypeId == test.TestTypeId)
+                .Where(tc => tc.TestTypeId == test.TestTypeId)
                 .ToListAsync();
 
-            using var transaction = await _dbcontext.Database.BeginTransactionAsync();
+            using var transaction =
+                await _dbcontext.Database.BeginTransactionAsync();
 
             try
             {
-                // Deduct consumables from stock
+                /*
+                 * ------------------------------------------------------------
+                 * First verify that ALL required consumables are available.
+                 * Nothing is deducted until every requirement has passed.
+                 * ------------------------------------------------------------
+                 */
                 foreach (var item in consumables)
                 {
-                    var stock = await _dbcontext.Consumables
-                        .FirstOrDefaultAsync(s => s.ConsumableId == item.ConsumableId);
+                    var stock = await _dbcontext.ManageConsumables
+                        .Include(s => s.Consumable)
+                        .FirstOrDefaultAsync(
+                            s => s.ConsumableId == item.ConsumableId);
+
 
                     if (stock == null)
                     {
-                        TempData["Error"] = $"Consumable not found: {item.ConsumableId}";
+                        TempData["Error"] =
+                            $"Consumable stock record not found for Consumable ID {item.ConsumableId}.";
+
                         await transaction.RollbackAsync();
+
                         return RedirectToAction("AvailableTests");
                     }
 
                     if (stock.QuantityOnHand < item.QuantityRequired)
                     {
-                        TempData["Error"] = $"Insufficient stock for {stock.Name}. Available: {stock.QuantityOnHand}, Required: {item.QuantityRequired}";
+                        var consumableName =
+                            stock.Consumable?.Name
+                            ?? $"Consumable ID {item.ConsumableId}";
+
+                        TempData["Error"] =
+                            $"Insufficient stock for {consumableName}. " +
+                            $"Available: {stock.QuantityOnHand}, " +
+                            $"Required: {item.QuantityRequired}.";
+
                         await transaction.RollbackAsync();
+
                         return RedirectToAction("AvailableTests");
+                    }
+                }
+
+                /*
+                 * ------------------------------------------------------------
+                 * All consumables are available.
+                 *
+                 * Now deduct the required quantity from ManageConsumable.
+                 * ------------------------------------------------------------
+                 */
+                foreach (var item in consumables)
+                {
+                    var stock = await _dbcontext.ManageConsumables
+                        .FirstOrDefaultAsync(
+                            s => s.ConsumableId == item.ConsumableId);
+
+                    if (stock == null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Consumable stock record disappeared during " +
+                            $"transaction. Consumable ID: {item.ConsumableId}");
                     }
 
                     stock.QuantityOnHand -= item.QuantityRequired;
-
-                    // Log stock transaction
-                    _dbcontext.StockTransactions.Add(new StockTransactionModel
-                    {
-                        ConsumableId = stock.ConsumableId,
-                        Type = TransactionType.Decrease,
-                        Quantity = item.QuantityRequired,
-                        PreviousQuantity = stock.QuantityOnHand + item.QuantityRequired,
-                        NewQuantity = stock.QuantityOnHand,
-                        TransactionDate = DateTime.Now,
-                        Reference = $"Test {test.TestType.Name} (ID: {test.TestRequestTestTypeId})",
-                        PerformedBy = technicianId
-                    });
+                    stock.DateUpdated = DateTime.UtcNow;
                 }
 
-                // Update test status
+                /*
+                 * ------------------------------------------------------------
+                 * Update test status.
+                 * ------------------------------------------------------------
+                 */
+
                 test.TechnicianId = technicianId;
-                test.Status = TestStatusConstants.InProgress;
-                test.StartDateTime = DateTime.UtcNow;
-                test.DueDate = DateTime.UtcNow.AddHours(test.TestType.TurnAroundTimeHours);
 
-                // Update test request status if it's the first test being processed
-                if (test.TestRequest.Status != TestStatusConstants.InProgress)
+                test.Status =
+                    TestStatusConstants.InProgress;
+
+                test.StartDateTime =
+                    DateTime.UtcNow;
+
+                test.DueDate =
+                    DateTime.UtcNow.AddHours(
+                        test.TestType.TurnAroundTimeHours);
+
+                /*
+                 * ------------------------------------------------------------
+                 * Update test request status.
+                 * ------------------------------------------------------------
+                 */
+
+                if (test.TestRequest.Status !=
+                    TestStatusConstants.InProgress)
                 {
-                    test.TestRequest.Status = TestStatusConstants.InProgress;
+                    test.TestRequest.Status =
+                        TestStatusConstants.InProgress;
                 }
+
+                /*
+                 * ------------------------------------------------------------
+                 * Save stock deduction and test changes together.
+                 * ------------------------------------------------------------
+                 */
 
                 await _dbcontext.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
-                TempData["Success"] = $"Test '{test.TestType.Name}' started successfully. Due by: {test.DueDate:dd MMM yyyy HH:mm}";
+                TempData["Success"] =
+                    $"Test '{test.TestType.Name}' started successfully. " +
+                    $"Due by: {test.DueDate:dd MMM yyyy HH:mm}";
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Error starting test {TestId}", id);
-                TempData["Error"] = $"An error occurred: {ex.Message}";
+
+                _logger.LogError(
+                    ex,
+                    "Error starting test {TestId}",
+                    id);
+
+                TempData["Error"] =
+                    $"An error occurred: {ex.Message}";
             }
 
             return RedirectToAction("MyTests");
+
         }
 
         [HttpGet]
@@ -391,13 +461,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
         private async Task NotifyDoctorTestsCompleted(TestRequestsModel testRequest)
         {
-            // This would send email notification to doctor
-            var doctor = await _userManager.FindByIdAsync(testRequest.DoctorId);
-            if (doctor != null && !string.IsNullOrEmpty(doctor.Email))
+            var doctor = await _dbcontext.Doctors
+                .Include(d => d.ApplicationUser)
+                .FirstOrDefaultAsync(d => d.DoctorId == testRequest.DoctorId);
+
+            if (doctor?.ApplicationUser != null &&
+                !string.IsNullOrEmpty(doctor.ApplicationUser.Email))
             {
+                var email = doctor.ApplicationUser.Email;
+
                 // Implement email sending logic
-                _logger.LogInformation($"Notification sent to doctor {doctor.Email} for completed tests");
+                _logger.LogInformation(
+                    "Notification sent to doctor {Email} for completed tests",
+                    email);
             }
         }
+
     }
 }

@@ -1,6 +1,8 @@
 ﻿using NMB_HLabSys.Areas.Doctor.Models;
-using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Models.Inventory;
+using NMB_HLabSys.Models.Laboratory;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Models.Identity;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,10 +18,10 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public TestRequestsModel TestRequest { get; set; } = null!;
 
         public int TestTypeId { get; set; }
-        public TestTypeModel? TestType { get; set; } 
+        public TestType? TestType { get; set; } 
 
         public string? TechnicianId { get; set; }
-        public RegisterUser? Technician { get; set; }
+        public ApplicationUser? Technician { get; set; }
 
         public string Status { get; set; } = "Submitted";     
         public DateTime StartDateTime { get; set; } 
@@ -36,7 +38,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         // Verification
         public string? VerifiedByTechnicianId { get; set; }
-        public RegisterUser? VerifyTechnician { get; set; }
+        public ApplicationUser? VerifyTechnician { get; set; }
         public string? VerificationNote { get; set; }
         public DateTime? VerificationDateTime { get; set; }
 

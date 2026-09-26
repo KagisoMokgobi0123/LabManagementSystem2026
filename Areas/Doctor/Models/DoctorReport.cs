@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using DoctorModel = NMB_HLabSys.Models.Users.Doctor;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
@@ -26,7 +27,7 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         public DateTime GeneratedAt { get; set; }
 
         // Navigation properties
-        public Doctor Doctor { get; set; }
+        public DoctorModel Doctor { get; set; }
 
 
     }

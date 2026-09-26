@@ -1,0 +1,762 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>
+        @ViewData["Title"] - NMB-HLabSys
+    </title>
+
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+          name="viewport" />
+
+    <link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
+
+
+    <!-- Fonts -->
+
+    <script src="~/assets/js/plugin/webfont/webfont.min.js"></script>
+
+
+    <script>
+
+        WebFont.load({
+
+            google: {
+                families: ["Lato:300,400,700,900"]
+            },
+
+            custom: {
+
+                families: [
+                    "Flaticon",
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons"
+                ],
+
+                urls: [
+                    "~/assets/css/fonts.min.css"
+                ]
+
+            },
+
+            active:function(){
+
+                sessionStorage.fonts = true;
+
+            }
+
+        });
+
+    </script>
+
+
+    <!-- CSS -->
+
+    <link rel="stylesheet"
+          href="~/assets/css/bootstrap.min.css" asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/assets/css/bootstrap.min.css" asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/assets/css/atlantis.min.css" asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/assets/css/fontawesome-all.min.css" asp-append-version="true" />
+
+
+</head>
+
+
+<body>
+
+
+<div class="wrapper">
+
+
+    <!-- HEADER -->
+
+    <div class="main-header">
+
+
+        <div class="logo-header"
+             data-background-color="blue">
+
+
+            <a asp-area="Manager"
+               asp-controller="Dashboard"
+               asp-action="Index"
+               class="logo"
+               style="color:white;font-weight:bolder">
+
+                NMB-HLabSys
+
+            </a>
+
+
+            <button class="navbar-toggler sidenav-toggler ml-auto">
+
+                <span class="navbar-toggler-icon">
+
+                    <i class="icon-menu"></i>
+
+                </span>
+
+            </button>
+
+
+            <div class="nav-toggle">
+
+                <button class="btn btn-toggle toggle-sidebar">
+
+                    <i class="icon-menu"></i>
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- TOP NAV -->
+
+
+        <nav class="navbar navbar-header navbar-expand-lg"
+             data-background-color="blue2">
+
+
+            <div class="container-fluid">
+
+
+                <ul class="navbar-nav topbar-nav ml-md-auto align-items-center">
+
+
+                    <!-- PROFILE DROPDOWN -->
+
+                    <li class="nav-item dropdown hidden-caret">
+
+
+                        <a class="dropdown-toggle profile-pic"
+                           data-toggle="dropdown"
+                           href="#">
+
+                            <div class="avatar-sm">
+
+                                <img src="@(ViewBag.ProfileImage ?? "/assets/img/profile.jpg")"
+                                     class="avatar-img rounded-circle" />
+
+                            </div>
+
+                        </a>
+
+
+
+                        <ul class="dropdown-menu dropdown-user animated fadeIn">
+
+
+                            <li>
+
+
+                                <div class="user-box">
+
+
+                                    <div class="avatar-lg">
+
+                                        <img src="@(ViewBag.ProfileImage ?? "/assets/img/profile.jpg")"
+                                             class="avatar-img rounded" />
+
+                                    </div>
+
+
+
+                                    <div class="u-text">
+
+
+                                        <h4>
+
+                                            @User.Identity?.Name
+
+                                        </h4>
+
+
+                                        <a asp-area=""
+                                           asp-controller="Profile"
+                                           asp-action="Edit"
+                                           class="btn btn-xs btn-secondary btn-sm">
+
+                                            My Profile
+
+                                        </a>
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </li>
+
+
+
+
+                            <li>
+
+
+                                <div class="dropdown-divider"></div>
+
+
+                                <a asp-area=""
+                                   asp-controller="Profile"
+                                   asp-action="Edit"
+                                   class="dropdown-item">
+
+
+                                    <i class="fas fa-user mr-2"></i>
+
+                                    My Profile
+
+
+                                </a>
+
+
+
+                                <a asp-area=""
+                                   asp-controller="Profile"
+                                   asp-action="Edit"
+                                   class="dropdown-item">
+
+
+                                    <i class="fas fa-user-edit mr-2"></i>
+
+                                    Edit Profile
+
+
+                                </a>
+
+
+
+                                <div class="dropdown-divider"></div>
+
+
+
+                                <form asp-area=""
+                                      asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post">
+
+
+                                    <button type="submit"
+                                            class="dropdown-item">
+
+
+                                        <i class="fas fa-sign-out-alt mr-2"></i>
+
+                                        Logout
+
+
+                                    </button>
+
+
+                                </form>
+
+
+
+                            </li>
+
+
+                        </ul>
+
+
+                    </li>
+
+
+                </ul>
+
+
+            </div>
+
+
+        </nav>
+
+
+    </div>
+    
+        <!-- SIDEBAR -->
+
+
+        <div class="sidebar sidebar-style-2">
+
+
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+
+
+                <div class="sidebar-content">
+
+
+                    <ul class="nav nav-primary">
+
+
+
+                        <!-- DASHBOARD -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Dashboard"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-home"></i>
+
+
+                                <p>
+                                    Dashboard
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <li class="nav-section">
+
+                            <h4 class="text-section">
+                                Components
+                            </h4>
+
+                        </li>
+
+
+
+
+                        <!-- USERS -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Users"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-users"></i>
+
+
+                                <p>
+                                    Manage User
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+                        
+                        <!-- Categories -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Categories" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Categories"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-layer-group"></i>
+
+
+                                <p>
+                                    Category
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+                        <!-- TEST TYPE -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "TestType" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="TestType"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-vial"></i>
+
+
+                                <p>
+                                    Test Type
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+                        <!-- SAMPLE TYPE -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "SampleType" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="SampleType"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-tags"></i>
+
+
+                                <p>
+                                    Samples
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- TECHNICIAN TEST ASSIGNMENT -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "TechnicianTestType" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="TechnicianTestType"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-user-md"></i>
+
+
+                                <p>
+                                    Technician Test Assignment
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- ORDERS -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Orders" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Orders"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-clipboard-list"></i>
+
+
+                                <p>
+                                    Orders
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- COMPLETED ORDERS -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "CompletedOrders" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="CompletedOrders"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-check-circle"></i>
+
+
+                                <p>
+                                    Completed Orders
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- CONSUMABLES -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Consumables" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Consumables"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-box"></i>
+
+
+                                <p>
+                                    Consumables
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- MANAGE CONSUMABLE -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "ManageConsumables" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="ManageConsumables"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-cogs"></i>
+
+
+                                <p>
+                                    Manage Consumables
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- SUPPLIERS -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Supplier" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Supplier"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-truck"></i>
+
+
+                                <p>
+                                    Suppliers
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- CALENDAR -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Calendar" ? "active" : "")">
+
+
+                            <a asp-area="LabManager"
+                                   asp-controller="Calendar"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-calendar-alt"></i>
+
+
+                                <p>
+                                    Calendar
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+
+                        <!-- REPORTS -->
+
+                        <li class="nav-item @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports" ? "active" : "")">
+
+
+                            <a asp-area="Manager"
+                                   asp-controller="Reports"
+                                   asp-action="Index">
+
+
+                                <i class="fas fa-table"></i>
+
+
+                                <p>
+                                    Reports
+                                </p>
+
+
+                            </a>
+
+
+                        </li>
+
+
+
+                    </ul>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+        
+        <!-- CONTENT -->
+
+
+        <div class="main-panel">
+
+
+            <div class="content">
+
+
+                @RenderBody()
+
+
+            </div>
+
+
+
+
+
+            <footer class="footer">
+
+
+                <div class="container-fluid">
+
+
+                    <div class="copyright ml-auto">
+
+
+                        2026 NMB-HLabSys
+
+
+                    </div>
+
+
+                </div>
+
+
+            </footer>
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+
+    <!-- JAVASCRIPT -->
+
+
+    <script src="~/assets/js/core/jquery.3.2.1.min.js"></script>
+
+
+    <script src="~/assets/js/core/popper.min.js"></script>
+
+
+    <script src="~/assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery UI -->
+    <script src="~/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+    <script src="~/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="~/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Chart JS -->
+    <script src="~/assets/js/plugin/chart.js/chart.min.js"></script>
+
+    <!-- jQuery Sparkline -->
+    <script src="~/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
+
+    <!-- Chart Circle -->
+    <script src="~/assets/js/plugin/chart-circle/circles.min.js"></script>
+
+    <!-- Datatables -->
+    <script src="~/assets/js/plugin/datatables/datatables.min.js"></script>
+
+    <!-- Bootstrap Notify -->
+    <script src="~/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
+
+    <!-- jQuery Vector Maps -->
+    <script src="~/assets/js/plugin/jqvmap/jquery.vmap.min.js"></script>
+    <script src="~/assets/js/plugin/jqvmap/maps/jquery.vmap.world.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="~/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Atlantis JS -->
+    <script src="~/assets/js/atlantis.min.js"></script>
+
+
+
+    @RenderSection("Scripts", required: false)
+
+
+
+</body>
+
+
+</html>

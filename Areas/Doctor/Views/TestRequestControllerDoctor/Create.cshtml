@@ -4,8 +4,8 @@
     ViewData["Title"] = "Create Test Request";
     Layout = "_DoctorLayout";
     var patients = ViewBag.Patients as List<NMB_HLabSys.Areas.Administrator.Models.Patient> ?? new();
-    var testTypes = ViewBag.TestTypes as List<NMB_HLabSys.Areas.Manager.Models.TestTypeModel> ?? new();
-    var sampleTypes = ViewBag.SampleTypes as List<NMB_HLabSys.Areas.Doctor.Models.SampleTypeModel> ?? new();
+    var testTypes = ViewBag.TestTypes as List<NMB_HLabSys.Models.Laboratory.TestType> ?? new();
+    var sampleTypes = ViewBag.SampleTypes as List<NMB_HLabSys.Models.Laboratory.SampleType> ?? new();
     var preselectedPatient = ViewBag.Patient as NMB_HLabSys.Areas.Administrator.Models.Patient;
 }
 

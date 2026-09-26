@@ -59,7 +59,7 @@ namespace NMB_HLabSys.Patterns.Factory
 
             // 2. Populate common fields
             request.Patient.Email = patientEmail;
-            request.Patient.FullName = patientName;
+            request.Patient.Name = patientName;
            
 
             // 3. Wire up observers (Observer pattern)

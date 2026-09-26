@@ -1,0 +1,62 @@
+@model IReadOnlyList<Order>
+@{
+    ViewData["Title"] = "Completed Orders";
+}
+
+<div class="page-header">
+    <h4 class="page-title">Completed Orders</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home"><a asp-area="Manager" asp-controller="Dashboard" asp-action="Index"><i class="flaticon-home"></i></a></li>
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a asp-area="Manager" asp-controller="Orders" asp-action="Index">Orders</a></li>
+        <li class="separator"><i class="flaticon-right-arrow"></i></li>
+        <li class="nav-item"><a href="#">Completed</a></li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Completed Orders</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="display table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Consumable</th>
+                                <th>Supplier</th>
+                                <th>Ordered Date</th>
+                                <th>Delivered Date</th>
+                                <th>Qty Ordered</th>
+                                <th>Qty Delivered</th>
+                                <th>Delivery Status</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td>@order.Consumable?.Name</td>
+                                    <td>@order.Supplier?.Name</td>
+                                    <td>@order.OrderedDate.ToString("yyyy/MM/dd")</td>
+                                    <td>@(order.DeliveredDate?.ToString("yyyy/MM/dd") ?? "-")</td>
+                                    <td>@order.QtyOrdered</td>
+                                    <td>@(order.QtyDelivered?.ToString() ?? "-")</td>
+                                    <td>@order.DeliveryStatus</td>
+                                    <td><span class="badge badge-success">Completed</span></td>
+                                </tr>
+                            }
+                            @if (!Model.Any())
+                            {
+                                <tr><td colspan="8" class="text-center text-muted">No completed orders yet.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
