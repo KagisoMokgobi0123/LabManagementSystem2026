@@ -1,855 +1,362 @@
-﻿@using NMB_HLabSys.Models.Account
-@model RegisterViewModel
+﻿@model NMB_HLabSys.Models.Account.RegisterViewModel
 
 @{
-    ViewData["Title"] = "NMB_HLabSys | Register";
-    Layout = "_LoginLayout";
+    ViewData["Title"] = "Create Account";
+    Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="utf-8" />
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+          content="width=device-width, initial-scale=1.0" />
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+    <title>Create Account | NMB-HLabSys</title>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
           rel="stylesheet">
 
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
-          rel="stylesheet">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <style>
 
-            * {
-                font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #f4f8fb;
+        }
 
-            body {
-                background: linear-gradient(135deg, #e9f0ff 0%, #d9e4f5 100%);
-                overflow-x: auto;
-            }
+        .register-wrapper {
+            min-height: 100vh;
+            display: flex;
+        }
 
-            .register-dashboard {
-                min-height: 100vh;
-                padding: 2rem 1rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+        .register-banner {
+            width: 42%;
+            padding: 60px;
 
-            .register-card {
-                width: 100%;
-                max-width: 620px;
-                border: none;
-                border-radius: 1.25rem;
-                background: white;
-                box-shadow: 0 20px 35px -12px rgba(0, 0, 0, .15);
-            }
+            background:
+                linear-gradient(
+                    rgba(5, 40, 67, .80),
+                    rgba(0, 127, 153, .82)
+                ),
+                url('/assets/img/lab-patient.jpg');
 
-            .card-header-brand {
-                background: linear-gradient(120deg, #0b5ed7, #0a58ca);
-                border-radius: 1.25rem 1.25rem 0 0;
-                padding: 1.5rem;
-                color: white;
-                text-align: center;
-            }
+            background-size: cover;
+            background-position: center;
 
-            .card-title-icon {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                gap: 10px;
-            }
+            color: white;
 
-                .card-title-icon i {
-                    font-size: 2rem;
-                }
+            display: flex;
+            align-items: flex-end;
+        }
 
-            .role-selection {
-                display: flex;
-                flex-wrap: wrap;
-                gap: .5rem;
-                justify-content: center;
-                margin-bottom: 1.5rem;
-            }
+        .register-banner h1 {
+            font-size: 40px;
+            font-weight: 800;
+        }
 
-            .role-btn {
-                border-radius: 2rem;
-                border: 1px solid #ced8e6;
-                background: #fafcff;
-                color: #2c3e66;
-                font-weight: 600;
-                font-size: .8rem;
-                padding: .45rem .9rem;
-                transition: .2s;
-            }
+        .register-banner p {
+            line-height: 1.8;
+            color: #e2f4f8;
+        }
 
-                .role-btn:hover,
-                .role-btn.active {
-                    background: #0d6efd;
-                    color: white;
-                    border-color: #0d6efd;
-                }
+        .register-container {
+            width: 58%;
+            padding: 45px;
 
-            .form-label {
-                font-weight: 600;
-                font-size: .8rem;
-                color: #1e2a3e;
-            }
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-            .form-control,
-            .form-select {
-                border-radius: .75rem;
-                border: 1px solid #e2e8f0;
-                background: #fafcff;
-                padding: .6rem .85rem;
-            }
+        .register-form {
+            width: 100%;
+            max-width: 620px;
+        }
 
-                .form-control:focus,
-                .form-select:focus {
-                    border-color: #0d6efd;
-                    box-shadow: 0 0 0 3px rgba(13, 110, 253, .2);
-                }
+        .register-form h2 {
+            color: #073b5c;
+            font-weight: 800;
+        }
 
-            .btn-coral {
-                background: linear-gradient(95deg, #ff7e5e, #feb47b);
-                border: none;
-                border-radius: 2rem;
-                color: white;
-                font-weight: 600;
-                padding: .65rem;
-            }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 30px;
+        }
 
-            .btn-outline-soft {
-                border-radius: 2rem;
-                border: 1px solid #ced8e6;
-                background: white;
-                color: #2c3e66;
-            }
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-            .text-link-muted {
-                color: #2b3b5c;
-                text-decoration: none;
-                font-size: .8rem;
-                font-weight: 500;
-            }
+        .form-control {
+            height: 50px;
+            border-radius: 9px;
+            border: 1px solid #d9e2ea;
+        }
 
-            .text-danger.small {
-                font-size: .7rem;
-            }
+        .form-control:focus {
+            border-color: #0088a9;
 
-            .section-divider {
-                display: flex;
-                align-items: center;
-                gap: .75rem;
-                margin: 1.5rem 0 1rem;
-                color: #53657d;
-                font-size: .8rem;
-                font-weight: 700;
-            }
+            box-shadow:
+                0 0 0 .2rem rgba(0,136,169,.10);
+        }
 
-                .section-divider::before,
-                .section-divider::after {
-                    content: "";
-                    flex: 1;
-                    height: 1px;
-                    background: #e5eaf1;
-                }
+        .btn-register {
+            width: 100%;
+            height: 52px;
 
-            .role-description {
-                text-align: center;
-                color: #6c7a91;
-                font-size: .75rem;
-                margin-top: -.75rem;
-                margin-bottom: 1.25rem;
-            }
+            border: 0;
+            border-radius: 10px;
 
-            .conditional-section {
+            color: white;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #073b5c,
+                    #0088a9
+                );
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 22px;
+        }
+
+        .login-link a {
+            color: #007f9e;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        @@media(max-width: 900px) {
+
+            .register-banner {
                 display: none;
             }
 
-            .password-note {
-                font-size: .7rem;
-                color: #6c7a91;
-                margin-top: .35rem;
+            .register-container {
+                width: 100%;
             }
+        }
 
     </style>
 
 </head>
+
 <body>
-    <div class="register-dashboard">
 
-        <div class="container">
+<div class="register-wrapper">
 
-            <div class="text-center mb-4">
 
-                <h1 class="fw-bold display-6"
-                    style="color:#1f2b48">
+    <section class="register-banner">
 
-                    <i class="fas fa-stethoscope text-primary me-2"></i>
+        <div>
 
-                    NMB_HLabSys
+            <h1>Join NMB-HLabSys</h1>
 
-                </h1>
+            <p>
+                Create your secure patient account to access
+                laboratory test requests, results and important
+                healthcare information.
+            </p>
 
-                <p class="text-secondary">
-                    Create your account · Select your subsystem role
-                </p>
+        </div>
 
+    </section>
+
+
+    <section class="register-container">
+
+        <div class="register-form">
+
+            <h2>Create Account</h2>
+
+            <p class="subtitle">
+                Register as a patient to get started.
+            </p>
+
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
             </div>
 
-            <div class="card register-card mx-auto">
 
-                <div class="card-header-brand">
+            <form asp-controller="Account"
+                  asp-action="Register"
+                  method="post">
 
-                    <div class="card-title-icon">
+                @Html.AntiForgeryToken()
 
-                        <i class="fas fa-user-plus"></i>
 
-                        <h3 class="fw-bold mb-0">
-                            Register
-                        </h3>
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="FirstName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="FirstName"
+                               class="form-control"
+                               placeholder="First name" />
+
+                        <span asp-validation-for="FirstName"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="LastName"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="LastName"
+                               class="form-control"
+                               placeholder="Last name" />
+
+                        <span asp-validation-for="LastName"
+                              class="text-danger small">
+                        </span>
 
                     </div>
 
                 </div>
 
-                <div class="card-body p-4">
 
-                    <form method="post"
-                          asp-controller="Account"
-                          asp-action="Register">
+                <div class="mb-3">
 
-                        @Html.AntiForgeryToken()
+                    <label asp-for="Email"
+                           class="form-label">
+                    </label>
 
-                        <!-- ================================================= -->
-                        <!-- Validation Summary -->
-                        <!-- ================================================= -->
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="name@example.com" />
 
-                        <div asp-validation-summary="ModelOnly"
-                             class="text-danger small mb-3">
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Role Selection -->
-                        <!-- ================================================= -->
-
-                        <div class="section-divider">
-                            <span>Select Account Role</span>
-                        </div>
-
-                        <div class="role-selection">
-
-                            <input asp-for="Role"
-                                   type="hidden"
-                                   id="SelectedRole" />
-
-                            <button type="button"
-                                    class="role-btn"
-                                    data-role="Patient"
-                                    onclick="selectRole(this, 'Patient')">
-
-                                <i class="fas fa-user-injured me-1"></i>
-
-                                Patient
-
-                            </button>
-
-                            <button type="button"
-                                    class="role-btn"
-                                    data-role="Doctor"
-                                    onclick="selectRole(this, 'Doctor')">
-
-                                <i class="fas fa-user-md me-1"></i>
-
-                                Doctor
-
-                            </button>
-
-                            <button type="button"
-                                    class="role-btn"
-                                    data-role="LabManager"
-                                    onclick="selectRole(this, 'LabManager')">
-
-                                <i class="fas fa-flask me-1"></i>
-
-                                Lab Manager
-
-                            </button>
-
-                            <button type="button"
-                                    class="role-btn"
-                                    data-role="LabTechnician"
-                                    onclick="selectRole(this, 'LabTechnician')">
-
-                                <i class="fas fa-microscope me-1"></i>
-
-                                Technician
-
-                            </button>
-
-                            <button type="button"
-                                    class="role-btn"
-                                    data-role="Administrator"
-                                    onclick="selectRole(this, 'Administrator')">
-
-                                <i class="fas fa-shield-alt me-1"></i>
-
-                                Administrator
-
-                            </button>
-
-                        </div>
-
-                        <div class="role-description">
-                            Select the role that applies to this account.
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Common Information -->
-                        <!-- ================================================= -->
-
-                        <div class="section-divider">
-                            <span>Account Information</span>
-                        </div>
-
-                        <!-- First Name -->
-
-                        <div class="mb-3">
-
-                            <label asp-for="FirstName"
-                                   class="form-label">
-
-                                <i class="fas fa-user me-1"></i>
-
-                                First Name
-
-                            </label>
-
-                            <input asp-for="FirstName"
-                                   class="form-control"
-                                   placeholder="Enter first name"
-                                   autocomplete="given-name" />
-
-                            <span asp-validation-for="FirstName"
-                                  class="text-danger small">
-                            </span>
-
-                        </div>
-
-                        <!-- Last Name -->
-
-                        <div class="mb-3">
-
-                            <label asp-for="LastName"
-                                   class="form-label">
-
-                                <i class="fas fa-user me-1"></i>
-
-                                Last Name
-
-                            </label>
-
-                            <input asp-for="LastName"
-                                   class="form-control"
-                                   placeholder="Enter last name"
-                                   autocomplete="family-name" />
-
-                            <span asp-validation-for="LastName"
-                                  class="text-danger small">
-                            </span>
-
-                        </div>
-
-                        <!-- Email -->
-
-                        <div class="mb-3">
-
-                            <label asp-for="Email"
-                                   class="form-label">
-
-                                <i class="far fa-envelope me-1"></i>
-
-                                Email Address
-
-                            </label>
-
-                            <input asp-for="Email"
-                                   class="form-control"
-                                   type="email"
-                                   placeholder="Enter email address"
-                                   autocomplete="email" />
-
-                            <span asp-validation-for="Email"
-                                  class="text-danger small">
-                            </span>
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Doctor Fields -->
-                        <!-- ================================================= -->
-
-                        <div id="doctorSection"
-                             class="conditional-section">
-
-                            <div class="section-divider">
-                                <span>Doctor Information</span>
-                            </div>
-
-                            <div class="mb-3">
-
-                                <label asp-for="HPCSANumber"
-                                       class="form-label">
-
-                                    <i class="fas fa-id-card me-1"></i>
-
-                                    HPCSA Number
-
-                                </label>
-
-                                <input asp-for="HPCSANumber"
-                                       class="form-control"
-                                       placeholder="Enter HPCSA registration number"
-                                       autocomplete="off" />
-
-                                <span asp-validation-for="HPCSANumber"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Technician Fields -->
-                        <!-- ================================================= -->
-
-                        <div id="technicianSection"
-                             class="conditional-section">
-
-                            <div class="section-divider">
-                                <span>Technician Information</span>
-                            </div>
-
-                            <div class="mb-3">
-
-                                <label asp-for="EmployeeNumber"
-                                       class="form-label">
-
-                                    <i class="fas fa-id-badge me-1"></i>
-
-                                    Employee Number
-
-                                </label>
-
-                                <input asp-for="EmployeeNumber"
-                                       class="form-control"
-                                       placeholder="Enter employee number"
-                                       autocomplete="off" />
-
-                                <span asp-validation-for="EmployeeNumber"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Patient Fields -->
-                        <!-- ================================================= -->
-
-                        <div id="patientSection"
-                             class="conditional-section">
-
-                            <div class="section-divider">
-                                <span>Patient Information</span>
-                            </div>
-
-                            <!-- ID Number -->
-
-                            <div class="mb-3">
-
-                                <label asp-for="IDNumber"
-                                       class="form-label">
-
-                                    <i class="fas fa-id-card me-1"></i>
-
-                                    South African ID Number
-
-                                </label>
-
-                                <input asp-for="IDNumber"
-                                       class="form-control"
-                                       type="text"
-                                       maxlength="13"
-                                       inputmode="numeric"
-                                       placeholder="Enter 13-digit ID number"
-                                       autocomplete="off" />
-
-                                <span asp-validation-for="IDNumber"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                            <!-- Date of Birth -->
-
-                            <div class="mb-3">
-
-                                <label asp-for="DateOfBirth"
-                                       class="form-label">
-
-                                    <i class="fas fa-calendar me-1"></i>
-
-                                    Date of Birth
-
-                                </label>
-
-                                <input asp-for="DateOfBirth"
-                                       class="form-control"
-                                       type="date" />
-
-                                <span asp-validation-for="DateOfBirth"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                            <!-- Cellphone -->
-
-                            <div class="mb-3">
-
-                                <label asp-for="CellPhone"
-                                       class="form-label">
-
-                                    <i class="fas fa-phone me-1"></i>
-
-                                    Cellphone Number
-
-                                </label>
-
-                                <input asp-for="CellPhone"
-                                       class="form-control"
-                                       type="tel"
-                                       placeholder="Enter cellphone number"
-                                       autocomplete="tel" />
-
-                                <span asp-validation-for="CellPhone"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                            <!-- Home Address -->
-
-                            <div class="mb-3">
-
-                                <label asp-for="HomeAddress"
-                                       class="form-label">
-
-                                    <i class="fas fa-house me-1"></i>
-
-                                    Home Address
-
-                                </label>
-
-                                <textarea asp-for="HomeAddress"
-                                          class="form-control"
-                                          rows="3"
-                                          placeholder="Enter home address"
-                                          autocomplete="street-address"></textarea>
-
-                                <span asp-validation-for="HomeAddress"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                            <!-- Patient Password -->
-
-                            <div class="section-divider">
-                                <span>Create Password</span>
-                            </div>
-
-                            <div class="mb-3">
-
-                                <label asp-for="Password"
-                                       class="form-label">
-
-                                    <i class="fas fa-lock me-1"></i>
-
-                                    Password
-
-                                </label>
-
-                                <input asp-for="Password"
-                                       class="form-control"
-                                       placeholder="Create a password"
-                                       autocomplete="new-password" />
-
-                                <div class="password-note">
-                                    Password must contain at least 8 characters.
-                                </div>
-
-                                <span asp-validation-for="Password"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                            <!-- Confirm Password -->
-
-                            <div class="mb-3">
-
-                                <label asp-for="ConfirmPassword"
-                                       class="form-label">
-
-                                    <i class="fas fa-lock me-1"></i>
-
-                                    Confirm Password
-
-                                </label>
-
-                                <input asp-for="ConfirmPassword"
-                                       class="form-control"
-                                       placeholder="Confirm your password"
-                                       autocomplete="new-password" />
-
-                                <span asp-validation-for="ConfirmPassword"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Staff Information -->
-                        <!-- ================================================= -->
-
-                        <div id="staffNotice"
-                             class="alert alert-info small">
-
-                            <i class="fas fa-info-circle me-1"></i>
-
-                            Staff accounts receive a temporary password by
-                            email after registration. The temporary password
-                            must be used to activate the account and create
-                            a permanent password.
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Patient Notice -->
-                        <!-- ================================================= -->
-
-                        <div id="patientNotice"
-                             class="alert alert-success small"
-                             style="display:none;">
-
-                            <i class="fas fa-shield-halved me-1"></i>
-
-                            Your password will be used to sign in after your
-                            patient account has been activated.
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Buttons -->
-                        <!-- ================================================= -->
-
-                        <div class="d-grid gap-2 mt-4">
-
-                            <button type="submit"
-                                    class="btn btn-coral">
-
-                                <i class="fas fa-user-plus me-1"></i>
-
-                                Create Account
-
-                            </button>
-
-                            <a asp-controller="Account"
-                                   asp-action="Login"
-                                   class="btn btn-outline-soft">
-
-                                <i class="fas fa-arrow-left me-1"></i>
-
-                                Already have an account?
-
-                            </a>
-
-                        </div>
-
-                        <!-- ================================================= -->
-                        <!-- Help -->
-                        <!-- ================================================= -->
-
-                        <div class="text-center mt-3">
-
-                            <a asp-controller="Account"
-                                   asp-action="ForgotPassword"
-                                   class="text-link-muted">
-
-                                <i class="far fa-question-circle me-1"></i>
-
-                                Need help?
-
-                            </a>
-
-                        </div>
-
-                    </form>
+                    <span asp-validation-for="Email"
+                          class="text-danger small">
+                    </span>
 
                 </div>
 
-            </div>
 
-            <div class="text-center mt-4">
+                <div class="row">
 
-                <p class="small text-secondary">
+                    <div class="col-md-6 mb-3">
 
-                    <i class="fas fa-shield-halved me-1"></i>
+                        <label asp-for="Password"
+                               class="form-label">
+                        </label>
 
-                    Secure registration · Role-based healthcare access
+                        <input asp-for="Password"
+                               class="form-control"
+                               placeholder="Create password" />
 
-                </p>
+                        <span asp-validation-for="Password"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label asp-for="ConfirmPassword"
+                               class="form-label">
+                        </label>
+
+                        <input asp-for="ConfirmPassword"
+                               class="form-control"
+                               placeholder="Confirm password" />
+
+                        <span asp-validation-for="ConfirmPassword"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-check mb-4">
+
+                    <input asp-for="AcceptTerms"
+                           class="form-check-input" />
+
+                    <label asp-for="AcceptTerms"
+                           class="form-check-label">
+
+                        I agree to the Terms of Use and
+                        Privacy Policy.
+
+                    </label>
+
+                    <br />
+
+                    <span asp-validation-for="AcceptTerms"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <button type="submit"
+                        class="btn-register">
+
+                    <i class="fa-solid fa-user-plus me-2"></i>
+
+                    Create Account
+
+                </button>
+
+            </form>
+
+
+            <div class="login-link">
+
+                Already have an account?
+
+                <a asp-controller="Account"
+                   asp-action="Login">
+                    Sign In
+                </a>
 
             </div>
 
         </div>
 
-    </div>
+    </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js">
-    </script>
+</div>
 
-    <partial name="_ValidationScriptsPartial" />
 
-    <script>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
 
-            function selectRole(button, role) {
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-                // ---------------------------------------------
-                // Update active role button
-                // ---------------------------------------------
+<partial name="_ValidationScriptsPartial" />
 
-                document
-                    .querySelectorAll(".role-btn")
-                    .forEach(btn => {
-                        btn.classList.remove("active");
-                    });
-
-                button.classList.add("active");
-
-                // ---------------------------------------------
-                // Set hidden Role field
-                // ---------------------------------------------
-
-                document
-                    .getElementById("SelectedRole")
-                    .value = role;
-
-                // ---------------------------------------------
-                // Get sections
-                // ---------------------------------------------
-
-                const doctorSection =
-                    document.getElementById("doctorSection");
-
-                const technicianSection =
-                    document.getElementById("technicianSection");
-
-                const patientSection =
-                    document.getElementById("patientSection");
-
-                const staffNotice =
-                    document.getElementById("staffNotice");
-
-                const patientNotice =
-                    document.getElementById("patientNotice");
-
-                // ---------------------------------------------
-                // Hide everything first
-                // ---------------------------------------------
-
-                doctorSection.style.display = "none";
-                technicianSection.style.display = "none";
-                patientSection.style.display = "none";
-
-                staffNotice.style.display = "block";
-                patientNotice.style.display = "none";
-
-                // ---------------------------------------------
-                // Display role-specific section
-                // ---------------------------------------------
-
-                switch (role) {
-
-                    case "Doctor":
-
-                        doctorSection.style.display = "block";
-
-                        break;
-
-                    case "LabTechnician":
-
-                        technicianSection.style.display = "block";
-
-                        break;
-
-                    case "Patient":
-
-                        patientSection.style.display = "block";
-
-                        staffNotice.style.display = "none";
-
-                        patientNotice.style.display = "block";
-
-                        break;
-
-                    case "LabManager":
-                    case "Administrator":
-
-                        break;
-                }
-            }
-
-            // -------------------------------------------------
-            // Restore selected role after validation failure
-            // -------------------------------------------------
-
-            document.addEventListener("DOMContentLoaded", function () {
-
-                const selectedRole =
-                    document.getElementById("SelectedRole").value;
-
-                if (selectedRole) {
-
-                    const selectedButton =
-                        document.querySelector(
-                            `.role-btn[data-role="${selectedRole}"]`
-                        );
-
-                    if (selectedButton) {
-
-                        selectRole(
-                            selectedButton,
-                            selectedRole
-                        );
-                    }
-                }
-
-            });
-
-    </script>
-
-</body></html>
+</body>
+</html>

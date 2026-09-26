@@ -1,9 +1,0 @@
-@using NMB_HLabSys.Areas.Doctor.Models
-@model List<TestRequestsModel>
-@{
-    ViewData["Title"] = "Track Test Request Status";
-    Layout = "_DoctorLayout";
-}
-
-@* This view is the same as Dashboard but focused on status tracking *@
-@await Html.PartialAsync("Dashboard")
