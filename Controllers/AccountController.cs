@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using global::NMB_HLabSys.Models.Account;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
+using NMB_HLabSys.Models.Account;
 
 namespace NMB_HLabSys.Controllers
     {
@@ -98,4 +98,5 @@ namespace NMB_HLabSys.Controllers
             }
         }
     }
+}
 
