@@ -1,29 +1,34 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace NMB_HLabSys.Models.Account.ViewModels
+namespace NMB_HLabSys.Models.Account
 {
     public class ChangePasswordViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Current password is required.")]
         [DataType(DataType.Password)]
         [Display(Name = "Current Password")]
-        public string CurrentPassword { get; set; }
+        public string CurrentPassword { get; set; } = string.Empty;
 
-        [Required]
-        [StringLength(
-            100,
-            ErrorMessage = "Password must be at least {2} characters.",
-            MinimumLength = 6)]
+
+        [Required(ErrorMessage = "New password is required.")]
         [DataType(DataType.Password)]
         [Display(Name = "New Password")]
-        public string NewPassword { get; set; }
+        [StringLength(
+            100,
+            MinimumLength = 8,
+            ErrorMessage =
+                "The password must contain at least 8 characters.")]
+        public string NewPassword { get; set; } = string.Empty;
 
-        [Required]
+
+        [Required(ErrorMessage =
+            "Please confirm your new password.")]
         [DataType(DataType.Password)]
         [Display(Name = "Confirm New Password")]
         [Compare(
-            "NewPassword",
-            ErrorMessage = "The new passwords do not match.")]
-        public string ConfirmPassword { get; set; }
+            nameof(NewPassword),
+            ErrorMessage =
+                "The new password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

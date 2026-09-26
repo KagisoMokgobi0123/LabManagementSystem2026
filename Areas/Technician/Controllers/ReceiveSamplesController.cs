@@ -40,10 +40,26 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return View(requests);
         }
         //verified samples 
+        [HttpGet]
         public async Task<IActionResult> VerifiedSamples()
         {
-            var requests = await _context.TestRequests
+            // =========================================================
+            // 1. GET REQUEST IDs THAT HAVE RECEIVED SAMPLES
+            // =========================================================
+            var receivedRequestIds = await _context.Samples
+                .AsNoTracking()
+                .Where(s =>
+                    s.IsReceived &&
+                    !s.IsDeleted)
+                .Select(s => s.TestRequestId)
+                .Distinct()
+                .ToListAsync();
 
+
+            // =========================================================
+            // 2. LOAD REQUESTS + RECEIVED SAMPLE INFORMATION
+            // =========================================================
+            var requests = await _context.TestRequests
                 .AsNoTracking()
 
                 .Include(r => r.Patient)
@@ -58,12 +74,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .Include(r => r.Samples)
                     .ThenInclude(s => s.Technician)
 
-                // The sample itself determines whether it has
-                // completed laboratory reception.
                 .Where(r =>
-                    r.Samples.Any(s =>
-                        s.IsReceived &&
-                        !s.IsDeleted))
+                    receivedRequestIds.Contains(r.TestRequestId))
 
                 .OrderByDescending(r => r.RequestDate)
 
@@ -71,10 +83,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
             return View(requests);
-        }        // Its job is to load the Receive Sample page
-                 // and populate it with the correct
-                 // request, patient, doctor, and sample information.
-                 // GET: Technician/ReceiveSamples/Receive
+        }                          // request, patient, doctor, and sample information.
+                                   // GET: Technician/ReceiveSamples/Receive
         [HttpGet]
          public async Task<IActionResult> Receive(string? requestNumber)
         {
