@@ -366,6 +366,68 @@
     }
 
     /* =========================================================
+       CLICKABLE WORKFLOW
+       ========================================================= */
+
+    .workflow-link {
+        position: relative;
+        display: block;
+        padding: 12px 8px;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        color: inherit !important;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
+    }
+
+    .workflow-link:hover {
+        transform: translateY(-4px);
+        border-color: #bae6fd;
+        background: #f8fcff;
+        box-shadow: 0 7px 20px rgba(15, 23, 42, .08);
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    .workflow-link:focus {
+        outline: none;
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, .15);
+    }
+
+    .workflow-link .workflow-icon {
+        transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
+    }
+
+    .workflow-link:hover .workflow-icon {
+        transform: scale(1.08);
+        background: #0284c7;
+        color: #fff;
+        box-shadow: 0 5px 14px rgba(2, 132, 199, .25);
+    }
+
+    .workflow-link .workflow-title {
+        transition: color .2s ease;
+    }
+
+    .workflow-link:hover .workflow-title {
+        color: #0284c7;
+    }
+
+    .workflow-hint {
+        margin-top: 3px;
+        color: #94a3b8;
+        font-size: 9px;
+        font-weight: 500;
+        transition: color .2s ease;
+    }
+
+    .workflow-link:hover .workflow-hint {
+        color: #64748b;
+    }
+
+    /* =========================================================
        QUICK ACTIONS
        ========================================================= */
 
@@ -623,25 +685,46 @@
 
         .workflow {
             flex-direction: column;
-            align-items: flex-start;
+            align-items: stretch;
+            gap: 4px;
         }
 
-        .workflow-item {
-            display: flex;
-            align-items: center;
+        .workflow-link {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 12px;
+            width: 100%;
             text-align: left;
         }
 
-        .workflow-title {
-            margin-top: 0;
-            margin-left: 10px;
+        .workflow-link .workflow-icon {
+            grid-column: 1;
+            grid-row: 1 / span 2;
+            margin: 0;
+        }
+
+        .workflow-link .workflow-title {
+            grid-column: 2;
+            grid-row: 1;
+            align-self: end;
+            margin: 0;
+            font-size: 12px;
+        }
+
+        .workflow-link .workflow-hint {
+            grid-column: 2;
+            grid-row: 2;
+            align-self: start;
+            margin-top: 2px;
         }
 
         .workflow-line {
             flex: none;
             width: 2px;
-            height: 20px;
-            margin: 0 0 0 23px;
+            height: 16px;
+            margin: 0 0 0 31px;
+            background: #e2e8f0;
         }
     }
 </style>
@@ -700,8 +783,8 @@
                             </a>
 
                             <a asp-area="Technician"
-                               asp-controller="Verification"
-                               asp-action="Pending"
+                               asp-controller="ReceiveSamples"
+                               asp-action="VerifiedSamples"
                                class="hero-btn hero-btn-outline">
 
                                 <i class="fas fa-check-double"></i>
@@ -1079,102 +1162,61 @@
 
             </div>
 
-
             <div class="card-body">
 
                 <div class="workflow">
 
-                    <div class="workflow-item">
-
-                        <div class="workflow-icon">
-                            <i class="fas fa-vials"></i>
-                        </div>
-
-                        <div class="workflow-title">
-                            Receive Samples
-                        </div>
-
-                    </div>
-
+                    <a asp-area="Technician" asp-controller="ReceiveSamples" asp-action="Index"
+                       class="workflow-item workflow-link" title="Receive and verify laboratory samples">
+                        <div class="workflow-icon"><i class="fas fa-vials"></i></div>
+                        <div class="workflow-title">Receive Samples</div>
+                        <div class="workflow-hint">Verify &amp; receive</div>
+                    </a>
 
                     <div class="workflow-line"></div>
 
-
-                    <div class="workflow-item">
-
-                        <div class="workflow-icon">
-                            <i class="fas fa-list-check"></i>
-                        </div>
-
-                        <div class="workflow-title">
-                            Select Test Type
-                        </div>
-
-                    </div>
-
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="Available"
+                       class="workflow-item workflow-link" title="Select an available assigned test type">
+                        <div class="workflow-icon"> <i class="fas fa-clipboard-list"></i></div>
+                        <div class="workflow-title">Select Test Type</div>
+                        <div class="workflow-hint">Available tests</div>
+                    </a>
 
                     <div class="workflow-line"></div>
 
-
-                    <div class="workflow-item">
-
-                        <div class="workflow-icon">
-                            <i class="fas fa-microscope"></i>
-                        </div>
-
-                        <div class="workflow-title">
-                            Perform Test
-                        </div>
-
-                    </div>
-
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
+                       class="workflow-item workflow-link" title="View and perform your selected tests">
+                        <div class="workflow-icon"><i class="fas fa-microscope"></i></div>
+                        <div class="workflow-title">Perform Test</div>
+                        <div class="workflow-hint">My selected tests</div>
+                    </a>
 
                     <div class="workflow-line"></div>
 
-
-                    <div class="workflow-item">
-
-                        <div class="workflow-icon">
-                            <i class="fas fa-file-medical"></i>
-                        </div>
-
-                        <div class="workflow-title">
-                            Capture Results
-                        </div>
-
-                    </div>
-
+                    <a asp-area="Technician" asp-controller="Results" asp-action="Index"
+                       class="workflow-item workflow-link" title="Capture laboratory test results">
+                        <div class="workflow-icon"><i class="fas fa-file-medical"></i></div>
+                        <div class="workflow-title">Capture Results</div>
+                        <div class="workflow-hint">Record results</div>
+                    </a>
 
                     <div class="workflow-line"></div>
 
-
-                    <div class="workflow-item">
-
-                        <div class="workflow-icon">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-
-                        <div class="workflow-title">
-                            Verify Results
-                        </div>
-
-                    </div>
-
+                    <a asp-area="Technician" asp-controller="Verification" asp-action="Pending"
+                       class="workflow-item workflow-link" title="Verify completed test results">
+                        <div class="workflow-icon"><i class="fas fa-user-check"></i></div>
+                        <div class="workflow-title">Verify Results</div>
+                        <div class="workflow-hint">Pending verification</div>
+                    </a>
 
                     <div class="workflow-line"></div>
 
-
-                    <div class="workflow-item">
-
-                        <div class="workflow-icon">
-                            <i class="fas fa-circle-check"></i>
-                        </div>
-
-                        <div class="workflow-title">
-                            Verified
-                        </div>
-
-                    </div>
+                    <a asp-area="Technician" asp-controller="Verification" asp-action="Verified"
+                       class="workflow-item workflow-link" title="View verified laboratory results">
+                        <div class="workflow-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="workflow-title">Verified</div>
+                        <div class="workflow-hint">Verified results</div>
+                    </a>
 
                 </div>
 
@@ -1255,7 +1297,7 @@
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
-                                        <i class="fas fa-list-check"></i>
+                                         <i class="fas fa-clipboard-list"></i>
                                     </div>
 
                                     <div>
@@ -1282,32 +1324,27 @@
 
                             <div class="col-md-6">
 
-                                <a asp-area="Technician"
-                                   asp-controller="Tests"
-                                   asp-action="MyTests"
-                                   class="quick-action">
+                               <a href="/Technician/Tests/MyTests"
+   class="quick-action">
 
-                                    <div class="quick-action-icon">
-                                        <i class="fas fa-microscope"></i>
-                                    </div>
+    <div class="quick-action-icon">
+        <i class="fas fa-microscope"></i>
+    </div>
 
-                                    <div>
+    <div>
+        <div class="quick-action-title">
+            My Selected Tests
+        </div>
 
-                                        <div class="quick-action-title">
-                                            My Selected Tests
-                                        </div>
+        <div class="quick-action-text">
+            View tests selected and currently
+            being processed by you
+        </div>
+    </div>
 
-                                        <div class="quick-action-text">
-                                            View tests selected and currently
-                                            being processed by you
-                                        </div>
+    <i class="fas fa-chevron-right quick-action-arrow"></i>
 
-                                    </div>
-
-                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
-
-                                </a>
-
+</a>
                             </div>
 
 
@@ -1387,7 +1424,7 @@
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
-                                        <i class="fas fa-rotate-left"></i>
+                                      <i class="fas fa-undo-alt"></i>
                                     </div>
 
                                     <div>
@@ -1420,7 +1457,7 @@
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
-                                        <i class="fas fa-clock-rotate-left"></i>
+<i class="fas fa-check-circle"></i>
                                     </div>
 
                                     <div>
@@ -1830,7 +1867,7 @@
                            class="quick-action">
 
                             <div class="quick-action-icon">
-                                <i class="fas fa-circle-check"></i>
+                                <i class="fas fa-check-circle"></i>
                             </div>
 
                             <div>
@@ -1863,8 +1900,8 @@
                            class="quick-action">
 
                             <div class="quick-action-icon">
-                                <i class="fas fa-clock-rotate-left"></i>
-                            </div>
+   <i class="fas fa-undo-alt"></i>
+   </div>
 
                             <div>
 

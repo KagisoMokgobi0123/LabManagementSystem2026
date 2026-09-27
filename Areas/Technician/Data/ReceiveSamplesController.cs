@@ -64,7 +64,7 @@ namespace NMB_HLabSys.Areas.Technician.Data
         // ============================================================
 
         [HttpGet]
-        [HttpGet]
+      
         public async Task<IActionResult> VerifiedSamples()
         {
             var requests = await _context.TestRequests
