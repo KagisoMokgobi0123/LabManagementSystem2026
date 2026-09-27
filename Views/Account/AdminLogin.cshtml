@@ -1,0 +1,29 @@
+﻿@model NMB_HLabSys.Models.Account.LoginViewModel
+
+@{
+    ViewData["Title"] = "Administrator Login";
+
+    ViewData["Role"] = "Administrator";
+
+    ViewData["PortalTitle"] = "Administrator Login";
+
+    ViewData["Description"] =
+        "Secure administrative access for managing NMB-HLabSys users, " +
+        "system information and laboratory configuration.";
+
+    ViewData["Image"] =
+        "/assets/img/admin-login.jpg";
+
+    ViewData["Icon"] =
+        "fa-user-shield";
+
+    ViewData["Primary"] =
+        "#172033";
+
+    ViewData["Secondary"] =
+        "#475569";
+
+    ViewData["AllowRegistration"] = false;
+}
+
+<partial name="_RoleLoginForm" model="Model" />

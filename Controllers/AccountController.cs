@@ -1,185 +1,403 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 using NMB_HLabSys.Models.Identity;
 
 namespace NMB_HLabSys.Controllers
 {
-  
-
-    namespace NMB_HLabSys.Controllers
+    public class AccountController : Controller
     {
-        public class AccountController : Controller
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ILogger<AccountController> _logger;
+
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<AccountController> logger)
         {
-            private readonly UserManager<ApplicationUser> _userManager;
-            private readonly SignInManager<ApplicationUser> _signInManager;
-            private readonly ILogger<AccountController> _logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+        }
 
-            public AccountController(
-                UserManager<ApplicationUser> userManager,
-                SignInManager<ApplicationUser> signInManager,
-                ILogger<AccountController> logger)
+
+        // ============================================================
+        // MAIN LOGIN / PORTAL SELECTION
+        // URL: /Account/Login
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+
+        // ============================================================
+        // ADMIN LOGIN
+        // URL: /Account/AdminLogin
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AdminLogin()
+        {
+            return View(new LoginViewModel());
+        }
+
+
+        // ============================================================
+        // PATIENT LOGIN
+        // URL: /Account/PatientLogin
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult PatientLogin()
+        {
+            return View(new LoginViewModel());
+        }
+
+
+        // ============================================================
+        // DOCTOR LOGIN
+        // URL: /Account/DoctorLogin
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult DoctorLogin()
+        {
+            return View(new LoginViewModel());
+        }
+
+
+        // ============================================================
+        // LAB TECHNICIAN LOGIN
+        // URL: /Account/TechnicianLogin
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult TechnicianLogin()
+        {
+            return View(new LoginViewModel());
+        }
+
+
+        // ============================================================
+        // LAB MANAGER LOGIN
+        // URL: /Account/ManagerLogin
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ManagerLogin()
+        {
+            return View(new LoginViewModel());
+        }
+
+
+        // ============================================================
+        // SHARED ROLE LOGIN
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RoleLogin(
+            LoginViewModel model,
+            string role)
+        {
+            if (string.IsNullOrWhiteSpace(role))
             {
-                _userManager = userManager;
-                _signInManager = signInManager;
-                _logger = logger;
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Invalid login portal.");
+
+                return View("Login");
             }
 
-            // =========================
-            // LOGIN
-            // =========================
 
-            [AllowAnonymous]
-            [HttpGet]
-            public IActionResult Login(string? returnUrl = null)
+            if (!ModelState.IsValid)
             {
-                if (User.Identity?.IsAuthenticated == true)
-                {
-                    return RedirectToAction("Index", "Home");
-                }
-
-                ViewData["ReturnUrl"] = returnUrl;
-
-                return View(new LoginViewModel());
+                return ReturnLoginView(role, model);
             }
 
-            [AllowAnonymous]
-            [HttpPost]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Login(
-                LoginViewModel model,
-                string? returnUrl = null)
+
+            // --------------------------------------------------------
+            // Find user
+            // --------------------------------------------------------
+
+            var user = await _userManager.FindByEmailAsync(
+                model.Email.Trim());
+
+
+            if (user == null)
             {
-                ViewData["ReturnUrl"] = returnUrl;
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Invalid email address or password.");
 
-                if (!ModelState.IsValid)
-                {
-                    return View(model);
-                }
+                return ReturnLoginView(role, model);
+            }
 
-                var user = await _userManager.FindByEmailAsync(model.Email);
 
-                if (user == null)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        "Invalid email address or password.");
+            // --------------------------------------------------------
+            // Verify role
+            // --------------------------------------------------------
 
-                    return View(model);
-                }
+            var belongsToRole =
+                await _userManager.IsInRoleAsync(
+                    user,
+                    role);
 
-                var result = await _signInManager.PasswordSignInAsync(
+
+            if (!belongsToRole)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "You are not authorised to access this portal.");
+
+                return ReturnLoginView(role, model);
+            }
+
+
+            // --------------------------------------------------------
+            // Check account state
+            //
+            // Staff with a temporary password can still login so that
+            // they can change the temporary password.
+            // --------------------------------------------------------
+
+            if (!user.IsActive &&
+                !user.MustChangePassword)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Your account is currently inactive.");
+
+                return ReturnLoginView(role, model);
+            }
+
+
+            // --------------------------------------------------------
+            // Authenticate
+            // --------------------------------------------------------
+
+            var result =
+                await _signInManager.PasswordSignInAsync(
                     user,
                     model.Password,
                     model.RememberMe,
                     lockoutOnFailure: true);
 
-                if (result.Succeeded)
-                {
-                    user.LastLoginDate = DateTime.UtcNow;
 
-                    await _userManager.UpdateAsync(user);
+            // --------------------------------------------------------
+            // Locked account
+            // --------------------------------------------------------
 
-                    _logger.LogInformation(
-                        "User {Email} logged in.",
-                        user.Email);
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Your account has been temporarily locked. " +
+                    "Please try again later.");
 
-                    if (!string.IsNullOrEmpty(returnUrl)
-                        && Url.IsLocalUrl(returnUrl))
-                    {
-                        return LocalRedirect(returnUrl);
-                    }
+                return ReturnLoginView(role, model);
+            }
 
-                    return await RedirectByRole(user);
-                }
 
-                if (result.IsLockedOut)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        "Your account has been temporarily locked.");
+            // --------------------------------------------------------
+            // Invalid password
+            // --------------------------------------------------------
 
-                    return View(model);
-                }
-
+            if (!result.Succeeded)
+            {
                 ModelState.AddModelError(
                     string.Empty,
                     "Invalid email address or password.");
 
+                return ReturnLoginView(role, model);
+            }
+
+
+            // --------------------------------------------------------
+            // Temporary password
+            // --------------------------------------------------------
+
+            if (user.MustChangePassword)
+            {
+                return RedirectToAction(
+                    nameof(ChangeTemporaryPassword));
+            }
+
+
+            // --------------------------------------------------------
+            // Account must be active
+            // --------------------------------------------------------
+
+            if (!user.IsActive)
+            {
+                await _signInManager.SignOutAsync();
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Your account has not been activated.");
+
+                return ReturnLoginView(role, model);
+            }
+
+
+            // --------------------------------------------------------
+            // Update last login
+            // --------------------------------------------------------
+
+            user.LastLoginDate = DateTime.UtcNow;
+
+            await _userManager.UpdateAsync(user);
+
+
+            _logger.LogInformation(
+                "User {Email} logged into the {Role} portal.",
+                user.Email,
+                role);
+
+
+            // --------------------------------------------------------
+            // Dashboard
+            // --------------------------------------------------------
+
+            return RedirectToDashboard(role);
+        }
+
+
+        // ============================================================
+        // RETURN CORRECT LOGIN PAGE
+        // ============================================================
+
+        private IActionResult ReturnLoginView(
+            string role,
+            LoginViewModel model)
+        {
+            return role switch
+            {
+                "Administrator" =>
+                    View("AdminLogin", model),
+
+                "Patient" =>
+                    View("PatientLogin", model),
+
+                "Doctor" =>
+                    View("DoctorLogin", model),
+
+                "LabTechnician" =>
+                    View("TechnicianLogin", model),
+
+                "Manager" =>
+                    View("ManagerLogin", model),
+
+                _ =>
+                    View("PatientLogin", model)
+            };
+        }
+
+
+        // ============================================================
+        // DASHBOARD REDIRECTION
+        // ============================================================
+
+        private IActionResult RedirectToDashboard(string role)
+        {
+            return role switch
+            {
+                "Administrator" =>
+                    RedirectToAction(
+                        "Index",
+                        "Home",
+                        new { area = "Administrator" }),
+
+                "Patient" =>
+                    RedirectToAction(
+                        "Index",
+                        "Home",
+                        new { area = "Patient" }),
+
+                "Doctor" =>
+                    RedirectToAction(
+                        "Index",
+                        "Home",
+                        new { area = "Doctor" }),
+
+                "LabTechnician" =>
+                    RedirectToAction(
+                        "Index",
+                        "Home",
+                        new { area = "Technician" }),
+
+                "Manager" =>
+                    RedirectToAction(
+                        "Index",
+                        "Home",
+                        new { area = "Manager" }),
+
+                _ =>
+                    RedirectToAction(
+                        nameof(Login))
+            };
+        }
+
+
+        // ============================================================
+        // CHANGE TEMPORARY PASSWORD
+        // ============================================================
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangeTemporaryPassword()
+        {
+            return View(
+                new ChangeTemporaryPasswordViewModel());
+        }
+
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangeTemporaryPassword(
+            ChangeTemporaryPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
                 return View(model);
             }
 
-            // =========================
-            // REGISTER
-            // =========================
 
-            [AllowAnonymous]
-            [HttpGet]
-            public IActionResult Register()
+            var user =
+                await _userManager.GetUserAsync(User);
+
+
+            if (user == null)
             {
-                return View(new RegisterViewModel());
+                await _signInManager.SignOutAsync();
+
+                return RedirectToAction(
+                    nameof(Login));
             }
 
-            [AllowAnonymous]
-            [HttpPost]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Register(RegisterViewModel model)
+
+            var result =
+                await _userManager.ChangePasswordAsync(
+                    user,
+                    model.CurrentPassword,
+                    model.NewPassword);
+
+
+            if (!result.Succeeded)
             {
-                if (!ModelState.IsValid)
-                {
-                    return View(model);
-                }
-
-                var existingUser =
-                    await _userManager.FindByEmailAsync(model.Email);
-
-                if (existingUser != null)
-                {
-                    ModelState.AddModelError(
-                        nameof(model.Email),
-                        "An account with this email address already exists.");
-
-                    return View(model);
-                }
-
-                var user = new ApplicationUser
-                {
-                    FirstName = model.FirstName.Trim(),
-                    LastName = model.LastName.Trim(),
-
-                    UserName = model.Email.Trim(),
-                    Email = model.Email.Trim(),
-
-                    CreatedDate = DateTime.UtcNow
-                };
-
-                var result =
-                    await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    // Public registration creates Patient accounts.
-                    await _userManager.AddToRoleAsync(user, "Patient");
-
-                    await _signInManager.SignInAsync(
-                        user,
-                        isPersistent: false);
-
-                    _logger.LogInformation(
-                        "New patient registered: {Email}",
-                        user.Email);
-
-                    TempData["Success"] =
-                        "Your account has been created successfully.";
-
-                    return RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Patient" });
-                }
-
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(
@@ -190,69 +408,101 @@ namespace NMB_HLabSys.Controllers
                 return View(model);
             }
 
-            // =========================
-            // LOGOUT
-            // =========================
 
-            [Authorize]
-            [HttpPost]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Logout()
+            // --------------------------------------------------------
+            // Activate account
+            // --------------------------------------------------------
+
+            user.MustChangePassword = false;
+
+            user.IsActive = true;
+
+
+            var updateResult =
+                await _userManager.UpdateAsync(user);
+
+
+            if (!updateResult.Succeeded)
+            {
+                foreach (var error in updateResult.Errors)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        error.Description);
+                }
+
+                return View(model);
+            }
+
+
+            // Refresh authentication cookie
+            await _signInManager.RefreshSignInAsync(user);
+
+
+            TempData["Success"] =
+                "Your password has been changed successfully.";
+
+
+            // --------------------------------------------------------
+            // Determine user's role
+            // --------------------------------------------------------
+
+            var roles =
+                await _userManager.GetRolesAsync(user);
+
+
+            var role =
+                roles.FirstOrDefault();
+
+
+            if (string.IsNullOrWhiteSpace(role))
             {
                 await _signInManager.SignOutAsync();
 
-                return RedirectToAction(nameof(Login));
+                return RedirectToAction(
+                    nameof(Login));
             }
 
-            // =========================
-            // ROLE REDIRECTION
-            // =========================
 
-            private async Task<IActionResult> RedirectByRole(
-                ApplicationUser user)
-            {
-                if (await _userManager.IsInRoleAsync(user, "Administrator"))
-                {
-                    return RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Administrator" });
-                }
+            return RedirectToDashboard(role);
+        }
 
-                if (await _userManager.IsInRoleAsync(user, "Manager"))
-                {
-                    return RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Manager" });
-                }
 
-                if (await _userManager.IsInRoleAsync(user, "Technician"))
-                {
-                    return RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Technician" });
-                }
+        // ============================================================
+        // LOGOUT
+        // ============================================================
 
-                if (await _userManager.IsInRoleAsync(user, "Doctor"))
-                {
-                    return RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Doctor" });
-                }
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            var email =
+                User.Identity?.Name;
 
-                if (await _userManager.IsInRoleAsync(user, "Patient"))
-                {
-                    return RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Patient" });
-                }
 
-                return RedirectToAction("Index", "Home");
-            }
+            await _signInManager.SignOutAsync();
+
+
+            _logger.LogInformation(
+                "User {Email} logged out.",
+                email);
+
+
+            return RedirectToAction(
+                nameof(Login));
+        }
+
+
+        // ============================================================
+        // ACCESS DENIED
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

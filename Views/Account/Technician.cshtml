@@ -1,0 +1,29 @@
+﻿@model NMB_HLabSys.Models.Account.LoginViewModel
+
+@{
+    ViewData["Title"] = "Lab Technician Login";
+
+    ViewData["Role"] = "LabTechnician";
+
+    ViewData["PortalTitle"] = "Lab Technician Login";
+
+    ViewData["Description"] =
+        "Access laboratory test requests, receive patient samples, " +
+        "process assigned tests and capture and verify laboratory results.";
+
+    ViewData["Image"] =
+        "/assets/img/technician-login.jpg";
+
+    ViewData["Icon"] =
+        "fa-microscope";
+
+    ViewData["Primary"] =
+        "#0f3d63";
+
+    ViewData["Secondary"] =
+        "#0284c7";
+
+    ViewData["AllowRegistration"] = false;
+}
+
+<partial name="_RoleLoginForm" model="Model" />

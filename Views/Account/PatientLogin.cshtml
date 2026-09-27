@@ -1,0 +1,29 @@
+﻿@model NMB_HLabSys.Models.Account.LoginViewModel
+
+@{
+    ViewData["Title"] = "Patient Login";
+
+    ViewData["Role"] = "Patient";
+
+    ViewData["PortalTitle"] = "Patient Login";
+
+    ViewData["Description"] =
+        "Securely access your laboratory test requests, " +
+        "test results and important health information.";
+
+    ViewData["Image"] =
+        "/assets/img/patient-login.jpg";
+
+    ViewData["Icon"] =
+        "fa-hospital-user";
+
+    ViewData["Primary"] =
+        "#075985";
+
+    ViewData["Secondary"] =
+        "#0891b2";
+
+    ViewData["AllowRegistration"] = true;
+}
+
+<partial name="_RoleLoginForm" model="Model" />

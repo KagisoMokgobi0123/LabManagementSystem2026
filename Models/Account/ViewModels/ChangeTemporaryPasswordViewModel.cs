@@ -2,7 +2,7 @@
 
 namespace NMB_HLabSys.Models.Account
 {
-    public class ChangePasswordViewModel
+    public class ChangeTemporaryPasswordViewModel
     {
         [Required(ErrorMessage = "Current password is required.")]
         [DataType(DataType.Password)]
