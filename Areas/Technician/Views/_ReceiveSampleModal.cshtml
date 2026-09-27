@@ -1,0 +1,1546 @@
+﻿@model NMB_HLabSys.Areas.Technician.Models.ReceiveSampleViewModel
+
+@{
+    Layout = null;
+}
+
+<style>
+
+    /* =========================================================
+       MODAL
+       ========================================================= */
+
+    .receive-modal-header {
+        position: relative;
+        overflow: hidden;
+
+        padding: 22px 24px;
+
+        border: 0;
+
+        background: linear-gradient(
+            135deg,
+            #073b5c 0%,
+            #075985 55%,
+            #0284c7 100%
+        );
+
+        color: #fff;
+    }
+
+    .receive-modal-header::after {
+        content: "";
+
+        position: absolute;
+
+        width: 150px;
+        height: 150px;
+
+        right: -45px;
+        top: -80px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.07);
+    }
+
+    .modal-title-area {
+        position: relative;
+
+        z-index: 2;
+
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+    }
+
+    .modal-header-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 43px;
+        height: 43px;
+
+        min-width: 43px;
+
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 10px;
+
+        background: rgba(255,255,255,.13);
+
+        font-size: 17px;
+    }
+
+    .receive-modal-title {
+        margin: 0;
+
+        color: #fff;
+
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .receive-modal-subtitle {
+        margin-top: 3px;
+        margin-bottom: 0;
+
+        color: rgba(255,255,255,.75);
+
+        font-size: 11px;
+    }
+
+    .receive-modal-header .close {
+        position: relative;
+
+        z-index: 3;
+
+        color: #fff;
+
+        opacity: .85;
+
+        text-shadow: none;
+    }
+
+    .receive-modal-header .close:hover {
+        color: #fff;
+
+        opacity: 1;
+    }
+
+
+    /* =========================================================
+       BODY
+       ========================================================= */
+
+    .receive-modal-body {
+        padding: 22px 24px;
+
+        background: #f8fafc;
+    }
+
+
+    /* =========================================================
+       REQUEST SUMMARY
+       ========================================================= */
+
+    .request-summary {
+        margin-bottom: 18px;
+
+        padding: 16px 18px;
+
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+
+        background: #eff6ff;
+    }
+
+    .summary-heading {
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        margin-bottom: 13px;
+
+        color: #075985;
+
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .summary-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 13px;
+    }
+
+    .summary-label {
+        margin-bottom: 3px;
+
+        color: #64748b;
+
+        font-size: 9px;
+        font-weight: 700;
+
+        text-transform: uppercase;
+
+        letter-spacing: .4px;
+    }
+
+    .summary-value {
+        color: #1e293b;
+
+        font-size: 12px;
+        font-weight: 600;
+
+        word-break: break-word;
+    }
+
+    .request-number-value {
+        color: #0369a1;
+    }
+
+
+    /* =========================================================
+       VERIFICATION PANEL
+       ========================================================= */
+
+    .verification-card {
+        overflow: hidden;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 11px;
+
+        background: #fff;
+
+        box-shadow:
+            0 2px 8px rgba(15,23,42,.03);
+    }
+
+    .verification-header {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 10px;
+
+        padding: 14px 17px;
+
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .verification-title {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .verification-description {
+        margin-top: 3px;
+        margin-bottom: 0;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+    }
+
+    .verification-counter {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 5px 9px;
+
+        border-radius: 50px;
+
+        background: #f1f5f9;
+
+        color: #64748b;
+
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+
+    /* =========================================================
+       CHECK ITEMS
+       ========================================================= */
+
+    .verification-list {
+        padding: 0;
+    }
+
+    .verification-item {
+        display: flex;
+
+        align-items: center;
+
+        padding: 14px 17px;
+
+        border-bottom: 1px solid #f1f5f9;
+
+        cursor: pointer;
+
+        transition: .15s ease;
+    }
+
+    .verification-item:last-child {
+        border-bottom: 0;
+    }
+
+    .verification-item:hover {
+        background: #f8fcff;
+    }
+
+    .verification-item.checked {
+        background: #f0fdf4;
+    }
+
+    .verification-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 36px;
+        height: 36px;
+
+        min-width: 36px;
+
+        margin-right: 12px;
+
+        border-radius: 9px;
+
+        background: #e0f2fe;
+
+        color: #0284c7;
+
+        font-size: 13px;
+    }
+
+    .verification-item.checked
+    .verification-icon {
+        background: #dcfce7;
+
+        color: #16a34a;
+    }
+
+    .verification-content {
+        flex: 1;
+
+        min-width: 0;
+    }
+
+    .verification-label {
+        margin-bottom: 3px;
+
+        color: #64748b;
+
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .verification-value {
+        color: #1e293b;
+
+        font-size: 12px;
+        font-weight: 700;
+
+        word-break: break-word;
+    }
+
+
+    /* =========================================================
+       CUSTOM CHECKBOX
+       ========================================================= */
+
+    .verify-check {
+        position: relative;
+
+        width: 22px;
+        height: 22px;
+
+        min-width: 22px;
+
+        margin-left: 12px;
+    }
+
+    .verify-check input {
+        position: absolute;
+
+        width: 100%;
+        height: 100%;
+
+        margin: 0;
+
+        opacity: 0;
+
+        cursor: pointer;
+
+        z-index: 2;
+    }
+
+    .check-display {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 22px;
+        height: 22px;
+
+        border: 2px solid #cbd5e1;
+        border-radius: 6px;
+
+        background: #fff;
+
+        color: transparent;
+
+        font-size: 10px;
+
+        transition: .15s ease;
+    }
+
+    .verify-check input:checked
+    + .check-display {
+        border-color: #16a34a;
+
+        background: #16a34a;
+
+        color: #fff;
+    }
+
+
+    /* =========================================================
+       INFORMATION
+       ========================================================= */
+
+    .security-note {
+        display: flex;
+
+        align-items: flex-start;
+
+        gap: 10px;
+
+        margin-top: 16px;
+
+        padding: 11px 13px;
+
+        border: 1px solid #e0f2fe;
+        border-radius: 8px;
+
+        background: #f0f9ff;
+
+        color: #0369a1;
+
+        font-size: 10px;
+
+        line-height: 1.6;
+    }
+
+    .security-note i {
+        margin-top: 2px;
+    }
+
+
+    /* =========================================================
+       VALIDATION
+       ========================================================= */
+
+    .validation-summary-valid {
+        display: none;
+    }
+
+    .validation-summary-errors {
+        margin-bottom: 15px;
+
+        padding: 11px 14px;
+
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+
+        background: #fef2f2;
+
+        color: #b91c1c;
+
+        font-size: 11px;
+    }
+
+    .validation-summary-errors ul {
+        margin: 0;
+
+        padding-left: 18px;
+    }
+
+
+    /* =========================================================
+       FOOTER
+       ========================================================= */
+
+    .receive-modal-footer {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 15px 24px;
+
+        border-top: 1px solid #e2e8f0;
+
+        background: #fff;
+    }
+
+    .verification-status {
+        display: flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .verification-status.ready {
+        color: #16a34a;
+    }
+
+    .btn-modal-cancel,
+    .btn-confirm-receive {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        gap: 6px;
+
+        padding: 9px 15px;
+
+        border-radius: 7px;
+
+        font-size: 11px;
+        font-weight: 600;
+
+        transition: .2s ease;
+    }
+
+    .btn-modal-cancel {
+        border: 1px solid #e2e8f0;
+
+        background: #fff;
+
+        color: #64748b;
+    }
+
+    .btn-confirm-receive {
+        border: 0;
+
+        background: #0284c7;
+
+        color: #fff;
+
+        box-shadow:
+            0 3px 8px rgba(2,132,199,.20);
+    }
+
+    .btn-confirm-receive:hover:not(:disabled) {
+        transform: translateY(-1px);
+
+        background: #0369a1;
+    }
+
+    .btn-confirm-receive:disabled {
+        background: #cbd5e1;
+
+        cursor: not-allowed;
+
+        box-shadow: none;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media(max-width: 767px) {
+
+        .summary-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .receive-modal-footer {
+            flex-direction: column;
+
+            align-items: stretch;
+
+            gap: 12px;
+        }
+
+        .modal-footer-actions {
+            display: flex;
+
+            gap: 7px;
+        }
+
+        .modal-footer-actions button {
+            flex: 1;
+        }
+    }
+
+</style>
+
+
+<!-- =============================================================
+     HEADER
+     ============================================================= -->
+
+<div class="modal-header receive-modal-header">
+
+    <div class="modal-title-area">
+
+        <div class="modal-header-icon">
+
+            <i class="fas fa-vial"></i>
+
+        </div>
+
+        <div>
+
+            <h5 class="receive-modal-title"
+                id="receiveSampleModalLabel">
+
+                Receive Patient Sample
+
+            </h5>
+
+            <p class="receive-modal-subtitle">
+
+                Verify the physical sample before accepting it
+                into the laboratory.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <button type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close">
+
+        <span aria-hidden="true">
+            &times;
+        </span>
+
+    </button>
+
+</div>
+
+
+<form id="receiveSampleForm"
+      asp-area="Technician"
+      asp-controller="ReceiveSamples"
+      asp-action="Receive"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+
+    <!-- =========================================================
+         VALUES REQUIRED BY POST
+         ========================================================= -->
+
+    <input asp-for="TestRequestId"
+           type="hidden" />
+
+    <input asp-for="RequestNumber"
+           type="hidden" />
+
+    <input asp-for="SampleID"
+           type="hidden" />
+
+    <input asp-for="Barcode"
+           type="hidden" />
+
+    <input asp-for="SampleTypeId"
+           type="hidden" />
+
+    <input asp-for="DateTimeReceived"
+           type="hidden" />
+
+
+    <!-- =========================================================
+         BODY
+         ========================================================= -->
+
+    <div class="modal-body receive-modal-body">
+
+
+        <!-- VALIDATION -->
+
+        <div asp-validation-summary="ModelOnly">
+        </div>
+
+
+        <!-- =====================================================
+             REQUEST SUMMARY
+             ===================================================== -->
+
+        <div class="request-summary">
+
+            <div class="summary-heading">
+
+                <i class="fas fa-file-medical"></i>
+
+                Test Request Information
+
+            </div>
+
+
+            <div class="summary-grid">
+
+
+                <!-- REQUEST -->
+
+                <div>
+
+                    <div class="summary-label">
+                        Request Number
+                    </div>
+
+                    <div class="summary-value request-number-value">
+
+                        @Model.RequestNumber
+
+                    </div>
+
+                </div>
+
+
+                <!-- PATIENT -->
+
+                <div>
+
+                    <div class="summary-label">
+                        Patient
+                    </div>
+
+                    <div class="summary-value">
+
+                        @(string.IsNullOrWhiteSpace(Model.PatientName)
+                            ? "N/A"
+                            : Model.PatientName)
+
+                    </div>
+
+                </div>
+
+
+                <!-- DOCTOR -->
+
+                <div>
+
+                    <div class="summary-label">
+                        Requesting Doctor
+                    </div>
+
+                    <div class="summary-value">
+
+                        @(string.IsNullOrWhiteSpace(Model.DoctorName)
+                            ? "N/A"
+                            : Model.DoctorName)
+
+                    </div>
+
+                </div>
+
+
+                <!-- BARCODE -->
+
+                <div>
+
+                    <div class="summary-label">
+                        Sample Barcode
+                    </div>
+
+                    <div class="summary-value">
+
+                        <i class="fas fa-barcode mr-1 text-muted"></i>
+
+                        @Model.Barcode
+
+                    </div>
+
+                </div>
+
+
+                <!-- SAMPLE TYPE -->
+
+                <div>
+
+                    <div class="summary-label">
+                        Sample Type
+                    </div>
+
+                    <div class="summary-value">
+
+                        <i class="fas fa-vial mr-1 text-muted"></i>
+
+                        @(string.IsNullOrWhiteSpace(Model.SampleTypeName)
+                            ? "N/A"
+                            : Model.SampleTypeName)
+
+                    </div>
+
+                </div>
+
+
+                <!-- TECHNICIAN -->
+
+                <div>
+
+                    <div class="summary-label">
+                        Receiving Technician
+                    </div>
+
+                    <div class="summary-value">
+
+                        <i class="fas fa-user-md mr-1 text-muted"></i>
+
+                        @(string.IsNullOrWhiteSpace(Model.TechnicianName)
+                            ? "N/A"
+                            : Model.TechnicianName)
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             VERIFICATION CHECKLIST
+             ===================================================== -->
+
+        <div class="verification-card">
+
+
+            <div class="verification-header">
+
+                <div>
+
+                    <h6 class="verification-title">
+
+                        Sample Verification Checklist
+
+                    </h6>
+
+                    <p class="verification-description">
+
+                        Confirm all five items against the physical
+                        sample and request.
+
+                    </p>
+
+                </div>
+
+
+                <div class="verification-counter">
+
+                    <i class="fas fa-list-check"></i>
+
+                    <span id="verifiedCount">
+                        0
+                    </span>
+
+                    / 5
+
+                </div>
+
+            </div>
+
+
+            <div class="verification-list">
+
+
+                <!-- =================================================
+                     REQUEST NUMBER
+                     ================================================= -->
+
+                <label class="verification-item">
+
+                    <div class="verification-icon">
+
+                        <i class="fas fa-file-medical"></i>
+
+                    </div>
+
+
+                    <div class="verification-content">
+
+                        <div class="verification-label">
+                            Verify Request Number
+                        </div>
+
+                        <div class="verification-value">
+
+                            @Model.RequestNumber
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="verify-check">
+
+                        <input asp-for="VerifyRequestNumber"
+                               class="verification-checkbox" />
+
+                        <span class="check-display">
+
+                            <i class="fas fa-check"></i>
+
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     TECHNICIAN
+                     ================================================= -->
+
+                <label class="verification-item">
+
+                    <div class="verification-icon">
+
+                        <i class="fas fa-user-check"></i>
+
+                    </div>
+
+
+                    <div class="verification-content">
+
+                        <div class="verification-label">
+                            Verify Receiving Technician
+                        </div>
+
+                        <div class="verification-value">
+
+                            @Model.TechnicianName
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="verify-check">
+
+                        <input asp-for="VerifyTechnician"
+                               class="verification-checkbox" />
+
+                        <span class="check-display">
+
+                            <i class="fas fa-check"></i>
+
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     BARCODE
+                     ================================================= -->
+
+                <label class="verification-item">
+
+                    <div class="verification-icon">
+
+                        <i class="fas fa-barcode"></i>
+
+                    </div>
+
+
+                    <div class="verification-content">
+
+                        <div class="verification-label">
+                            Verify Sample Barcode
+                        </div>
+
+                        <div class="verification-value">
+
+                            @Model.Barcode
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="verify-check">
+
+                        <input asp-for="VerifyBarcode"
+                               class="verification-checkbox" />
+
+                        <span class="check-display">
+
+                            <i class="fas fa-check"></i>
+
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     SAMPLE TYPE
+                     ================================================= -->
+
+                <label class="verification-item">
+
+                    <div class="verification-icon">
+
+                        <i class="fas fa-vial"></i>
+
+                    </div>
+
+
+                    <div class="verification-content">
+
+                        <div class="verification-label">
+                            Verify Sample Type
+                        </div>
+
+                        <div class="verification-value">
+
+                            @Model.SampleTypeName
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="verify-check">
+
+                        <input asp-for="VerifySampleType"
+                               class="verification-checkbox" />
+
+                        <span class="check-display">
+
+                            <i class="fas fa-check"></i>
+
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <!-- =================================================
+                     DATE / TIME
+                     ================================================= -->
+
+                <label class="verification-item">
+
+                    <div class="verification-icon">
+
+                        <i class="fas fa-clock"></i>
+
+                    </div>
+
+
+                    <div class="verification-content">
+
+                        <div class="verification-label">
+                            Verify Date / Time Received
+                        </div>
+
+                        <div class="verification-value">
+
+                            @Model.DateTimeReceived
+                                .ToString("dd MMM yyyy HH:mm")
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="verify-check">
+
+                        <input asp-for="VerifyDateTime"
+                               class="verification-checkbox" />
+
+                        <span class="check-display">
+
+                            <i class="fas fa-check"></i>
+
+                        </span>
+
+                    </div>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             SECURITY NOTE
+             ===================================================== -->
+
+        <div class="security-note">
+
+            <i class="fas fa-shield-halved"></i>
+
+            <div>
+
+                <strong>Reception verification:</strong>
+
+                Confirm that the information displayed above matches
+                the physical sample before receiving it. The system
+                records the authenticated laboratory technician and
+                server reception time when the sample is accepted.
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         FOOTER
+         ========================================================= -->
+
+    <div class="modal-footer receive-modal-footer">
+
+
+        <div class="verification-status"
+             id="verificationStatus">
+
+            <i class="fas fa-circle-info"></i>
+
+            <span>
+                Complete all 5 verification checks.
+            </span>
+
+        </div>
+
+
+        <div class="modal-footer-actions">
+
+            <button type="button"
+                    class="btn-modal-cancel"
+                    data-dismiss="modal">
+
+                <i class="fas fa-times"></i>
+
+                Cancel
+
+            </button>
+
+
+            <button type="submit"
+                    id="confirmReceiveButton"
+                    class="btn-confirm-receive"
+                    disabled>
+
+                <i class="fas fa-check-circle"></i>
+
+                Confirm Reception
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    (function () {
+
+        // ============================================================
+        // ELEMENTS
+        // ============================================================
+
+        const form =
+            document.getElementById(
+                "receiveSampleForm"
+            );
+
+        if (!form) {
+            return;
+        }
+
+
+        const checkboxes =
+            form.querySelectorAll(
+                ".verification-checkbox"
+            );
+
+
+        const confirmButton =
+            document.getElementById(
+                "confirmReceiveButton"
+            );
+
+
+        const verifiedCount =
+            document.getElementById(
+                "verifiedCount"
+            );
+
+
+        const verificationStatus =
+            document.getElementById(
+                "verificationStatus"
+            );
+
+
+        // ============================================================
+        // UPDATE CHECKLIST
+        // ============================================================
+
+        function updateVerification() {
+
+            let checkedCount = 0;
+
+
+            checkboxes.forEach(
+                function (checkbox) {
+
+                    const item =
+                        checkbox.closest(
+                            ".verification-item"
+                        );
+
+
+                    if (checkbox.checked) {
+
+                        checkedCount++;
+
+                        item?.classList.add(
+                            "checked"
+                        );
+
+                    }
+                    else {
+
+                        item?.classList.remove(
+                            "checked"
+                        );
+                    }
+                }
+            );
+
+
+            verifiedCount.textContent =
+                checkedCount;
+
+
+            const allVerified =
+                checkedCount ===
+                checkboxes.length;
+
+
+            confirmButton.disabled =
+                !allVerified;
+
+
+            if (allVerified) {
+
+                verificationStatus
+                    .classList
+                    .add("ready");
+
+
+                verificationStatus.innerHTML = `
+
+                    <i class="fas fa-circle-check"></i>
+
+                    <span>
+                        Verification complete.
+                        Sample ready for reception.
+                    </span>
+
+                `;
+            }
+            else {
+
+                verificationStatus
+                    .classList
+                    .remove("ready");
+
+
+                verificationStatus.innerHTML = `
+
+                    <i class="fas fa-circle-info"></i>
+
+                    <span>
+                        Complete all 5 verification checks.
+                    </span>
+
+                `;
+            }
+        }
+
+
+        checkboxes.forEach(
+            function (checkbox) {
+
+                checkbox.addEventListener(
+                    "change",
+                    updateVerification
+                );
+            }
+        );
+
+
+        updateVerification();
+
+
+        // ============================================================
+        // AJAX POST
+        // ============================================================
+
+        form.addEventListener(
+            "submit",
+            function (event) {
+
+                event.preventDefault();
+
+
+                const allVerified =
+                    Array.from(checkboxes)
+                        .every(
+                            checkbox =>
+                                checkbox.checked
+                        );
+
+
+                if (!allVerified) {
+
+                    Swal.fire({
+
+                        icon:
+                            "warning",
+
+                        title:
+                            "Verification Required",
+
+                        text:
+                            "Please verify all five sample reception items before continuing."
+                    });
+
+                    return;
+                }
+
+
+                // ----------------------------------------------------
+                // CONFIRM BEFORE RECEIVING
+                // ----------------------------------------------------
+
+                Swal.fire({
+
+                    icon:
+                        "question",
+
+                    title:
+                        "Receive Sample?",
+
+                    html:
+                        "Confirm reception of sample <strong>@Model.Barcode</strong> for request <strong>@Model.RequestNumber</strong>?",
+
+                    showCancelButton:
+                        true,
+
+                    confirmButtonText:
+                        '<i class="fas fa-check mr-1"></i> Yes, Receive Sample',
+
+                    cancelButtonText:
+                        "Cancel",
+
+                    confirmButtonColor:
+                        "#0284c7"
+
+                }).then(function (result) {
+
+
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+
+
+                    // ------------------------------------------------
+                    // BUTTON LOADING STATE
+                    // ------------------------------------------------
+
+                    confirmButton.disabled =
+                        true;
+
+
+                    confirmButton.innerHTML = `
+
+                        <span class="spinner-border
+                                     spinner-border-sm"
+                              role="status"
+                              aria-hidden="true">
+                        </span>
+
+                        Receiving...
+
+                    `;
+
+
+                    // ------------------------------------------------
+                    // POST FORM
+                    // ------------------------------------------------
+
+                    $.ajax({
+
+                        url:
+                            form.action,
+
+                        type:
+                            "POST",
+
+                        data:
+                            $(form).serialize(),
+
+
+                        success:
+                            function (response) {
+
+
+                                // ------------------------------------
+                                // SUCCESS
+                                // ------------------------------------
+
+                                if (response &&
+                                    response.success) {
+
+
+                                    $("#receiveSampleModal")
+                                        .modal("hide");
+
+
+                                    Swal.fire({
+
+                                        icon:
+                                            "success",
+
+                                        title:
+                                            response.title ||
+                                            "Sample Received",
+
+                                        text:
+                                            response.message ||
+                                            "The sample has been successfully received.",
+
+                                        confirmButtonColor:
+                                            "#0284c7"
+
+                                    }).then(
+                                        function () {
+
+                                            window.location.reload();
+
+                                        }
+                                    );
+
+
+                                    return;
+                                }
+
+
+                                // ------------------------------------
+                                // SERVER VALIDATION FAILURE
+                                // ------------------------------------
+
+                                confirmButton.disabled =
+                                    false;
+
+
+                                confirmButton.innerHTML = `
+
+                                    <i class="fas fa-check-circle"></i>
+
+                                    Confirm Reception
+
+                                `;
+
+
+                                Swal.fire({
+
+                                    icon:
+                                        "error",
+
+                                    title:
+                                        response?.title ||
+                                        "Unable to Receive Sample",
+
+                                    text:
+                                        response?.message ||
+                                        "The sample could not be received. Please verify the information and try again."
+                                });
+                            },
+
+
+                        error:
+                            function (xhr) {
+
+
+                                confirmButton.disabled =
+                                    false;
+
+
+                                confirmButton.innerHTML = `
+
+                                    <i class="fas fa-check-circle"></i>
+
+                                    Confirm Reception
+
+                                `;
+
+
+                                let message =
+                                    "An unexpected error occurred while receiving the sample.";
+
+
+                                if (xhr.responseJSON &&
+                                    xhr.responseJSON.message) {
+
+                                    message =
+                                        xhr.responseJSON.message;
+                                }
+
+
+                                Swal.fire({
+
+                                    icon:
+                                        "error",
+
+                                    title:
+                                        "Reception Failed",
+
+                                    text:
+                                        message
+                                });
+                            }
+                    });
+
+                });
+
+            }
+        );
+
+    })();
+
+</script>

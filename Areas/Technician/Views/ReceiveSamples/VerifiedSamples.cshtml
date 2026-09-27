@@ -1,0 +1,1694 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
+
+@using NMB_HLabSys.Areas.Doctor.Models
+@using NMB_HLabSys.Areas.Technician.Models
+
+@{
+    ViewData["Title"] = "Received Samples";
+    Layout = "_TechnicianLayout";
+
+    var requests = Model?.ToList() ?? new List<TestRequestsModel>();
+
+    var receivedSamples = requests
+        .SelectMany(r => r.Samples
+            .Where(s => s.IsReceived && !s.IsDeleted)
+            .Select(s => new
+            {
+                Request = r,
+                Sample = s
+            }))
+        .OrderByDescending(x => x.Sample.DateReceived)
+        .ToList();
+
+    var totalSamples = receivedSamples.Count;
+
+    var receivedToday = receivedSamples.Count(x =>
+        x.Sample.DateReceived.HasValue &&
+        x.Sample.DateReceived.Value.Date == DateTime.Today);
+
+    var urgentSamples = receivedSamples.Count(x =>
+        x.Request.Urgency == Urgency.Urgent);
+
+    var statSamples = receivedSamples.Count(x =>
+        x.Request.Urgency == Urgency.Stat);
+}
+
+<style>
+
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .received-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+    }
+
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .received-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 38px 0 82px;
+
+        background: linear-gradient(
+            135deg,
+            #073b5c 0%,
+            #075985 45%,
+            #0284c7 100%
+        );
+    }
+
+    .received-hero::before {
+        content: "";
+        position: absolute;
+
+        width: 280px;
+        height: 280px;
+
+        right: 200px;
+        bottom: -210px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.05);
+    }
+
+    .received-hero::after {
+        content: "";
+        position: absolute;
+
+        width: 380px;
+        height: 380px;
+
+        right: -100px;
+        top: -220px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.06);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 7px 13px;
+        margin-bottom: 14px;
+
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 50px;
+
+        background: rgba(255,255,255,.13);
+
+        color: #fff;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .received-hero h1 {
+        margin-bottom: 7px;
+
+        color: #fff;
+
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .received-hero p {
+        max-width: 700px;
+
+        margin: 0;
+
+        color: rgba(255,255,255,.82);
+
+        font-size: 14px;
+    }
+
+
+    /* =========================================================
+       HERO BUTTONS
+       ========================================================= */
+
+    .hero-actions {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+
+        gap: 10px;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 10px 17px;
+
+        border-radius: 8px;
+
+        font-size: 13px;
+        font-weight: 600;
+
+        text-decoration: none !important;
+
+        transition: .2s ease;
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .hero-btn-primary {
+        background: #fff;
+        color: #075985 !important;
+    }
+
+    .hero-btn-outline {
+        border: 1px solid rgba(255,255,255,.50);
+
+        background: rgba(255,255,255,.08);
+
+        color: #fff !important;
+    }
+
+
+    /* =========================================================
+       PAGE CONTENT
+       ========================================================= */
+
+    .received-content {
+        position: relative;
+
+        z-index: 5;
+
+        margin-top: -48px;
+
+        padding-bottom: 50px;
+    }
+
+
+    /* =========================================================
+       SUMMARY CARDS
+       ========================================================= */
+
+    .summary-card {
+        height: 100%;
+
+        padding: 20px;
+
+        border: 1px solid transparent;
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow:
+            0 4px 18px rgba(15,23,42,.07);
+
+        transition: .2s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+
+        border-color: #bae6fd;
+
+        box-shadow:
+            0 10px 25px rgba(15,23,42,.10);
+    }
+
+    .summary-top {
+        display: flex;
+
+        align-items: flex-start;
+        justify-content: space-between;
+
+        gap: 15px;
+    }
+
+    .summary-title {
+        margin-bottom: 7px;
+
+        color: #64748b;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .summary-number {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .summary-note {
+        margin-top: 7px;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+    .summary-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 44px;
+        height: 44px;
+
+        min-width: 44px;
+
+        border-radius: 11px;
+
+        font-size: 17px;
+    }
+
+    .icon-blue {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .icon-orange {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+
+    /* =========================================================
+       MAIN CARD
+       ========================================================= */
+
+    .samples-card {
+        margin-top: 24px;
+
+        overflow: hidden;
+
+        border: 0;
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow:
+            0 4px 18px rgba(15,23,42,.06);
+    }
+
+    .samples-card-header {
+        padding: 18px 20px;
+
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .samples-title {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .samples-subtitle {
+        margin-top: 4px;
+        margin-bottom: 0;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+
+        top: 50%;
+        left: 13px;
+
+        color: #94a3b8;
+
+        transform: translateY(-50%);
+    }
+
+    .sample-search {
+        height: 37px;
+
+        padding-left: 36px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+
+        font-size: 12px;
+    }
+
+    .sample-search:focus {
+        border-color: #38bdf8;
+
+        box-shadow:
+            0 0 0 3px rgba(14,165,233,.10);
+    }
+
+
+    /* =========================================================
+       TABLE
+       ========================================================= */
+
+    .samples-table {
+        margin-bottom: 0;
+    }
+
+    .samples-table thead th {
+        padding: 12px 13px;
+
+        border-top: 0;
+        border-bottom: 1px solid #e2e8f0;
+
+        background: #f8fafc;
+
+        color: #64748b;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        text-transform: uppercase;
+
+        letter-spacing: .4px;
+
+        white-space: nowrap;
+    }
+
+    .samples-table tbody td {
+        padding: 14px 13px;
+
+        vertical-align: middle;
+
+        border-color: #f1f5f9;
+
+        color: #334155;
+
+        font-size: 12px;
+    }
+
+    .samples-table tbody tr {
+        transition: .15s ease;
+    }
+
+    .samples-table tbody tr:hover {
+        background: #f8fcff;
+    }
+
+
+    /* =========================================================
+       REQUEST
+       ========================================================= */
+
+    .request-number {
+        color: #075985;
+
+        font-weight: 700;
+    }
+
+    .request-date {
+        display: block;
+
+        margin-top: 3px;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       BARCODE
+       ========================================================= */
+
+    .barcode-value {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 5px 9px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+
+        background: #f8fafc;
+
+        color: #334155;
+
+        font-family: Consolas, monospace;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+
+    /* =========================================================
+       PERSON
+       ========================================================= */
+
+    .person-name {
+        color: #334155;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .person-label {
+        display: block;
+
+        margin-top: 2px;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       BADGES
+       ========================================================= */
+
+    .status-badge,
+    .urgency-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 5px 9px;
+
+        border-radius: 50px;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        white-space: nowrap;
+    }
+
+    .status-received {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .urgency-routine {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .urgency-urgent {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .urgency-stat {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+
+    /* =========================================================
+       SAMPLE TYPE
+       ========================================================= */
+
+    .sample-type {
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+    }
+
+    .sample-type-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 30px;
+        height: 30px;
+
+        border-radius: 7px;
+
+        background: #e0f2fe;
+
+        color: #0284c7;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       RECEIVED DATE
+       ========================================================= */
+
+    .received-date {
+        color: #334155;
+
+        font-weight: 600;
+    }
+
+    .received-time {
+        display: block;
+
+        margin-top: 2px;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       EMPTY STATE
+       ========================================================= */
+
+    .empty-state {
+        padding: 65px 20px;
+
+        text-align: center;
+    }
+
+    .empty-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 65px;
+        height: 65px;
+
+        margin: 0 auto 16px;
+
+        border-radius: 50%;
+
+        background: #e0f2fe;
+
+        color: #0284c7;
+
+        font-size: 24px;
+    }
+
+    .empty-state h5 {
+        margin-bottom: 7px;
+
+        color: #334155;
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        max-width: 430px;
+
+        margin: auto;
+
+        color: #94a3b8;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media(max-width: 768px) {
+
+        .received-hero {
+            padding-top: 25px;
+        }
+
+        .received-hero h1 {
+            font-size: 24px;
+        }
+
+        .hero-actions {
+            justify-content: flex-start;
+
+            margin-top: 20px;
+        }
+
+        .samples-card-header .row > div:last-child {
+            margin-top: 15px;
+        }
+    }
+
+</style>
+
+
+<div class="received-page">
+
+
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+
+    <div class="received-hero">
+
+        <div class="container-fluid">
+
+            <div class="hero-content">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <div class="hero-badge">
+
+                            <i class="fas fa-circle-check"></i>
+
+                            Sample Reception
+
+                        </div>
+
+                        <h1>
+                            Received Samples
+                        </h1>
+
+                        <p>
+                            View patient samples that have been successfully
+                            verified and received into the laboratory.
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="hero-actions">
+
+                            <a asp-area="Technician"
+                               asp-controller="ReceiveSamples"
+                               asp-action="Index"
+                               class="hero-btn hero-btn-primary">
+
+                                <i class="fas fa-vials"></i>
+
+                                Receive Samples
+
+                            </a>
+
+
+                            <a asp-area="Technician"
+                               asp-controller="Home"
+                               asp-action="Index"
+                               class="hero-btn hero-btn-outline">
+
+                                <i class="fas fa-gauge-high"></i>
+
+                                Dashboard
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
+    <div class="container-fluid received-content">
+
+
+        <!-- =====================================================
+             SUMMARY CARDS
+             ===================================================== -->
+
+        <div class="row">
+
+
+            <!-- TOTAL RECEIVED -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                Total Received
+                            </div>
+
+                            <h2 class="summary-number">
+                                @totalSamples
+                            </h2>
+
+                            <div class="summary-note">
+                                Samples received into laboratory
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-blue">
+
+                            <i class="fas fa-vials"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- RECEIVED TODAY -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                Received Today
+                            </div>
+
+                            <h2 class="summary-number">
+                                @receivedToday
+                            </h2>
+
+                            <div class="summary-note">
+                                Samples received today
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-green">
+
+                            <i class="fas fa-calendar-check"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- URGENT -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                Urgent Samples
+                            </div>
+
+                            <h2 class="summary-number">
+                                @urgentSamples
+                            </h2>
+
+                            <div class="summary-note">
+                                Urgent requests received
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-orange">
+
+                            <i class="fas fa-triangle-exclamation"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STAT -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                STAT Samples
+                            </div>
+
+                            <h2 class="summary-number">
+                                @statSamples
+                            </h2>
+
+                            <div class="summary-note">
+                                Highest priority samples
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-red">
+
+                            <i class="fas fa-bolt"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             RECEIVED SAMPLE TABLE
+             ===================================================== -->
+
+        <div class="samples-card">
+
+            <div class="samples-card-header">
+
+                <div class="row align-items-center">
+
+                    <div class="col-lg-6">
+
+                        <h4 class="samples-title">
+
+                            <i class="fas fa-circle-check text-success mr-2"></i>
+
+                            Received Sample History
+
+                        </h4>
+
+                        <p class="samples-subtitle">
+                            Samples successfully verified by laboratory technicians
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-lg-6">
+
+                        <div class="search-wrapper">
+
+                            <i class="fas fa-search"></i>
+
+                            <input type="text"
+                                   id="sampleSearch"
+                                   class="form-control sample-search"
+                                   placeholder="Search request, barcode, patient, technician..." />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            @if (receivedSamples.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table samples-table"
+                           id="receivedSamplesTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Request #
+                                </th>
+
+                                <th>
+                                    Barcode
+                                </th>
+
+                                <th>
+                                    Patient
+                                </th>
+
+                                <th>
+                                    Sample Type
+                                </th>
+
+                                <th>
+                                    Urgency
+                                </th>
+
+                                <th>
+                                    Received By
+                                </th>
+
+                                <th>
+                                    Date Received
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var item in receivedSamples)
+                            {
+                                var request = item.Request;
+                                var sample = item.Sample;
+
+
+                                var urgencyClass =
+                                    request.Urgency == Urgency.Stat
+                                        ? "urgency-stat"
+                                        : request.Urgency == Urgency.Urgent
+                                            ? "urgency-urgent"
+                                            : "urgency-routine";
+
+
+                                <tr>
+
+                                    <!-- REQUEST -->
+
+                                    <td>
+
+                                        <span class="request-number">
+                                            @request.RequestNumber
+                                        </span>
+
+                                        <span class="request-date">
+                                            @request.RequestDate.ToString("dd MMM yyyy")
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- BARCODE -->
+
+                                    <td>
+
+                                        <span class="barcode-value">
+
+                                            <i class="fas fa-barcode"></i>
+
+                                            @sample.Barcode
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- PATIENT -->
+
+                                    <td>
+
+                                        <span class="person-name">
+
+                                            @(request.Patient?.FullName ?? "N/A")
+
+                                        </span>
+
+                                        <span class="person-label">
+                                            Patient
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- SAMPLE TYPE -->
+
+                                    <td>
+
+                                        <div class="sample-type">
+
+                                            <div class="sample-type-icon">
+
+                                                <i class="fas fa-vial"></i>
+
+                                            </div>
+
+                                            <span>
+
+                                                @(sample.SampleType?.Name ?? "N/A")
+
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- URGENCY -->
+
+                                    <td>
+
+                                        <span class="urgency-badge @urgencyClass">
+
+                                            @if (request.Urgency == Urgency.Stat)
+                                            {
+                                                <i class="fas fa-bolt"></i>
+                                            }
+                                            else if (request.Urgency == Urgency.Urgent)
+                                            {
+                                                <i class="fas fa-triangle-exclamation"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-circle"></i>
+                                            }
+
+                                            @request.Urgency
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- TECHNICIAN -->
+
+                                    <td>
+
+                                        <span class="person-name">
+
+                                            @(sample.Technician?.FullName ?? "N/A")
+
+                                        </span>
+
+                                        <span class="person-label">
+                                            Lab Technician
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- RECEIVED DATE -->
+
+                                    <td>
+
+                                        @if (sample.DateReceived.HasValue)
+                                        {
+                                            <span class="received-date">
+
+                                                @sample.DateReceived.Value
+                                                    .ToString("dd MMM yyyy")
+
+                                            </span>
+
+                                            <span class="received-time">
+
+                                                <i class="far fa-clock mr-1"></i>
+
+                                                @sample.DateReceived.Value
+                                                    .ToString("HH:mm")
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        <span class="status-badge status-received">
+
+                                            <i class="fas fa-check-circle"></i>
+
+                                            Received
+
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <!-- =================================================
+                     EMPTY STATE
+                     ================================================= -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+
+                        <i class="fas fa-vials"></i>
+
+                    </div>
+
+                    <h5>
+                        No Received Samples
+                    </h5>
+
+                    <p>
+                        No patient samples have been received into the
+                        laboratory yet. Samples will appear here after
+                        a laboratory technician completes the reception
+                        verification process.
+                    </p>
+
+
+                    <div class="mt-4">
+
+                        <a asp-area="Technician"
+                           asp-controller="ReceiveSamples"
+                           asp-action="Index"
+                           class="btn btn-primary btn-sm">
+
+                            <i class="fas fa-vials mr-1"></i>
+
+                            View Samples Awaiting Reception
+
+                        </a>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <!-- ============================================================
+         DATATABLES CSS
+         ============================================================ -->
+
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
+
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
+
+
+    <!-- ============================================================
+         DATATABLES JAVASCRIPT
+         ============================================================ -->
+
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <!-- ============================================================
+         DATATABLES BUTTONS
+         ============================================================ -->
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+
+
+    <!-- ============================================================
+         EXCEL EXPORT
+         ============================================================ -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
+
+    <!-- ============================================================
+         PDF EXPORT
+         ============================================================ -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+
+    <!-- ============================================================
+         PRINT BUTTON
+         ============================================================ -->
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+
+            if (!$("#receivedSamplesTable").length) {
+                return;
+            }
+
+            $("#receivedSamplesTable").DataTable({
+
+                // ====================================================
+                // TABLE CONFIGURATION
+                // ====================================================
+
+                responsive: true,
+
+                processing: true,
+
+                pageLength: 10,
+
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
+
+                order: [[6, "desc"]],
+
+                autoWidth: false,
+
+                // ====================================================
+                // LAYOUT
+                // ====================================================
+
+                dom:
+                    "<'row align-items-center mb-3'" +
+                        "<'col-md-6'l>" +
+                        "<'col-md-6 text-md-right'B>" +
+                    ">" +
+                    "<'row'" +
+                        "<'col-sm-12'tr>" +
+                    ">" +
+                    "<'row align-items-center mt-3'" +
+                        "<'col-md-5'i>" +
+                        "<'col-md-7'p>" +
+                    ">",
+
+
+                // ====================================================
+                // EXPORT BUTTONS
+                // ====================================================
+
+                buttons: [
+
+                    // ------------------------------------------------
+                    // COPY
+                    // ------------------------------------------------
+
+                    {
+                        extend: "copyHtml5",
+
+                        text:
+                            '<i class="fas fa-copy mr-1"></i> Copy',
+
+                        className:
+                            "btn btn-outline-secondary btn-sm",
+
+                        title:
+                            "NMB-HLabSys - Received Samples",
+
+                        exportOptions: {
+                            columns: ":visible"
+                        }
+                    },
+
+
+                    // ------------------------------------------------
+                    // EXCEL
+                    // ------------------------------------------------
+
+                    {
+                        extend: "excelHtml5",
+
+                        text:
+                            '<i class="fas fa-file-excel mr-1"></i> Excel',
+
+                        className:
+                            "btn btn-success btn-sm",
+
+                        title:
+                            "NMB-HLabSys Received Samples",
+
+                        filename:
+                            "NMB-HLabSys_Received_Samples",
+
+                        sheetName:
+                            "Received Samples",
+
+                        exportOptions: {
+
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
+
+                            modifier: {
+                                page: "all",
+                                search: "applied",
+                                order: "applied"
+                            }
+                        }
+                    },
+
+
+                    // ------------------------------------------------
+                    // PDF
+                    // ------------------------------------------------
+
+                    {
+                        extend: "pdfHtml5",
+
+                        text:
+                            '<i class="fas fa-file-pdf mr-1"></i> PDF',
+
+                        className:
+                            "btn btn-danger btn-sm",
+
+                        title:
+                            "NMB-HLabSys - Received Samples",
+
+                        filename:
+                            "NMB-HLabSys_Received_Samples",
+
+                        orientation:
+                            "landscape",
+
+                        pageSize:
+                            "A4",
+
+                        exportOptions: {
+
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
+
+                            modifier: {
+                                page: "all",
+                                search: "applied",
+                                order: "applied"
+                            }
+                        },
+
+                        customize: function (doc) {
+
+                            doc.pageMargins =
+                                [25, 40, 25, 40];
+
+                            doc.defaultStyle.fontSize =
+                                8;
+
+                            doc.styles.tableHeader.fontSize =
+                                8;
+
+                            doc.styles.tableHeader.bold =
+                                true;
+
+                            doc.styles.title.fontSize =
+                                16;
+
+                            doc.styles.title.alignment =
+                                "center";
+
+
+                            // ----------------------------------------
+                            // Add report information
+                            // ----------------------------------------
+
+                            doc.content.splice(
+                                1,
+                                0,
+                                {
+                                    text:
+                                        "Laboratory Sample Reception Report",
+                                    alignment:
+                                        "center",
+                                    fontSize:
+                                        10,
+                                    margin:
+                                        [0, 0, 0, 5]
+                                },
+                                {
+                                    text:
+                                        "Generated: " +
+                                        new Date()
+                                            .toLocaleString(),
+                                    alignment:
+                                        "center",
+                                    fontSize:
+                                        8,
+                                    margin:
+                                        [0, 0, 0, 15]
+                                }
+                            );
+
+
+                            // ----------------------------------------
+                            // Make table use available page width
+                            // ----------------------------------------
+
+                            var table =
+                                doc.content.find(function (item) {
+                                    return item.table;
+                                });
+
+
+                            if (table) {
+
+                                table.table.widths = [
+                                    "*",
+                                    "*",
+                                    "*",
+                                    "*",
+                                    "*",
+                                    "*",
+                                    "*",
+                                    "*"
+                                ];
+                            }
+
+
+                            // ----------------------------------------
+                            // Footer
+                            // ----------------------------------------
+
+                            doc.footer =
+                                function (
+                                    currentPage,
+                                    pageCount
+                                ) {
+
+                                    return {
+
+                                        columns: [
+
+                                            {
+                                                text:
+                                                    "NMB-HLabSys",
+                                                alignment:
+                                                    "left",
+                                                margin:
+                                                    [25, 0, 0, 0]
+                                            },
+
+                                            {
+                                                text:
+                                                    "Page " +
+                                                    currentPage +
+                                                    " of " +
+                                                    pageCount,
+
+                                                alignment:
+                                                    "right",
+
+                                                margin:
+                                                    [0, 0, 25, 0]
+                                            }
+
+                                        ],
+
+                                        fontSize:
+                                            8,
+
+                                        color:
+                                            "#64748b"
+                                    };
+                                };
+                        }
+                    },
+
+
+                    // ------------------------------------------------
+                    // PRINT
+                    // ------------------------------------------------
+
+                    {
+                        extend: "print",
+
+                        text:
+                            '<i class="fas fa-print mr-1"></i> Print',
+
+                        className:
+                            "btn btn-primary btn-sm",
+
+                        title:
+                            "NMB-HLabSys - Received Samples",
+
+                        messageTop:
+                            "Laboratory Sample Reception Report",
+
+                        exportOptions: {
+
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
+
+                            modifier: {
+                                search: "applied",
+                                order: "applied"
+                            }
+                        }
+                    }
+                ],
+
+
+                // ====================================================
+                // LANGUAGE
+                // ====================================================
+
+                language: {
+
+                    emptyTable:
+                        "No received samples are available.",
+
+                    zeroRecords:
+                        "No matching received samples were found.",
+
+                    info:
+                        "Showing _START_ to _END_ of _TOTAL_ received samples",
+
+                    infoEmpty:
+                        "Showing 0 received samples",
+
+                    lengthMenu:
+                        "Show _MENU_ records",
+
+                    paginate: {
+                        previous:
+                            '<i class="fas fa-chevron-left"></i>',
+
+                        next:
+                            '<i class="fas fa-chevron-right"></i>'
+                    }
+                }
+            });
+
+
+            // ========================================================
+            // CONNECT YOUR EXISTING CUSTOM SEARCH BOX
+            // ========================================================
+
+            var table =
+                $("#receivedSamplesTable").DataTable();
+
+
+            $("#sampleSearch").on(
+                "keyup change",
+                function () {
+
+                    table
+                        .search(this.value)
+                        .draw();
+                }
+            );
+
+        });
+
+    </script>
+}

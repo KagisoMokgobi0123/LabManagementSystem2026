@@ -1,0 +1,2075 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Lab Technician Dashboard";
+    Layout = "_TechnicianLayout";
+
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    var technicianName = currentUser?.FullName ?? "Lab Technician";
+    var technicianEmail = currentUser?.Email ?? "";
+
+    var technicianInitial =
+        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+            ? currentUser.FirstName.Substring(0, 1).ToUpper()
+            : "T";
+}
+
+<style>
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .tech-dashboard {
+        min-height: 100vh;
+        background: #f4f7fb;
+    }
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .tech-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 38px 0 82px;
+        background: linear-gradient(
+            135deg,
+            #073b5c 0%,
+            #075985 45%,
+            #0284c7 100%
+        );
+    }
+
+    .tech-hero::before {
+        content: "";
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        right: 220px;
+        bottom: -190px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.05);
+    }
+
+    .tech-hero::after {
+        content: "";
+        position: absolute;
+        width: 380px;
+        height: 380px;
+        right: -100px;
+        top: -210px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.06);
+    }
+
+    .tech-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .tech-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        margin-bottom: 14px;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,.20);
+        background: rgba(255,255,255,.13);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .tech-hero h1 {
+        margin-bottom: 7px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .tech-hero p {
+        max-width: 720px;
+        margin: 0;
+        color: rgba(255,255,255,.82);
+        font-size: 14px;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 17px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: .2s ease;
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .hero-btn-primary {
+        background: #fff;
+        color: #075985 !important;
+    }
+
+    .hero-btn-outline {
+        border: 1px solid rgba(255,255,255,.50);
+        background: rgba(255,255,255,.08);
+        color: #fff !important;
+    }
+
+    /* =========================================================
+       PAGE INNER
+       ========================================================= */
+
+    .tech-page-inner {
+        position: relative;
+        z-index: 5;
+        margin-top: -48px;
+        padding-bottom: 50px;
+    }
+
+    /* =========================================================
+       CLICKABLE STAT CARDS
+       ========================================================= */
+
+    .stat-card-link {
+        display: block;
+        height: 100%;
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    .stat-card {
+        position: relative;
+        height: 100%;
+        padding: 20px;
+        overflow: hidden;
+        border: 1px solid transparent;
+        border-radius: 13px;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+        cursor: pointer;
+
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease,
+            border-color .2s ease;
+    }
+
+    .stat-card-link:hover .stat-card {
+        transform: translateY(-4px);
+        border-color: #bae6fd;
+        box-shadow: 0 12px 30px rgba(15,23,42,.13);
+    }
+
+    .stat-card::after {
+        content: "\f054";
+        position: absolute;
+        right: 20px;
+        bottom: 17px;
+
+        font-family: "Font Awesome 5 Free";
+        font-size: 10px;
+        font-weight: 900;
+
+        color: #cbd5e1;
+        opacity: 0;
+        transform: translateX(-5px);
+        transition: .2s ease;
+    }
+
+    .stat-card-link:hover .stat-card::after {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .stat-card-link:focus {
+        outline: none;
+    }
+
+    .stat-card-link:focus .stat-card {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2,132,199,.15);
+    }
+
+    .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .stat-title {
+        margin-bottom: 7px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        margin: 0;
+        color: #0f172a;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .stat-note {
+        margin-top: 7px;
+        padding-right: 10px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+
+        border-radius: 11px;
+        font-size: 17px;
+    }
+
+    .icon-blue {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .icon-cyan {
+        background: #cffafe;
+        color: #0891b2;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .icon-orange {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .icon-purple {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .icon-yellow {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    /* =========================================================
+       DASHBOARD CARDS
+       ========================================================= */
+
+    .dashboard-card {
+        margin-bottom: 24px;
+        border: 0;
+        border-radius: 13px;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
+    }
+
+    .dashboard-card .card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef2f7;
+        background: transparent;
+    }
+
+    .dashboard-card .card-body {
+        padding: 20px;
+    }
+
+    .dashboard-title {
+        margin: 0;
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .dashboard-subtitle {
+        margin-top: 4px;
+        margin-bottom: 0;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    /* =========================================================
+       WORKFLOW
+       ========================================================= */
+
+    .workflow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 5px;
+    }
+
+    .workflow-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .workflow-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 48px;
+        height: 48px;
+
+        margin: auto;
+        border-radius: 50%;
+
+        background: #e0f2fe;
+        color: #0284c7;
+
+        font-size: 16px;
+    }
+
+    .workflow-title {
+        margin-top: 8px;
+        color: #334155;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .workflow-line {
+        flex: .6;
+        height: 2px;
+        margin-top: -20px;
+        background: #e2e8f0;
+    }
+
+    /* =========================================================
+       QUICK ACTIONS
+       ========================================================= */
+
+    .quick-action {
+        display: flex;
+        align-items: center;
+
+        min-height: 78px;
+        margin-bottom: 12px;
+        padding: 15px;
+
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+
+        background: #fff;
+
+        color: inherit !important;
+        text-decoration: none !important;
+
+        transition: .2s ease;
+    }
+
+    .quick-action:hover {
+        transform: translateY(-2px);
+        border-color: #0284c7;
+        background: #f8fcff;
+        box-shadow: 0 6px 18px rgba(15,23,42,.06);
+    }
+
+    .quick-action-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+
+        margin-right: 12px;
+
+        border-radius: 10px;
+
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .quick-action-title {
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .quick-action-text {
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .quick-action-arrow {
+        margin-left: auto;
+        padding-left: 10px;
+        color: #cbd5e1;
+    }
+
+    /* =========================================================
+       ATTENTION
+       ========================================================= */
+
+    .attention-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 13px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .attention-item:last-child {
+        border-bottom: 0;
+    }
+
+    .attention-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 37px;
+        height: 37px;
+        min-width: 37px;
+
+        margin-right: 11px;
+
+        border-radius: 9px;
+    }
+
+    .attention-title {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .attention-text {
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    /* =========================================================
+       TABLE
+       ========================================================= */
+
+    .tech-table {
+        margin-bottom: 0;
+    }
+
+    .tech-table thead th {
+        padding: 12px 10px;
+
+        border-top: 0;
+        border-bottom: 1px solid #e2e8f0;
+
+        color: #64748b;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+
+    .tech-table tbody td {
+        padding: 13px 10px;
+        vertical-align: middle;
+
+        border-color: #f1f5f9;
+
+        color: #334155;
+        font-size: 12px;
+    }
+
+    .request-number {
+        color: #075985;
+        font-weight: 700;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 9px;
+
+        border-radius: 50px;
+
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .status-submitted {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .status-progress {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-review {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .status-verified {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .status-stat {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    /* =========================================================
+       FILTERS
+       ========================================================= */
+
+    .filter-select {
+        height: 35px;
+        border: 1px solid #e2e8f0;
+        border-radius: 7px;
+        font-size: 11px;
+    }
+
+    /* =========================================================
+       PROFILE
+       ========================================================= */
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 46px;
+        height: 46px;
+
+        margin-right: 12px;
+
+        border-radius: 50%;
+
+        background: linear-gradient(
+            135deg,
+            #075985,
+            #0284c7
+        );
+
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .profile-name {
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .profile-role,
+    .profile-email {
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media(max-width: 768px) {
+
+        .tech-hero {
+            padding-top: 25px;
+        }
+
+        .tech-hero h1 {
+            font-size: 24px;
+        }
+
+        .hero-actions {
+            margin-top: 20px;
+        }
+
+        .workflow {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .workflow-item {
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        .workflow-title {
+            margin-top: 0;
+            margin-left: 10px;
+        }
+
+        .workflow-line {
+            flex: none;
+            width: 2px;
+            height: 20px;
+            margin: 0 0 0 23px;
+        }
+    }
+</style>
+
+
+<div class="tech-dashboard">
+
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+
+    <div class="tech-hero">
+
+        <div class="container-fluid">
+
+            <div class="tech-hero-content">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <div class="tech-badge">
+
+                            <i class="fas fa-microscope"></i>
+
+                            Lab Technician Subsystem
+
+                        </div>
+
+                        <h1>
+                            Welcome, @technicianName
+                        </h1>
+
+                        <p>
+                            Receive patient test requests and samples,
+                            select assigned test types, capture laboratory
+                            results and perform two-step result verification.
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="hero-actions justify-content-md-end">
+
+                            <a asp-area="Technician"
+                               asp-controller="ReceiveSamples"
+                               asp-action="Index"
+                               class="hero-btn hero-btn-primary">
+
+                                <i class="fas fa-vials"></i>
+
+                                Receive Samples
+
+                            </a>
+
+                            <a asp-area="Technician"
+                               asp-controller="Verification"
+                               asp-action="Pending"
+                               class="hero-btn hero-btn-outline">
+
+                                <i class="fas fa-check-double"></i>
+
+                                Verify Results
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
+    <div class="container-fluid tech-page-inner">
+
+
+        <!-- =====================================================
+             WORKLOAD CARDS - ROW 1
+             ===================================================== -->
+
+        <div class="row">
+
+            <!-- MY SELECTED TESTS -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="MyTests"
+                   class="stat-card-link"
+                   title="View my selected tests">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    My Selected Tests
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Tests currently assigned to you
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-blue">
+
+                                <i class="fas fa-microscope"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- WAITING FOR SELECTION -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Available"
+                   class="stat-card-link"
+                   title="View tests waiting for selection">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Waiting for Selection
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Available assigned test types
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-cyan">
+
+                                <i class="fas fa-list-check"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- WAITING FOR VERIFICATION -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Verification"
+                   asp-action="Pending"
+                   class="stat-card-link"
+                   title="View results waiting for verification">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Waiting for Verification
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Completed results requiring verification
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-purple">
+
+                                <i class="fas fa-user-check"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- TO BE REVIEWED -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Review"
+                   class="stat-card-link"
+                   title="View tests returned for review">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    To Be Reviewed
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Results returned with verification notes
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-orange">
+
+                                <i class="fas fa-rotate-left"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             WORKLOAD CARDS - ROW 2
+             ===================================================== -->
+
+        <div class="row">
+
+            <!-- URGENT / STAT -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Urgent"
+                   class="stat-card-link"
+                   title="View urgent and STAT tests">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Urgent / STAT Tests
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    High-priority laboratory tests
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-red">
+
+                                <i class="fas fa-bolt"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- OVERDUE -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Overdue"
+                   class="stat-card-link"
+                   title="View overdue tests">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Overdue Tests
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Tests beyond turnaround time
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-red">
+
+                                <i class="fas fa-clock"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- NEARING TAT -->
+
+            <div class="col-xl-4 col-md-12 mb-4">
+
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="NearingTat"
+                   class="stat-card-link"
+                   title="View tests nearing turnaround time">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Nearing TAT Limit
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Tests approaching expected completion
+                                </div>
+
+                            </div>
+
+                            <div class="stat-icon icon-yellow">
+
+                                <i class="fas fa-hourglass-half"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             LABORATORY WORKFLOW
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Laboratory Test Workflow
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Lab Technician test processing and verification workflow
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="workflow">
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+                            <i class="fas fa-vials"></i>
+                        </div>
+
+                        <div class="workflow-title">
+                            Receive Samples
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+                            <i class="fas fa-list-check"></i>
+                        </div>
+
+                        <div class="workflow-title">
+                            Select Test Type
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+                            <i class="fas fa-microscope"></i>
+                        </div>
+
+                        <div class="workflow-title">
+                            Perform Test
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+
+                        <div class="workflow-title">
+                            Capture Results
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+
+                        <div class="workflow-title">
+                            Verify Results
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+                            <i class="fas fa-circle-check"></i>
+                        </div>
+
+                        <div class="workflow-title">
+                            Verified
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             TECHNICIAN ACTIONS + ATTENTION
+             ===================================================== -->
+
+        <div class="row">
+
+            <!-- ACTIONS -->
+
+            <div class="col-lg-7">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <h4 class="dashboard-title">
+                            Technician Actions
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Access the main laboratory processing functions
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+                            <!-- RECEIVE SAMPLES -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="ReceiveSamples"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-vials"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Receive Samples
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Verify request number, barcode,
+                                            sample type and receipt time
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- SELECT TEST TYPE -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Tests"
+                                   asp-action="Available"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-list-check"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Select Test Type
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Select test types assigned to you
+                                            by the laboratory manager
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- MY TESTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Tests"
+                                   asp-action="MyTests"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-microscope"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            My Selected Tests
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            View tests selected and currently
+                                            being processed by you
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- CAPTURE RESULTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Tests"
+                                   asp-action="MyTests"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-file-medical"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Capture Test Results
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Record result values, notes and
+                                            abnormal laboratory findings
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- VERIFY RESULTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Verification"
+                                   asp-action="Pending"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-user-check"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Verify Test Results
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Perform second-technician
+                                            validation of completed results
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- REVIEW -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Tests"
+                                   asp-action="Review"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-rotate-left"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Tests To Be Reviewed
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Review returned results and
+                                            verification notes
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- VERIFICATION HISTORY -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Verification"
+                                   asp-action="History"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-clock-rotate-left"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Verification History
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            View result reviews, verifier
+                                            notes and previous changes
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- REPORTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Technician"
+                                   asp-controller="Reports"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Technician Reports
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Generate completed test reports
+                                            by date range and category
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- REQUIRES ATTENTION -->
+
+            <div class="col-lg-5">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <h4 class="dashboard-title">
+                            Requires Attention
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Priority workload and turnaround-time alerts
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <a asp-area="Technician"
+                           asp-controller="Tests"
+                           asp-action="Urgent"
+                           class="attention-item text-decoration-none">
+
+                            <div class="attention-icon icon-red">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Urgent / STAT Tests
+                                </div>
+
+                                <div class="attention-text">
+                                    View high-priority tests requiring
+                                    immediate processing.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                        <a asp-area="Technician"
+                           asp-controller="Tests"
+                           asp-action="Overdue"
+                           class="attention-item text-decoration-none">
+
+                            <div class="attention-icon icon-red">
+                                <i class="fas fa-clock"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Overdue Tests
+                                </div>
+
+                                <div class="attention-text">
+                                    View tests that have exceeded their
+                                    turnaround time.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                        <a asp-area="Technician"
+                           asp-controller="Tests"
+                           asp-action="NearingTat"
+                           class="attention-item text-decoration-none">
+
+                            <div class="attention-icon icon-yellow">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Nearing Turnaround Limit
+                                </div>
+
+                                <div class="attention-text">
+                                    View tests approaching expected
+                                    completion time.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                        <a asp-area="Technician"
+                           asp-controller="Tests"
+                           asp-action="Review"
+                           class="attention-item text-decoration-none">
+
+                            <div class="attention-icon icon-orange">
+                                <i class="fas fa-rotate-left"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Returned for Review
+                                </div>
+
+                                <div class="attention-text">
+                                    Review verifier notes and update
+                                    returned test results.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             MY TEST WORKLOAD
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div class="row align-items-center">
+
+                    <div class="col-lg-5">
+
+                        <h4 class="dashboard-title">
+                            My Test Workload
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Selected tests, expected completion times
+                            and processing status
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-lg-7 mt-3 mt-lg-0">
+
+                        <div class="row">
+
+                            <div class="col-md-3 mb-2 mb-md-0">
+
+                                <select class="form-control filter-select">
+
+                                    <option>All Urgencies</option>
+                                    <option>Routine</option>
+                                    <option>Urgent</option>
+                                    <option>STAT</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-3 mb-2 mb-md-0">
+
+                                <select class="form-control filter-select">
+
+                                    <option>
+                                        All Categories
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-3 mb-2 mb-md-0">
+
+                                <select class="form-control filter-select">
+
+                                    <option>Due Time</option>
+                                    <option>Overdue</option>
+                                    <option>Due Soon</option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-3">
+
+                                <input type="text"
+                                       class="form-control filter-select"
+                                       placeholder="Request #" />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table tech-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Request #</th>
+                                <th>Test Type</th>
+                                <th>Category</th>
+                                <th>Urgency</th>
+                                <th>Started</th>
+                                <th>Expected Completion</th>
+                                <th>Status</th>
+                                <th>Action</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <tr>
+
+                                <td colspan="8"
+                                    class="text-center py-5 text-muted">
+
+                                    <i class="fas fa-microscope fa-2x mb-3 d-block"></i>
+
+                                    No tests currently selected.
+
+                                    <div class="mt-3">
+
+                                        <a asp-area="Technician"
+                                           asp-controller="Tests"
+                                           asp-action="Available"
+                                           class="btn btn-primary btn-sm">
+
+                                            <i class="fas fa-list-check mr-1"></i>
+
+                                            View Available Tests
+
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             TWO-STEP RESULT VERIFICATION
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Test Result Verification
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Two-step validation — a technician cannot verify
+                    their own test result
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <!-- PENDING -->
+
+                    <div class="col-md-4">
+
+                        <a asp-area="Technician"
+                           asp-controller="Verification"
+                           asp-action="Pending"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Waiting for Verification
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Completed tests available for
+                                    second-technician verification
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- VERIFIED -->
+
+                    <div class="col-md-4">
+
+                        <a asp-area="Technician"
+                           asp-controller="Verification"
+                           asp-action="Verified"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fas fa-circle-check"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Verified Results
+                                </div>
+
+                                <div class="quick-action-text">
+                                    View results successfully verified
+                                    by a second technician
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+
+                    <!-- HISTORY -->
+
+                    <div class="col-md-4">
+
+                        <a asp-area="Technician"
+                           asp-controller="Verification"
+                           asp-action="History"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+                                <i class="fas fa-clock-rotate-left"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Review History
+                                </div>
+
+                                <div class="quick-action-text">
+                                    View verification notes and complete
+                                    review history
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             REPORTING
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Technician Reports
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Generate PDF reports of tests completed by you,
+                    grouped by test category and date range
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="quick-action-icon mr-3">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Completed Tests Report
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Select a date range and generate a
+                                    PDF report of tests completed by you,
+                                    grouped by category.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4 text-md-right mt-3 mt-md-0">
+
+                        <a asp-area="Technician"
+                           asp-controller="Reports"
+                           asp-action="Index"
+                           class="btn btn-primary btn-sm">
+
+                            <i class="fas fa-file-pdf mr-1"></i>
+
+                            Generate Report
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ACCOUNT & SECURITY
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    My Account & Security
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Manage your Lab Technician profile and account security
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-6">
+
+                        <div class="profile-summary">
+
+                            <div class="profile-avatar">
+                                @technicianInitial
+                            </div>
+
+                            <div>
+
+                                <div class="profile-name">
+                                    @technicianName
+                                </div>
+
+                                <div class="profile-role">
+                                    Lab Technician
+                                </div>
+
+                                <div class="profile-email">
+                                    @technicianEmail
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 text-md-right mt-3 mt-md-0">
+
+                        <a asp-area="Technician"
+                           asp-controller="Profile"
+                           asp-action="Index"
+                           class="btn btn-outline-primary btn-sm mr-2">
+
+                            <i class="fas fa-user mr-1"></i>
+
+                            My Profile
+
+                        </a>
+
+
+                        <a asp-area="Technician"
+                           asp-controller="Profile"
+                           asp-action="ChangePassword"
+                           class="btn btn-outline-secondary btn-sm mr-2">
+
+                            <i class="fas fa-key mr-1"></i>
+
+                            Change Password
+
+                        </a>
+
+
+                        <form asp-area=""
+                              asp-controller="Account"
+                              asp-action="Logout"
+                              method="post"
+                              class="d-inline">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm">
+
+                                <i class="fas fa-sign-out-alt mr-1"></i>
+
+                                Secure Logout
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

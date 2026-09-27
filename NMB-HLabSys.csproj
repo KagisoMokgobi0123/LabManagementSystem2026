@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <None Remove="Areas\Manager\Controllers\gvh5guig.glj~" />
+    <None Remove="Areas\Technician\Models\SampleTypeModel.cs~RFa68e002.TMP" />
   </ItemGroup>
 
   <ItemGroup>
@@ -39,13 +40,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Areas\Administrator\Controllers\" />
     <Folder Include="Areas\Administrator\Data\" />
+    <Folder Include="Areas\Administrator\Models\" />
     <Folder Include="Areas\Administrator\Views\" />
     <Folder Include="Areas\Doctor\Data\" />
-    <Folder Include="Areas\Patient\Controllers\" />
     <Folder Include="Areas\Patient\Data\" />
-    <Folder Include="Areas\Patient\Views\" />
+    <Folder Include="Areas\Patient\Models\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

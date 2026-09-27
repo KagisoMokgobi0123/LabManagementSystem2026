@@ -1,0 +1,2291 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
+
+@using NMB_HLabSys.Areas.Doctor.Models
+@using NMB_HLabSys.Areas.Technician.Models
+
+@{
+    ViewData["Title"] = "Receive Samples";
+    Layout = "_TechnicianLayout";
+
+    var requests = Model?.ToList()
+        ?? new List<TestRequestsModel>();
+
+    var totalRequests = requests.Count;
+
+    var routineRequests = requests.Count(r =>
+        r.Urgency == Urgency.Routine);
+
+    var urgentRequests = requests.Count(r =>
+        r.Urgency == Urgency.Urgent);
+
+    var statRequests = requests.Count(r =>
+        r.Urgency == Urgency.Stat);
+}
+
+<style>
+
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .receive-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+    }
+
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .receive-hero {
+        position: relative;
+        overflow: hidden;
+
+        padding: 38px 0 82px;
+
+        background: linear-gradient(
+            135deg,
+            #073b5c 0%,
+            #075985 45%,
+            #0284c7 100%
+        );
+    }
+
+    .receive-hero::before {
+        content: "";
+
+        position: absolute;
+
+        width: 280px;
+        height: 280px;
+
+        right: 200px;
+        bottom: -210px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.05);
+    }
+
+    .receive-hero::after {
+        content: "";
+
+        position: absolute;
+
+        width: 380px;
+        height: 380px;
+
+        right: -100px;
+        top: -220px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.06);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 7px 13px;
+
+        margin-bottom: 14px;
+
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 50px;
+
+        background: rgba(255,255,255,.13);
+
+        color: #fff;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .receive-hero h1 {
+        margin-bottom: 7px;
+
+        color: #fff;
+
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .receive-hero p {
+        max-width: 720px;
+
+        margin: 0;
+
+        color: rgba(255,255,255,.82);
+
+        font-size: 14px;
+    }
+
+
+    /* =========================================================
+       HERO BUTTONS
+       ========================================================= */
+
+    .hero-actions {
+        display: flex;
+
+        justify-content: flex-end;
+        flex-wrap: wrap;
+
+        gap: 10px;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 10px 17px;
+
+        border-radius: 8px;
+
+        font-size: 13px;
+        font-weight: 600;
+
+        text-decoration: none !important;
+
+        transition: .2s ease;
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .hero-btn-primary {
+        background: #fff;
+
+        color: #075985 !important;
+    }
+
+    .hero-btn-outline {
+        border: 1px solid rgba(255,255,255,.50);
+
+        background: rgba(255,255,255,.08);
+
+        color: #fff !important;
+    }
+
+
+    /* =========================================================
+       CONTENT
+       ========================================================= */
+
+    .receive-content {
+        position: relative;
+
+        z-index: 5;
+
+        margin-top: -48px;
+
+        padding-bottom: 50px;
+    }
+
+
+    /* =========================================================
+       SUMMARY CARDS
+       ========================================================= */
+
+    .summary-card {
+        height: 100%;
+
+        padding: 20px;
+
+        border: 1px solid transparent;
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow:
+            0 4px 18px rgba(15,23,42,.07);
+
+        transition: .2s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-3px);
+
+        border-color: #bae6fd;
+
+        box-shadow:
+            0 10px 25px rgba(15,23,42,.10);
+    }
+
+    .summary-top {
+        display: flex;
+
+        justify-content: space-between;
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .summary-title {
+        margin-bottom: 7px;
+
+        color: #64748b;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .summary-number {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .summary-note {
+        margin-top: 7px;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+    .summary-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 44px;
+        height: 44px;
+
+        min-width: 44px;
+
+        border-radius: 11px;
+
+        font-size: 17px;
+    }
+
+    .icon-blue {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .icon-cyan {
+        background: #cffafe;
+        color: #0891b2;
+    }
+
+    .icon-orange {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+
+    /* =========================================================
+       TABLE CARD
+       ========================================================= */
+
+    .requests-card {
+        margin-top: 24px;
+
+        overflow: hidden;
+
+        border: 0;
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow:
+            0 4px 18px rgba(15,23,42,.06);
+    }
+
+    .requests-card-header {
+        padding: 18px 20px;
+
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .requests-title {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .requests-subtitle {
+        margin-top: 4px;
+        margin-bottom: 0;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       FILTERS
+       ========================================================= */
+
+    .filter-control {
+        height: 37px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+
+        color: #334155;
+
+        font-size: 11px;
+    }
+
+    .filter-control:focus {
+        border-color: #38bdf8;
+
+        box-shadow:
+            0 0 0 3px rgba(14,165,233,.10);
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper i {
+        position: absolute;
+
+        top: 50%;
+        left: 13px;
+
+        color: #94a3b8;
+
+        transform: translateY(-50%);
+
+        z-index: 2;
+    }
+
+    .search-wrapper input {
+        padding-left: 36px;
+    }
+
+
+    /* =========================================================
+       TABLE
+       ========================================================= */
+
+    .requests-table {
+        margin-bottom: 0;
+    }
+
+    .requests-table thead th {
+        padding: 12px 13px;
+
+        border-top: 0;
+        border-bottom: 1px solid #e2e8f0;
+
+        background: #f8fafc;
+
+        color: #64748b;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        text-transform: uppercase;
+
+        letter-spacing: .4px;
+
+        white-space: nowrap;
+    }
+
+    .requests-table tbody td {
+        padding: 14px 13px;
+
+        vertical-align: middle;
+
+        border-color: #f1f5f9;
+
+        color: #334155;
+
+        font-size: 12px;
+    }
+
+    .requests-table tbody tr {
+        transition: .15s ease;
+    }
+
+    .requests-table tbody tr:hover {
+        background: #f8fcff;
+    }
+
+
+    /* =========================================================
+       REQUEST
+       ========================================================= */
+
+    .request-number {
+        color: #075985;
+
+        font-weight: 700;
+    }
+
+    .request-date {
+        display: block;
+
+        margin-top: 3px;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       PERSON
+       ========================================================= */
+
+    .person-name {
+        display: block;
+
+        color: #334155;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .person-label {
+        display: block;
+
+        margin-top: 2px;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+    }
+
+
+    /* =========================================================
+       BARCODE
+       ========================================================= */
+
+    .barcode-value {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 5px 9px;
+
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+
+        background: #f8fafc;
+
+        color: #334155;
+
+        font-family: Consolas, monospace;
+
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .barcode-missing {
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       SAMPLE TYPE
+       ========================================================= */
+
+    .sample-type {
+        display: flex;
+
+        align-items: center;
+
+        gap: 7px;
+    }
+
+    .sample-type-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 30px;
+        height: 30px;
+
+        min-width: 30px;
+
+        border-radius: 7px;
+
+        background: #e0f2fe;
+
+        color: #0284c7;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       URGENCY
+       ========================================================= */
+
+    .urgency-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 5px 9px;
+
+        border-radius: 50px;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        white-space: nowrap;
+    }
+
+    .urgency-routine {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .urgency-urgent {
+        background: #ffedd5;
+        color: #c2410c;
+    }
+
+    .urgency-stat {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+
+    /* =========================================================
+       STATUS
+       ========================================================= */
+
+    .status-badge {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 5px 9px;
+
+        border-radius: 50px;
+
+        background: #e0f2fe;
+
+        color: #0369a1;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       TEST TYPE COUNT
+       ========================================================= */
+
+    .test-count {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 5px 8px;
+
+        border-radius: 6px;
+
+        background: #f1f5f9;
+
+        color: #475569;
+
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+
+    /* =========================================================
+       RECEIVE BUTTON
+       ========================================================= */
+
+    .btn-receive {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 6px;
+
+        padding: 7px 12px;
+
+        border: 0;
+        border-radius: 7px;
+
+        background: #0284c7;
+
+        color: #fff !important;
+
+        font-size: 11px;
+        font-weight: 600;
+
+        text-decoration: none !important;
+
+        box-shadow:
+            0 3px 8px rgba(2,132,199,.18);
+
+        transition: .2s ease;
+    }
+
+    .btn-receive:hover {
+        transform: translateY(-1px);
+
+        background: #0369a1;
+
+        box-shadow:
+            0 5px 12px rgba(2,132,199,.25);
+    }
+
+    .btn-disabled {
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 5px;
+
+        padding: 7px 10px;
+
+        border-radius: 7px;
+
+        background: #f1f5f9;
+
+        color: #94a3b8;
+
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+
+    /* =========================================================
+       EMPTY STATE
+       ========================================================= */
+
+    .empty-state {
+        padding: 65px 20px;
+
+        text-align: center;
+    }
+
+    .empty-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 65px;
+        height: 65px;
+
+        margin: 0 auto 16px;
+
+        border-radius: 50%;
+
+        background: #dcfce7;
+
+        color: #16a34a;
+
+        font-size: 24px;
+    }
+
+    .empty-state h5 {
+        margin-bottom: 7px;
+
+        color: #334155;
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .empty-state p {
+        max-width: 450px;
+
+        margin: auto;
+
+        color: #94a3b8;
+
+        font-size: 12px;
+    }
+
+
+    /* =========================================================
+       MODAL
+       ========================================================= */
+
+    #receiveSampleModal .modal-content {
+        overflow: hidden;
+
+        border: 0;
+        border-radius: 13px;
+
+        box-shadow:
+            0 20px 60px rgba(15,23,42,.20);
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media(max-width: 768px) {
+
+        .receive-hero {
+            padding-top: 25px;
+        }
+
+        .receive-hero h1 {
+            font-size: 24px;
+        }
+
+        .hero-actions {
+            justify-content: flex-start;
+
+            margin-top: 20px;
+        }
+
+        .requests-card-header .filters-area {
+            margin-top: 15px;
+        }
+    }
+
+</style>
+
+
+<div class="receive-page">
+
+
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+
+    <div class="receive-hero">
+
+        <div class="container-fluid">
+
+            <div class="hero-content">
+
+                <div class="row align-items-center">
+
+
+                    <div class="col-md-8">
+
+                        <div class="hero-badge">
+
+                            <i class="fas fa-vials"></i>
+
+                            Sample Reception
+
+                        </div>
+
+
+                        <h1>
+                            Receive Patient Samples
+                        </h1>
+
+
+                        <p>
+                            Verify the test request, receiving technician,
+                            sample barcode, sample type and reception date/time
+                            before accepting a physical sample into the laboratory.
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="hero-actions">
+
+
+                            <a asp-area="Technician"
+                               asp-controller="ReceiveSamples"
+                               asp-action="VerifiedSamples"
+                               class="hero-btn hero-btn-primary">
+
+                                <i class="fas fa-circle-check"></i>
+
+                                Received Samples
+
+                            </a>
+
+
+                            <a asp-area="Technician"
+                               asp-controller="Home"
+                               asp-action="Index"
+                               class="hero-btn hero-btn-outline">
+
+                                <i class="fas fa-gauge-high"></i>
+
+                                Dashboard
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         CONTENT
+         ========================================================= -->
+
+    <div class="container-fluid receive-content">
+
+
+        <!-- =====================================================
+             SUMMARY
+             ===================================================== -->
+
+        <div class="row">
+
+
+            <!-- TOTAL -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                Awaiting Reception
+                            </div>
+
+                            <h2 class="summary-number">
+                                @totalRequests
+                            </h2>
+
+                            <div class="summary-note">
+                                Submitted laboratory requests
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-blue">
+
+                            <i class="fas fa-vials"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ROUTINE -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                Routine
+                            </div>
+
+                            <h2 class="summary-number">
+                                @routineRequests
+                            </h2>
+
+                            <div class="summary-note">
+                                Standard priority requests
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-cyan">
+
+                            <i class="fas fa-flask"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- URGENT -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                Urgent
+                            </div>
+
+                            <h2 class="summary-number">
+                                @urgentRequests
+                            </h2>
+
+                            <div class="summary-note">
+                                High-priority requests
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-orange">
+
+                            <i class="fas fa-triangle-exclamation"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STAT -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <div class="summary-card">
+
+                    <div class="summary-top">
+
+                        <div>
+
+                            <div class="summary-title">
+                                STAT
+                            </div>
+
+                            <h2 class="summary-number">
+                                @statRequests
+                            </h2>
+
+                            <div class="summary-note">
+                                Immediate laboratory priority
+                            </div>
+
+                        </div>
+
+
+                        <div class="summary-icon icon-red">
+
+                            <i class="fas fa-bolt"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             REQUEST TABLE
+             ===================================================== -->
+
+        <div class="requests-card">
+
+
+            <div class="requests-card-header">
+
+                <div class="row align-items-center">
+
+
+                    <div class="col-lg-5">
+
+                        <h4 class="requests-title">
+
+                            <i class="fas fa-vials text-primary mr-2"></i>
+
+                            Samples Awaiting Reception
+
+                        </h4>
+
+
+                        <p class="requests-subtitle">
+                            Submitted requests requiring physical sample verification
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-lg-7 filters-area">
+
+                        <div class="row">
+
+
+                            <!-- URGENCY FILTER -->
+
+                            <div class="col-md-4 mb-2 mb-md-0">
+
+                                <select id="urgencyFilter"
+                                        class="form-control filter-control">
+
+                                    <option value="">
+                                        All Urgencies
+                                    </option>
+
+                                    <option value="Routine">
+                                        Routine
+                                    </option>
+
+                                    <option value="Urgent">
+                                        Urgent
+                                    </option>
+
+                                    <option value="Stat">
+                                        STAT
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- SEARCH -->
+
+                            <div class="col-md-8">
+
+                                <div class="search-wrapper">
+
+                                    <i class="fas fa-search"></i>
+
+                                    <input type="text"
+                                           id="requestSearch"
+                                           class="form-control filter-control"
+                                           placeholder="Search request, patient, doctor or barcode..." />
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            @if (requests.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table requests-table"
+                           id="requestsTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Request #
+                                </th>
+
+                                <th>
+                                    Patient
+                                </th>
+
+                                <th>
+                                    Doctor
+                                </th>
+
+                                <th>
+                                    Barcode
+                                </th>
+
+                                <th>
+                                    Sample Type
+                                </th>
+
+                                <th>
+                                    Tests
+                                </th>
+
+                                <th>
+                                    Urgency
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th class="text-right">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            @foreach (var request in requests)
+                            {
+                                var sample = request.Samples
+                                    .FirstOrDefault(s =>
+                                        !s.IsDeleted &&
+                                        !s.IsReceived);
+
+
+                                var barcode =
+                                    sample?.Barcode ?? "N/A";
+
+
+                                var sampleType =
+                                    sample?.SampleType?.Name ?? "N/A";
+
+
+                                var urgencyClass =
+                                    request.Urgency == Urgency.Stat
+                                        ? "urgency-stat"
+                                        : request.Urgency == Urgency.Urgent
+                                            ? "urgency-urgent"
+                                            : "urgency-routine";
+
+
+                                <tr data-urgency="@request.Urgency">
+
+
+                                    <!-- REQUEST -->
+
+                                    <td>
+
+                                        <span class="request-number">
+                                            @request.RequestNumber
+                                        </span>
+
+                                        <span class="request-date">
+
+                                            <i class="far fa-calendar mr-1"></i>
+
+                                            @request.RequestDate
+                                                .ToString("dd MMM yyyy HH:mm")
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- PATIENT -->
+
+                                    <td>
+
+                                        <span class="person-name">
+                                            @(request.Patient?.FullName ?? "N/A")
+                                        </span>
+
+                                        <span class="person-label">
+                                            Patient
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- DOCTOR -->
+
+                                    <td>
+
+                                        <span class="person-name">
+                                            @(request.Doctor?.FullName ?? "N/A")
+                                        </span>
+
+                                        <span class="person-label">
+                                            Requesting Doctor
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- BARCODE -->
+
+                                    <td>
+
+                                        @if (sample != null &&
+                                             !string.IsNullOrWhiteSpace(sample.Barcode))
+                                        {
+                                            <span class="barcode-value">
+
+                                                <i class="fas fa-barcode"></i>
+
+                                                @sample.Barcode
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="barcode-missing">
+
+                                                <i class="fas fa-circle-exclamation mr-1"></i>
+
+                                                No Sample
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- SAMPLE TYPE -->
+
+                                    <td>
+
+                                        @if (sample != null)
+                                        {
+                                            <div class="sample-type">
+
+                                                <div class="sample-type-icon">
+
+                                                    <i class="fas fa-vial"></i>
+
+                                                </div>
+
+                                                <span>
+                                                    @sampleType
+                                                </span>
+
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                N/A
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <!-- TEST COUNT -->
+
+                                    <td>
+
+                                        <span class="test-count">
+
+                                            <i class="fas fa-microscope"></i>
+
+                                            @request.TestTypes.Count
+
+                                            @(request.TestTypes.Count == 1
+                                                ? "Test"
+                                                : "Tests")
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- URGENCY -->
+
+                                    <td>
+
+                                        <span class="urgency-badge @urgencyClass">
+
+                                            @if (request.Urgency == Urgency.Stat)
+                                            {
+                                                <i class="fas fa-bolt"></i>
+                                            }
+                                            else if (request.Urgency == Urgency.Urgent)
+                                            {
+                                                <i class="fas fa-triangle-exclamation"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="fas fa-circle"></i>
+                                            }
+
+                                            @request.Urgency
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        <span class="status-badge">
+
+                                            <i class="fas fa-clock"></i>
+
+                                            @request.Status
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- ACTION -->
+
+                                    <td class="text-right">
+
+                                        @if (sample != null)
+                                        {
+                                            <button type="button"
+                                                    class="btn-receive js-receive-sample"
+                                                    data-request-number="@request.RequestNumber">
+
+                                                <i class="fas fa-box-open"></i>
+
+                                                Receive
+
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="btn-disabled">
+
+                                                <i class="fas fa-ban"></i>
+
+                                                No Sample
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <!-- =================================================
+                     EMPTY STATE
+                     ================================================= -->
+
+                <div class="empty-state">
+
+                    <div class="empty-icon">
+
+                        <i class="fas fa-check"></i>
+
+                    </div>
+
+                    <h5>
+                        No Samples Awaiting Reception
+                    </h5>
+
+                    <p>
+                        There are currently no submitted patient test
+                        requests waiting for sample reception.
+                        Newly submitted requests will appear here.
+                    </p>
+
+
+                    <div class="mt-4">
+
+                        <a asp-area="Technician"
+                           asp-controller="ReceiveSamples"
+                           asp-action="VerifiedSamples"
+                           class="btn btn-outline-primary btn-sm">
+
+                            <i class="fas fa-circle-check mr-1"></i>
+
+                            View Received Samples
+
+                        </a>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     RECEIVE SAMPLE MODAL
+     Content is loaded from _ReceiveSampleModal
+     ============================================================= -->
+
+<div class="modal fade"
+     id="receiveSampleModal"
+     tabindex="-1"
+     role="dialog"
+     aria-labelledby="receiveSampleModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered"
+         role="document">
+
+        <div class="modal-content"
+             id="receiveSampleModalContent">
+
+            <div class="modal-body text-center py-5">
+
+                <div class="spinner-border text-primary"
+                     role="status">
+
+                    <span class="sr-only">
+                        Loading...
+                    </span>
+
+                </div>
+
+                <p class="mt-3 text-muted mb-0">
+                    Loading sample information...
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <!-- ============================================================
+         DATATABLES CSS
+         ============================================================ -->
+
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
+
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
+
+
+    <!-- ============================================================
+         DATATABLES
+         ============================================================ -->
+
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <!-- ============================================================
+         BUTTONS
+         ============================================================ -->
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+
+
+    <!-- ============================================================
+         EXCEL
+         ============================================================ -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+
+
+    <!-- ============================================================
+         PDF
+         ============================================================ -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+
+    <!-- ============================================================
+         PRINT
+         ============================================================ -->
+
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+
+    <script>
+
+        $(document).ready(function () {
+
+
+            // ========================================================
+            // DATATABLE
+            // ========================================================
+
+            let table = null;
+
+
+            if ($("#requestsTable").length) {
+
+                table =
+                    $("#requestsTable").DataTable({
+
+                        // ============================================
+                        // BASIC CONFIGURATION
+                        // ============================================
+
+                        processing: true,
+
+                        autoWidth: false,
+
+                        pageLength: 10,
+
+                        lengthMenu: [
+                            [10, 25, 50, 100, -1],
+                            [10, 25, 50, 100, "All"]
+                        ],
+
+
+                        // ============================================
+                        // PAGINATION
+                        // ============================================
+
+                        paging: true,
+
+                        pagingType: "full_numbers",
+
+
+                        // ============================================
+                        // SCROLL BARS
+                        // ============================================
+
+                        scrollX: true,
+
+                        scrollY: "500px",
+
+                        scrollCollapse: true,
+
+
+                        // ============================================
+                        // SORTING
+                        //
+                        // Request Date is contained in column 0.
+                        // ============================================
+
+                        order: [[0, "desc"]],
+
+
+                        // ============================================
+                        // DO NOT SORT ACTION COLUMN
+                        // ============================================
+
+                        columnDefs: [
+
+                            {
+                                targets: 8,
+                                orderable: false,
+                                searchable: false
+                            }
+
+                        ],
+
+
+                        // ============================================
+                        // DATATABLE LAYOUT
+                        // ============================================
+
+                        dom:
+                            "<'row align-items-center mb-3'" +
+                                "<'col-lg-4 col-md-6'l>" +
+                                "<'col-lg-8 col-md-6 text-md-right'B>" +
+                            ">" +
+
+                            "<'row'" +
+                                "<'col-sm-12'tr>" +
+                            ">" +
+
+                            "<'row align-items-center mt-3'" +
+                                "<'col-md-5'i>" +
+                                "<'col-md-7'p>" +
+                            ">",
+
+
+                        // ============================================
+                        // EXPORT BUTTONS
+                        // ============================================
+
+                        buttons: [
+
+
+                            // ----------------------------------------
+                            // COPY
+                            // ----------------------------------------
+
+                            {
+                                extend:
+                                    "copyHtml5",
+
+                                text:
+                                    '<i class="fas fa-copy mr-1"></i> Copy',
+
+                                className:
+                                    "btn btn-outline-secondary btn-sm",
+
+                                title:
+                                    "NMB-HLabSys - Samples Awaiting Reception",
+
+                                exportOptions: {
+
+                                    // Exclude Action column
+                                    columns: [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                    ],
+
+                                    modifier: {
+
+                                        search:
+                                            "applied",
+
+                                        order:
+                                            "applied",
+
+                                        page:
+                                            "all"
+                                    }
+                                }
+                            },
+
+
+                            // ----------------------------------------
+                            // EXCEL
+                            // ----------------------------------------
+
+                            {
+                                extend:
+                                    "excelHtml5",
+
+                                text:
+                                    '<i class="fas fa-file-excel mr-1"></i> Excel',
+
+                                className:
+                                    "btn btn-success btn-sm",
+
+                                title:
+                                    "NMB-HLabSys Samples Awaiting Reception",
+
+                                filename:
+                                    "NMB-HLabSys_Samples_Awaiting_Reception",
+
+                                sheetName:
+                                    "Awaiting Reception",
+
+                                exportOptions: {
+
+                                    columns: [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                    ],
+
+                                    modifier: {
+
+                                        search:
+                                            "applied",
+
+                                        order:
+                                            "applied",
+
+                                        page:
+                                            "all"
+                                    },
+
+                                    format: {
+
+                                        body: function (
+                                            data,
+                                            row,
+                                            column,
+                                            node
+                                        ) {
+
+                                            return $(node)
+                                                .text()
+                                                .replace(
+                                                    /\s+/g,
+                                                    " "
+                                                )
+                                                .trim();
+                                        }
+                                    }
+                                }
+                            },
+
+
+                            // ----------------------------------------
+                            // PDF
+                            // ----------------------------------------
+
+                            {
+                                extend:
+                                    "pdfHtml5",
+
+                                text:
+                                    '<i class="fas fa-file-pdf mr-1"></i> PDF',
+
+                                className:
+                                    "btn btn-danger btn-sm",
+
+                                title:
+                                    "NMB-HLabSys - Samples Awaiting Reception",
+
+                                filename:
+                                    "NMB-HLabSys_Samples_Awaiting_Reception",
+
+                                orientation:
+                                    "landscape",
+
+                                pageSize:
+                                    "A4",
+
+                                exportOptions: {
+
+                                    columns: [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                    ],
+
+                                    modifier: {
+
+                                        search:
+                                            "applied",
+
+                                        order:
+                                            "applied",
+
+                                        page:
+                                            "all"
+                                    },
+
+                                    format: {
+
+                                        body: function (
+                                            data,
+                                            row,
+                                            column,
+                                            node
+                                        ) {
+
+                                            return $(node)
+                                                .text()
+                                                .replace(
+                                                    /\s+/g,
+                                                    " "
+                                                )
+                                                .trim();
+                                        }
+                                    }
+                                },
+
+
+                                customize: function (doc) {
+
+
+                                    // --------------------------------
+                                    // DOCUMENT
+                                    // --------------------------------
+
+                                    doc.pageMargins =
+                                        [20, 45, 20, 40];
+
+                                    doc.defaultStyle.fontSize =
+                                        7;
+
+                                    doc.styles.tableHeader.fontSize =
+                                        7;
+
+                                    doc.styles.tableHeader.bold =
+                                        true;
+
+                                    doc.styles.title.fontSize =
+                                        16;
+
+                                    doc.styles.title.alignment =
+                                        "center";
+
+
+                                    // --------------------------------
+                                    // REPORT SUBTITLE
+                                    // --------------------------------
+
+                                    doc.content.splice(
+
+                                        1,
+
+                                        0,
+
+                                        {
+                                            text:
+                                                "Laboratory Sample Reception Report",
+
+                                            alignment:
+                                                "center",
+
+                                            fontSize:
+                                                10,
+
+                                            margin:
+                                                [0, 0, 0, 4]
+                                        },
+
+                                        {
+                                            text:
+                                                "Submitted samples currently awaiting laboratory reception",
+
+                                            alignment:
+                                                "center",
+
+                                            fontSize:
+                                                8,
+
+                                            margin:
+                                                [0, 0, 0, 4]
+                                        },
+
+                                        {
+                                            text:
+                                                "Generated: " +
+                                                new Date()
+                                                    .toLocaleString(),
+
+                                            alignment:
+                                                "center",
+
+                                            fontSize:
+                                                7,
+
+                                            margin:
+                                                [0, 0, 0, 15]
+                                        }
+
+                                    );
+
+
+                                    // --------------------------------
+                                    // TABLE WIDTH
+                                    // --------------------------------
+
+                                    const tableContent =
+                                        doc.content.find(
+                                            function (item) {
+
+                                                return item.table;
+
+                                            }
+                                        );
+
+
+                                    if (tableContent) {
+
+                                        tableContent.table.widths = [
+
+                                            "13%",
+                                            "14%",
+                                            "14%",
+                                            "14%",
+                                            "12%",
+                                            "8%",
+                                            "10%",
+                                            "15%"
+
+                                        ];
+                                    }
+
+
+                                    // --------------------------------
+                                    // FOOTER
+                                    // --------------------------------
+
+                                    doc.footer =
+                                        function (
+                                            currentPage,
+                                            pageCount
+                                        ) {
+
+                                            return {
+
+                                                columns: [
+
+                                                    {
+                                                        text:
+                                                            "NMB-HLabSys | Laboratory Sample Reception",
+
+                                                        alignment:
+                                                            "left",
+
+                                                        margin:
+                                                            [20, 0, 0, 0]
+                                                    },
+
+                                                    {
+                                                        text:
+                                                            "Page " +
+                                                            currentPage +
+                                                            " of " +
+                                                            pageCount,
+
+                                                        alignment:
+                                                            "right",
+
+                                                        margin:
+                                                            [0, 0, 20, 0]
+                                                    }
+
+                                                ],
+
+                                                fontSize:
+                                                    7,
+
+                                                color:
+                                                    "#64748b"
+                                            };
+                                        };
+                                }
+                            },
+
+
+                            // ----------------------------------------
+                            // PRINT
+                            // ----------------------------------------
+
+                            {
+                                extend:
+                                    "print",
+
+                                text:
+                                    '<i class="fas fa-print mr-1"></i> Print',
+
+                                className:
+                                    "btn btn-primary btn-sm",
+
+                                title:
+                                    "NMB-HLabSys - Samples Awaiting Reception",
+
+                                messageTop:
+                                    "Laboratory Sample Reception Report",
+
+                                exportOptions: {
+
+                                    columns: [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                        6,
+                                        7
+                                    ],
+
+                                    modifier: {
+
+                                        search:
+                                            "applied",
+
+                                        order:
+                                            "applied",
+
+                                        page:
+                                            "all"
+                                    }
+                                }
+                            }
+
+                        ],
+
+
+                        // ============================================
+                        // LANGUAGE
+                        // ============================================
+
+                        language: {
+
+                            processing:
+                                "Loading records...",
+
+                            emptyTable:
+                                "No samples are currently awaiting reception.",
+
+                            zeroRecords:
+                                "No matching sample requests were found.",
+
+                            info:
+                                "Showing _START_ to _END_ of _TOTAL_ requests",
+
+                            infoEmpty:
+                                "Showing 0 requests",
+
+                            infoFiltered:
+                                "(filtered from _MAX_ total requests)",
+
+                            lengthMenu:
+                                "Show _MENU_ records",
+
+                            paginate: {
+
+                                first:
+                                    '<i class="fas fa-angles-left"></i>',
+
+                                previous:
+                                    '<i class="fas fa-chevron-left"></i>',
+
+                                next:
+                                    '<i class="fas fa-chevron-right"></i>',
+
+                                last:
+                                    '<i class="fas fa-angles-right"></i>'
+                            }
+                        }
+                    });
+
+
+                // ================================================
+                // USE EXISTING SEARCH FIELD
+                // ================================================
+
+                $("#requestSearch").on(
+                    "keyup change",
+                    function () {
+
+                        table
+                            .search(this.value)
+                            .draw();
+
+                    }
+                );
+
+
+                // ================================================
+                // URGENCY FILTER
+                //
+                // Column 6 = Urgency
+                // ================================================
+
+                $("#urgencyFilter").on(
+                    "change",
+                    function () {
+
+                        const value =
+                            $(this).val();
+
+
+                        if (!value) {
+
+                            table
+                                .column(6)
+                                .search("")
+                                .draw();
+
+                            return;
+                        }
+
+
+                        table
+                            .column(6)
+                            .search(
+                                "^" + value + "$",
+                                true,
+                                false
+                            )
+                            .draw();
+
+                    }
+                );
+            }
+
+
+            // ========================================================
+            // RECEIVE SAMPLE MODAL
+            // ========================================================
+
+            $(document).on(
+                "click",
+                ".js-receive-sample",
+                function () {
+
+
+                    const requestNumber =
+                        $(this)
+                            .data("request-number");
+
+
+                    if (!requestNumber) {
+
+                        Swal.fire({
+
+                            icon:
+                                "error",
+
+                            title:
+                                "Request Missing",
+
+                            text:
+                                "Unable to determine the test request."
+                        });
+
+                        return;
+                    }
+
+
+                    // ================================================
+                    // LOADING CONTENT
+                    // ================================================
+
+                    $("#receiveSampleModalContent")
+                        .html(`
+
+                            <div class="modal-body text-center py-5">
+
+                                <div class="spinner-border text-primary"
+                                     role="status">
+
+                                    <span class="sr-only">
+                                        Loading...
+                                    </span>
+
+                                </div>
+
+                                <p class="mt-3 text-muted mb-0">
+
+                                    Loading sample information...
+
+                                </p>
+
+                            </div>
+
+                        `);
+
+
+                    $("#receiveSampleModal")
+                        .modal("show");
+
+
+                    // ================================================
+                    // LOAD RECEIVE PARTIAL
+                    // ================================================
+
+                    $.ajax({
+
+                        url:
+                            '@Url.Action(
+                                "Receive",
+                                "ReceiveSamples",
+                                new { area = "Technician" })',
+
+                        type:
+                            "GET",
+
+                        data: {
+
+                            requestNumber:
+                                requestNumber
+                        },
+
+
+                        success: function (response) {
+
+                            $("#receiveSampleModalContent")
+                                .html(response);
+                        },
+
+
+                        error: function () {
+
+                            $("#receiveSampleModal")
+                                .modal("hide");
+
+
+                            Swal.fire({
+
+                                icon:
+                                    "error",
+
+                                title:
+                                    "Unable to Load Sample",
+
+                                text:
+                                    "The sample information could not be loaded. Please try again."
+                            });
+                        }
+                    });
+
+                });
+
+        });
+
+    </script>
+}

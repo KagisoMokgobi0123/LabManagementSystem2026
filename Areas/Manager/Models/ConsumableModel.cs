@@ -1,0 +1,31 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace NMB_HLabSys.Areas.Manager.Models
+{
+    public class ConsumableModel
+    {
+        [Key]
+        public int ConsumableId { get; set; }
+
+        [Required]
+        [StringLength(150)]
+        [Display(Name = "Consumable Name")]
+        public string Name { get; set; } = string.Empty;
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        [Display(Name = "Quantity On Hand")]
+        public int QuantityOnHand { get; set; }
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        [Display(Name = "Reorder Level")]
+        public int ReorderLevel { get; set; }
+
+        // One consumable can be required by many test types.
+        public virtual ICollection<TestTypeConsumableModel>
+            TestTypeConsumables
+        { get; set; }
+            = new List<TestTypeConsumableModel>();
+    }
+}

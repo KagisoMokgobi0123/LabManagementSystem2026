@@ -1,0 +1,2251 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Doctor Dashboard";
+    Layout = "_DoctorLayout";
+
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    var doctorName = currentUser?.FullName ?? "Doctor";
+    var doctorEmail = currentUser?.Email ?? "";
+
+    var doctorInitial =
+        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+            ? currentUser.FirstName.Substring(0, 1).ToUpper()
+            : "D";
+}
+
+<style>
+
+    /* =========================================================
+       PAGE
+       ========================================================= */
+
+    .doctor-dashboard {
+        min-height: 100vh;
+        background: #f4f7fb;
+    }
+
+
+    /* =========================================================
+       HERO
+       ========================================================= */
+
+    .doctor-hero {
+        position: relative;
+        overflow: hidden;
+
+        padding: 38px 0 82px;
+
+        background: linear-gradient(
+            135deg,
+            #073b5c 0%,
+            #075985 45%,
+            #0284c7 100%
+        );
+    }
+
+    .doctor-hero::before {
+        content: "";
+
+        position: absolute;
+
+        width: 260px;
+        height: 260px;
+
+        right: 220px;
+        bottom: -190px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.05);
+    }
+
+    .doctor-hero::after {
+        content: "";
+
+        position: absolute;
+
+        width: 380px;
+        height: 380px;
+
+        right: -100px;
+        top: -210px;
+
+        border-radius: 50%;
+
+        background: rgba(255,255,255,.06);
+    }
+
+    .doctor-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .doctor-badge {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 7px 13px;
+        margin-bottom: 14px;
+
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 50px;
+
+        background: rgba(255,255,255,.13);
+
+        color: #fff;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .doctor-hero h1 {
+        margin-bottom: 7px;
+
+        color: #fff;
+
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .doctor-hero p {
+        max-width: 720px;
+
+        margin: 0;
+
+        color: rgba(255,255,255,.82);
+
+        font-size: 14px;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 10px;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+
+        gap: 7px;
+
+        padding: 10px 17px;
+
+        border-radius: 8px;
+
+        font-size: 13px;
+        font-weight: 600;
+
+        text-decoration: none !important;
+
+        transition: .2s ease;
+    }
+
+    .hero-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .hero-btn-primary {
+        background: #fff;
+        color: #075985 !important;
+    }
+
+    .hero-btn-outline {
+        border: 1px solid rgba(255,255,255,.50);
+
+        background: rgba(255,255,255,.08);
+
+        color: #fff !important;
+    }
+
+
+    /* =========================================================
+       PAGE INNER
+       ========================================================= */
+
+    .doctor-page-inner {
+        position: relative;
+        z-index: 5;
+
+        margin-top: -48px;
+
+        padding-bottom: 50px;
+    }
+
+
+    /* =========================================================
+       STAT CARDS
+       ========================================================= */
+
+    .stat-card-link {
+        display: block;
+
+        height: 100%;
+
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    .stat-card {
+        position: relative;
+
+        height: 100%;
+
+        padding: 20px;
+
+        overflow: hidden;
+
+        border: 1px solid transparent;
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+
+        cursor: pointer;
+
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease,
+            border-color .2s ease;
+    }
+
+    .stat-card-link:hover .stat-card {
+        transform: translateY(-4px);
+
+        border-color: #bae6fd;
+
+        box-shadow: 0 12px 30px rgba(15,23,42,.13);
+    }
+
+    .stat-card::after {
+        content: "\f054";
+
+        position: absolute;
+
+        right: 20px;
+        bottom: 17px;
+
+        font-family: "Font Awesome 5 Free";
+
+        font-size: 10px;
+        font-weight: 900;
+
+        color: #cbd5e1;
+
+        opacity: 0;
+
+        transform: translateX(-5px);
+
+        transition: .2s ease;
+    }
+
+    .stat-card-link:hover .stat-card::after {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .stat-top {
+        display: flex;
+
+        justify-content: space-between;
+        align-items: flex-start;
+
+        gap: 15px;
+    }
+
+    .stat-title {
+        margin-bottom: 7px;
+
+        color: #64748b;
+
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .stat-note {
+        margin-top: 7px;
+        padding-right: 10px;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+    .stat-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+
+        border-radius: 11px;
+
+        font-size: 17px;
+    }
+
+    .icon-blue {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .icon-cyan {
+        background: #cffafe;
+        color: #0891b2;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .icon-orange {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .icon-purple {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .icon-yellow {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+
+    /* =========================================================
+       DASHBOARD CARDS
+       ========================================================= */
+
+    .dashboard-card {
+        margin-bottom: 24px;
+
+        border: 0;
+        border-radius: 13px;
+
+        background: #fff;
+
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
+    }
+
+    .dashboard-card .card-header {
+        padding: 18px 20px;
+
+        border-bottom: 1px solid #eef2f7;
+
+        background: transparent;
+    }
+
+    .dashboard-card .card-body {
+        padding: 20px;
+    }
+
+    .dashboard-title {
+        margin: 0;
+
+        color: #0f172a;
+
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .dashboard-subtitle {
+        margin-top: 4px;
+        margin-bottom: 0;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       QUICK ACTIONS
+       ========================================================= */
+
+    .quick-action {
+        display: flex;
+
+        align-items: center;
+
+        min-height: 78px;
+
+        margin-bottom: 12px;
+        padding: 15px;
+
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+
+        background: #fff;
+
+        color: inherit !important;
+
+        text-decoration: none !important;
+
+        transition: .2s ease;
+    }
+
+    .quick-action:hover {
+        transform: translateY(-2px);
+
+        border-color: #0284c7;
+
+        background: #f8fcff;
+
+        box-shadow: 0 6px 18px rgba(15,23,42,.06);
+    }
+
+    .quick-action-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+
+        margin-right: 12px;
+
+        border-radius: 10px;
+
+        background: #e0f2fe;
+
+        color: #0284c7;
+    }
+
+    .quick-action-title {
+        color: #0f172a;
+
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .quick-action-text {
+        margin-top: 2px;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+    .quick-action-arrow {
+        margin-left: auto;
+        padding-left: 10px;
+
+        color: #cbd5e1;
+    }
+
+
+    /* =========================================================
+       WORKFLOW
+       ========================================================= */
+
+    .workflow {
+        display: flex;
+
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 5px;
+    }
+
+    .workflow-item {
+        flex: 1;
+
+        text-align: center;
+    }
+
+    .workflow-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 48px;
+        height: 48px;
+
+        margin: auto;
+
+        border-radius: 50%;
+
+        background: #e0f2fe;
+
+        color: #0284c7;
+
+        font-size: 16px;
+    }
+
+    .workflow-title {
+        margin-top: 8px;
+
+        color: #334155;
+
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .workflow-line {
+        flex: .6;
+
+        height: 2px;
+
+        margin-top: -20px;
+
+        background: #e2e8f0;
+    }
+
+
+    /* =========================================================
+       ATTENTION
+       ========================================================= */
+
+    .attention-item {
+        display: flex;
+
+        align-items: flex-start;
+
+        padding: 13px 0;
+
+        border-bottom: 1px solid #f1f5f9;
+
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    .attention-item:last-child {
+        border-bottom: 0;
+    }
+
+    .attention-icon {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 37px;
+        height: 37px;
+        min-width: 37px;
+
+        margin-right: 11px;
+
+        border-radius: 9px;
+    }
+
+    .attention-title {
+        color: #334155;
+
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .attention-text {
+        margin-top: 2px;
+
+        color: #94a3b8;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       TABLE
+       ========================================================= */
+
+    .doctor-table {
+        margin-bottom: 0;
+    }
+
+    .doctor-table thead th {
+        padding: 12px 10px;
+
+        border-top: 0;
+        border-bottom: 1px solid #e2e8f0;
+
+        color: #64748b;
+
+        font-size: 10px;
+        font-weight: 700;
+
+        text-transform: uppercase;
+        letter-spacing: .4px;
+    }
+
+    .doctor-table tbody td {
+        padding: 13px 10px;
+
+        vertical-align: middle;
+
+        border-color: #f1f5f9;
+
+        color: #334155;
+
+        font-size: 12px;
+    }
+
+    .status-badge {
+        display: inline-block;
+
+        padding: 5px 9px;
+
+        border-radius: 50px;
+
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .status-submitted {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .status-received {
+        background: #cffafe;
+        color: #0e7490;
+    }
+
+    .status-progress {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .status-completed {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-released {
+        background: #d1fae5;
+        color: #047857;
+    }
+
+    .status-cancelled {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+
+    /* =========================================================
+       PROFILE
+       ========================================================= */
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-avatar {
+        display: flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 46px;
+        height: 46px;
+
+        margin-right: 12px;
+
+        border-radius: 50%;
+
+        background: linear-gradient(
+            135deg,
+            #075985,
+            #0284c7
+        );
+
+        color: #fff;
+
+        font-weight: 700;
+    }
+
+    .profile-name {
+        color: #0f172a;
+
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .profile-role,
+    .profile-email {
+        color: #64748b;
+
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @@media(max-width: 768px) {
+
+        .doctor-hero {
+            padding-top: 25px;
+        }
+
+        .doctor-hero h1 {
+            font-size: 24px;
+        }
+
+        .hero-actions {
+            margin-top: 20px;
+        }
+
+        .workflow {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .workflow-item {
+            display: flex;
+
+            align-items: center;
+
+            text-align: left;
+        }
+
+        .workflow-title {
+            margin-top: 0;
+            margin-left: 10px;
+        }
+
+        .workflow-line {
+            flex: none;
+
+            width: 2px;
+            height: 20px;
+
+            margin: 0 0 0 23px;
+        }
+    }
+
+</style>
+
+
+<div class="doctor-dashboard">
+
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+
+    <div class="doctor-hero">
+
+        <div class="container-fluid">
+
+            <div class="doctor-hero-content">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <div class="doctor-badge">
+
+                            <i class="fas fa-user-doctor"></i>
+
+                            Doctor / Healthcare Provider
+
+                        </div>
+
+
+                        <h1>
+                            Welcome, Dr @doctorName
+                        </h1>
+
+
+                        <p>
+                            Manage patient records, submit laboratory
+                            test requests, track testing progress,
+                            review verified results and release
+                            laboratory reports to patients.
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="hero-actions justify-content-md-end">
+
+                            <a asp-area="Doctor"
+                               asp-controller="TestRequests"
+                               asp-action="Create"
+                               class="hero-btn hero-btn-primary">
+
+                                <i class="fas fa-plus"></i>
+
+                                New Test Request
+
+                            </a>
+
+
+                            <a asp-area="Doctor"
+                               asp-controller="Alerts"
+                               asp-action="Index"
+                               class="hero-btn hero-btn-outline">
+
+                                <i class="fas fa-triangle-exclamation"></i>
+
+                                View Alerts
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
+    <div class="container-fluid doctor-page-inner">
+
+
+        <!-- =====================================================
+             STAT CARDS
+             ===================================================== -->
+
+        <div class="row">
+
+
+            <!-- PATIENTS -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="Patients"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    My Patients
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Patient records available to you
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-blue">
+
+                                <i class="fas fa-users"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- TEST REQUESTS -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="TestRequests"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Test Requests
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Requests submitted by you
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-cyan">
+
+                                <i class="fas fa-flask"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- RESULTS -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="Results"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Completed Results
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Results ready for doctor review
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-green">
+
+                                <i class="fas fa-file-circle-check"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- ABNORMAL -->
+
+            <div class="col-xl-3 col-md-6 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="Alerts"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Abnormal Results
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Recent abnormal-result alerts
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-red">
+
+                                <i class="fas fa-triangle-exclamation"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- SECOND ROW -->
+
+        <div class="row">
+
+
+            <!-- SUBMITTED -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="TestRequests"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Submitted Requests
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Waiting for laboratory processing
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-blue">
+
+                                <i class="fas fa-paper-plane"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- IN PROGRESS -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="TestRequests"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    In Progress
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Requests currently being processed
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-yellow">
+
+                                <i class="fas fa-spinner"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+            <!-- READY TO RELEASE -->
+
+            <div class="col-xl-4 col-md-12 mb-4">
+
+                <a asp-area="Doctor"
+                   asp-controller="Results"
+                   asp-action="Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Ready to Release
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Results awaiting release to patients
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-purple">
+
+                                <i class="fas fa-share-from-square"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             REQUEST WORKFLOW
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Test Request Workflow
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Follow a patient laboratory request from
+                    submission through release
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="workflow">
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+
+                            <i class="fas fa-file-circle-plus"></i>
+
+                        </div>
+
+                        <div class="workflow-title">
+                            Submit Request
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+
+                            <i class="fas fa-vials"></i>
+
+                        </div>
+
+                        <div class="workflow-title">
+                            Samples Received
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+
+                            <i class="fas fa-microscope"></i>
+
+                        </div>
+
+                        <div class="workflow-title">
+                            In Progress
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+
+                            <i class="fas fa-circle-check"></i>
+
+                        </div>
+
+                        <div class="workflow-title">
+                            Completed
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+
+                            <i class="fas fa-user-doctor"></i>
+
+                        </div>
+
+                        <div class="workflow-title">
+                            Doctor Review
+                        </div>
+
+                    </div>
+
+
+                    <div class="workflow-line"></div>
+
+
+                    <div class="workflow-item">
+
+                        <div class="workflow-icon">
+
+                            <i class="fas fa-share-from-square"></i>
+
+                        </div>
+
+                        <div class="workflow-title">
+                            Release Results
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             DOCTOR ACTIONS + ATTENTION
+             ===================================================== -->
+
+        <div class="row">
+
+
+            <!-- DOCTOR ACTIONS -->
+
+            <div class="col-lg-7">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <h4 class="dashboard-title">
+                            Doctor Actions
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Access your main patient and laboratory
+                            request functions
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+
+                            <!-- NEW PATIENT -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="Patients"
+                                   asp-action="Create"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-user-plus"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Add Patient
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Register a new patient and
+                                            capture their health information
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- PATIENT RECORDS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="Patients"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-users"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Patient Records
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            View patient conditions,
+                                            allergies and medications
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- CREATE REQUEST -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="TestRequests"
+                                   asp-action="Create"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-file-circle-plus"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Create Test Request
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Request laboratory tests and
+                                            record sample barcodes
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- TRACK REQUESTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="TestRequests"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-list-check"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Track Test Requests
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Monitor laboratory processing
+                                            status for submitted requests
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- RESULTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="Results"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-file-medical"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Review Results
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Review patient laboratory
+                                            results and abnormal findings
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- ALERTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="Alerts"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-triangle-exclamation"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Abnormal Result Alerts
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Review abnormal results for
+                                            laboratory tests you ordered
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- REPORTS -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="Reports"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-file-pdf"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Doctor Reports
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Generate PDF reports for
+                                            submitted test requests
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                            <!-- PROFILE -->
+
+                            <div class="col-md-6">
+
+                                <a asp-area="Doctor"
+                                   asp-controller="Profile"
+                                   asp-action="Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fas fa-user-doctor"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            My Profile
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Manage your healthcare provider
+                                            account details
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                                </a>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- REQUIRES ATTENTION -->
+
+            <div class="col-lg-5">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <h4 class="dashboard-title">
+                            Requires Attention
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Results and requests requiring doctor action
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+
+                        <a asp-area="Doctor"
+                           asp-controller="Alerts"
+                           asp-action="Index"
+                           class="attention-item">
+
+                            <div class="attention-icon icon-red">
+
+                                <i class="fas fa-triangle-exclamation"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Abnormal Results
+                                </div>
+
+                                <div class="attention-text">
+                                    Review recent abnormal laboratory
+                                    results for tests you ordered.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                        <a asp-area="Doctor"
+                           asp-controller="Results"
+                           asp-action="Index"
+                           class="attention-item">
+
+                            <div class="attention-icon icon-green">
+
+                                <i class="fas fa-file-circle-check"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Results Ready for Review
+                                </div>
+
+                                <div class="attention-text">
+                                    Review completed and verified
+                                    laboratory results.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                        <a asp-area="Doctor"
+                           asp-controller="Results"
+                           asp-action="Index"
+                           class="attention-item">
+
+                            <div class="attention-icon icon-purple">
+
+                                <i class="fas fa-share-from-square"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Results Awaiting Release
+                                </div>
+
+                                <div class="attention-text">
+                                    Release reviewed results to patients
+                                    with the appropriate note.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                        <a asp-area="Doctor"
+                           asp-controller="TestRequests"
+                           asp-action="Index"
+                           class="attention-item">
+
+                            <div class="attention-icon icon-orange">
+
+                                <i class="fas fa-clock"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="attention-title">
+                                    Active Requests
+                                </div>
+
+                                <div class="attention-text">
+                                    Monitor laboratory requests that
+                                    have not yet been completed.
+                                </div>
+
+                            </div>
+
+                        </a>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- =====================================================
+             RECENT TEST REQUESTS
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <h4 class="dashboard-title">
+                            Recent Test Requests
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Latest laboratory requests submitted by you
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4 text-md-right mt-2 mt-md-0">
+
+                        <a asp-area="Doctor"
+                           asp-controller="TestRequests"
+                           asp-action="Index"
+                           class="btn btn-outline-primary btn-sm">
+
+                            <i class="fas fa-list mr-1"></i>
+
+                            View All Requests
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table doctor-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Request #
+                                </th>
+
+                                <th>
+                                    Patient
+                                </th>
+
+                                <th>
+                                    Request Date
+                                </th>
+
+                                <th>
+                                    Urgency
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center py-5 text-muted">
+
+                                    <i class="fas fa-flask fa-2x mb-3 d-block"></i>
+
+                                    No recent test requests available.
+
+                                    <div class="mt-3">
+
+                                        <a asp-area="Doctor"
+                                           asp-controller="TestRequests"
+                                           asp-action="Create"
+                                           class="btn btn-primary btn-sm">
+
+                                            <i class="fas fa-plus mr-1"></i>
+
+                                            Create Test Request
+
+                                        </a>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ABNORMAL RESULT ALERTS
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <h4 class="dashboard-title">
+                            Abnormal Result Alerts
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Abnormal laboratory results requiring
+                            clinical review
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4 text-md-right mt-2 mt-md-0">
+
+                        <a asp-area="Doctor"
+                           asp-controller="Alerts"
+                           asp-action="Index"
+                           class="btn btn-outline-danger btn-sm">
+
+                            <i class="fas fa-triangle-exclamation mr-1"></i>
+
+                            View All Alerts
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="text-center py-4 text-muted">
+
+                    <div class="stat-icon icon-green mx-auto mb-3">
+
+                        <i class="fas fa-circle-check"></i>
+
+                    </div>
+
+                    <div class="quick-action-title">
+                        No abnormal-result alerts
+                    </div>
+
+                    <div class="quick-action-text">
+                        New abnormal results from your ordered
+                        tests will appear here.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             RESULT MANAGEMENT
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Patient Result Management
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Review verified laboratory results and release
+                    them to patients
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row">
+
+
+                    <div class="col-md-6">
+
+                        <a asp-area="Doctor"
+                           asp-controller="Results"
+                           asp-action="Index"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fas fa-microscope"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Review Laboratory Results
+                                </div>
+
+                                <div class="quick-action-text">
+                                    View patient test results and
+                                    automatically highlighted abnormal
+                                    values.
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <a asp-area="Doctor"
+                           asp-controller="Results"
+                           asp-action="Index"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fas fa-share-from-square"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Release Results to Patient
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Release results with a note or
+                                    request the patient to make an
+                                    appointment.
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             REPORTING
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Doctor Reports
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Generate PDF reports for laboratory requests
+                    submitted by you
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row align-items-center">
+
+
+                    <div class="col-md-8">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="quick-action-icon mr-3">
+
+                                <i class="fas fa-file-pdf"></i>
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Test Request Report
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Select a date range and generate
+                                    a PDF report containing all test
+                                    requests submitted by you.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-4 text-md-right mt-3 mt-md-0">
+
+                        <a asp-area="Doctor"
+                           asp-controller="Reports"
+                           asp-action="Index"
+                           class="btn btn-primary btn-sm">
+
+                            <i class="fas fa-file-pdf mr-1"></i>
+
+                            Generate Report
+
+                        </a>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ACCOUNT & SECURITY
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    My Account & Security
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Manage your Doctor profile and account security
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row align-items-center">
+
+
+                    <div class="col-md-6">
+
+                        <div class="profile-summary">
+
+                            <div class="profile-avatar">
+
+                                @doctorInitial
+
+                            </div>
+
+
+                            <div>
+
+                                <div class="profile-name">
+                                    Dr @doctorName
+                                </div>
+
+                                <div class="profile-role">
+                                    Doctor / Healthcare Provider
+                                </div>
+
+                                <div class="profile-email">
+                                    @doctorEmail
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6 text-md-right mt-3 mt-md-0">
+
+                        <a asp-area="Doctor"
+                           asp-controller="Profile"
+                           asp-action="Index"
+                           class="btn btn-outline-primary btn-sm mr-2">
+
+                            <i class="fas fa-user-doctor mr-1"></i>
+
+                            My Profile
+
+                        </a>
+
+
+                        <a asp-area="Doctor"
+                           asp-controller="Profile"
+                           asp-action="ChangePassword"
+                           class="btn btn-outline-secondary btn-sm mr-2">
+
+                            <i class="fas fa-key mr-1"></i>
+
+                            Change Password
+
+                        </a>
+
+
+                        <form asp-area=""
+                              asp-controller="Account"
+                              asp-action="Logout"
+                              method="post"
+                              class="d-inline">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-outline-danger btn-sm">
+
+                                <i class="fas fa-sign-out-alt mr-1"></i>
+
+                                Secure Logout
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>

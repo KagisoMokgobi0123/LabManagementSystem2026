@@ -10,6 +10,7 @@
     var icon = ViewData["Icon"]?.ToString() ?? "fa-user";
     var primary = ViewData["Primary"]?.ToString() ?? "#073b5c";
     var secondary = ViewData["Secondary"]?.ToString() ?? "#0088a9";
+
     var allowRegistration =
         ViewData["AllowRegistration"] as bool? ?? false;
 }
@@ -26,6 +27,9 @@
 
     <title>@portalTitle | NMB-HLabSys</title>
 
+
+    <!-- GOOGLE FONT -->
+
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
 
@@ -36,20 +40,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
           rel="stylesheet">
 
+
+    <!-- FONT AWESOME -->
+
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+
+    <!-- BOOTSTRAP -->
 
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
+
     <style>
+
+        /* ==========================================================
+           GENERAL
+           ========================================================== */
 
         * {
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
             font-family: 'Inter', sans-serif;
             background: #f5f8fc;
         }
@@ -59,9 +80,10 @@
             display: flex;
         }
 
-        /* =========================================
+
+        /* ==========================================================
            LEFT SIDE
-           ========================================= */
+           ========================================================== */
 
         .auth-image {
             width: 52%;
@@ -72,12 +94,13 @@
             background:
                 linear-gradient(
                     rgba(6, 30, 54, .72),
-                    rgba(0, 103, 140, .76)
+                    rgba(0, 103, 140, .78)
                 ),
                 url('@image');
 
             background-size: cover;
             background-position: center;
+            background-repeat: no-repeat;
 
             display: flex;
             align-items: flex-end;
@@ -85,170 +108,123 @@
             padding: 60px;
         }
 
-        .image-content {
-            color: white;
-            max-width: 620px;
+
+        .auth-image::before {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    rgba(5, 25, 45, .05),
+                    rgba(5, 25, 45, .32)
+                );
+
+            pointer-events: none;
         }
+
+
+        .image-content {
+            position: relative;
+            z-index: 2;
+
+            max-width: 620px;
+
+            color: #ffffff;
+        }
+
+
+        .image-content h1,
+        .image-content p,
+        .image-content span,
+        .image-content i {
+            color: #ffffff;
+        }
+
+
+        /* ==========================================================
+           LEFT PORTAL BADGE
+           ========================================================== */
 
         .portal-badge {
             display: inline-flex;
+
             align-items: center;
+
             gap: 8px;
 
-            padding: 8px 15px;
+            padding: 9px 16px;
 
-            background: rgba(255,255,255,.14);
+            margin-bottom: 20px;
+
+            background:
+                rgba(255, 255, 255, .14);
 
             border:
-                1px solid rgba(255,255,255,.25);
+                1px solid
+                rgba(255, 255, 255, .30);
 
             border-radius: 50px;
 
-            margin-bottom: 18px;
+            color: #ffffff;
 
             font-size: 13px;
+
             font-weight: 700;
+
+            backdrop-filter: blur(5px);
+
+            -webkit-backdrop-filter: blur(5px);
         }
+
+
+        .portal-badge i {
+            color: #ffffff;
+        }
+
 
         .image-content h1 {
+            margin: 0 0 15px;
+
+            color: #ffffff;
+
             font-size: 44px;
+
             font-weight: 800;
-            margin-bottom: 15px;
+
+            letter-spacing: -.7px;
         }
+
 
         .image-content p {
+            margin: 0;
+
+            color: #ffffff;
+
             font-size: 16px;
+
             line-height: 1.8;
-            color: #e6f4fa;
         }
 
 
-        /* =========================================
-           RIGHT SIDE
-           ========================================= */
+        /* ==========================================================
+           RIGHT FORM SIDE
+           ========================================================== */
 
         .auth-form-container {
             width: 48%;
+            min-height: 100vh;
 
             display: flex;
+
             justify-content: center;
+
             align-items: center;
 
             padding: 50px;
-        }
-
-        .auth-form {
-            width: 100%;
-            max-width: 450px;
-        }
-
-        .logo {
-            width: 75px;
-            height: auto;
-            margin-bottom: 25px;
-        }
-
-        .role-icon {
-            width: 58px;
-            height: 58px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            border-radius: 14px;
-
-            background: @primary;
-            color: white;
-
-            font-size: 22px;
-
-            margin-bottom: 20px;
-        }
-
-        .auth-form h2 {
-            font-weight: 800;
-            color: #082c4c;
-            margin-bottom: 8px;
-        }
-
-        .subtitle {
-            color: #718096;
-            margin-bottom: 30px;
-            line-height: 1.7;
-        }
-
-
-        /* =========================================
-           FORM
-           ========================================= */
-
-        .form-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #334155;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-
-            left: 16px;
-            top: 50%;
-
-            transform: translateY(-50%);
-
-            color: #64748b;
-
-            z-index: 5;
-        }
-
-        .form-control {
-            height: 52px;
-
-            border-radius: 10px;
-
-            border:
-                1px solid #dbe3eb;
-
-            padding-left: 45px;
-
-            font-size: 14px;
-        }
-
-        .form-control:focus {
-            border-color: @secondary;
-
-            box-shadow:
-                0 0 0 .2rem
-                rgba(0, 136, 169, .10);
-        }
-
-        .forgot-link {
-            color: @secondary;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .forgot-link:hover {
-            text-decoration: underline;
-        }
-
-
-        /* =========================================
-           LOGIN BUTTON
-           ========================================= */
-
-        .btn-login {
-            height: 52px;
-            width: 100%;
-
-            border: none;
-            border-radius: 10px;
 
             background:
                 linear-gradient(
@@ -257,78 +233,477 @@
                     @secondary
                 );
 
-            color: white;
+            color: #ffffff;
+        }
 
-            font-weight: 700;
-            font-size: 15px;
+
+        .auth-form {
+            width: 100%;
+
+            max-width: 450px;
+
+            color: #ffffff;
+        }
+
+
+        /* ==========================================================
+           LOGO
+           ========================================================== */
+
+        .logo {
+            width: 75px;
+
+            height: auto;
+
+            margin-bottom: 25px;
+        }
+
+
+        /* ==========================================================
+           ROLE ICON
+           ========================================================== */
+
+        .role-icon {
+            width: 58px;
+
+            height: 58px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            margin-bottom: 20px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(255, 255, 255, .16);
+
+            border:
+                1px solid
+                rgba(255, 255, 255, .28);
+
+            color: #ffffff;
+
+            font-size: 22px;
+
+            box-shadow:
+                0 8px 20px
+                rgba(0, 0, 0, .10);
+        }
+
+
+        .role-icon i {
+            color: #ffffff;
+        }
+
+
+        /* ==========================================================
+           FORM TITLE
+           ========================================================== */
+
+        .auth-form h2 {
+            margin-bottom: 8px;
+
+            color: #ffffff;
+
+            font-size: 30px;
+
+            font-weight: 800;
+        }
+
+
+        .subtitle {
+            margin-bottom: 30px;
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            line-height: 1.7;
+
+            opacity: .92;
+        }
+
+
+        /* ==========================================================
+           LABELS
+           ========================================================== */
+
+        .form-label {
+            margin-bottom: 8px;
+
+            color: #ffffff;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        /* ==========================================================
+           INPUT WRAPPER
+           ========================================================== */
+
+        .input-wrapper {
+            position: relative;
+        }
+
+
+        .input-icon {
+            position: absolute;
+
+            left: 16px;
+
+            top: 50%;
+
+            transform:
+                translateY(-50%);
+
+            z-index: 5;
+
+            color: #64748b;
+
+            pointer-events: none;
+        }
+
+
+        /* ==========================================================
+           INPUTS
+           ========================================================== */
+
+        .form-control {
+            width: 100%;
+
+            height: 52px;
+
+            padding-left: 45px;
+
+            padding-right: 15px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, .50);
+
+            border-radius: 10px;
+
+            background: #ffffff;
+
+            /* Keep typed text dark */
+            color: #172033;
+
+            font-size: 14px;
 
             transition:
-                transform .2s ease,
+                border-color .2s ease,
                 box-shadow .2s ease;
         }
 
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+
+        .form-control:focus {
+            background: #ffffff;
+
+            color: #172033;
+
+            border-color: #ffffff;
+
+            outline: none;
+
+            box-shadow:
+                0 0 0 .2rem
+                rgba(255, 255, 255, .20);
+        }
+
+
+        /* Browser autofill */
+
+        .form-control:-webkit-autofill,
+        .form-control:-webkit-autofill:hover,
+        .form-control:-webkit-autofill:focus {
+            -webkit-text-fill-color: #172033;
+
+            -webkit-box-shadow:
+                0 0 0 1000px
+                #ffffff inset;
+
+            transition:
+                background-color 5000s ease-in-out 0s;
+        }
+
+
+        /* ==========================================================
+           REMEMBER ME
+           ========================================================== */
+
+        .remember-forgot {
+            color: #ffffff;
+        }
+
+
+        .form-check-label {
+            color: #ffffff;
+
+            font-size: 14px;
+
+            cursor: pointer;
+        }
+
+
+        .form-check-input {
+            cursor: pointer;
+
+            border-color:
+                rgba(255, 255, 255, .80);
+        }
+
+
+        .form-check-input:checked {
+            background-color: #ffffff;
+
+            border-color: #ffffff;
+        }
+
+
+        .form-check-input:focus {
+            border-color: #ffffff;
+
+            box-shadow:
+                0 0 0 .15rem
+                rgba(255, 255, 255, .20);
+        }
+
+
+        /* ==========================================================
+           FORGOT PASSWORD
+           ========================================================== */
+
+        .forgot-link {
+            color: #ffffff;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        .forgot-link:hover,
+        .forgot-link:focus {
+            color: #ffffff;
+
+            text-decoration: underline;
+        }
+
+
+        /* ==========================================================
+           LOGIN BUTTON
+           ========================================================== */
+
+        .btn-login {
+            width: 100%;
+
+            height: 52px;
+
+            border:
+                1px solid
+                rgba(255, 255, 255, .32);
+
+            border-radius: 10px;
+
+            background:
+                rgba(255, 255, 255, .16);
+
+            color: #ffffff !important;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                transform .2s ease,
+                background .2s ease,
+                box-shadow .2s ease;
+        }
+
+
+        .btn-login i {
+            color: #ffffff;
+        }
+
+
         .btn-login:hover {
-            color: white;
+            background:
+                rgba(255, 255, 255, .24);
+
+            color: #ffffff !important;
 
             transform:
                 translateY(-1px);
 
             box-shadow:
                 0 8px 20px
-                rgba(0,0,0,.15);
+                rgba(0, 0, 0, .15);
         }
 
 
-        /* =========================================
+        .btn-login:focus,
+        .btn-login:active {
+            color: #ffffff !important;
+        }
+
+
+        /* ==========================================================
            VALIDATION
-           ========================================= */
+           ========================================================== */
 
         .validation-summary-errors {
-            background: #fff2f2;
-            color: #b42318;
-
-            border:
-                1px solid #fecaca;
+            margin-bottom: 20px;
 
             padding: 13px 15px;
 
+            border:
+                1px solid
+                rgba(255, 255, 255, .30);
+
             border-radius: 9px;
 
-            margin-bottom: 20px;
+            background:
+                rgba(127, 29, 29, .28);
+
+            color: #ffffff !important;
 
             font-size: 14px;
         }
 
 
-        /* =========================================
-           FOOTER
-           ========================================= */
+        .validation-summary-errors ul {
+            margin: 0;
 
-        .register-text {
-            text-align: center;
-            margin-top: 25px;
-            color: #64748b;
+            padding-left: 20px;
         }
 
-        .register-text a {
-            color: @secondary;
-            font-weight: 700;
-            text-decoration: none;
+
+        .validation-summary-errors li {
+            color: #ffffff;
         }
 
-        .system-name {
-            text-align: center;
 
-            margin-top: 30px;
+        .field-validation-error,
+        .text-danger {
+            display: block;
+
+            margin-top: 5px;
+
+            color: #ffffff !important;
 
             font-size: 12px;
-            color: #94a3b8;
         }
 
 
-        /* =========================================
+        /* ==========================================================
+           PATIENT REGISTRATION
+           ========================================================== */
+
+        .register-text {
+            margin-top: 25px;
+
+            text-align: center;
+
+            color: #ffffff;
+
+            font-size: 14px;
+        }
+
+
+        .register-text a {
+            color: #ffffff;
+
+            font-weight: 700;
+
+            text-decoration: underline;
+        }
+
+
+        .register-text a:hover,
+        .register-text a:focus {
+            color: #ffffff;
+
+            opacity: .90;
+        }
+
+
+        /* ==========================================================
+           BACK TO PORTAL SELECTION
+           ========================================================== */
+
+        .back-login {
+            margin-top: 20px;
+
+            text-align: center;
+        }
+
+
+        .back-login a {
+            color: #ffffff;
+
+            font-size: 13px;
+
+            font-weight: 600;
+
+            text-decoration: none;
+
+            opacity: .90;
+        }
+
+
+        .back-login a:hover,
+        .back-login a:focus {
+            color: #ffffff;
+
+            text-decoration: underline;
+
+            opacity: 1;
+        }
+
+
+        /* ==========================================================
+           SYSTEM NAME
+           ========================================================== */
+
+        .system-name {
+            margin-top: 28px;
+
+            text-align: center;
+
+            color:
+                rgba(255, 255, 255, .82);
+
+            font-size: 12px;
+
+            line-height: 1.6;
+        }
+
+
+        .system-name i {
+            margin-right: 4px;
+
+            color: #ffffff;
+        }
+
+
+        /* ==========================================================
            MOBILE
-           ========================================= */
+           ========================================================== */
 
         @@media(max-width: 900px) {
 
@@ -336,9 +711,41 @@
                 display: none;
             }
 
+
             .auth-form-container {
                 width: 100%;
+
+                min-height: 100vh;
+
                 padding: 30px;
+            }
+
+
+            .auth-form {
+                max-width: 480px;
+            }
+
+        }
+
+
+        @@media(max-width: 500px) {
+
+            .auth-form-container {
+                padding: 25px 20px;
+            }
+
+
+            .auth-form h2 {
+                font-size: 26px;
+            }
+
+
+            .remember-forgot {
+                align-items: flex-start !important;
+
+                flex-direction: column;
+
+                gap: 12px;
             }
 
         }
@@ -350,51 +757,72 @@
 
 <body>
 
+
 <div class="auth-container">
 
 
-    <!-- =========================================
+    <!-- ============================================================
          LEFT IMAGE
-         ========================================= -->
+         ============================================================ -->
 
     <section class="auth-image">
 
+
         <div class="image-content">
+
+
+            <!-- PORTAL BADGE -->
 
             <div class="portal-badge">
 
                 <i class="fa-solid @icon"></i>
 
-                @portalTitle
+                <span>
+                    @portalTitle
+                </span>
 
             </div>
 
 
-            <h1>NMB-HLabSys</h1>
+            <!-- SYSTEM TITLE -->
 
+            <h1>
+                NMB-HLabSys
+            </h1>
+
+
+            <!-- DESCRIPTION -->
 
             <p>
                 @description
             </p>
 
+
         </div>
+
 
     </section>
 
 
-    <!-- =========================================
-         LOGIN FORM
-         ========================================= -->
+
+    <!-- ============================================================
+         RIGHT LOGIN FORM
+         ============================================================ -->
 
     <section class="auth-form-container">
 
+
         <div class="auth-form">
 
+
+            <!-- LOGO -->
 
             <img src="~/assets/img/logo.png"
                  class="logo"
                  alt="NMB-HLabSys Logo" />
 
+
+            <!-- ROLE ICON -->
 
             <div class="role-icon">
 
@@ -403,8 +831,14 @@
             </div>
 
 
-            <h2>@portalTitle</h2>
+            <!-- TITLE -->
 
+            <h2>
+                @portalTitle
+            </h2>
+
+
+            <!-- SUBTITLE -->
 
             <p class="subtitle">
 
@@ -414,14 +848,25 @@
             </p>
 
 
+
+            <!-- ====================================================
+                 VALIDATION
+                 ==================================================== -->
+
             <div asp-validation-summary="ModelOnly"
-                 class="text-danger">
+                 class="validation-summary-errors">
             </div>
 
+
+
+            <!-- ====================================================
+                 LOGIN FORM
+                 ==================================================== -->
 
             <form asp-controller="Account"
                   asp-action="RoleLogin"
                   method="post">
+
 
                 @Html.AntiForgeryToken()
 
@@ -433,9 +878,13 @@
                        value="@role" />
 
 
-                <!-- EMAIL -->
+
+                <!-- =================================================
+                     EMAIL
+                     ================================================= -->
 
                 <div class="mb-3">
+
 
                     <label asp-for="Email"
                            class="form-label">
@@ -444,13 +893,19 @@
 
                     <div class="input-wrapper">
 
-                        <i class="fa-solid fa-envelope input-icon"></i>
 
+                      @*   <i class="fa-solid
+                                  fa-envelope
+                                  input-icon">
+                        </i>
+ *@
 
                         <input asp-for="Email"
                                class="form-control"
+                               type="email"
                                autocomplete="email"
                                placeholder="name@example.com" />
+
 
                     </div>
 
@@ -459,12 +914,17 @@
                           class="text-danger small">
                     </span>
 
+
                 </div>
 
 
-                <!-- PASSWORD -->
+
+                <!-- =================================================
+                     PASSWORD
+                     ================================================= -->
 
                 <div class="mb-3">
+
 
                     <label asp-for="Password"
                            class="form-label">
@@ -473,13 +933,19 @@
 
                     <div class="input-wrapper">
 
-                        <i class="fa-solid fa-lock input-icon"></i>
 
+                   @*      <i class="fa-solid
+                                  fa-lock
+                                  input-icon">
+                        </i>
 
+ *@
                         <input asp-for="Password"
                                class="form-control"
+                               type="password"
                                autocomplete="current-password"
                                placeholder="Enter your password" />
+
 
                     </div>
 
@@ -488,17 +954,24 @@
                           class="text-danger small">
                     </span>
 
+
                 </div>
 
 
-                <!-- REMEMBER / FORGOT -->
 
-                <div class="d-flex
+                <!-- =================================================
+                     REMEMBER / FORGOT
+                     ================================================= -->
+
+                <div class="remember-forgot
+                            d-flex
                             justify-content-between
                             align-items-center
                             mb-4">
 
+
                     <div class="form-check">
+
 
                         <input asp-for="RememberMe"
                                class="form-check-input" />
@@ -508,67 +981,125 @@
                                class="form-check-label">
                         </label>
 
+
                     </div>
 
 
-                    <a asp-controller="Account"
-                       asp-action="ForgotPassword"
+
+                    <a href="/Account/ForgotPassword"
                        class="forgot-link">
 
                         Forgot password?
 
                     </a>
 
+
                 </div>
 
 
-                <!-- LOGIN -->
+
+                <!-- =================================================
+                     SIGN IN BUTTON
+                     ================================================= -->
 
                 <button type="submit"
                         class="btn-login">
+
 
                     <i class="fa-solid
                               fa-right-to-bracket
                               me-2">
                     </i>
 
+
                     Sign In
 
+
                 </button>
+
 
             </form>
 
 
+
+            <!-- ====================================================
+                 PATIENT REGISTRATION ONLY
+                 ==================================================== -->
+
             @if (allowRegistration)
             {
+
                 <div class="register-text">
+
 
                     Don't have a patient account?
 
-                    <a asp-controller="Account"
-                       asp-action="Register">
+
+                    <a href="/Account/Register">
 
                         Create Account
 
                     </a>
 
+
                 </div>
+
             }
 
 
+
+            <!-- ====================================================
+                 BACK TO PORTALS
+                 ==================================================== -->
+
+            <div class="back-login">
+
+
+                <a href="/Account/Login">
+
+                    <i class="fa-solid
+                              fa-arrow-left
+                              me-1">
+                    </i>
+
+                    Back to portal selection
+
+                </a>
+
+
+            </div>
+
+
+
+            <!-- ====================================================
+                 SYSTEM NAME
+                 ==================================================== -->
+
             <div class="system-name">
+
+
+                <i class="fa-solid fa-shield-halved"></i>
 
                 NMB-HLabSys • Haematology Laboratory
                 Test Request Management System
 
+
             </div>
+
 
         </div>
 
+
     </section>
+
 
 </div>
 
+
+
+<!-- ==============================================================
+     SCRIPTS
+     ============================================================== -->
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
