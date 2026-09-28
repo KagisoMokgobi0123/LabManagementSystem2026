@@ -843,9 +843,7 @@
                             </a>
 
 
-                            <a asp-area="Technician"
-                               asp-controller="Home"
-                               asp-action="Index"
+                            <a  href="/Technician/Home/Index"  
                                class="hero-btn hero-btn-outline">
 
                                 <i class="fas fa-gauge-high"></i>
@@ -1382,10 +1380,12 @@
                                         {
                                             <button type="button"
                                                     class="btn-receive js-receive-sample"
-                                                    data-request-number="@request.RequestNumber">
+                                                    data-request-id="@request.TestRequestId"
+                                                    data-sample-id="@sample.SampleId"
+                                                    data-request-number="@request.RequestNumber"
+                                                    data-barcode="@sample.Barcode">
 
                                                 <i class="fas fa-box-open"></i>
-
                                                 Receive
 
                                             </button>
@@ -1562,656 +1562,1036 @@
 
     <script>
 
-        $(document).ready(function () {
+    $(document).ready(function () {
 
+        // ============================================================
+        // DATATABLE
+        // ============================================================
 
-            // ========================================================
-            // DATATABLE
-            // ========================================================
+        let table = null;
 
-            let table = null;
+        if ($("#requestsTable").length) {
 
+            table = $("#requestsTable").DataTable({
 
-            if ($("#requestsTable").length) {
+                processing: true,
+                autoWidth: false,
 
-                table =
-                    $("#requestsTable").DataTable({
+                pageLength: 10,
 
-                        // ============================================
-                        // BASIC CONFIGURATION
-                        // ============================================
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
 
-                        processing: true,
+                paging: true,
+                pagingType: "full_numbers",
 
-                        autoWidth: false,
+                scrollX: true,
+                scrollY: "500px",
+                scrollCollapse: true,
 
-                        pageLength: 10,
+                order: [[0, "desc"]],
 
-                        lengthMenu: [
-                            [10, 25, 50, 100, -1],
-                            [10, 25, 50, 100, "All"]
-                        ],
+                // Action column
+                columnDefs: [
+                    {
+                        targets: 8,
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
 
+                // ====================================================
+                // DATATABLE LAYOUT
+                // ====================================================
 
-                        // ============================================
-                        // PAGINATION
-                        // ============================================
+                dom:
+                    "<'row align-items-center mb-3'" +
+                        "<'col-lg-4 col-md-6'l>" +
+                        "<'col-lg-8 col-md-6 text-md-right'B>" +
+                    ">" +
 
-                        paging: true,
+                    "<'row'" +
+                        "<'col-sm-12'tr>" +
+                    ">" +
 
-                        pagingType: "full_numbers",
+                    "<'row align-items-center mt-3'" +
+                        "<'col-md-5'i>" +
+                        "<'col-md-7'p>" +
+                    ">",
 
+                // ====================================================
+                // EXPORT BUTTONS
+                // ====================================================
 
-                        // ============================================
-                        // SCROLL BARS
-                        // ============================================
+                buttons: [
 
-                        scrollX: true,
+                    // ------------------------------------------------
+                    // COPY
+                    // ------------------------------------------------
 
-                        scrollY: "500px",
+                    {
+                        extend: "copyHtml5",
 
-                        scrollCollapse: true,
+                        text:
+                            '<i class="fas fa-copy mr-1"></i> Copy',
 
+                        className:
+                            "btn btn-outline-secondary btn-sm",
 
-                        // ============================================
-                        // SORTING
-                        //
-                        // Request Date is contained in column 0.
-                        // ============================================
+                        title:
+                            "NMB-HLabSys - Samples Awaiting Reception",
 
-                        order: [[0, "desc"]],
+                        exportOptions: {
 
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
 
-                        // ============================================
-                        // DO NOT SORT ACTION COLUMN
-                        // ============================================
+                            modifier: {
+                                search: "applied",
+                                order: "applied",
+                                page: "all"
+                            },
 
-                        columnDefs: [
+                            format: {
 
-                            {
-                                targets: 8,
-                                orderable: false,
-                                searchable: false
+                                body: function (
+                                    data,
+                                    row,
+                                    column,
+                                    node
+                                ) {
+
+                                    return $(node)
+                                        .text()
+                                        .replace(/\s+/g, " ")
+                                        .trim();
+                                }
                             }
-
-                        ],
-
-
-                        // ============================================
-                        // DATATABLE LAYOUT
-                        // ============================================
-
-                        dom:
-                            "<'row align-items-center mb-3'" +
-                                "<'col-lg-4 col-md-6'l>" +
-                                "<'col-lg-8 col-md-6 text-md-right'B>" +
-                            ">" +
-
-                            "<'row'" +
-                                "<'col-sm-12'tr>" +
-                            ">" +
-
-                            "<'row align-items-center mt-3'" +
-                                "<'col-md-5'i>" +
-                                "<'col-md-7'p>" +
-                            ">",
+                        }
+                    },
 
 
-                        // ============================================
-                        // EXPORT BUTTONS
-                        // ============================================
+                    // ------------------------------------------------
+                    // EXCEL
+                    // ------------------------------------------------
 
-                        buttons: [
+                    {
+                        extend: "excelHtml5",
 
+                        text:
+                            '<i class="fas fa-file-excel mr-1"></i> Excel',
 
-                            // ----------------------------------------
-                            // COPY
-                            // ----------------------------------------
+                        className:
+                            "btn btn-success btn-sm",
 
-                            {
-                                extend:
-                                    "copyHtml5",
+                        title:
+                            "NMB-HLabSys Samples Awaiting Reception",
 
-                                text:
-                                    '<i class="fas fa-copy mr-1"></i> Copy',
+                        filename:
+                            "NMB-HLabSys_Samples_Awaiting_Reception",
 
-                                className:
-                                    "btn btn-outline-secondary btn-sm",
+                        sheetName:
+                            "Awaiting Reception",
 
-                                title:
-                                    "NMB-HLabSys - Samples Awaiting Reception",
+                        exportOptions: {
 
-                                exportOptions: {
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
 
-                                    // Exclude Action column
-                                    columns: [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7
-                                    ],
-
-                                    modifier: {
-
-                                        search:
-                                            "applied",
-
-                                        order:
-                                            "applied",
-
-                                        page:
-                                            "all"
-                                    }
-                                }
+                            modifier: {
+                                search: "applied",
+                                order: "applied",
+                                page: "all"
                             },
 
+                            format: {
 
-                            // ----------------------------------------
-                            // EXCEL
-                            // ----------------------------------------
+                                body: function (
+                                    data,
+                                    row,
+                                    column,
+                                    node
+                                ) {
 
-                            {
-                                extend:
-                                    "excelHtml5",
-
-                                text:
-                                    '<i class="fas fa-file-excel mr-1"></i> Excel',
-
-                                className:
-                                    "btn btn-success btn-sm",
-
-                                title:
-                                    "NMB-HLabSys Samples Awaiting Reception",
-
-                                filename:
-                                    "NMB-HLabSys_Samples_Awaiting_Reception",
-
-                                sheetName:
-                                    "Awaiting Reception",
-
-                                exportOptions: {
-
-                                    columns: [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7
-                                    ],
-
-                                    modifier: {
-
-                                        search:
-                                            "applied",
-
-                                        order:
-                                            "applied",
-
-                                        page:
-                                            "all"
-                                    },
-
-                                    format: {
-
-                                        body: function (
-                                            data,
-                                            row,
-                                            column,
-                                            node
-                                        ) {
-
-                                            return $(node)
-                                                .text()
-                                                .replace(
-                                                    /\s+/g,
-                                                    " "
-                                                )
-                                                .trim();
-                                        }
-                                    }
+                                    return $(node)
+                                        .text()
+                                        .replace(/\s+/g, " ")
+                                        .trim();
                                 }
+                            }
+                        }
+                    },
+
+
+                    // ------------------------------------------------
+                    // PDF
+                    // ------------------------------------------------
+
+                    {
+                        extend: "pdfHtml5",
+
+                        text:
+                            '<i class="fas fa-file-pdf mr-1"></i> PDF',
+
+                        className:
+                            "btn btn-danger btn-sm",
+
+                        title:
+                            "NMB-HLabSys - Samples Awaiting Reception",
+
+                        filename:
+                            "NMB-HLabSys_Samples_Awaiting_Reception",
+
+                        orientation:
+                            "landscape",
+
+                        pageSize:
+                            "A4",
+
+                        exportOptions: {
+
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
+
+                            modifier: {
+                                search: "applied",
+                                order: "applied",
+                                page: "all"
                             },
 
+                            format: {
 
-                            // ----------------------------------------
-                            // PDF
-                            // ----------------------------------------
+                                body: function (
+                                    data,
+                                    row,
+                                    column,
+                                    node
+                                ) {
 
-                            {
-                                extend:
-                                    "pdfHtml5",
+                                    return $(node)
+                                        .text()
+                                        .replace(/\s+/g, " ")
+                                        .trim();
+                                }
+                            }
+                        },
 
-                                text:
-                                    '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                        customize: function (doc) {
 
-                                className:
-                                    "btn btn-danger btn-sm",
+                            doc.pageMargins =
+                                [20, 45, 20, 40];
 
-                                title:
-                                    "NMB-HLabSys - Samples Awaiting Reception",
+                            doc.defaultStyle.fontSize =
+                                7;
 
-                                filename:
-                                    "NMB-HLabSys_Samples_Awaiting_Reception",
+                            doc.styles.tableHeader.fontSize =
+                                7;
 
-                                orientation:
-                                    "landscape",
+                            doc.styles.tableHeader.bold =
+                                true;
 
-                                pageSize:
-                                    "A4",
+                            doc.styles.title.fontSize =
+                                16;
 
-                                exportOptions: {
+                            doc.styles.title.alignment =
+                                "center";
 
-                                    columns: [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7
-                                    ],
 
-                                    modifier: {
+                            // =========================================
+                            // REPORT INFORMATION
+                            // =========================================
 
-                                        search:
-                                            "applied",
+                            doc.content.splice(
 
-                                        order:
-                                            "applied",
+                                1,
 
-                                        page:
-                                            "all"
-                                    },
+                                0,
 
-                                    format: {
+                                {
+                                    text:
+                                        "Laboratory Sample Reception Report",
 
-                                        body: function (
-                                            data,
-                                            row,
-                                            column,
-                                            node
-                                        ) {
+                                    alignment:
+                                        "center",
 
-                                            return $(node)
-                                                .text()
-                                                .replace(
-                                                    /\s+/g,
-                                                    " "
-                                                )
-                                                .trim();
-                                        }
-                                    }
+                                    fontSize:
+                                        10,
+
+                                    margin:
+                                        [0, 0, 0, 4]
                                 },
 
+                                {
+                                    text:
+                                        "Submitted samples currently awaiting laboratory reception",
 
-                                customize: function (doc) {
+                                    alignment:
+                                        "center",
 
+                                    fontSize:
+                                        8,
 
-                                    // --------------------------------
-                                    // DOCUMENT
-                                    // --------------------------------
+                                    margin:
+                                        [0, 0, 0, 4]
+                                },
 
-                                    doc.pageMargins =
-                                        [20, 45, 20, 40];
+                                {
+                                    text:
+                                        "Generated: " +
+                                        new Date().toLocaleString(),
 
-                                    doc.defaultStyle.fontSize =
-                                        7;
+                                    alignment:
+                                        "center",
 
-                                    doc.styles.tableHeader.fontSize =
-                                        7;
+                                    fontSize:
+                                        7,
 
-                                    doc.styles.tableHeader.bold =
-                                        true;
-
-                                    doc.styles.title.fontSize =
-                                        16;
-
-                                    doc.styles.title.alignment =
-                                        "center";
-
-
-                                    // --------------------------------
-                                    // REPORT SUBTITLE
-                                    // --------------------------------
-
-                                    doc.content.splice(
-
-                                        1,
-
-                                        0,
-
-                                        {
-                                            text:
-                                                "Laboratory Sample Reception Report",
-
-                                            alignment:
-                                                "center",
-
-                                            fontSize:
-                                                10,
-
-                                            margin:
-                                                [0, 0, 0, 4]
-                                        },
-
-                                        {
-                                            text:
-                                                "Submitted samples currently awaiting laboratory reception",
-
-                                            alignment:
-                                                "center",
-
-                                            fontSize:
-                                                8,
-
-                                            margin:
-                                                [0, 0, 0, 4]
-                                        },
-
-                                        {
-                                            text:
-                                                "Generated: " +
-                                                new Date()
-                                                    .toLocaleString(),
-
-                                            alignment:
-                                                "center",
-
-                                            fontSize:
-                                                7,
-
-                                            margin:
-                                                [0, 0, 0, 15]
-                                        }
-
-                                    );
+                                    margin:
+                                        [0, 0, 0, 15]
+                                }
+                            );
 
 
-                                    // --------------------------------
-                                    // TABLE WIDTH
-                                    // --------------------------------
+                            // =========================================
+                            // TABLE WIDTHS
+                            // =========================================
 
-                                    const tableContent =
-                                        doc.content.find(
-                                            function (item) {
+                            const tableContent =
+                                doc.content.find(function (item) {
+                                    return item.table;
+                                });
 
-                                                return item.table;
+                            if (tableContent) {
 
+                                tableContent.table.widths = [
+                                    "13%",
+                                    "14%",
+                                    "14%",
+                                    "14%",
+                                    "12%",
+                                    "8%",
+                                    "10%",
+                                    "15%"
+                                ];
+                            }
+
+
+                            // =========================================
+                            // FOOTER
+                            // =========================================
+
+                            doc.footer =
+                                function (
+                                    currentPage,
+                                    pageCount
+                                ) {
+
+                                    return {
+
+                                        columns: [
+
+                                            {
+                                                text:
+                                                    "NMB-HLabSys | Laboratory Sample Reception",
+
+                                                alignment:
+                                                    "left",
+
+                                                margin:
+                                                    [20, 0, 0, 0]
+                                            },
+
+                                            {
+                                                text:
+                                                    "Page " +
+                                                    currentPage +
+                                                    " of " +
+                                                    pageCount,
+
+                                                alignment:
+                                                    "right",
+
+                                                margin:
+                                                    [0, 0, 20, 0]
                                             }
-                                        );
+                                        ],
+
+                                        fontSize:
+                                            7,
+
+                                        color:
+                                            "#64748b"
+                                    };
+                                };
+                        }
+                    },
 
 
-                                    if (tableContent) {
+                    // ------------------------------------------------
+                    // PRINT
+                    // ------------------------------------------------
 
-                                        tableContent.table.widths = [
+                    {
+                        extend: "print",
 
-                                            "13%",
-                                            "14%",
-                                            "14%",
-                                            "14%",
-                                            "12%",
-                                            "8%",
-                                            "10%",
-                                            "15%"
+                        text:
+                            '<i class="fas fa-print mr-1"></i> Print',
 
-                                        ];
-                                    }
+                        className:
+                            "btn btn-primary btn-sm",
 
+                        title:
+                            "NMB-HLabSys - Samples Awaiting Reception",
 
-                                    // --------------------------------
-                                    // FOOTER
-                                    // --------------------------------
+                        messageTop:
+                            "Laboratory Sample Reception Report",
 
-                                    doc.footer =
-                                        function (
-                                            currentPage,
-                                            pageCount
-                                        ) {
+                        exportOptions: {
 
-                                            return {
+                            columns: [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7
+                            ],
 
-                                                columns: [
-
-                                                    {
-                                                        text:
-                                                            "NMB-HLabSys | Laboratory Sample Reception",
-
-                                                        alignment:
-                                                            "left",
-
-                                                        margin:
-                                                            [20, 0, 0, 0]
-                                                    },
-
-                                                    {
-                                                        text:
-                                                            "Page " +
-                                                            currentPage +
-                                                            " of " +
-                                                            pageCount,
-
-                                                        alignment:
-                                                            "right",
-
-                                                        margin:
-                                                            [0, 0, 20, 0]
-                                                    }
-
-                                                ],
-
-                                                fontSize:
-                                                    7,
-
-                                                color:
-                                                    "#64748b"
-                                            };
-                                        };
-                                }
-                            },
-
-
-                            // ----------------------------------------
-                            // PRINT
-                            // ----------------------------------------
-
-                            {
-                                extend:
-                                    "print",
-
-                                text:
-                                    '<i class="fas fa-print mr-1"></i> Print',
-
-                                className:
-                                    "btn btn-primary btn-sm",
-
-                                title:
-                                    "NMB-HLabSys - Samples Awaiting Reception",
-
-                                messageTop:
-                                    "Laboratory Sample Reception Report",
-
-                                exportOptions: {
-
-                                    columns: [
-                                        0,
-                                        1,
-                                        2,
-                                        3,
-                                        4,
-                                        5,
-                                        6,
-                                        7
-                                    ],
-
-                                    modifier: {
-
-                                        search:
-                                            "applied",
-
-                                        order:
-                                            "applied",
-
-                                        page:
-                                            "all"
-                                    }
-                                }
-                            }
-
-                        ],
-
-
-                        // ============================================
-                        // LANGUAGE
-                        // ============================================
-
-                        language: {
-
-                            processing:
-                                "Loading records...",
-
-                            emptyTable:
-                                "No samples are currently awaiting reception.",
-
-                            zeroRecords:
-                                "No matching sample requests were found.",
-
-                            info:
-                                "Showing _START_ to _END_ of _TOTAL_ requests",
-
-                            infoEmpty:
-                                "Showing 0 requests",
-
-                            infoFiltered:
-                                "(filtered from _MAX_ total requests)",
-
-                            lengthMenu:
-                                "Show _MENU_ records",
-
-                            paginate: {
-
-                                first:
-                                    '<i class="fas fa-angles-left"></i>',
-
-                                previous:
-                                    '<i class="fas fa-chevron-left"></i>',
-
-                                next:
-                                    '<i class="fas fa-chevron-right"></i>',
-
-                                last:
-                                    '<i class="fas fa-angles-right"></i>'
+                            modifier: {
+                                search: "applied",
+                                order: "applied",
+                                page: "all"
                             }
                         }
-                    });
-
-
-                // ================================================
-                // USE EXISTING SEARCH FIELD
-                // ================================================
-
-                $("#requestSearch").on(
-                    "keyup change",
-                    function () {
-
-                        table
-                            .search(this.value)
-                            .draw();
-
                     }
-                );
+                ],
 
 
-                // ================================================
-                // URGENCY FILTER
-                //
-                // Column 6 = Urgency
-                // ================================================
+                // ====================================================
+                // LANGUAGE
+                // ====================================================
 
-                $("#urgencyFilter").on(
-                    "change",
-                    function () {
+                language: {
 
-                        const value =
-                            $(this).val();
+                    processing:
+                        "Loading records...",
+
+                    emptyTable:
+                        "No samples are currently awaiting reception.",
+
+                    zeroRecords:
+                        "No matching sample requests were found.",
+
+                    info:
+                        "Showing _START_ to _END_ of _TOTAL_ requests",
+
+                    infoEmpty:
+                        "Showing 0 requests",
+
+                    infoFiltered:
+                        "(filtered from _MAX_ total requests)",
+
+                    lengthMenu:
+                        "Show _MENU_ records",
+
+                    paginate: {
+
+                        // Font Awesome 5 compatible icons
+                        first:
+                            '<i class="fas fa-angle-double-left"></i>',
+
+                        previous:
+                            '<i class="fas fa-chevron-left"></i>',
+
+                        next:
+                            '<i class="fas fa-chevron-right"></i>',
+
+                        last:
+                            '<i class="fas fa-angle-double-right"></i>'
+                    }
+                }
+            });
 
 
-                        if (!value) {
+            // ========================================================
+            // SEARCH
+            // ========================================================
 
-                            table
-                                .column(6)
-                                .search("")
-                                .draw();
+            $("#requestSearch").on(
+                "keyup change",
+                function () {
 
-                            return;
-                        }
+                    table
+                        .search(this.value)
+                        .draw();
+                }
+            );
 
+
+            // ========================================================
+            // URGENCY FILTER
+            // Column 6 = Urgency
+            // ========================================================
+
+            $("#urgencyFilter").on(
+                "change",
+                function () {
+
+                    const value =
+                        $(this).val();
+
+                    if (!value) {
 
                         table
                             .column(6)
-                            .search(
-                                "^" + value + "$",
-                                true,
-                                false
-                            )
+                            .search("")
                             .draw();
-
-                    }
-                );
-            }
-
-
-            // ========================================================
-            // RECEIVE SAMPLE MODAL
-            // ========================================================
-
-            $(document).on(
-                "click",
-                ".js-receive-sample",
-                function () {
-
-
-                    const requestNumber =
-                        $(this)
-                            .data("request-number");
-
-
-                    if (!requestNumber) {
-
-                        Swal.fire({
-
-                            icon:
-                                "error",
-
-                            title:
-                                "Request Missing",
-
-                            text:
-                                "Unable to determine the test request."
-                        });
 
                         return;
                     }
 
+                    table
+                        .column(6)
+                        .search(
+                            "^" + value + "$",
+                            true,
+                            false
+                        )
+                        .draw();
+                }
+            );
+        }
+
+
+        // ============================================================
+        // RECEIVE SAMPLE MODAL
+        // ============================================================
+
+        $(document).on(
+            "click",
+            ".js-receive-sample",
+            function (event) {
+
+                event.preventDefault();
+
+
+                // ====================================================
+                // BUTTON
+                // ====================================================
+
+                const button =
+                    $(this);
+
+
+                // ====================================================
+                // READ VALUES DIRECTLY FROM HTML ATTRIBUTES
+                // ====================================================
+
+                const testRequestId =
+                    button.attr("data-request-id");
+
+                const sampleId =
+                    button.attr("data-sample-id");
+
+                const requestNumber =
+                    button.attr("data-request-number");
+
+                const barcode =
+                    button.attr("data-barcode");
+
+
+                // ====================================================
+                // DEBUG INFORMATION
+                // ====================================================
+
+                console.log(
+                    "========================================"
+                );
+
+                console.log(
+                    "RECEIVE SAMPLE BUTTON CLICKED"
+                );
+
+                console.log(
+                    "TestRequestId:",
+                    testRequestId
+                );
+
+                console.log(
+                    "SampleId:",
+                    sampleId
+                );
+
+                console.log(
+                    "RequestNumber:",
+                    requestNumber
+                );
+
+                console.log(
+                    "Barcode:",
+                    barcode
+                );
+
+                console.log(
+                    "========================================"
+                );
+
+
+                // ====================================================
+                // VALIDATE TEST REQUEST ID
+                // ====================================================
+
+                if (
+                    !testRequestId ||
+                    testRequestId === "0"
+                ) {
+
+                    Swal.fire({
+
+                        icon:
+                            "error",
+
+                        title:
+                            "Request Missing",
+
+                        text:
+                            "Unable to determine the TestRequestId for this sample.",
+
+                        confirmButtonText:
+                            "OK"
+                    });
+
+                    return;
+                }
+
+
+                // ====================================================
+                // VALIDATE SAMPLE ID
+                // ====================================================
+
+                if (
+                    !sampleId ||
+                    sampleId === "0"
+                ) {
+
+                    Swal.fire({
+
+                        icon:
+                            "error",
+
+                        title:
+                            "Sample Missing",
+
+                        text:
+                            "Unable to determine the SampleId for this sample.",
+
+                        confirmButtonText:
+                            "OK"
+                    });
+
+                    return;
+                }
+
+
+                // ====================================================
+                // PREVENT DOUBLE CLICK
+                // ====================================================
+
+                button
+                    .prop("disabled", true);
+
+
+                // ====================================================
+                // SHOW LOADING CONTENT
+                // ====================================================
+
+                $("#receiveSampleModalContent")
+                    .html(`
+
+                        <div class="modal-body text-center py-5">
+
+                            <div
+                                class="spinner-border text-primary"
+                                role="status">
+
+                                <span class="sr-only">
+                                    Loading...
+                                </span>
+
+                            </div>
+
+                            <h6 class="mt-3 mb-1">
+
+                                Loading Sample
+
+                            </h6>
+
+                            <p class="text-muted mb-0">
+
+                                ${requestNumber || "Request"}
+
+                                <br />
+
+                                ${barcode || ""}
+
+                            </p>
+
+                        </div>
+
+                    `);
+
+
+                // ====================================================
+                // SHOW MODAL
+                // ====================================================
+
+                $("#receiveSampleModal")
+                    .modal("show");
+
+
+                // ====================================================
+                // URL
+                // ====================================================
+
+                const receiveUrl =
+                    '@Url.Action(
+                        "Receive",
+                        "ReceiveSamples",
+                        new { area = "Technician" })';
+
+
+                console.log(
+                    "Receive URL:",
+                    receiveUrl
+                );
+
+
+                // ====================================================
+                // AJAX GET
+                //
+                // Controller:
+                //
+                // Receive(
+                //     int testRequestId,
+                //     int sampleId
+                // )
+                //
+                // ====================================================
+
+                $.ajax({
+
+                    url:
+                        receiveUrl,
+
+                    type:
+                        "GET",
+
+                    cache:
+                        false,
+
+                    data: {
+
+                        testRequestId:
+                            testRequestId,
+
+                        sampleId:
+                            sampleId
+                    },
+
 
                     // ================================================
-                    // LOADING CONTENT
+                    // SUCCESS
                     // ================================================
+
+                    success:
+                        function (
+                            response,
+                            textStatus,
+                            xhr
+                        ) {
+
+                            console.log(
+                                "Sample loaded successfully."
+                            );
+
+                            console.log(
+                                "HTTP Status:",
+                                xhr.status
+                            );
+
+
+                            $("#receiveSampleModalContent")
+                                .html(response);
+
+
+                            button
+                                .prop(
+                                    "disabled",
+                                    false
+                                );
+                        },
+
+
+                    // ================================================
+                    // ERROR
+                    // ================================================
+
+                    error:
+                        function (
+                            xhr,
+                            textStatus,
+                            errorThrown
+                        ) {
+
+                            button
+                                .prop(
+                                    "disabled",
+                                    false
+                                );
+
+
+                            $("#receiveSampleModal")
+                                .modal("hide");
+
+
+                            // =========================================
+                            // CONSOLE DEBUG
+                            // =========================================
+
+                            console.error(
+                                "========================================"
+                            );
+
+                            console.error(
+                                "FAILED TO LOAD SAMPLE"
+                            );
+
+                            console.error(
+                                "HTTP Status:",
+                                xhr.status
+                            );
+
+                            console.error(
+                                "Text Status:",
+                                textStatus
+                            );
+
+                            console.error(
+                                "Error:",
+                                errorThrown
+                            );
+
+                            console.error(
+                                "TestRequestId:",
+                                testRequestId
+                            );
+
+                            console.error(
+                                "SampleId:",
+                                sampleId
+                            );
+
+                            console.error(
+                                "RequestNumber:",
+                                requestNumber
+                            );
+
+                            console.error(
+                                "Barcode:",
+                                barcode
+                            );
+
+                            console.error(
+                                "Server Response:",
+                                xhr.responseText
+                            );
+
+                            console.error(
+                                "========================================"
+                            );
+
+
+                            // =========================================
+                            // USER-FRIENDLY ERROR
+                            // =========================================
+
+                            let errorMessage =
+                                "The sample information could not be loaded.";
+
+
+                            // -----------------------------------------
+                            // HTTP 400
+                            // -----------------------------------------
+
+                            if (xhr.status === 400) {
+
+                                errorMessage =
+                                    xhr.responseText ||
+                                    "This sample cannot currently be received.";
+                            }
+
+
+                            // -----------------------------------------
+                            // HTTP 401
+                            // -----------------------------------------
+
+                            else if (xhr.status === 401) {
+
+                                errorMessage =
+                                    "Your login session has expired. Please sign in again.";
+                            }
+
+
+                            // -----------------------------------------
+                            // HTTP 403
+                            // -----------------------------------------
+
+                            else if (xhr.status === 403) {
+
+                                errorMessage =
+                                    "You are not authorized to receive laboratory samples.";
+                            }
+
+
+                            // -----------------------------------------
+                            // HTTP 404
+                            // -----------------------------------------
+
+                            else if (xhr.status === 404) {
+
+                                errorMessage =
+                                    "The sample could not be found. " +
+                                    "TestRequestId: " +
+                                    testRequestId +
+                                    ", SampleId: " +
+                                    sampleId +
+                                    ".";
+                            }
+
+
+                            // -----------------------------------------
+                            // HTTP 500
+                            // -----------------------------------------
+
+                            else if (xhr.status === 500) {
+
+                                errorMessage =
+                                    "A server error occurred while loading the sample. " +
+                                    "Check the Visual Studio Output window for the exception.";
+                            }
+
+
+                            // -----------------------------------------
+                            // HTTP 0
+                            // -----------------------------------------
+
+                            else if (xhr.status === 0) {
+
+                                errorMessage =
+                                    "The request could not reach the server. " +
+                                    "Check your connection and application.";
+                            }
+
+
+                            // =========================================
+                            // SWEETALERT
+                            // =========================================
+
+                            Swal.fire({
+
+                                icon:
+                                    "error",
+
+                                title:
+                                    "Unable to Load Sample",
+
+                                html:
+                                    "<div style='text-align:left'>" +
+
+                                        "<p>" +
+                                            errorMessage +
+                                        "</p>" +
+
+                                        "<hr>" +
+
+                                        "<small>" +
+
+                                            "<strong>Request:</strong> " +
+                                            (requestNumber || "N/A") +
+
+                                            "<br>" +
+
+                                            "<strong>TestRequestId:</strong> " +
+                                            testRequestId +
+
+                                            "<br>" +
+
+                                            "<strong>SampleId:</strong> " +
+                                            sampleId +
+
+                                            "<br>" +
+
+                                            "<strong>HTTP Status:</strong> " +
+                                            xhr.status +
+
+                                        "</small>" +
+
+                                    "</div>",
+
+                                confirmButtonText:
+                                    "OK"
+                            });
+                        }
+                });
+            }
+        );
+
+
+        // ============================================================
+        // RESET RECEIVE MODAL AFTER CLOSING
+        // ============================================================
+
+        $("#receiveSampleModal")
+            .on(
+                "hidden.bs.modal",
+                function () {
 
                     $("#receiveSampleModalContent")
                         .html(`
 
                             <div class="modal-body text-center py-5">
 
-                                <div class="spinner-border text-primary"
-                                     role="status">
+                                <div
+                                    class="spinner-border text-primary"
+                                    role="status">
 
                                     <span class="sr-only">
                                         Loading...
@@ -2228,64 +2608,10 @@
                             </div>
 
                         `);
+                }
+            );
 
+    });
 
-                    $("#receiveSampleModal")
-                        .modal("show");
-
-
-                    // ================================================
-                    // LOAD RECEIVE PARTIAL
-                    // ================================================
-
-                    $.ajax({
-
-                        url:
-                            '@Url.Action(
-                                "Receive",
-                                "ReceiveSamples",
-                                new { area = "Technician" })',
-
-                        type:
-                            "GET",
-
-                        data: {
-
-                            requestNumber:
-                                requestNumber
-                        },
-
-
-                        success: function (response) {
-
-                            $("#receiveSampleModalContent")
-                                .html(response);
-                        },
-
-
-                        error: function () {
-
-                            $("#receiveSampleModal")
-                                .modal("hide");
-
-
-                            Swal.fire({
-
-                                icon:
-                                    "error",
-
-                                title:
-                                    "Unable to Load Sample",
-
-                                text:
-                                    "The sample information could not be loaded. Please try again."
-                            });
-                        }
-                    });
-
-                });
-
-        });
-
-    </script>
+</script>
 }

@@ -29,6 +29,8 @@ namespace NMB_HLabSys.Data
         public DbSet<TestTypeModel> TestTypes { get; set; }
 
         public DbSet<ConsumableModel> Consumables { get; set; }
+        
+        public DbSet<TestRequestTestTypeModel> TestRequestTestTypes{ get; set; }
 
         public DbSet<MeasurementUnitModel> MeasurementUnits { get; set; }
 
