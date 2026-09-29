@@ -170,6 +170,30 @@
                 display: none;
             }
 
+            /* PATIENT FORM */
+
+            .patient-field {
+                display: none;
+            }
+
+            .patient-section {
+                border-top: 1px solid #e3ebf0;
+                padding-top: 20px;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+
+            .patient-section-title {
+                color: #073b5c;
+                font-size: 15px;
+                font-weight: 700;
+                margin-bottom: 18px;
+            }
+
+                .patient-section-title i {
+                    color: #0088a9;
+                }
+
             /* INFORMATION NOTICE */
 
             .registration-info {
@@ -294,8 +318,11 @@
     </style>
 
 </head>
+
 <body>
+
     <div class="register-wrapper">
+
         <!-- LEFT HEALTHCARE BANNER -->
 
         <section class="register-banner">
@@ -318,6 +345,7 @@
 
         </section>
 
+
         <!-- REGISTRATION AREA -->
 
         <section class="register-container">
@@ -334,9 +362,11 @@
 
                 </p>
 
+
                 <div asp-validation-summary="ModelOnly"
                      class="text-danger mb-3">
                 </div>
+
 
                 <form method="post"
                       asp-controller="Account"
@@ -344,11 +374,13 @@
 
                     @Html.AntiForgeryToken()
 
+
                     <!-- ROLE NAVIGATION -->
 
                     <input asp-for="Role"
                            type="hidden"
                            id="SelectedRole" />
+
 
                     <div class="role-navigation">
 
@@ -362,6 +394,7 @@
 
                         </button>
 
+
                         <button type="button"
                                 class="role-btn"
                                 onclick="selectRole(this, 'Doctor')">
@@ -371,6 +404,7 @@
                             Doctor
 
                         </button>
+
 
                         <button type="button"
                                 class="role-btn"
@@ -382,6 +416,7 @@
 
                         </button>
 
+
                         <button type="button"
                                 class="role-btn"
                                 onclick="selectRole(this, 'LabTechnician')">
@@ -391,6 +426,7 @@
                             Technician
 
                         </button>
+
 
                         <button type="button"
                                 class="role-btn"
@@ -403,6 +439,7 @@
                         </button>
 
                     </div>
+
 
                     <!-- FIRST NAME -->
 
@@ -427,6 +464,7 @@
 
                     </div>
 
+
                     <!-- LAST NAME -->
 
                     <div class="mb-3">
@@ -450,9 +488,261 @@
 
                     </div>
 
-                    <!-- EMAIL -->
 
-                    <div class="mb-3">
+                    <!-- ========================= -->
+                    <!-- PATIENT-ONLY INFORMATION -->
+                    <!-- ========================= -->
+
+                    <div id="patientFields"
+                         class="patient-field">
+
+
+                        <div class="patient-section">
+
+                            <div class="patient-section-title">
+
+                                <i class="fas fa-id-card me-2"></i>
+
+                                Patient Information
+
+                            </div>
+
+
+                            <!-- SOUTH AFRICAN ID NUMBER -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="IdNumber"
+                                       class="form-label">
+
+                                    <i class="fas fa-address-card me-1"></i>
+
+                                    South African ID Number
+
+                                </label>
+
+                                <input asp-for="IdNumber"
+                                       id="SouthAfricanIDNumber"
+                                       class="form-control"
+                                       placeholder="Enter 13-digit South African ID number"
+                                       maxlength="13"
+                                       inputmode="numeric"
+                                       autocomplete="off" />
+
+                                <span asp-validation-for="IdNumber"
+                                      class="text-danger small">
+                                </span>
+
+                                <div class="text-muted small mt-1">
+
+                                    Your ID number is used to determine your
+                                    date of birth.
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- DATE OF BIRTH -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="DateOfBirth"
+                                       class="form-label">
+
+                                    <i class="fas fa-calendar-days me-1"></i>
+
+                                    Date of Birth
+
+                                </label>
+
+                                <input asp-for="DateOfBirth"
+                                       id="DateOfBirth"
+                                       type="date"
+                                       class="form-control"
+                                       readonly />
+
+                                <span asp-validation-for="DateOfBirth"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- CELLPHONE -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="PhoneNumber"
+                                       class="form-label">
+
+                                    <i class="fas fa-mobile-screen-button me-1"></i>
+
+                                    Cellphone Number
+
+                                </label>
+
+                                <input asp-for="PhoneNumber"
+                                       class="form-control"
+                                       placeholder="Enter cellphone number"
+                                       inputmode="tel"
+                                       autocomplete="tel" />
+
+                                <span asp-validation-for="PhoneNumber"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- HOME ADDRESS -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="HomeAddress"
+                                       class="form-label">
+
+                                    <i class="fas fa-house me-1"></i>
+
+                                    Home Address
+
+                                </label>
+
+                                <textarea asp-for="HomeAddress"
+                                          class="form-control"
+                                          placeholder="Enter home address"
+                                          rows="3"
+                                          style="height:auto; resize:vertical;"></textarea>
+
+                                <span asp-validation-for="HomeAddress"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- PATIENT ACCOUNT DETAILS -->
+
+                        <div class="patient-section">
+
+                            <div class="patient-section-title">
+
+                                <i class="fas fa-lock me-2"></i>
+
+                                Account Security
+
+                            </div>
+
+
+                            <!-- EMAIL -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="Email"
+                                       class="form-label">
+
+                                    <i class="far fa-envelope me-1"></i>
+
+                                    Email Address
+
+                                </label>
+
+                                <input asp-for="Email"
+                                       class="form-control"
+                                       placeholder="name@example.com"
+                                       autocomplete="email" />
+
+                                <span asp-validation-for="Email"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- PASSWORD -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="Password"
+                                       class="form-label">
+
+                                    <i class="fas fa-lock me-1"></i>
+
+                                    Password
+
+                                </label>
+
+                                <input asp-for="Password"
+                                       type="password"
+                                       class="form-control"
+                                       placeholder="Create password"
+                                       autocomplete="new-password" />
+
+                                <span asp-validation-for="Password"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- CONFIRM PASSWORD -->
+
+                            <div class="mb-3">
+
+                                <label asp-for="ConfirmPassword"
+                                       class="form-label">
+
+                                    <i class="fas fa-lock me-1"></i>
+
+                                    Confirm Password
+
+                                </label>
+
+                                <input asp-for="ConfirmPassword"
+                                       type="password"
+                                       class="form-control"
+                                       placeholder="Confirm password"
+                                       autocomplete="new-password" />
+
+                                <span asp-validation-for="ConfirmPassword"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+
+                            <!-- ACCEPT TERMS -->
+
+                            <div class="form-check mb-3">
+
+                                <input asp-for="AcceptTerms"
+                                       class="form-check-input" />
+
+                                <label asp-for="AcceptTerms"
+                                       class="form-check-label">
+
+                                    I agree to the Terms of Use and
+                                    Privacy Policy.
+
+                                </label>
+
+                                <span asp-validation-for="AcceptTerms"
+                                      class="text-danger small d-block">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- EMAIL FOR OTHER ROLES -->
+
+                    <div id="otherRoleEmailField"
+                         class="mb-3">
 
                         <label asp-for="Email"
                                class="form-label">
@@ -472,6 +762,7 @@
                         </span>
 
                     </div>
+
 
                     <!-- DOCTOR FIELD -->
 
@@ -497,6 +788,7 @@
 
                     </div>
 
+
                     <!-- TECHNICIAN FIELD -->
 
                     <div class="mb-3 role-specific-field"
@@ -521,9 +813,11 @@
 
                     </div>
 
-                    <!-- INFORMATION -->
 
-                    <div class="registration-info mb-4">
+                    <!-- INFORMATION FOR OTHER ROLES -->
+
+                    <div id="otherRoleInformation"
+                         class="registration-info mb-4">
 
                         <i class="fas fa-circle-info me-1"></i>
 
@@ -532,6 +826,21 @@
                         your permanent password before signing in.
 
                     </div>
+
+
+                    <!-- PATIENT INFORMATION -->
+
+                    <div id="patientInformation"
+                         class="registration-info mb-4"
+                         style="display:none;">
+
+                        <i class="fas fa-circle-info me-1"></i>
+
+                        Create your own password to securely access
+                        your patient account and laboratory information.
+
+                    </div>
+
 
                     <!-- CREATE ACCOUNT -->
 
@@ -543,6 +852,7 @@
                         Create Account
 
                     </button>
+
 
                     <!-- LOGIN -->
 
@@ -559,6 +869,7 @@
                         </a>
 
                     </div>
+
 
                     <!-- HELP -->
 
@@ -578,6 +889,7 @@
 
                 </form>
 
+
                 <div class="security-note">
 
                     <i class="fas fa-shield-halved me-1"></i>
@@ -591,40 +903,76 @@
         </section>
 
     </div>
+
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
     <partial name="_ValidationScriptsPartial" />
+
+
     <script>
+
         function selectRole(button, role) {
 
         // Remove active state from all roles
         document
         .querySelectorAll(".role-btn")
         .forEach(btn => {
-
         btn.classList.remove("active");
-
         });
+
 
         // Activate selected role
         button.classList.add("active");
+
 
         // Set hidden Role field
         document
         .getElementById("SelectedRole")
         .value = role;
 
-        // Get role-specific fields
+
+        // Existing role-specific fields
         const doctorField =
         document.getElementById("doctorField");
 
         const technicianField =
         document.getElementById("technicianField");
 
-        // Hide all role-specific fields
+
+        // Patient fields
+        const patientFields =
+        document.getElementById("patientFields");
+
+        const otherRoleEmailField =
+        document.getElementById("otherRoleEmailField");
+
+        const otherRoleInformation =
+        document.getElementById("otherRoleInformation");
+
+        const patientInformation =
+        document.getElementById("patientInformation");
+
+
+        // Hide existing role-specific fields
         doctorField.style.display = "none";
 
         technicianField.style.display = "none";
+
+
+        // Hide patient-specific section
+        patientFields.style.display = "none";
+
+
+        // Show normal email field for existing roles
+        otherRoleEmailField.style.display = "block";
+
+        otherRoleInformation.style.display = "block";
+
+        patientInformation.style.display = "none";
+
 
         // Show Doctor field
         if (role === "Doctor") {
@@ -633,6 +981,7 @@
 
         }
 
+
         // Show Technician field
         if (role === "LabTechnician") {
 
@@ -640,32 +989,206 @@
 
         }
 
+
+        // Show Patient fields
+        if (role === "Patient") {
+
+        patientFields.style.display = "block";
+
+        // Email is already included inside the patient section
+        otherRoleEmailField.style.display = "none";
+
+        // Patient creates their own password
+        otherRoleInformation.style.display = "none";
+
+        patientInformation.style.display = "block";
+
+        // Extract DOB from South African ID
+        updateDateOfBirthFromId();
+
         }
 
-        // Restore selected role after validation
+        }
+
+
+        // Extract date of birth from South African ID number.
+        //
+        // South African ID format:
+        // YYMMDDSSSSCAZ
+        //
+        // The first six digits are YYMMDD.
+
+        function updateDateOfBirthFromId() {
+
+        const idInput =
+        document.getElementById("SouthAfricanIDNumber");
+
+        const dobInput =
+        document.getElementById("DateOfBirth");
+
+
+        if (!idInput || !dobInput) {
+        return;
+        }
+
+
+        const idNumber =
+        idInput.value.replace(/\D/g, "");
+
+
+        if (idNumber.length < 6) {
+
+        dobInput.value = "";
+
+        return;
+
+        }
+
+
+        const yearPart =
+        parseInt(idNumber.substring(0, 2), 10);
+
+        const monthPart =
+        parseInt(idNumber.substring(2, 4), 10);
+
+        const dayPart =
+        parseInt(idNumber.substring(4, 6), 10);
+
+
+        if (
+        isNaN(yearPart) ||
+        isNaN(monthPart) ||
+        isNaN(dayPart) ||
+        monthPart < 1 ||
+        monthPart > 12 ||
+        dayPart < 1 ||
+        dayPart > 31
+        ) {
+
+        dobInput.value = "";
+
+        return;
+
+        }
+
+
+        /*
+        * Determine century.
+        *
+        * This uses the current year as the reference:
+        * two-digit years up to the current year's final
+        * two digits are treated as 20xx.
+        *
+        * Older two-digit years are treated as 19xx.
+        */
+
+        const currentYear =
+        new Date().getFullYear();
+
+        const currentTwoDigitYear =
+        currentYear % 100;
+
+
+        let fullYear;
+
+
+        if (yearPart <= currentTwoDigitYear) {
+
+        fullYear = 2000 + yearPart;
+
+        } else {
+
+        fullYear = 1900 + yearPart;
+
+        }
+
+
+        const month =
+        String(monthPart).padStart(2, "0");
+
+        const day =
+        String(dayPart).padStart(2, "0");
+
+
+        const date =
+        new Date(fullYear, monthPart - 1, dayPart);
+
+
+        // Validate the constructed date
+        if (
+        date.getFullYear() !== fullYear ||
+        date.getMonth() !== monthPart - 1 ||
+        date.getDate() !== dayPart
+        ) {
+
+        dobInput.value = "";
+
+        return;
+
+        }
+
+
+        dobInput.value =
+        `${fullYear}-${month}-${day}`;
+
+        }
+
+
+        // Automatically update DOB whenever the patient
+        // enters or changes the ID number.
+
         document.addEventListener("DOMContentLoaded", function () {
+
+        const idInput =
+        document.getElementById("SouthAfricanIDNumber");
+
+
+        if (idInput) {
+
+        idInput.addEventListener(
+        "input",
+        updateDateOfBirthFromId
+        );
+
+        }
+
+
+        // Restore selected role after validation
 
         const selectedRole =
         document.getElementById("SelectedRole").value;
+
 
         if (!selectedRole) {
         return;
         }
 
+
         const roleButtons =
         document.querySelectorAll(".role-btn");
+
 
         roleButtons.forEach(button => {
 
         const buttonText =
         button.innerText.trim();
 
+
         if (
-        (selectedRole === "Patient" && buttonText === "Patient") ||
-        (selectedRole === "Doctor" && buttonText === "Doctor") ||
-        (selectedRole === "LabManager" && buttonText === "Lab Manager") ||
-        (selectedRole === "LabTechnician" && buttonText === "Technician") ||
-        (selectedRole === "Administrator" && buttonText === "Administrator")
+        (selectedRole === "Patient" &&
+        buttonText === "Patient") ||
+
+        (selectedRole === "Doctor" &&
+        buttonText === "Doctor") ||
+
+        (selectedRole === "LabManager" &&
+        buttonText === "Lab Manager") ||
+
+        (selectedRole === "LabTechnician" &&
+        buttonText === "Technician") ||
+
+        (selectedRole === "Administrator" &&
+        buttonText === "Administrator")
         ) {
 
         selectRole(button, selectedRole);
@@ -676,5 +1199,7 @@
 
         });
 
-    </script></body>
+    </script>
+
+</body>
 </html>
