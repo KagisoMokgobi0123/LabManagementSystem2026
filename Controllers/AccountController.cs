@@ -471,28 +471,79 @@ namespace NMB_HLabSys.Controllers
         // ============================================================
         // LOGOUT
         // ============================================================
-
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
+            // Get currently logged-in user
+            var user =
+                await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                await _signInManager.SignOutAsync();
+
+                return RedirectToAction(nameof(Login));
+            }
+
+
+            // Get user's role BEFORE signing out
+            var roles =
+                await _userManager.GetRolesAsync(user);
+
+            var role =
+                roles.FirstOrDefault();
+
             var email =
-                User.Identity?.Name;
+                user.Email;
 
 
+            // Sign user out
             await _signInManager.SignOutAsync();
 
 
             _logger.LogInformation(
-                "User {Email} logged out.",
-                email);
+                "User {Email} with role {Role} logged out.",
+                email,
+                role
+            );
 
 
-            return RedirectToAction(
-                nameof(Login));
+            // Redirect each role to its own login page
+            return role switch
+            {
+                "Admin" =>
+                    RedirectToAction(
+                        nameof(AdminLogin)
+                    ),
+
+                "Manager" =>
+                    RedirectToAction(
+                        nameof(ManagerLogin)
+                    ),
+
+                "Doctor" =>
+                    RedirectToAction(
+                        nameof(DoctorLogin)
+                    ),
+
+                "LabTechnician" =>
+                    RedirectToAction(
+                        nameof(TechnicianLogin)
+                    ),
+
+                "Patient" =>
+                    RedirectToAction(
+                        nameof(PatientLogin)
+                    ),
+
+                _ =>
+                    RedirectToAction(
+                        nameof(Login)
+                    )
+            };
         }
-
 
         // ============================================================
         // ACCESS DENIED

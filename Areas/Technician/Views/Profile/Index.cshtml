@@ -16,6 +16,31 @@
         min-height: 100vh;
     }
 
+    .phone-clickable {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .phone-clickable:hover {
+            border-color: #0284c7;
+            background: #f0f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.10);
+        }
+
+            .phone-clickable:hover .info-icon {
+                background: #0284c7;
+                color: #ffffff;
+            }
+
+            .phone-clickable:hover .fa-chevron-right {
+                color: #0284c7 !important;
+            }
+
+        .phone-clickable .info-value {
+            color: #334155;
+        }
+
     .profile-header {
         margin-bottom: 25px;
     }
@@ -299,33 +324,42 @@
 
 
                                 <!-- PHONE -->
+                                <!-- PHONE -->
 
                                 <div class="col-md-6">
 
-                                    <div class="info-item">
+                                    <a href="/Technician/Profile/ChangePhoneNumber"
+                                       class="text-decoration-none">
 
-                                        <div class="info-icon">
-                                            <i class="fas fa-phone"></i>
-                                        </div>
+                                        <div class="info-item phone-clickable">
 
-                                        <div>
-
-                                            <div class="info-label">
-                                                Phone Number
+                                            <div class="info-icon">
+                                                <i class="fas fa-phone"></i>
                                             </div>
 
-                                            <div class="info-value">
-                                                @(string.IsNullOrWhiteSpace(Model.PhoneNumber)
-                                                    ? "Not provided"
-                                                    : Model.PhoneNumber)
+                                            <div class="flex-grow-1">
+
+                                                <div class="info-label">
+                                                    Phone Number
+                                                </div>
+
+                                                <div class="info-value">
+                                                    @(string.IsNullOrWhiteSpace(Model.PhoneNumber)
+                                                        ? "Not provided"
+                                                        : Model.PhoneNumber)
+                                                </div>
+
+                                            </div>
+
+                                            <div class="ml-auto">
+                                                <i class="fas fa-chevron-right text-muted"></i>
                                             </div>
 
                                         </div>
 
-                                    </div>
+                                    </a>
 
                                 </div>
-
                             </div>
 
                         </div>
