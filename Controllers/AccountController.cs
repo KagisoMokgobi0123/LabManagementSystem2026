@@ -28,6 +28,20 @@ namespace NMB_HLabSys.Controllers
         // URL: /Account/Login
         // ============================================================
 
+        [AllowAnonymous]//Add this(KG)
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]//Add this(KG)
+        [HttpGet]
+        public IActionResult RegisterUser()
+        {
+            return View();
+        }
+
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
