@@ -30,6 +30,13 @@ namespace NMB_HLabSys.Controllers
 
         [AllowAnonymous]
         [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
