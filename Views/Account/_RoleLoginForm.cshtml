@@ -2,20 +2,11 @@
 
 @{
     Layout = null;
-
-    var role = ViewData["Role"]?.ToString() ?? "";
-    var portalTitle = ViewData["PortalTitle"]?.ToString() ?? "Login";
-    var description = ViewData["Description"]?.ToString() ?? "";
-    var image = ViewData["Image"]?.ToString() ?? "/assets/img/laboratory.jpg";
-    var icon = ViewData["Icon"]?.ToString() ?? "fa-user";
-    var primary = ViewData["Primary"]?.ToString() ?? "#073b5c";
-    var secondary = ViewData["Secondary"]?.ToString() ?? "#0088a9";
-
-    var allowRegistration =
-        ViewData["AllowRegistration"] as bool? ?? false;
+    ViewData["Title"] = "Login";
 }
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -25,7 +16,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0" />
 
-    <title>@portalTitle | NMB-HLabSys</title>
+    <title>Login | NMB-HLabSys</title>
 
 
     <!-- GOOGLE FONT -->
@@ -55,700 +46,491 @@
 
     <style>
 
-        /* ==========================================================
-           GENERAL
-           ========================================================== */
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            min-height: 100%;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f8fc;
-        }
-
-        .auth-container {
-            min-height: 100vh;
-            display: flex;
-        }
-
-
-        /* ==========================================================
-           LEFT SIDE
-           ========================================================== */
-
-        .auth-image {
-            width: 52%;
-            min-height: 100vh;
-
-            position: relative;
-
-            background:
-                linear-gradient(
-                    rgba(6, 30, 54, .72),
-                    rgba(0, 103, 140, .78)
-                ),
-                url('@image');
-
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-
-            display: flex;
-            align-items: flex-end;
-
-            padding: 60px;
-        }
-
-
-        .auth-image::before {
-            content: "";
-
-            position: absolute;
-
-            inset: 0;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    rgba(5, 25, 45, .05),
-                    rgba(5, 25, 45, .32)
-                );
-
-            pointer-events: none;
-        }
-
-
-        .image-content {
-            position: relative;
-            z-index: 2;
-
-            max-width: 620px;
-
-            color: #ffffff;
-        }
-
-
-        .image-content h1,
-        .image-content p,
-        .image-content span,
-        .image-content i {
-            color: #ffffff;
-        }
-
-
-        /* ==========================================================
-           LEFT PORTAL BADGE
-           ========================================================== */
-
-        .portal-badge {
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 8px;
-
-            padding: 9px 16px;
-
-            margin-bottom: 20px;
-
-            background:
-                rgba(255, 255, 255, .14);
-
-            border:
-                1px solid
-                rgba(255, 255, 255, .30);
-
-            border-radius: 50px;
-
-            color: #ffffff;
-
-            font-size: 13px;
-
-            font-weight: 700;
-
-            backdrop-filter: blur(5px);
-
-            -webkit-backdrop-filter: blur(5px);
-        }
-
-
-        .portal-badge i {
-            color: #ffffff;
-        }
-
-
-        .image-content h1 {
-            margin: 0 0 15px;
-
-            color: #ffffff;
-
-            font-size: 44px;
-
-            font-weight: 800;
-
-            letter-spacing: -.7px;
-        }
-
-
-        .image-content p {
-            margin: 0;
-
-            color: #ffffff;
-
-            font-size: 16px;
-
-            line-height: 1.8;
-        }
-
-
-        /* ==========================================================
-           RIGHT FORM SIDE
-           ========================================================== */
-
-        .auth-form-container {
-            width: 48%;
-            min-height: 100vh;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: center;
-
-            padding: 50px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    @primary,
-                    @secondary
-                );
-
-            color: #ffffff;
-        }
-
-
-        .auth-form {
-            width: 100%;
-
-            max-width: 450px;
-
-            color: #ffffff;
-        }
-
-
-        /* ==========================================================
-           LOGO
-           ========================================================== */
-
-        .logo {
-            width: 75px;
-
-            height: auto;
-
-            margin-bottom: 25px;
-        }
-
-
-        /* ==========================================================
-           ROLE ICON
-           ========================================================== */
-
-        .role-icon {
-            width: 58px;
-
-            height: 58px;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            margin-bottom: 20px;
-
-            border-radius: 14px;
-
-            background:
-                rgba(255, 255, 255, .16);
-
-            border:
-                1px solid
-                rgba(255, 255, 255, .28);
-
-            color: #ffffff;
-
-            font-size: 22px;
-
-            box-shadow:
-                0 8px 20px
-                rgba(0, 0, 0, .10);
-        }
-
-
-        .role-icon i {
-            color: #ffffff;
-        }
-
-
-        /* ==========================================================
-           FORM TITLE
-           ========================================================== */
-
-        .auth-form h2 {
-            margin-bottom: 8px;
-
-            color: #ffffff;
-
-            font-size: 30px;
-
-            font-weight: 800;
-        }
-
-
-        .subtitle {
-            margin-bottom: 30px;
-
-            color: #ffffff;
-
-            font-size: 14px;
-
-            line-height: 1.7;
-
-            opacity: .92;
-        }
-
-
-        /* ==========================================================
-           LABELS
-           ========================================================== */
-
-        .form-label {
-            margin-bottom: 8px;
-
-            color: #ffffff;
-
-            font-size: 14px;
-
-            font-weight: 600;
-        }
-
-
-        /* ==========================================================
-           INPUT WRAPPER
-           ========================================================== */
-
-        .input-wrapper {
-            position: relative;
-        }
-
-
-        .input-icon {
-            position: absolute;
-
-            left: 16px;
-
-            top: 50%;
-
-            transform:
-                translateY(-50%);
-
-            z-index: 5;
-
-            color: #64748b;
-
-            pointer-events: none;
-        }
-
-
-        /* ==========================================================
-           INPUTS
-           ========================================================== */
-
-        .form-control {
-            width: 100%;
-
-            height: 52px;
-
-            padding-left: 45px;
-
-            padding-right: 15px;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, .50);
-
-            border-radius: 10px;
-
-            background: #ffffff;
-
-            /* Keep typed text dark */
-            color: #172033;
-
-            font-size: 14px;
-
-            transition:
-                border-color .2s ease,
-                box-shadow .2s ease;
-        }
-
-
-        .form-control::placeholder {
-            color: #94a3b8;
-        }
-
-
-        .form-control:focus {
-            background: #ffffff;
-
-            color: #172033;
-
-            border-color: #ffffff;
-
-            outline: none;
-
-            box-shadow:
-                0 0 0 .2rem
-                rgba(255, 255, 255, .20);
-        }
-
-
-        /* Browser autofill */
-
-        .form-control:-webkit-autofill,
-        .form-control:-webkit-autofill:hover,
-        .form-control:-webkit-autofill:focus {
-            -webkit-text-fill-color: #172033;
-
-            -webkit-box-shadow:
-                0 0 0 1000px
-                #ffffff inset;
-
-            transition:
-                background-color 5000s ease-in-out 0s;
-        }
-
-
-        /* ==========================================================
-           REMEMBER ME
-           ========================================================== */
-
-        .remember-forgot {
-            color: #ffffff;
-        }
-
-
-        .form-check-label {
-            color: #ffffff;
-
-            font-size: 14px;
-
-            cursor: pointer;
-        }
-
-
-        .form-check-input {
-            cursor: pointer;
-
-            border-color:
-                rgba(255, 255, 255, .80);
-        }
-
-
-        .form-check-input:checked {
-            background-color: #ffffff;
-
-            border-color: #ffffff;
-        }
-
-
-        .form-check-input:focus {
-            border-color: #ffffff;
-
-            box-shadow:
-                0 0 0 .15rem
-                rgba(255, 255, 255, .20);
-        }
-
-
-        /* ==========================================================
-           FORGOT PASSWORD
-           ========================================================== */
-
-        .forgot-link {
-            color: #ffffff;
-
-            text-decoration: none;
-
-            font-size: 14px;
-
-            font-weight: 600;
-        }
-
-
-        .forgot-link:hover,
-        .forgot-link:focus {
-            color: #ffffff;
-
-            text-decoration: underline;
-        }
-
-
-        /* ==========================================================
-           LOGIN BUTTON
-           ========================================================== */
-
-        .btn-login {
-            width: 100%;
-
-            height: 52px;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, .32);
-
-            border-radius: 10px;
-
-            background:
-                rgba(255, 255, 255, .16);
-
-            color: #ffffff !important;
-
-            font-size: 15px;
-
-            font-weight: 700;
-
-            cursor: pointer;
-
-            transition:
-                transform .2s ease,
-                background .2s ease,
-                box-shadow .2s ease;
-        }
-
-
-        .btn-login i {
-            color: #ffffff;
-        }
-
-
-        .btn-login:hover {
-            background:
-                rgba(255, 255, 255, .24);
-
-            color: #ffffff !important;
-
-            transform:
-                translateY(-1px);
-
-            box-shadow:
-                0 8px 20px
-                rgba(0, 0, 0, .15);
-        }
-
-
-        .btn-login:focus,
-        .btn-login:active {
-            color: #ffffff !important;
-        }
-
-
-        /* ==========================================================
-           VALIDATION
-           ========================================================== */
-
-        .validation-summary-errors {
-            margin-bottom: 20px;
-
-            padding: 13px 15px;
-
-            border:
-                1px solid
-                rgba(255, 255, 255, .30);
-
-            border-radius: 9px;
-
-            background:
-                rgba(127, 29, 29, .28);
-
-            color: #ffffff !important;
-
-            font-size: 14px;
-        }
-
-
-        .validation-summary-errors ul {
-            margin: 0;
-
-            padding-left: 20px;
-        }
-
-
-        .validation-summary-errors li {
-            color: #ffffff;
-        }
-
-
-        .field-validation-error,
-        .text-danger {
-            display: block;
-
-            margin-top: 5px;
-
-            color: #ffffff !important;
-
-            font-size: 12px;
-        }
-
-
-        /* ==========================================================
-           PATIENT REGISTRATION
-           ========================================================== */
-
-        .register-text {
-            margin-top: 25px;
-
-            text-align: center;
-
-            color: #ffffff;
-
-            font-size: 14px;
-        }
-
-
-        .register-text a {
-            color: #ffffff;
-
-            font-weight: 700;
-
-            text-decoration: underline;
-        }
-
-
-        .register-text a:hover,
-        .register-text a:focus {
-            color: #ffffff;
-
-            opacity: .90;
-        }
-
-
-        /* ==========================================================
-           BACK TO PORTAL SELECTION
-           ========================================================== */
-
-        .back-login {
-            margin-top: 20px;
-
-            text-align: center;
-        }
-
-
-        .back-login a {
-            color: #ffffff;
-
-            font-size: 13px;
-
-            font-weight: 600;
-
-            text-decoration: none;
-
-            opacity: .90;
-        }
-
-
-        .back-login a:hover,
-        .back-login a:focus {
-            color: #ffffff;
-
-            text-decoration: underline;
-
-            opacity: 1;
-        }
-
-
-        /* ==========================================================
-           SYSTEM NAME
-           ========================================================== */
-
-        .system-name {
-            margin-top: 28px;
-
-            text-align: center;
-
-            color:
-                rgba(255, 255, 255, .82);
-
-            font-size: 12px;
-
-            line-height: 1.6;
-        }
-
-
-        .system-name i {
-            margin-right: 4px;
-
-            color: #ffffff;
-        }
-
-
-        /* ==========================================================
-           MOBILE
-           ========================================================== */
-
-        @@media(max-width: 900px) {
+            * {
+                box-sizing: border-box;
+            }
+
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                min-height: 100%;
+            }
+
+            body {
+                font-family: 'Inter', sans-serif;
+                background: #f5f8fc;
+            }
+
+            .btn-back {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-top: 12px;
+                background: transparent;
+                color: #ffffff !important;
+                text-decoration: none !important;
+            }
+
+                .btn-back:hover {
+                    background: rgba(255, 255, 255, .12);
+                    color: #ffffff !important;
+                    text-decoration: none !important;
+                    transform: translateY(-1px);
+                }
+
+                .btn-back i {
+                    color: #ffffff;
+                }
+
+            /* =========================================================
+                       PAGE
+                       ========================================================= */
+
+            .auth-container {
+                min-height: 100vh;
+                display: flex;
+            }
+
+
+            /* =========================================================
+                       LEFT SIDE
+                       ========================================================= */
 
             .auth-image {
-                display: none;
+                width: 48%;
+                min-height: 100vh;
+                position: relative;
+                background: linear-gradient( rgba(6, 30, 54, .72), rgba(0, 103, 140, .78) ), url('/assets/img/laboratory.jpg');
+                background-size: cover;
+                background-position: center;
+                display: flex;
+                align-items: flex-end;
+                padding: 55px;
             }
 
+                .auth-image::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background: linear-gradient( 180deg, rgba(5, 25, 45, .05), rgba(5, 25, 45, .40) );
+                    pointer-events: none;
+                }
+
+            .image-content {
+                position: relative;
+                z-index: 2;
+                max-width: 620px;
+                color: #fff;
+            }
+
+            .system-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 9px 16px;
+                margin-bottom: 20px;
+                border: 1px solid rgba(255,255,255,.30);
+                border-radius: 50px;
+                background: rgba(255,255,255,.14);
+                font-size: 13px;
+                font-weight: 700;
+                backdrop-filter: blur(5px);
+            }
+
+            .image-content h1 {
+                margin: 0 0 15px;
+                font-size: 43px;
+                font-weight: 800;
+                color: #fff;
+            }
+
+            .image-content p {
+                margin: 0;
+                color: rgba(255,255,255,.92);
+                font-size: 15px;
+                line-height: 1.8;
+            }
+
+
+            /* =========================================================
+                       RIGHT
+                       ========================================================= */
 
             .auth-form-container {
-                width: 100%;
-
+                width: 52%;
                 min-height: 100vh;
-
-                padding: 30px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 35px 45px;
+                background: linear-gradient( 135deg, #073b5c, #0088a9 );
+                color: #fff;
             }
-
 
             .auth-form {
-                max-width: 480px;
+                width: 100%;
+                max-width: 540px;
             }
 
-        }
 
+            /* =========================================================
+                       LOGO
+                       ========================================================= */
 
-        @@media(max-width: 500px) {
-
-            .auth-form-container {
-                padding: 25px 20px;
+            .logo {
+                width: 68px;
+                height: auto;
+                margin-bottom: 18px;
             }
 
+
+            /* =========================================================
+                       TITLE
+                       ========================================================= */
 
             .auth-form h2 {
-                font-size: 26px;
+                margin: 0 0 7px;
+                color: #fff;
+                font-size: 29px;
+                font-weight: 800;
             }
 
+            .subtitle {
+                margin-bottom: 22px;
+                color: rgba(255,255,255,.88);
+                font-size: 13px;
+                line-height: 1.6;
+            }
+
+
+            /* =========================================================
+                       ROLE SELECTOR
+                       ========================================================= */
+
+            .role-title {
+                margin-bottom: 10px;
+                color: #fff;
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            .role-grid {
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+                margin-bottom: 22px;
+            }
+
+            .role-option {
+                position: relative;
+            }
+
+                .role-option input {
+                    position: absolute;
+                    opacity: 0;
+                    pointer-events: none;
+                }
+
+            .role-card {
+                min-height: 82px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                padding: 10px 5px;
+                border: 1px solid rgba(255,255,255,.28);
+                border-radius: 10px;
+                background: rgba(255,255,255,.08);
+                color: rgba(255,255,255,.88);
+                cursor: pointer;
+                transition: .2s ease;
+            }
+
+                .role-card i {
+                    font-size: 19px;
+                }
+
+                .role-card span {
+                    font-size: 10px;
+                    font-weight: 700;
+                    text-align: center;
+                }
+
+                .role-card:hover {
+                    background: rgba(255,255,255,.16);
+                    transform: translateY(-2px);
+                }
+
+            .role-option input:checked +
+            .role-card {
+                background: #fff;
+                border-color: #fff;
+                color: #075985;
+                box-shadow: 0 6px 18px rgba(0,0,0,.15);
+            }
+
+
+            /* =========================================================
+                       SELECTED ROLE
+                       ========================================================= */
+
+            .selected-role {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 20px;
+                padding: 10px 13px;
+                border: 1px solid rgba(255,255,255,.22);
+                border-radius: 9px;
+                background: rgba(255,255,255,.08);
+                font-size: 12px;
+            }
+
+                .selected-role i {
+                    width: 25px;
+                    text-align: center;
+                    font-size: 16px;
+                }
+
+                .selected-role strong {
+                    font-weight: 700;
+                }
+
+
+            /* =========================================================
+                       LABEL
+                       ========================================================= */
+
+            .form-label {
+                margin-bottom: 7px;
+                color: #fff;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+
+            /* =========================================================
+                       INPUT
+                       ========================================================= */
+
+            .input-wrapper {
+                position: relative;
+            }
+
+            .input-icon {
+                position: absolute;
+                left: 16px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 5;
+                color: #64748b;
+                pointer-events: none;
+            }
+
+            .form-control {
+                width: 100%;
+                height: 50px;
+                padding-left: 44px;
+                padding-right: 44px;
+                border: 1px solid rgba(255,255,255,.50);
+                border-radius: 9px;
+                background: #fff;
+                color: #172033;
+                font-size: 14px;
+            }
+
+                .form-control:focus {
+                    background: #fff;
+                    color: #172033;
+                    border-color: #fff;
+                    outline: none;
+                    box-shadow: 0 0 0 .2rem rgba(255,255,255,.20);
+                }
+
+                .form-control::placeholder {
+                    color: #94a3b8;
+                }
+
+
+            /* =========================================================
+                       PASSWORD TOGGLE
+                       ========================================================= */
+
+            .password-toggle {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                border: 0;
+                background: transparent;
+                color: #64748b;
+                cursor: pointer;
+                z-index: 6;
+            }
+
+
+            /* =========================================================
+                       REMEMBER
+                       ========================================================= */
 
             .remember-forgot {
-                align-items: flex-start !important;
-
-                flex-direction: column;
-
-                gap: 12px;
+                color: #fff;
             }
 
-        }
+            .form-check-label {
+                color: #fff;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+            .forgot-link {
+                color: #fff;
+                font-size: 13px;
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+                .forgot-link:hover {
+                    color: #fff;
+                    text-decoration: underline;
+                }
+
+
+            /* =========================================================
+                       BUTTON
+                       ========================================================= */
+
+            .btn-login {
+                width: 100%;
+                height: 50px;
+                border: 1px solid rgba(255,255,255,.32);
+                border-radius: 9px;
+                background: rgba(255,255,255,.16);
+                color: #fff !important;
+                font-size: 14px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: .2s ease;
+            }
+
+                .btn-login:hover {
+                    background: rgba(255,255,255,.25);
+                    transform: translateY(-1px);
+                    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+                }
+
+
+            /* =========================================================
+                       VALIDATION
+                       ========================================================= */
+
+            .validation-summary-errors {
+                margin-bottom: 16px;
+                padding: 11px 14px;
+                border: 1px solid rgba(255,255,255,.30);
+                border-radius: 8px;
+                background: rgba(127,29,29,.28);
+                color: #fff !important;
+                font-size: 13px;
+            }
+
+                .validation-summary-errors ul {
+                    margin: 0;
+                    padding-left: 20px;
+                }
+
+            .field-validation-error,
+            .text-danger {
+                display: block;
+                margin-top: 4px;
+                color: #fff !important;
+                font-size: 11px;
+            }
+
+
+            /* =========================================================
+                       PATIENT REGISTER
+                       ========================================================= */
+
+            .patient-register {
+                display: none;
+                margin-top: 18px;
+                padding: 11px;
+                border: 1px solid rgba(255,255,255,.18);
+                border-radius: 8px;
+                background: rgba(255,255,255,.06);
+                text-align: center;
+                color: #fff;
+                font-size: 12px;
+            }
+
+                .patient-register a {
+                    color: #fff;
+                    font-weight: 700;
+                    text-decoration: underline;
+                }
+
+
+            /* =========================================================
+                       SYSTEM FOOTER
+                       ========================================================= */
+
+            .system-name {
+                margin-top: 20px;
+                text-align: center;
+                color: rgba(255,255,255,.70);
+                font-size: 11px;
+            }
+
+
+            /* =========================================================
+                       MOBILE
+                       ========================================================= */
+
+            @@media(max-width: 1000px) {
+
+                .role-grid {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+
+
+            @@media(max-width: 900px) {
+
+                .auth-image {
+                    display: none;
+                }
+
+                .auth-form-container {
+                    width: 100%;
+                    min-height: 100vh;
+                    padding: 30px;
+                }
+            }
+
+
+            @@media(max-width: 500px) {
+
+                .auth-form-container {
+                    padding: 25px 18px;
+                }
+
+                .role-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+
+                .auth-form h2 {
+                    font-size: 25px;
+                }
+
+                .remember-forgot {
+                    flex-direction: column;
+                    align-items: flex-start !important;
+                    gap: 10px;
+                }
+            }
 
     </style>
 
@@ -758,227 +540,257 @@
 <body>
 
 
-<div class="auth-container">
+    <div class="auth-container">
 
 
-    <!-- ============================================================
-         LEFT IMAGE
-         ============================================================ -->
+        <!-- =========================================================
+         LEFT SIDE
+         ========================================================= -->
 
-    <section class="auth-image">
+        <section class="auth-image">
 
+            <div class="image-content">
 
-        <div class="image-content">
+                <div class="system-badge">
 
+                    <i class="fa-solid fa-flask-vial"></i>
 
-            <!-- PORTAL BADGE -->
+                    NMB-HLabSys Secure Portal
 
-            <div class="portal-badge">
-
-                <i class="fa-solid @icon"></i>
-
-                <span>
-                    @portalTitle
-                </span>
-
-            </div>
+                </div>
 
 
-            <!-- SYSTEM TITLE -->
-
-            <h1>
-                NMB-HLabSys
-            </h1>
+                <h1>
+                    NMB-HLabSys
+                </h1>
 
 
-            <!-- DESCRIPTION -->
+                <p>
+                    Secure access to the Haematology Laboratory Test
+                    Request Management System for patients, doctors,
+                    laboratory technicians, managers and administrators.
+                </p>
+                <br />
 
-            <p>
-                @description
-            </p>
-
-
-        </div>
-
-
-    </section>
-
-
-
-    <!-- ============================================================
-         RIGHT LOGIN FORM
-         ============================================================ -->
-
-    <section class="auth-form-container">
-
-
-        <div class="auth-form">
-
-
-            <!-- LOGO -->
-
-            <img src="~/assets/img/logo.png"
-                 class="logo"
-                 alt="NMB-HLabSys Logo" />
-
-
-            <!-- ROLE ICON -->
-
-            <div class="role-icon">
-
-                <i class="fa-solid @icon"></i>
+                <p>
+                   LOG IN CREDENTIALS:
+                    <br />
+                    Admin:  <br />
+                   Username: admin@nmbhlab.co.za <br/>
+                   Password: Admin@123<br/>
+                    <br />
+                 
+                    Manager:   <br />
+                    Username: manager@nmbhlab.co.za <br />
+                    Password: Manager@123<br />
+                    <br />
+                    Doctor:<br />
+                    Username: doctor@nmbhlab.co.za <br />
+                    Password: Doctor@123<br />
+                    <br />
+                
+                    Techncian:  <br />
+                    Username: technician@nmbhlab.co.za <br />
+                    Password: Tech@1234<br />
+                    <br />
+                    Patient:  <br />
+                    Username: patient@nmbhlab.co.za <br />
+                    Password: Patient@123<br />
+                </p>
 
             </div>
 
-
-            <!-- TITLE -->
-
-            <h2>
-                @portalTitle
-            </h2>
-
-
-            <!-- SUBTITLE -->
-
-            <p class="subtitle">
-
-                Enter your registered email address
-                and password to continue.
-
-            </p>
+        </section>
 
 
 
-            <!-- ====================================================
+        <!-- =========================================================
+         RIGHT SIDE
+         ========================================================= -->
+
+        <section class="auth-form-container">
+
+
+            <div class="auth-form">
+
+
+                <!-- LOGO -->
+
+                <img src="~/assets/img/logo.png"
+                     class="logo"
+                     alt="NMB-HLabSys Logo" />
+
+
+                <h2>
+                    Sign in to your account
+                </h2>
+
+
+                <p class="subtitle">
+
+                    Select your account role and enter your
+                    registered credentials to continue.
+
+                </p>
+
+
+
+                <!-- =================================================
                  VALIDATION
-                 ==================================================== -->
+                 ================================================= -->
 
-            <div asp-validation-summary="ModelOnly"
-                 class="validation-summary-errors">
-            </div>
+                <div asp-validation-summary="ModelOnly"
+                     class="validation-summary-errors">
+                </div>
 
 
 
-            <!-- ====================================================
+                <!-- =================================================
                  LOGIN FORM
-                 ==================================================== -->
+                 ================================================= -->
 
-            <form asp-controller="Account"
-                  asp-action="RoleLogin"
-                  method="post">
-
-
-                @Html.AntiForgeryToken()
-
-
-                <!-- ROLE -->
-
-                <input type="hidden"
-                       name="role"
-                       value="@role" />
+                <form asp-area=""
+                      asp-controller="Account"
+                      asp-action="RoleLogin"
+                      method="post"
+                      id="loginForm">
 
 
-
-                <!-- =================================================
-                     EMAIL
-                     ================================================= -->
-
-                <div class="mb-3">
+                    @Html.AntiForgeryToken()
 
 
-                    <label asp-for="Email"
-                           class="form-label">
-                    </label>
+                    <!-- =============================================
+                     ROLE
+                     ============================================= -->
 
+                    <div class="role-title">
 
-                    <div class="input-wrapper">
+                        <i class="fa-solid fa-users mr-1"></i>
 
-
-                      @*   <i class="fa-solid
-                                  fa-envelope
-                                  input-icon">
-                        </i>
- *@
-
-                        <input asp-for="Email"
-                               class="form-control"
-                               type="email"
-                               autocomplete="email"
-                               placeholder="name@example.com" />
-
+                        Select your role
 
                     </div>
 
 
-                    <span asp-validation-for="Email"
-                          class="text-danger small">
-                    </span>
+                    <div class="role-grid">
 
 
-                </div>
+                        <!-- ADMIN -->
 
+                        <label class="role-option">
 
+                            <input type="radio"
+                                   name="role"
+                                   value="Admin"
+                                   data-title="Administrator"
+                                   data-icon="fa-user-shield" />
 
-                <!-- =================================================
-                     PASSWORD
-                     ================================================= -->
+                            <span class="role-card">
 
-                <div class="mb-3">
+                                <i class="fa-solid fa-user-shield"></i>
 
+                                <span>
+                                    Admin
+                                </span>
 
-                    <label asp-for="Password"
-                           class="form-label">
-                    </label>
+                            </span>
 
-
-                    <div class="input-wrapper">
-
-
-                   @*      <i class="fa-solid
-                                  fa-lock
-                                  input-icon">
-                        </i>
-
- *@
-                        <input asp-for="Password"
-                               class="form-control"
-                               type="password"
-                               autocomplete="current-password"
-                               placeholder="Enter your password" />
-
-
-                    </div>
-
-
-                    <span asp-validation-for="Password"
-                          class="text-danger small">
-                    </span>
-
-
-                </div>
+                        </label>
 
 
 
-                <!-- =================================================
-                     REMEMBER / FORGOT
-                     ================================================= -->
+                        <!-- MANAGER -->
 
-                <div class="remember-forgot
-                            d-flex
-                            justify-content-between
-                            align-items-center
-                            mb-4">
+                        <label class="role-option">
+
+                            <input type="radio"
+                                   name="role"
+                                   value="Manager"
+                                   data-title="Laboratory Manager"
+                                   data-icon="fa-user-tie" />
+
+                            <span class="role-card">
+
+                                <i class="fa-solid fa-user-tie"></i>
+
+                                <span>
+                                    Manager
+                                </span>
+
+                            </span>
+
+                        </label>
 
 
-                    <div class="form-check">
+
+                        <!-- DOCTOR -->
+
+                        <label class="role-option">
+
+                            <input type="radio"
+                                   name="role"
+                                   value="Doctor"
+                                   data-title="Doctor"
+                                   data-icon="fa-user-doctor" />
+
+                            <span class="role-card">
+
+                                <i class="fa-solid fa-user-doctor"></i>
+
+                                <span>
+                                    Doctor
+                                </span>
+
+                            </span>
+
+                        </label>
 
 
-                        <input asp-for="RememberMe"
-                               class="form-check-input" />
+
+                        <!-- LAB TECHNICIAN -->
+
+                        <label class="role-option">
+
+                            <input type="radio"
+                                   name="role"
+                                   value="LabTechnician"
+                                   data-title="Lab Technician"
+                                   data-icon="fa-microscope" />
+
+                            <span class="role-card">
+
+                                <i class="fa-solid fa-microscope"></i>
+
+                                <span>
+                                    Technician
+                                </span>
+
+                            </span>
+
+                        </label>
 
 
-                        <label asp-for="RememberMe"
-                               class="form-check-label">
+
+                        <!-- PATIENT -->
+
+                        <label class="role-option">
+
+                            <input type="radio"
+                                   name="role"
+                                   value="Patient"
+                                   data-title="Patient"
+                                   data-icon="fa-hospital-user" />
+
+                            <span class="role-card">
+
+                                <i class="fa-solid fa-hospital-user"></i>
+
+                                <span>
+                                    Patient
+                                </span>
+
+                            </span>
+
                         </label>
 
 
@@ -986,126 +798,508 @@
 
 
 
-                    <a href="/Account/ForgotPassword"
-                       class="forgot-link">
+                    <!-- SELECTED ROLE -->
 
-                        Forgot password?
+                    <div class="selected-role"
+                         id="selectedRoleDisplay">
+
+                        <i class="fa-solid fa-circle-info"
+                           id="selectedRoleIcon">
+                        </i>
+
+                        <div>
+
+                            Signing in as
+
+                            <strong id="selectedRoleText">
+                                Select a role above
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                     EMAIL
+                     ============================================= -->
+
+                    <div class="mb-3">
+
+
+                        <label asp-for="Email"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+                   
+                            <input asp-for="Email"
+                                   class="form-control"
+                                   type="email"
+                                   autocomplete="email"
+                                   placeholder="name@example.com" />
+
+                          
+
+                        </div>
+
+
+                        <span asp-validation-for="Email"
+                              class="text-danger">
+                        </span>
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                     PASSWORD
+                     ============================================= -->
+
+                    <div class="mb-3">
+
+
+                        <label asp-for="Password"
+                               class="form-label">
+                        </label>
+
+
+                        <div class="input-wrapper">
+
+@* 
+                            <i class="fa-solid
+                                fa-lock
+                                input-icon">
+                            </i> *@
+
+                            
+                            <input asp-for="Password"
+                                   class="form-control"
+                                   id="Password"
+                                   type="password"
+                                   autocomplete="current-password"
+                                   placeholder="Enter your password" />
+
+
+                            <button type="button"
+                                    class="password-toggle"
+                                    id="togglePassword"
+                                    aria-label="Show password">
+
+                                <i class="fa-solid fa-eye"
+                                   id="passwordIcon">
+                                </i>
+
+                            </button>
+
+
+                        </div>
+
+
+                        <span asp-validation-for="Password"
+                              class="text-danger">
+                        </span>
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                     REMEMBER / FORGOT
+                     ============================================= -->
+
+                    <div class="remember-forgot
+                        d-flex
+                        justify-content-between
+                        align-items-center
+                        mb-4">
+
+
+                        <div class="form-check">
+
+
+                            <input asp-for="RememberMe"
+                                   class="form-check-input" />
+
+
+                            <label asp-for="RememberMe"
+                                   class="form-check-label">
+                            </label>
+
+
+                        </div>
+
+
+                        <a href="/Account/ForgotPassword"
+                           class="forgot-link">
+
+                            Forgot password?
+
+                        </a>
+
+
+                    </div>
+
+
+
+                    <!-- =============================================
+                     SIGN IN
+                     ============================================= -->
+                    <!-- SIGN IN BUTTON -->
+
+                    <button type="submit"
+                            class="btn-login"
+                            id="loginButton">
+
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>
+
+                        <span id="loginButtonText">
+                            Sign In
+                        </span>
+
+                    </button>
+
+
+                    <!-- BACK BUTTON -->
+
+                    <a href="/"
+                       class="btn-login btn-back">
+
+                        <i class="fa-solid fa-arrow-left me-2"></i>
+
+                        <span>
+                            Back
+                        </span>
 
                     </a>
 
+                    <!-- =============================================
+                     PATIENT REGISTRATION
+                     ============================================= -->
+
+                    <div class="patient-register"
+                         id="patientRegister">
+
+
+                        Don't have a patient account?
+
+
+                        <a href="/Account/Register">
+                            Create Account
+                        </a>
+
+
+                    </div>
+
+
+                </form>
+
+
+
+                <div class="system-name">
+
+                    <i class="fa-solid fa-shield-halved"></i>
+
+                    NMB-HLabSys • Haematology Laboratory
+                    Test Request Management System
 
                 </div>
-
-
-
-                <!-- =================================================
-                     SIGN IN BUTTON
-                     ================================================= -->
-
-                <button type="submit"
-                        class="btn-login">
-
-
-                    <i class="fa-solid
-                              fa-right-to-bracket
-                              me-2">
-                    </i>
-
-
-                    Sign In
-
-
-                </button>
-
-
-            </form>
-
-
-
-            <!-- ====================================================
-                 PATIENT REGISTRATION ONLY
-                 ==================================================== -->
-
-            @if (allowRegistration)
-            {
-
-                <div class="register-text">
-
-
-                    Don't have a patient account?
-
-
-                    <a href="/Account/Register">
-
-                        Create Account
-
-                    </a>
-
-
-                </div>
-
-            }
-
-
-
-            <!-- ====================================================
-                 BACK TO PORTALS
-                 ==================================================== -->
-
-            <div class="back-login">
-
-
-                <a href="/Account/Login">
-
-                    <i class="fa-solid
-                              fa-arrow-left
-                              me-1">
-                    </i>
-
-                    Back to portal selection
-
-                </a>
 
 
             </div>
 
 
-
-            <!-- ====================================================
-                 SYSTEM NAME
-                 ==================================================== -->
-
-            <div class="system-name">
+        </section>
 
 
-                <i class="fa-solid fa-shield-halved"></i>
-
-                NMB-HLabSys • Haematology Laboratory
-                Test Request Management System
-
-
-            </div>
-
-
-        </div>
-
-
-    </section>
-
-
-</div>
+    </div>
 
 
 
-<!-- ==============================================================
-     SCRIPTS
-     ============================================================== -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
 
-<partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+            (function() {
+
+                "use strict";
+
+
+                // =========================================================
+                // ELEMENTS
+                // =========================================================
+
+                const loginForm =
+                    document.getElementById(
+                        "loginForm"
+                    );
+
+
+                const roleInputs =
+                    document.querySelectorAll(
+                        'input[name="role"]'
+                    );
+
+
+                const selectedRoleText =
+                    document.getElementById(
+                        "selectedRoleText"
+                    );
+
+
+                const selectedRoleIcon =
+                    document.getElementById(
+                        "selectedRoleIcon"
+                    );
+
+
+                const loginButtonText =
+                    document.getElementById(
+                        "loginButtonText"
+                    );
+
+
+                const patientRegister =
+                    document.getElementById(
+                        "patientRegister"
+                    );
+
+
+                const password =
+                    document.getElementById(
+                        "Password"
+                    );
+
+
+                const togglePassword =
+                    document.getElementById(
+                        "togglePassword"
+                    );
+
+
+                const passwordIcon =
+                    document.getElementById(
+                        "passwordIcon"
+                    );
+
+
+                // =========================================================
+                // UPDATE SELECTED ROLE
+                // =========================================================
+
+                function updateSelectedRole(
+                    roleInput
+                ) {
+
+                    if (!roleInput) {
+                        return;
+                    }
+
+
+                    const role =
+                        roleInput.value;
+
+
+                    const title =
+                        roleInput.dataset.title ||
+                        role;
+
+
+                    const icon =
+                        roleInput.dataset.icon ||
+                        "fa-user";
+
+
+                    selectedRoleText.textContent =
+                        title;
+
+
+                    selectedRoleIcon.className =
+                        "fa-solid " + icon;
+
+
+                    loginButtonText.textContent =
+                        "Sign In as " + title;
+
+
+                    // Patient registration is only shown
+                    // when Patient is selected.
+
+                    if (role === "Patient") {
+
+                        patientRegister.style.display =
+                            "block";
+
+                    } else {
+
+                        patientRegister.style.display =
+                            "none";
+                    }
+                }
+
+
+                // =========================================================
+                // ROLE CHANGE
+                // =========================================================
+
+                roleInputs.forEach(
+                    function(input) {
+
+                        input.addEventListener(
+                            "change",
+                            function() {
+
+                                updateSelectedRole(
+                                    input
+                                );
+                            }
+                        );
+                    }
+                );
+
+
+                // =========================================================
+                // PASSWORD SHOW/HIDE
+                // =========================================================
+
+                if (
+                    togglePassword &&
+                    password
+                ) {
+
+                    togglePassword.addEventListener(
+                        "click",
+                        function() {
+
+                            const showing =
+                                password.type === "text";
+
+
+                            password.type =
+                                showing
+                                    ? "password"
+                                    : "text";
+
+
+                            passwordIcon.className =
+                                showing
+                                    ? "fa-solid fa-eye"
+                                    : "fa-solid fa-eye-slash";
+
+
+                            togglePassword.setAttribute(
+                                "aria-label",
+                                showing
+                                    ? "Show password"
+                                    : "Hide password"
+                            );
+                        }
+                    );
+                }
+
+
+                // =========================================================
+                // VALIDATE ROLE BEFORE SUBMIT
+                // =========================================================
+
+                if (loginForm) {
+
+                    loginForm.addEventListener(
+                        "submit",
+                        function(event) {
+
+                            const selectedRole =
+                                document.querySelector(
+                                    'input[name="role"]:checked'
+                                );
+
+
+                            if (!selectedRole) {
+
+                                event.preventDefault();
+
+
+                                selectedRoleText.textContent =
+                                    "Please select a role";
+
+
+                                selectedRoleIcon.className =
+                                    "fa-solid fa-triangle-exclamation";
+
+
+                                return;
+                            }
+
+
+                            // Prevent accidental multiple clicks
+
+                            const loginButton =
+                                document.getElementById(
+                                    "loginButton"
+                                );
+
+
+                            if (loginButton) {
+
+                                loginButton.disabled =
+                                    true;
+
+
+                                loginButtonText.textContent =
+                                    "Signing in...";
+                            }
+                        }
+                    );
+                }
+
+
+                // =========================================================
+                // RESTORE ROLE AFTER SERVER VALIDATION ERROR
+                //
+                // If RoleLogin returns this same view and role is placed in
+                // ViewData["Role"], select it again.
+                // =========================================================
+
+                const serverRole =
+                    '@(ViewData["Role"]?.ToString() ?? "")';
+
+
+                if (serverRole) {
+
+                    const serverRoleInput =
+                        document.querySelector(
+                            'input[name="role"][value="' +
+                            serverRole +
+                            '"]'
+                        );
+
+
+                    if (serverRoleInput) {
+
+                        serverRoleInput.checked =
+                            true;
+
+
+                        updateSelectedRole(
+                            serverRoleInput
+                        );
+                    }
+                }
+
+
+            })();
+
+    </script>
 
 
 </body>
