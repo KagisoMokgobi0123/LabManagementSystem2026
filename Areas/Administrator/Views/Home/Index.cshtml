@@ -1,5 +1,1420 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
+
 @{
+    ViewData["Title"] = "Administrator Dashboard";
+    Layout = "_AdministratorLayout";
+
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    var administratorName =
+        currentUser?.FullName ?? "Administrator";
+
+    var administratorEmail =
+        currentUser?.Email ?? "";
+
+    var administratorInitial =
+        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+            ? currentUser.FirstName.Substring(0, 1).ToUpper()
+            : "A";
 }
+
+<style>
+
+    /* =========================================================
+           PAGE
+           ========================================================= */
+
+    .admin-dashboard {
+        min-height: 100vh;
+        background: #f4f7fb;
+    }
+
+
+    /* =========================================================
+           HERO
+           ========================================================= */
+
+    .admin-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 38px 0 82px;
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
+    }
+
+        .admin-hero::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: 220px;
+            bottom: -190px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
+
+        .admin-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
+
+    .admin-hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        margin-bottom: 14px;
+        border: 1px solid rgba(255,255,255,.20);
+        border-radius: 50px;
+        background: rgba(255,255,255,.13);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .admin-hero h1 {
+        margin-bottom: 7px;
+        color: #fff;
+        font-size: 30px;
+        font-weight: 700;
+    }
+
+    .admin-hero p {
+        max-width: 760px;
+        margin: 0;
+        color: rgba(255,255,255,.82);
+        font-size: 14px;
+    }
+
+    .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 10px 17px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: .2s ease;
+    }
+
+        .hero-btn:hover {
+            transform: translateY(-2px);
+        }
+
+    .hero-btn-primary {
+        background: #fff;
+        color: #075985 !important;
+    }
+
+    .hero-btn-outline {
+        border: 1px solid rgba(255,255,255,.50);
+        background: rgba(255,255,255,.08);
+        color: #fff !important;
+    }
+
+
+    /* =========================================================
+           PAGE CONTENT
+           ========================================================= */
+
+    .admin-page-inner {
+        position: relative;
+        z-index: 5;
+        margin-top: -48px;
+        padding-bottom: 50px;
+    }
+
+
+    /* =========================================================
+           STAT CARDS
+           ========================================================= */
+
+    .stat-card-link {
+        display: block;
+        height: 100%;
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    .stat-card {
+        position: relative;
+        height: 100%;
+        padding: 20px;
+        border: 1px solid transparent;
+        border-radius: 13px;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .stat-card-link:hover .stat-card {
+        transform: translateY(-4px);
+        border-color: #bae6fd;
+        box-shadow: 0 12px 30px rgba(15,23,42,.13);
+    }
+
+    .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .stat-title {
+        margin-bottom: 7px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .stat-number {
+        margin: 0;
+        color: #0f172a;
+        font-size: 28px;
+        font-weight: 700;
+    }
+
+    .stat-note {
+        margin-top: 7px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 11px;
+        font-size: 17px;
+    }
+
+    .icon-blue {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .icon-cyan {
+        background: #cffafe;
+        color: #0891b2;
+    }
+
+    .icon-green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .icon-purple {
+        background: #f3e8ff;
+        color: #9333ea;
+    }
+
+    .icon-orange {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .icon-red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+
+    /* =========================================================
+           DASHBOARD CARD
+           ========================================================= */
+
+    .dashboard-card {
+        margin-bottom: 24px;
+        border: 0;
+        border-radius: 13px;
+        background: #fff;
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
+    }
+
+        .dashboard-card .card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f7;
+            background: transparent;
+        }
+
+        .dashboard-card .card-body {
+            padding: 20px;
+        }
+
+    .dashboard-title {
+        margin: 0;
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    .dashboard-subtitle {
+        margin-top: 4px;
+        margin-bottom: 0;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+           QUICK ACTION
+           ========================================================= */
+
+    .quick-action {
+        display: flex;
+        align-items: center;
+        min-height: 88px;
+        margin-bottom: 12px;
+        padding: 15px;
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+        background: #fff;
+        color: inherit !important;
+        text-decoration: none !important;
+        transition: .2s ease;
+    }
+
+        .quick-action:hover {
+            transform: translateY(-2px);
+            border-color: #0284c7;
+            background: #f8fcff;
+            box-shadow: 0 6px 18px rgba(15,23,42,.06);
+        }
+
+    .quick-action-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        margin-right: 12px;
+        border-radius: 10px;
+        background: #e0f2fe;
+        color: #0284c7;
+        font-size: 16px;
+    }
+
+    .quick-action-title {
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .quick-action-text {
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .quick-action-arrow {
+        margin-left: auto;
+        padding-left: 10px;
+        color: #cbd5e1;
+    }
+
+
+    /* =========================================================
+           ADMIN RESPONSIBILITY
+           ========================================================= */
+
+    .responsibility-item {
+        display: flex;
+        align-items: flex-start;
+        padding: 14px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .responsibility-item:last-child {
+            border-bottom: 0;
+        }
+
+    .responsibility-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        margin-right: 12px;
+        border-radius: 9px;
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .responsibility-title {
+        color: #334155;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .responsibility-text {
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+           PROFILE
+           ========================================================= */
+
+    .profile-summary {
+        display: flex;
+        align-items: center;
+    }
+
+    .profile-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        margin-right: 12px;
+        border-radius: 50%;
+        background: linear-gradient( 135deg, #075985, #0284c7 );
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .profile-name {
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .profile-role,
+    .profile-email {
+        color: #64748b;
+        font-size: 11px;
+    }
+
+
+    /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+    @@media(max-width: 768px) {
+
+        .admin-hero {
+            padding-top: 25px;
+        }
+
+            .admin-hero h1 {
+                font-size: 24px;
+            }
+
+        .hero-actions {
+            margin-top: 20px;
+        }
+    }
+
+</style>
+
+
+<div class="admin-dashboard">
+
+
+    <!-- =========================================================
+         HERO
+         ========================================================= -->
+
+    <div class="admin-hero">
+
+        <div class="container-fluid">
+
+            <div class="admin-hero-content">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <div class="admin-badge">
+
+                            <i class="fa-solid fa-user-shield"></i>
+
+                            Administrator Subsystem
+
+                        </div>
+
+
+                        <h1>
+                            Welcome, @administratorName
+                        </h1>
+
+
+                        <p>
+                            Maintain medical conditions, allergies,
+                            medications and supporting system data used
+                            throughout the NMB-HLabSys platform.
+                        </p>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <div class="hero-actions justify-content-md-end">
+
+                            <a href="/Administrator/MedicalConditions/Index"
+                               class="hero-btn hero-btn-primary">
+
+                                <i class="fa-solid fa-notes-medical"></i>
+
+                                Medical Conditions
+
+                            </a>
+
+
+                            <a href="/Administrator/Medications/Index"
+                               class="hero-btn hero-btn-outline">
+
+                                <i class="fa-solid fa-pills"></i>
+
+                                Medications
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
+    <div class="container-fluid admin-page-inner">
+
+
+        <!-- =====================================================
+             STATISTICS
+             ===================================================== -->
+
+        <div class="row">
+
+
+            <!-- MEDICAL CONDITIONS -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a href="/Administrator/MedicalConditions/Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Medical Conditions
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Conditions maintained in the system
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-blue">
+
+                                <i class="fa-solid fa-notes-medical"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+
+            <!-- ALLERGIES -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a href="/Administrator/Allergies/Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Allergies
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Allergy records maintained
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-orange">
+
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+
+            <!-- MEDICATIONS -->
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a href="/Administrator/Medications/Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Medications
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Medication records maintained
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-green">
+
+                                <i class="fa-solid fa-pills"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             CATEGORY STATISTICS
+             ===================================================== -->
+
+        <div class="row">
+
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a href="/Administrator/MedicalConditionCategories/Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Condition Categories
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Medical condition classifications
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-cyan">
+
+                                <i class="fa-solid fa-layer-group"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a href="/Administrator/AllergyCategories/Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Allergy Categories
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Allergy classifications
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-purple">
+
+                                <i class="fa-solid fa-tags"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+
+
+            <div class="col-xl-4 col-md-6 mb-4">
+
+                <a href="/Administrator/MedicationCategories/Index"
+                   class="stat-card-link">
+
+                    <div class="stat-card">
+
+                        <div class="stat-top">
+
+                            <div>
+
+                                <div class="stat-title">
+                                    Medication Categories
+                                </div>
+
+                                <h2 class="stat-number">
+                                    0
+                                </h2>
+
+                                <div class="stat-note">
+                                    Medication classifications
+                                </div>
+
+                            </div>
+
+
+                            <div class="stat-icon icon-purple">
+
+                                <i class="fa-solid fa-capsules"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             ADMINISTRATION ACTIONS
+             ===================================================== -->
+
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <h4 class="dashboard-title">
+                            Administration Actions
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Maintain the clinical reference information
+                            used throughout the system
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+                        <div class="row">
+
+
+                            <!-- CONDITIONS -->
+
+                            <div class="col-md-6">
+
+                                <a href="/Administrator/MedicalConditions/Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fa-solid fa-notes-medical"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Medical Conditions
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Add, edit and maintain medical
+                                            conditions available to patient records
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fa-solid fa-chevron-right
+                                        quick-action-arrow">
+                                    </i>
+
+                                </a>
+
+                            </div>
+
+
+
+                            <!-- ALLERGIES -->
+
+                            <div class="col-md-6">
+
+                                <a href="/Administrator/Allergies/Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Allergies
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Maintain allergy information
+                                            used by patient medical records
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fa-solid fa-chevron-right
+                                        quick-action-arrow">
+                                    </i>
+
+                                </a>
+
+                            </div>
+
+
+
+                            <!-- MEDICATIONS -->
+
+                            <div class="col-md-6">
+
+                                <a href="/Administrator/Medications/Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fa-solid fa-pills"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Medications
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Add and maintain medications
+                                            available throughout the system
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fa-solid fa-chevron-right
+                                        quick-action-arrow">
+                                    </i>
+
+                                </a>
+
+                            </div>
+
+
+
+                            <!-- CONDITION CATEGORIES -->
+
+                            <div class="col-md-6">
+
+                                <a href="/Administrator/MedicalConditionCategories/Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fa-solid fa-layer-group"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Condition Categories
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Organise medical conditions
+                                            into appropriate categories
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fa-solid fa-chevron-right
+                                        quick-action-arrow">
+                                    </i>
+
+                                </a>
+
+                            </div>
+
+
+
+                            <!-- ALLERGY CATEGORIES -->
+
+                            <div class="col-md-6">
+
+                                <a href="/Administrator/AllergyCategories/Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fa-solid fa-tags"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Allergy Categories
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Maintain the categories used
+                                            to classify allergies
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fa-solid fa-chevron-right
+                                        quick-action-arrow">
+                                    </i>
+
+                                </a>
+
+                            </div>
+
+
+
+                            <!-- MEDICATION CATEGORIES -->
+
+                            <div class="col-md-6">
+
+                                <a href="/Administrator/MedicationCategories/Index"
+                                   class="quick-action">
+
+                                    <div class="quick-action-icon">
+
+                                        <i class="fa-solid fa-capsules"></i>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="quick-action-title">
+                                            Medication Categories
+                                        </div>
+
+                                        <div class="quick-action-text">
+                                            Maintain medication
+                                            classification information
+                                        </div>
+
+                                    </div>
+
+                                    <i class="fa-solid fa-chevron-right
+                                        quick-action-arrow">
+                                    </i>
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 RESPONSIBILITIES
+                 ================================================= -->
+
+            <div class="col-lg-4">
+
+                <div class="dashboard-card">
+
+                    <div class="card-header">
+
+                        <h4 class="dashboard-title">
+                            Administrator Responsibilities
+                        </h4>
+
+                        <p class="dashboard-subtitle">
+                            Core reference-data management
+                        </p>
+
+                    </div>
+
+
+                    <div class="card-body">
+
+
+                        <div class="responsibility-item">
+
+                            <div class="responsibility-icon">
+
+                                <i class="fa-solid fa-notes-medical"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="responsibility-title">
+                                    Medical Conditions
+                                </div>
+
+                                <div class="responsibility-text">
+                                    Maintain categorised medical
+                                    condition lists.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="responsibility-item">
+
+                            <div class="responsibility-icon">
+
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="responsibility-title">
+                                    Allergies
+                                </div>
+
+                                <div class="responsibility-text">
+                                    Maintain categorised allergy lists.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="responsibility-item">
+
+                            <div class="responsibility-icon">
+
+                                <i class="fa-solid fa-pills"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="responsibility-title">
+                                    Medications
+                                </div>
+
+                                <div class="responsibility-text">
+                                    Maintain categorised medication lists.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="responsibility-item">
+
+                            <div class="responsibility-icon">
+
+                                <i class="fa-solid fa-database"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="responsibility-title">
+                                    Supporting Data
+                                </div>
+
+                                <div class="responsibility-text">
+                                    Maintain additional database reference
+                                    information required by the system.
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             SYSTEM DATA
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    Supporting System Data
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Maintain supporting reference information used by
+                    NMB-HLabSys
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row">
+
+
+                    <div class="col-md-4">
+
+                        <a href="/Administrator/SampleTypes/Index"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fa-solid fa-vial"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Sample Types
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Maintain laboratory sample
+                                    type reference data
+                                </div>
+
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right
+                                quick-action-arrow">
+                            </i>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="/Administrator/Profile/Index"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fa-solid fa-user-shield"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Administrator Profile
+                                </div>
+
+                                <div class="quick-action-text">
+                                    View your administrator account
+                                    information
+                                </div>
+
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right
+                                quick-action-arrow">
+                            </i>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-4">
+
+                        <a href="/Administrator/Profile/ChangePassword"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fa-solid fa-key"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Account Security
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Change your administrator
+                                    account password
+                                </div>
+
+                            </div>
+
+                            <i class="fa-solid fa-chevron-right
+                                quick-action-arrow">
+                            </i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =====================================================
+             ACCOUNT & SECURITY
+             ===================================================== -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <h4 class="dashboard-title">
+                    My Account & Security
+                </h4>
+
+                <p class="dashboard-subtitle">
+                    Manage your Administrator profile and account security
+                </p>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="row align-items-center">
+
+
+                    <div class="col-md-6">
+
+                        <div class="profile-summary">
+
+                            <div class="profile-avatar">
+                                @administratorInitial
+                            </div>
+
+                            <div>
+
+                                <div class="profile-name">
+                                    @administratorName
+                                </div>
+
+                                <div class="profile-role">
+                                    System Administrator
+                                </div>
+
+                                <div class="profile-email">
+                                    @administratorEmail
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-6
+                        text-md-right
+                        mt-3 mt-md-0">
+
+                        <a href="/Administrator/Profile/Index"
+                           class="btn
+                            btn-outline-primary
+                            btn-sm
+                            mr-2">
+
+                            <i class="fa-solid fa-user mr-1"></i>
+
+                            My Profile
+
+                        </a>
+
+
+                        <a href="/Administrator/Profile/ChangePassword"
+                           class="btn
+                            btn-outline-secondary
+                            btn-sm
+                            mr-2">
+
+                            <i class="fa-solid fa-key mr-1"></i>
+
+                            Change Password
+
+                        </a>
+
+
+                        <form action="/Administrator/Profile/Logout"
+                              method="post"
+                              class="d-inline">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn
+                                btn-outline-danger
+                                btn-sm">
+
+                                <i class="fa-solid fa-right-from-bracket mr-1"></i>
+
+                                Secure Logout
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
