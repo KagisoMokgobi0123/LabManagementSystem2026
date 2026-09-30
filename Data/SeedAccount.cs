@@ -82,6 +82,14 @@ namespace NMB_HLabSys.Data
                 lastName: "Manager",
                 role: ManagerRole);
 
+            await CreateUserAsync(
+               userManager,
+               email: "manager@nmbhlab.co.za",
+               password: "Manager@123",
+               firstName: "Frank",
+               lastName: "Smith",
+               role: ManagerRole);
+
 
             // ========================================================
             // PATIENT

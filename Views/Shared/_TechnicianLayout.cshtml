@@ -1,224 +1,1991 @@
-﻿
+﻿@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    var technicianName =
+        currentUser?.FullName ?? "Lab Technician";
+
+    var technicianEmail =
+        currentUser?.Email ?? "";
+
+    var technicianInitial =
+        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+            ? currentUser.FirstName.Substring(0, 1).ToUpper()
+            : "T";
+
+    var controller =
+        ViewContext.RouteData.Values["controller"]?
+            .ToString() ?? "";
+
+    var action =
+        ViewContext.RouteData.Values["action"]?
+            .ToString() ?? "";
+}
+
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-	<title>NMB-HLabSys | Technician</title>
-	<meta content='width=device-width, initial-scale=1.0, shrink-to-fit=no' name='viewport' />
-	<link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
-	<link rel="stylesheet"
-		  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-	<!-- Fonts and icons -->
-	<script src="~/assets/js/plugin/webfont/webfont.min.js"></script>
-	<script>
-		WebFont.load({
-			google: {"families":["Lato:300,400,700,900"]},
-			custom: {"families":["Flaticon", "Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"], urls: ['~/assets/css/fonts.min.css']},
-			active: function() {
-				sessionStorage.fonts = true;
-			}
-		});
-	</script>
-	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	<!-- CSS Files -->
-	<link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
-		<link rel="stylesheet" href="~/assets/css/atlantis.min.css">
 
-	<!-- CSS Just for demo purpose, don't include it in your project -->
-			<link rel="stylesheet" href="~/assets/css/demo.css">
+    <meta charset="utf-8" />
 
-			  <!--datatables links-->
-				<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-				<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
 
-				<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-				<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-				<script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-				<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-				<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-				<script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <title>
+        @ViewData["Title"] - NMB-HLabSys
+    </title>
 
 
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
+
+    <!-- Font Awesome -->
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+
+    <!-- Site CSS -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+
+    <style>
+
+            :root {
+                --sidebar-width: 265px;
+                --sidebar-collapsed-width: 78px;
+                --sidebar-dark: #052f4a;
+                --sidebar-blue: #073b5c;
+                --sidebar-light: #075985;
+                --accent: #0284c7;
+                --page-bg: #f4f7fb;
+            }
+
+
+            * {
+                box-sizing: border-box;
+            }
+
+
+            html,
+            body {
+                margin: 0;
+                min-height: 100%;
+            }
+
+
+            body {
+                background: var(--page-bg);
+                color: #334155;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            }
+
+
+            /* =====================================================
+                       APPLICATION
+                       ===================================================== */
+
+            .technician-app {
+                min-height: 100vh;
+            }
+
+
+            /* =====================================================
+                       SIDEBAR
+                       ===================================================== */
+
+            .technician-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                z-index: 1050;
+                width: var(--sidebar-width);
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto;
+                overflow-x: hidden;
+                background: linear-gradient( 180deg, var(--sidebar-dark) 0%, var(--sidebar-blue) 50%, var(--sidebar-light) 100% );
+                box-shadow: 5px 0 25px rgba(15, 23, 42, .13);
+                transition: width .25s ease, transform .25s ease;
+            }
+
+
+            /* =====================================================
+                       LOGO
+                       ===================================================== */
+
+            .sidebar-brand {
+                min-height: 105px;
+                display: flex;
+                align-items: center;
+                padding: 18px 20px;
+                border-bottom: 1px solid rgba(255,255,255,.10);
+                text-decoration: none !important;
+            }
+
+
+            .sidebar-logo {
+                width: 55px;
+                height: 55px;
+                flex-shrink: 0;
+                object-fit: contain;
+                margin-right: 12px;
+                filter: drop-shadow( 0 4px 8px rgba(0,0,0,.20) );
+            }
+
+
+            .sidebar-brand-text {
+                overflow: hidden;
+            }
+
+
+            .sidebar-brand-name {
+                margin: 0;
+                color: #fff;
+                font-size: 17px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-brand-subtitle {
+                margin-top: 2px;
+                color: rgba(255,255,255,.60);
+                font-size: 10px;
+                white-space: nowrap;
+            }
+
+
+            /* =====================================================
+                       SIDEBAR CONTROLS
+                       ===================================================== */
+
+            .sidebar-controls {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 7px;
+                padding: 8px 12px;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+
+            .sidebar-control-btn {
+                width: 33px;
+                height: 33px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                border: 1px solid rgba(255,255,255,.16);
+                border-radius: 7px;
+                background: rgba(255,255,255,.07);
+                color: rgba(255,255,255,.82);
+                cursor: pointer;
+                transition: background .2s ease, color .2s ease, transform .2s ease;
+            }
+
+
+                .sidebar-control-btn:hover {
+                    background: rgba(255,255,255,.16);
+                    color: #fff;
+                    transform: translateY(-1px);
+                }
+
+
+            /* =====================================================
+                       TECHNICIAN USER
+                       ===================================================== */
+
+            .sidebar-user {
+                display: flex;
+                align-items: center;
+                margin: 15px 13px;
+                padding: 12px;
+                border: 1px solid rgba(255,255,255,.10);
+                border-radius: 10px;
+                background: rgba(255,255,255,.07);
+            }
+
+
+            .sidebar-avatar {
+                width: 39px;
+                height: 39px;
+                min-width: 39px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 10px;
+                border-radius: 50%;
+                background: linear-gradient( 135deg, #0284c7, #06b6d4 );
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+
+            .sidebar-user-details {
+                min-width: 0;
+                overflow: hidden;
+            }
+
+
+            .sidebar-user-name {
+                overflow: hidden;
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-user-role {
+                margin-top: 2px;
+                color: rgba(255,255,255,.55);
+                font-size: 9px;
+            }
+
+
+            /* =====================================================
+                       NAVIGATION
+                       ===================================================== */
+
+            .sidebar-navigation {
+                flex: 1;
+                padding: 5px 12px 25px;
+            }
+
+
+            .sidebar-section {
+                margin: 19px 10px 7px;
+                color: rgba(255,255,255,.40);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: .8px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-link {
+                position: relative;
+                display: flex;
+                align-items: center;
+                min-height: 45px;
+                margin-bottom: 4px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                color: rgba(255,255,255,.77) !important;
+                font-size: 12px;
+                font-weight: 500;
+                text-decoration: none !important;
+                transition: background .2s ease, color .2s ease, transform .2s ease;
+            }
+
+
+                .sidebar-link:hover {
+                    color: #fff !important;
+                    background: rgba(255,255,255,.10);
+                    transform: translateX(2px);
+                }
+
+
+                .sidebar-link.active {
+                    color: #fff !important;
+                    background: linear-gradient( 135deg, rgba(2,132,199,.85), rgba(6,182,212,.65) );
+                    box-shadow: 0 5px 15px rgba(0,0,0,.15);
+                }
+
+
+                    .sidebar-link.active::before {
+                        content: "";
+                        position: absolute;
+                        left: -12px;
+                        top: 8px;
+                        bottom: 8px;
+                        width: 3px;
+                        border-radius: 0 4px 4px 0;
+                        background: #38bdf8;
+                    }
+
+
+            .sidebar-link-icon {
+                width: 28px;
+                min-width: 28px;
+                margin-right: 8px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+
+            .sidebar-link-text {
+                flex: 1;
+                white-space: nowrap;
+            }
+
+
+            /* =====================================================
+                       PRIORITY BADGE
+                       ===================================================== */
+
+            .sidebar-count {
+                min-width: 20px;
+                padding: 2px 6px;
+                border-radius: 20px;
+                background: #dc2626;
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+                text-align: center;
+            }
+
+
+            /* =====================================================
+                       SIDEBAR BOTTOM
+                       ===================================================== */
+
+            .sidebar-bottom {
+                padding: 12px;
+                border-top: 1px solid rgba(255,255,255,.10);
+            }
+
+
+                .sidebar-bottom form {
+                    margin: 0;
+                }
+
+
+            .sidebar-logout {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                padding: 11px 12px;
+                border: 1px solid rgba(248,113,113,.28);
+                border-radius: 8px;
+                background: rgba(220,38,38,.10);
+                color: #fecaca;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background .2s ease, color .2s ease;
+            }
+
+
+                .sidebar-logout:hover {
+                    background: rgba(220,38,38,.20);
+                    color: #fff;
+                }
+
+
+            /* =====================================================
+                       MAIN CONTENT
+                       ===================================================== */
+
+            .technician-main {
+                min-height: 100vh;
+                margin-left: var(--sidebar-width);
+                transition: margin-left .25s ease, width .25s ease;
+            }
+
+
+            /* =====================================================
+                       COLLAPSED DESKTOP SIDEBAR
+                       ===================================================== */
+
+            body.sidebar-collapsed
+            .technician-sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+
+
+            body.sidebar-collapsed
+            .technician-main {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-brand {
+                justify-content: center;
+                min-height: 90px;
+                padding: 15px 8px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-logo {
+                width: 48px;
+                height: 48px;
+                margin-right: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-brand-text {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-controls {
+                justify-content: center;
+                padding: 8px 5px;
+            }
+
+
+            /*
+                     * Hide full-screen button while sidebar is collapsed.
+                     * The arrow remains visible.
+                     */
+            body.sidebar-collapsed
+            #fullScreenToggle {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-user {
+                justify-content: center;
+                margin: 12px 9px;
+                padding: 9px 5px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-avatar {
+                margin-right: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-user-details {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-section {
+                height: 8px;
+                margin: 8px 0;
+                overflow: hidden;
+                font-size: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-navigation {
+                padding: 5px 9px 20px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link {
+                justify-content: center;
+                padding: 10px 5px;
+            }
+
+
+                body.sidebar-collapsed
+                .sidebar-link:hover {
+                    transform: none;
+                }
+
+
+            body.sidebar-collapsed
+            .sidebar-link-icon {
+                width: auto;
+                min-width: 0;
+                margin-right: 0;
+                font-size: 16px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link-text,
+            body.sidebar-collapsed
+            .sidebar-count {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link.active::before {
+                left: -9px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-bottom {
+                padding: 10px 9px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-logout {
+                justify-content: center;
+                padding: 11px 5px;
+            }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout
+                .sidebar-link-icon {
+                    margin-right: 0;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout
+                .sidebar-link-text {
+                    display: none;
+                }
+
+
+            /* =====================================================
+                       FULL WIDTH MODE
+
+                       Completely removes sidebar from view.
+                       ===================================================== */
+
+            body.sidebar-hidden
+            .technician-sidebar {
+                transform: translateX(-100%) !important;
+            }
+
+
+            body.sidebar-hidden
+            .technician-main {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+
+            /* =====================================================
+                       FLOATING RESTORE BUTTON
+                       ===================================================== */
+
+            .sidebar-restore-btn {
+                position: fixed;
+                top: 18px;
+                left: 18px;
+                z-index: 1200;
+                width: 44px;
+                height: 44px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                border-radius: 10px;
+                background: linear-gradient( 135deg, #075985, #0284c7 );
+                color: #fff;
+                font-size: 17px;
+                box-shadow: 0 6px 20px rgba(15,23,42,.25);
+                cursor: pointer;
+                transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            }
+
+
+                .sidebar-restore-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 9px 24px rgba(15,23,42,.30);
+                    background: linear-gradient( 135deg, #0284c7, #06b6d4 );
+                }
+
+
+            body.sidebar-hidden
+            .sidebar-restore-btn {
+                display: flex;
+            }
+
+
+            /* =====================================================
+                       MOBILE TOP BAR
+                       ===================================================== */
+
+            .technician-mobile-header {
+                display: none;
+                height: 64px;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 16px;
+                background: #073b5c;
+                color: #fff;
+                box-shadow: 0 2px 12px rgba(15,23,42,.15);
+            }
+
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                color: #fff;
+                font-weight: 700;
+            }
+
+
+            .mobile-logo {
+                width: 39px;
+                height: 39px;
+                margin-right: 9px;
+                object-fit: contain;
+            }
+
+
+            .sidebar-toggle {
+                width: 39px;
+                height: 39px;
+                border: 1px solid rgba(255,255,255,.20);
+                border-radius: 7px;
+                background: rgba(255,255,255,.08);
+                color: #fff;
+                cursor: pointer;
+            }
+
+
+            /* =====================================================
+                       MOBILE BACKDROP
+                       ===================================================== */
+
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 1040;
+                display: none;
+                background: rgba(15,23,42,.55);
+            }
+
+
+            /* =====================================================
+                       RESPONSIVE
+                       ===================================================== */
+
+            @@media(max-width: 991.98px) {
+
+                .technician-sidebar {
+                    width: 265px;
+                    transform: translateX(-100%);
+                    transition: transform .25s ease;
+                }
+
+
+                    .technician-sidebar.show {
+                        transform: translateX(0);
+                    }
+
+
+                .sidebar-backdrop.show {
+                    display: block;
+                }
+
+
+                .technician-main {
+                    margin-left: 0;
+                    width: 100%;
+                }
+
+
+                .technician-mobile-header {
+                    display: flex;
+                }
+                /*
+                         * Desktop control buttons are unnecessary
+                         * on mobile.
+                         */
+                .sidebar-controls {
+                    display: none;
+                }
+                /*
+                         * Cancel desktop collapsed styling
+                         * when switching to mobile.
+                         */
+                body.sidebar-collapsed
+                .technician-sidebar {
+                    width: 265px;
+                }
+
+
+                body.sidebar-collapsed
+                .technician-main {
+                    margin-left: 0;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-brand {
+                    justify-content: flex-start;
+                    min-height: 105px;
+                    padding: 18px 20px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logo {
+                    width: 55px;
+                    height: 55px;
+                    margin-right: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-brand-text {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-user {
+                    justify-content: flex-start;
+                    margin: 15px 13px;
+                    padding: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-avatar {
+                    margin-right: 10px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-user-details {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-section {
+                    height: auto;
+                    margin: 19px 10px 7px;
+                    font-size: 9px;
+                    overflow: visible;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-navigation {
+                    padding: 5px 12px 25px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link {
+                    justify-content: flex-start;
+                    padding: 10px 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link-icon {
+                    width: 28px;
+                    min-width: 28px;
+                    margin-right: 8px;
+                    font-size: 14px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link-text {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link.active::before {
+                    left: -12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-bottom {
+                    padding: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout {
+                    justify-content: flex-start;
+                    padding: 11px 12px;
+                }
+
+
+                    body.sidebar-collapsed
+                    .sidebar-logout
+                    .sidebar-link-icon {
+                        margin-right: 8px;
+                    }
+
+
+                    body.sidebar-collapsed
+                    .sidebar-logout
+                    .sidebar-link-text {
+                        display: block;
+                    }
+                /*
+                         * The desktop floating restore button
+                         * isn't needed on mobile.
+                         */
+                .sidebar-restore-btn {
+                    display: none !important;
+                }
+
+
+                body.sidebar-hidden
+                .technician-sidebar {
+                    transform: translateX(-100%);
+                }
+            }
+
+
+            @@media(max-width: 575.98px) {
+
+                .technician-sidebar {
+                    width: 280px;
+                    max-width: 86vw;
+                }
+
+
+                body.sidebar-collapsed
+                .technician-sidebar {
+                    width: 280px;
+                    max-width: 86vw;
+                }
+            }
+
+    </style>
+
+
+    @await RenderSectionAsync(
+        "Styles",
+        required: false
+    )
 
 </head>
+
+
 <body>
-	
-	@RenderBody()
-
-	<!--   Core JS Files   -->
-				<script src="~/assets/js/core/jquery.3.2.1.min.js"></script>
-				<script src="~/assets/js/core/popper.min.js"></script>
-				<script src="~/assets/js/core/bootstrap.min.js"></script>
-
-	<!-- jQuery UI -->
-				<script src="~/assets/js/plugin/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-				<script src="~/assets/js/plugin/jquery-ui-touch-punch/jquery.ui.touch-punch.min.js"></script>
-
-	<!-- jQuery Scrollbar -->
-				<script src="~/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
 
 
-	<!-- Chart JS -->
-				<script src="~/assets/js/plugin/chart.js/chart.min.js"></script>
+    <div class="technician-app">
 
-	<!-- jQuery Sparkline -->
-				<script src="~/assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js"></script>
 
-	<!-- Chart Circle -->
-				<script src="~/assets/js/plugin/chart-circle/circles.min.js"></script>
+        <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
 
-	<!-- Datatables -->
-				<script src="~/assets/js/plugin/datatables/datatables.min.js"></script>
+        <aside class="technician-sidebar"
+               id="technicianSidebar">
 
-	<!-- Bootstrap Notify -->
-				<script src="~/assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js"></script>
 
-	<!-- jQuery Vector Maps -->
-				<script src="~/assets/js/plugin/jqvmap/jquery.vmap.min.js"></script>
-				<script src="~/assets/js/plugin/jqvmap/maps/jquery.vmap.world.js"></script>
+            <!-- =================================================
+             LOGO
+             ================================================= -->
 
-	<!-- Sweet Alert -->
-				<script src="~/assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+            <a href="/Technician/Home/Index"
+               class="sidebar-brand"
+               title="NMB-HLabSys Dashboard">
 
-	<!-- Atlantis JS -->
-				<script src="~/assets/js/atlantis.min.js"></script>
 
-	<!-- Atlantis DEMO methods, don't include it in your project! -->
-				<script src="~/assets/js/setting-demo.js"></script>
-				<script src="~/assets/js/demo.js"></script>
+                <img src="~/assets/img/logo.png"
+                     class="sidebar-logo"
+                     alt="NMB-HLabSys Logo" />
 
-				<!--Datatables links-->
-				<script>
-					$(document).ready(function() {
-					$('#add-row').DataTable({
-					"pageLength": 5, // Default rows per page
-					"dom": 'Bfrtip', // B = Buttons, f = filter, r = processing, t = table, i = info, p = pagination
-					"buttons": [
-					{
-					extend: 'excelHtml5',
-					text: '<i class="fa fa-file-excel"></i> Excel',
-					className: 'btn btn-success btn-sm',
-					exportOptions: { columns: ':not(.no-export)' } // Excludes the Action column
-					},
-					{
-					extend: 'csvHtml5',
-					text: '<i class="fa fa-file-csv"></i> CSV',
-					className: 'btn btn-info btn-sm',
-					exportOptions: { columns: ':not(.no-export)' }
-					},
-					{
-					extend: 'pdfHtml5',
-					text: '<i class="fa fa-file-pdf"></i> PDF',
-					className: 'btn btn-danger btn-sm',
-					exportOptions: { columns: ':not(.no-export)' }
-					}
-					]
-					});
-					});
-					</script>
-	<script>
+
+                <div class="sidebar-brand-text">
+
+                    <div class="sidebar-brand-name">
+                        NMB-HLabSys
+                    </div>
+
+                    <div class="sidebar-brand-subtitle">
+                        Haematology Laboratory
+                    </div>
+
+                </div>
+
+            </a>
 
 
 
+            <!-- =================================================
+             SIDEBAR CONTROLS
+             ================================================= -->
+
+            <div class="sidebar-controls">
+
+
+                <!-- COLLAPSE -->
+
+                <button type="button"
+                        class="sidebar-control-btn"
+                        id="desktopSidebarToggle"
+                        title="Collapse sidebar"
+                        aria-label="Collapse sidebar">
+
+                  <i class="fa-solid fa-chevron-left"
+   id="desktopSidebarToggleIcon">
+</i>
+
+                </button>
+
+
+                <!-- HIDE COMPLETELY -->
+
+                <button type="button"
+                        class="sidebar-control-btn"
+                        id="fullScreenToggle"
+                        title="Hide sidebar and use full width"
+                        aria-label="Hide sidebar">
+
+                    <i class="fas fa-expand-arrows-alt"></i>
+
+                </button>
+
+
+            </div>
 
 
 
-		Circles.create({
-		id:'circles-1',
-		radius:45,
-		value:60,
-		maxValue:100,
-		width:7,
-		text: 5,
-		colors:['#f1f1f1', '#FF9E27'],
-		duration:400,
-		wrpClass:'circles-wrp',
-		textClass:'circles-text',
-		styleWrapper:true,
-		styleText:true
-		})
+            <!-- =================================================
+             TECHNICIAN
+             ================================================= -->
 
-		Circles.create({
-		id:'circles-2',
-		radius:45,
-		value:70,
-		maxValue:100,
-		width:7,
-		text: 36,
-		colors:['#f1f1f1', '#2BB930'],
-		duration:400,
-		wrpClass:'circles-wrp',
-		textClass:'circles-text',
-		styleWrapper:true,
-		styleText:true
-		})
+            <div class="sidebar-user">
 
-		Circles.create({
-		id:'circles-3',
-		radius:45,
-		value:40,
-		maxValue:100,
-		width:7,
-		text: 12,
-		colors:['#f1f1f1', '#F25961'],
-		duration:400,
-		wrpClass:'circles-wrp',
-		textClass:'circles-text',
-		styleWrapper:true,
-		styleText:true
-		})
 
-		var totalIncomeChart = document.getElementById('totalIncomeChart').getContext('2d');
+                <div class="sidebar-avatar"
+                     title="@technicianName">
 
-		var mytotalIncomeChart = new Chart(totalIncomeChart, {
-		type: 'bar',
-		data: {
-		labels: ["S", "M", "T", "W", "T", "F", "S", "S", "M", "T"],
-		datasets : [{
-		label: "Total Income",
-		backgroundColor: '#ff9e27',
-		borderColor: 'rgb(23, 125, 255)',
-		data: [6, 4, 9, 5, 4, 6, 4, 3, 8, 10],
-		}],
-		},
-		options: {
-		responsive: true,
-		maintainAspectRatio: false,
-		legend: {
-		display: false,
-		},
-		scales: {
-		yAxes: [{
-		ticks: {
-		display: false //this will remove only the label
-		},
-		gridLines : {
-		drawBorder: false,
-		display : false
-		}
-		}],
-		xAxes : [ {
-		gridLines : {
-		drawBorder: false,
-		display : false
-		}
-		}]
-		},
-		}
-		});
+                    @technicianInitial
 
-		$('#lineChart').sparkline([105,103,123,100,95,105,115], {
-		type: 'line',
-		height: '70',
-		width: '100%',
-		lineWidth: '2',
-		lineColor: '#ffa534',
-		fillColor: 'rgba(255, 165, 52, .14)'
-		});
-	</script>
+                </div>
+
+
+                <div class="sidebar-user-details">
+
+                    <div class="sidebar-user-name">
+                        @technicianName
+                    </div>
+
+                    <div class="sidebar-user-role">
+                        Lab Technician
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+             NAVIGATION
+             ================================================= -->
+
+            <nav class="sidebar-navigation">
+
+
+                <!-- ================= MAIN ================= -->
+
+                <div class="sidebar-section">
+                    Main
+                </div>
+
+
+                <a href="/Technician/Home/Index"
+                   title="Dashboard"
+                   class="sidebar-link @(controller == "Home" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-tachometer-alt"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/ReceiveSamples/Index"
+                   title="Receive Samples"
+                   class="sidebar-link @(controller == "ReceiveSamples" && action == "Index" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-vials"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Receive Samples
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= TEST PROCESSING ================= -->
+
+                <div class="sidebar-section">
+                    Test Processing
+                </div>
+
+
+                <a href="/Technician/Tests/Available"
+                   title="Available Tests"
+                   class="sidebar-link @(controller == "Tests" && action == "Available" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-clipboard-list"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Available Tests
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Tests/MyTests"
+                   title="My Selected Tests"
+                   class="sidebar-link @(controller == "Tests" && action == "MyTests" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-microscope"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        My Selected Tests
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Results/Index"
+                   title="Capture Results"
+                   class="sidebar-link @(controller == "Results" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-file-medical"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Capture Results
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Tests/Review"
+                   title="To Be Reviewed"
+                   class="sidebar-link @(controller == "Tests" && action == "Review" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-undo-alt"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        To Be Reviewed
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= VERIFICATION ================= -->
+
+                <div class="sidebar-section">
+                    Verification
+                </div>
+
+
+                <a href="/Technician/Verification/Pending"
+                   title="Pending Verification"
+                   class="sidebar-link @(controller == "Verification" && action == "Pending" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-user-check"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Pending Verification
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Verification/Verified"
+                   title="Verified Results"
+                   class="sidebar-link @(controller == "Verification" && action == "Verified" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-check-circle"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Verified Results
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Verification/History"
+                   title="Verification History"
+                   class="sidebar-link @(controller == "Verification" && action == "History" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-history"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Verification History
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= PRIORITY ================= -->
+
+                <div class="sidebar-section">
+                    Priority
+                </div>
+
+
+                <a href="/Technician/Tests/Urgent"
+                   title="Urgent / STAT"
+                   class="sidebar-link @(controller == "Tests" && action == "Urgent" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-bolt"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Urgent / STAT
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Tests/Overdue"
+                   title="Overdue Tests"
+                   class="sidebar-link @(controller == "Tests" && action == "Overdue" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-clock"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Overdue Tests
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Tests/NearingTat"
+                   title="Nearing TAT"
+                   class="sidebar-link @(controller == "Tests" && action == "NearingTat" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-hourglass-half"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Nearing TAT
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= REPORTS / ACCOUNT ================= -->
+
+                <div class="sidebar-section">
+                    Reports & Account
+                </div>
+
+
+                <a href="/Technician/Reports/Index"
+                   title="Reports"
+                   class="sidebar-link @(controller == "Reports" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-file-pdf"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Reports
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Profile/Index"
+                   title="My Profile"
+                   class="sidebar-link @(controller == "Profile" && action == "Index" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-user"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        My Profile
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Profile/ChangePhoneNumber"
+                   title="Change Phone Number"
+                   class="sidebar-link @(controller == "Profile" && action == "ChangePhoneNumber" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-phone"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Change Phone Number
+                    </span>
+
+                </a>
+
+
+
+                <a href="/Technician/Profile/ChangePassword"
+                   title="Change Password"
+                   class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-key"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Change Password
+                    </span>
+
+                </a>
+
+
+            </nav>
+
+
+
+            <!-- =================================================
+             LOGOUT
+             ================================================= -->
+
+            <div class="sidebar-bottom">
+
+
+                <form action="/Technician/Profile/Logout"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <button type="submit"
+                            class="sidebar-logout"
+                            title="Secure Logout">
+
+
+                        <span class="sidebar-link-icon">
+
+                            <i class="fas fa-sign-out-alt"></i>
+
+                        </span>
+
+
+                        <span class="sidebar-link-text">
+                            Secure Logout
+                        </span>
+
+
+                    </button>
+
+
+                </form>
+
+
+            </div>
+
+
+        </aside>
+
+
+
+        <!-- =====================================================
+         RESTORE SIDEBAR
+
+         Only visible when desktop sidebar is completely hidden.
+         ===================================================== -->
+
+        <button type="button"
+                class="sidebar-restore-btn"
+                id="sidebarRestoreButton"
+                title="Show sidebar"
+                aria-label="Show sidebar">
+
+            <i class="fas fa-bars"></i>
+
+        </button>
+
+
+
+        <!-- =====================================================
+         MOBILE BACKDROP
+         ===================================================== -->
+
+        <div class="sidebar-backdrop"
+             id="sidebarBackdrop">
+        </div>
+
+
+
+        <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+        <main class="technician-main">
+
+
+            <!-- =================================================
+             MOBILE HEADER
+             ================================================= -->
+
+            <div class="technician-mobile-header">
+
+
+                <div class="mobile-brand">
+
+
+                    <img src="~/assets/img/logo.png"
+                         class="mobile-logo"
+                         alt="NMB-HLabSys" />
+
+
+                    <span>
+                        NMB-HLabSys
+                    </span>
+
+
+                </div>
+
+
+
+                <button type="button"
+                        class="sidebar-toggle"
+                        id="sidebarToggle"
+                        aria-label="Open navigation">
+
+                    <i class="fas fa-bars"></i>
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+             PAGE CONTENT
+             ================================================= -->
+            @RenderBody()
+
+
+        </main>
+
+
+    </div>
+
+
+
+    <!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+
+
+    <script>
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                function() {
+
+                    const body =
+                        document.body;
+
+
+                    const sidebar =
+                        document.getElementById(
+                            "technicianSidebar"
+                        );
+
+
+                    const mobileToggle =
+                        document.getElementById(
+                            "sidebarToggle"
+                        );
+
+
+                    const backdrop =
+                        document.getElementById(
+                            "sidebarBackdrop"
+                        );
+
+
+                    const desktopToggle =
+                        document.getElementById(
+                            "desktopSidebarToggle"
+                        );
+
+
+                    const desktopToggleIcon =
+                        document.getElementById(
+                            "desktopSidebarToggleIcon"
+                        );
+
+
+                    const fullScreenToggle =
+                        document.getElementById(
+                            "fullScreenToggle"
+                        );
+
+
+                    const restoreButton =
+                        document.getElementById(
+                            "sidebarRestoreButton"
+                        );
+
+
+                    /* =====================================================
+                       MOBILE SIDEBAR
+                       ===================================================== */
+
+                    function openMobileSidebar() {
+
+                        if (!sidebar) {
+                            return;
+                        }
+
+
+                        sidebar.classList.add(
+                            "show"
+                        );
+
+
+                        if (backdrop) {
+
+                            backdrop.classList.add(
+                                "show"
+                            );
+
+                        }
+
+
+                        body.style.overflow =
+                            "hidden";
+                    }
+
+
+                    function closeMobileSidebar() {
+
+                        if (!sidebar) {
+                            return;
+                        }
+
+
+                        sidebar.classList.remove(
+                            "show"
+                        );
+
+
+                        if (backdrop) {
+
+                            backdrop.classList.remove(
+                                "show"
+                            );
+
+                        }
+
+
+                        body.style.overflow =
+                            "";
+                    }
+
+
+                    if (mobileToggle) {
+
+                        mobileToggle.addEventListener(
+                            "click",
+                            function() {
+
+                                if (!sidebar) {
+                                    return;
+                                }
+
+
+                                if (
+                                    sidebar.classList.contains(
+                                        "show"
+                                    )
+                                ) {
+
+                                    closeMobileSidebar();
+
+                                }
+                                else {
+
+                                    openMobileSidebar();
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+
+                    if (backdrop) {
+
+                        backdrop.addEventListener(
+                            "click",
+                            closeMobileSidebar
+                        );
+
+                    }
+
+
+                    /* =====================================================
+                       DESKTOP COLLAPSE
+                       ===================================================== */
+
+                    function updateCollapseIcon() {
+
+                        if (!desktopToggleIcon) {
+                            return;
+                        }
+
+
+                        const collapsed =
+                            body.classList.contains(
+                                "sidebar-collapsed"
+                            );
+
+
+                        if (collapsed) {
+
+                            desktopToggleIcon.className =
+                                "fas fa-chevron-right";
+
+
+                            if (desktopToggle) {
+
+                                desktopToggle.title =
+                                    "Expand sidebar";
+
+                            }
+
+                        }
+                        else {
+
+                            desktopToggleIcon.className =
+                                "fas fa-chevron-left";
+
+
+                            if (desktopToggle) {
+
+                                desktopToggle.title =
+                                    "Collapse sidebar";
+
+                            }
+
+                        }
+
+                    }
+
+
+                    if (desktopToggle) {
+
+                        desktopToggle.addEventListener(
+                            "click",
+                            function() {
+
+                                /*
+                                 * Desktop-only action.
+                                 */
+                                if (
+                                    window.innerWidth <= 991
+                                ) {
+                                    return;
+                                }
+
+
+                                /*
+                                 * If somehow hidden, restore it first.
+                                 */
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+
+                                body.classList.toggle(
+                                    "sidebar-collapsed"
+                                );
+
+
+                                const collapsed =
+                                    body.classList.contains(
+                                        "sidebar-collapsed"
+                                    );
+
+
+                                /*
+                                 * Save the technician's preference.
+                                 */
+                                localStorage.setItem(
+                                    "technicianSidebarCollapsed",
+                                    collapsed
+                                        ? "true"
+                                        : "false"
+                                );
+
+
+                                updateCollapseIcon();
+
+                            }
+                        );
+
+                    }
+
+
+                    /* =====================================================
+                       FULL WIDTH / HIDE SIDEBAR
+                       ===================================================== */
+
+                    if (fullScreenToggle) {
+
+                        fullScreenToggle.addEventListener(
+                            "click",
+                            function() {
+
+                                if (
+                                    window.innerWidth <= 991
+                                ) {
+                                    return;
+                                }
+
+
+                                /*
+                                 * Completely hide sidebar.
+                                 */
+                                body.classList.add(
+                                    "sidebar-hidden"
+                                );
+
+
+                                /*
+                                 * Remove collapsed state while hidden.
+                                 * When restored it will return as full sidebar.
+                                 */
+                                body.classList.remove(
+                                    "sidebar-collapsed"
+                                );
+
+
+                                updateCollapseIcon();
+
+                            }
+                        );
+
+                    }
+
+
+                    /* =====================================================
+                       RESTORE SIDEBAR
+                       ===================================================== */
+
+                    if (restoreButton) {
+
+                        restoreButton.addEventListener(
+                            "click",
+                            function() {
+
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+
+                                /*
+                                 * Restore the user's saved collapse preference.
+                                 */
+                                const savedCollapsed =
+                                    localStorage.getItem(
+                                        "technicianSidebarCollapsed"
+                                    );
+
+
+                                if (
+                                    savedCollapsed === "true" &&
+                                    window.innerWidth > 991
+                                ) {
+
+                                    body.classList.add(
+                                        "sidebar-collapsed"
+                                    );
+
+                                }
+                                else {
+
+                                    body.classList.remove(
+                                        "sidebar-collapsed"
+                                    );
+
+                                }
+
+
+                                updateCollapseIcon();
+
+                            }
+                        );
+
+                    }
+
+
+                    /* =====================================================
+                       RESTORE SAVED DESKTOP STATE
+                       ===================================================== */
+
+                    const savedCollapsed =
+                        localStorage.getItem(
+                            "technicianSidebarCollapsed"
+                        );
+
+
+                    if (
+                        savedCollapsed === "true" &&
+                        window.innerWidth > 991
+                    ) {
+
+                        body.classList.add(
+                            "sidebar-collapsed"
+                        );
+
+                    }
+
+
+                    updateCollapseIcon();
+
+
+                    /* =====================================================
+                       WINDOW RESIZE
+                       ===================================================== */
+
+                    window.addEventListener(
+                        "resize",
+                        function() {
+
+                            /*
+                             * Desktop
+                             */
+                            if (
+                                window.innerWidth > 991
+                            ) {
+
+                                closeMobileSidebar();
+
+
+                                const savedState =
+                                    localStorage.getItem(
+                                        "technicianSidebarCollapsed"
+                                    );
+
+
+                                if (
+                                    !body.classList.contains(
+                                        "sidebar-hidden"
+                                    )
+                                ) {
+
+                                    if (
+                                        savedState === "true"
+                                    ) {
+
+                                        body.classList.add(
+                                            "sidebar-collapsed"
+                                        );
+
+                                    }
+                                    else {
+
+                                        body.classList.remove(
+                                            "sidebar-collapsed"
+                                        );
+
+                                    }
+
+                                }
+
+                            }
+
+                            /*
+                             * Mobile
+                             */
+                            else {
+
+                                /*
+                                 * Desktop full-width mode shouldn't
+                                 * interfere with mobile navigation.
+                                 */
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+                            }
+
+
+                            updateCollapseIcon();
+
+                        }
+                    );
+
+
+                    /* =====================================================
+                       ESC KEY
+
+                       If the technician is in full-width mode,
+                       Escape restores the sidebar.
+
+                       On mobile Escape closes the sidebar.
+                       ===================================================== */
+
+                    document.addEventListener(
+                        "keydown",
+                        function(event) {
+
+                            if (
+                                event.key !== "Escape"
+                            ) {
+                                return;
+                            }
+
+
+                            if (
+                                window.innerWidth <= 991
+                            ) {
+
+                                closeMobileSidebar();
+
+                                return;
+                            }
+
+
+                            if (
+                                body.classList.contains(
+                                    "sidebar-hidden"
+                                )
+                            ) {
+
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+
+                                const savedState =
+                                    localStorage.getItem(
+                                        "technicianSidebarCollapsed"
+                                    );
+
+
+                                if (
+                                    savedState === "true"
+                                ) {
+
+                                    body.classList.add(
+                                        "sidebar-collapsed"
+                                    );
+
+                                }
+
+
+                                updateCollapseIcon();
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+    </script>
+
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
+
+
 </body>
-			@RenderSection("Scripts", required: false)
+
 </html>

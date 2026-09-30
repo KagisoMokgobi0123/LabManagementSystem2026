@@ -15,6 +15,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Views\Shared\_AdminManagerLayout.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Areas\Manager\Controllers\gvh5guig.glj~" />
     <None Remove="Areas\Technician\Models\SampleTypeModel.cs~RFa68e002.TMP" />
   </ItemGroup>
