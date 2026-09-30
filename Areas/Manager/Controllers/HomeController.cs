@@ -7,7 +7,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
     [Authorize(Roles = "Manager")]
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Index()//Dashboard
         {
             return View();
         }
