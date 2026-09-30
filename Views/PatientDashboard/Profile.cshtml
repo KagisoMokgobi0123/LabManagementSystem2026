@@ -1,0 +1,371 @@
+﻿@model NMB_HLabSys.Areas.Patient.Models.PatientModel
+
+@{
+    ViewBag.Title = "My Profile";
+
+    var fullName = $"{Model.Name} {Model.Surname}".Trim();
+}
+
+<style>
+    .profile-page {
+        padding: 30px;
+        background: #f5f7fb;
+        min-height: calc(100vh - 70px);
+    }
+
+    .profile-header {
+        background: white;
+        border-radius: 16px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+        .profile-header h2 {
+            margin: 0;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .profile-header p {
+            margin: 6px 0 0;
+            color: #6b7280;
+        }
+
+    .profile-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .profile-card-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 22px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .profile-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        font-size: 20px;
+    }
+
+    .profile-card-header h5 {
+        margin: 0;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .profile-card-header small {
+        color: #6b7280;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+    }
+
+    .readonly-field {
+        background: #f3f4f6 !important;
+        cursor: not-allowed;
+    }
+
+    .readonly-note {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+
+    .account-item {
+        padding: 14px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+        .account-item:last-child {
+            border-bottom: none;
+        }
+
+    .account-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 3px;
+    }
+
+    .account-value {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .security-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 18px;
+    }
+
+    .back-button {
+        text-decoration: none;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    .save-button {
+        min-width: 150px;
+    }
+
+    @@media (max-width: 768px) {
+        .profile-page {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="profile-page">
+
+    <!-- Back to Dashboard -->
+    <a href="@Url.Action("Index", "PatientDashboard")"
+           class="btn btn-outline-secondary back-button">
+        ← Back to Dashboard
+    </a>
+
+    <!-- Header -->
+    <div class="profile-header">
+        <h2>My Profile</h2>
+        <p>View and manage your personal and contact information.</p>
+    </div>
+
+    <form asp-action="UpdateProfile"
+          asp-controller="PatientDashboard"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <!-- PERSONAL INFORMATION -->
+        <div class="profile-card">
+
+            <div class="profile-card-header">
+                <div class="profile-icon">👤</div>
+
+                <div>
+                    <h5>Personal Information</h5>
+                    <small>These details can only be changed by an administrator.</small>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <!-- Name -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Name</label>
+
+                    <input type="text"
+                           class="form-control readonly-field"
+                           value="@Model.Name"
+                           readonly />
+                </div>
+
+                <!-- Surname -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Surname</label>
+
+                    <input type="text"
+                           class="form-control readonly-field"
+                           value="@Model.Surname"
+                           readonly />
+                </div>
+
+                <!-- ID Number -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">South African ID Number</label>
+
+                    <input type="text"
+                           class="form-control readonly-field"
+                           value="@Model.IDNumber"
+                           readonly />
+
+                    <div class="readonly-note">
+                        Your ID number cannot be changed.
+                    </div>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Date of Birth</label>
+
+                    <input type="text"
+                           class="form-control readonly-field"
+                           value="@Model.DateOfBirth.ToString("dd MMMM yyyy")"
+                           readonly />
+
+                    <div class="readonly-note">
+                        Date of birth cannot be changed from this page.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- CONTACT INFORMATION -->
+        <div class="profile-card">
+
+            <div class="profile-card-header">
+                <div class="profile-icon">📞</div>
+
+                <div>
+                    <h5>Contact Information</h5>
+                    <small>You can update your contact details below.</small>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <!-- Cellphone -->
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ContactNumber" class="form-label">
+                        Cellphone Number
+                    </label>
+
+                    <input asp-for="ContactNumber"
+                           class="form-control"
+                           placeholder="Enter cellphone number" />
+
+                    <span asp-validation-for="ContactNumber"
+                          class="text-danger">
+                    </span>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Email" class="form-label">
+                        Email Address
+                    </label>
+
+                    <input asp-for="Email"
+                           type="email"
+                           class="form-control"
+                           placeholder="Enter email address" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger">
+                    </span>
+
+                    <div class="readonly-note">
+                        Your email address is also used as your username.
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="col-12 mb-3">
+                    <label asp-for="Address" class="form-label">
+                        Home Address
+                    </label>
+
+                    <textarea asp-for="Address"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Enter your home address"></textarea>
+
+                    <span asp-validation-for="Address"
+                          class="text-danger">
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="text-end">
+                <button type="submit"
+                        class="btn btn-primary save-button">
+                    Save Changes
+                </button>
+            </div>
+
+        </div>
+
+
+        <!-- ACCOUNT & SECURITY -->
+        <div class="profile-card">
+
+            <div class="profile-card-header">
+                <div class="profile-icon">🔒</div>
+
+                <div>
+                    <h5>Account & Security</h5>
+                    <small>Manage your account security.</small>
+                </div>
+            </div>
+
+            <div class="security-box">
+
+                <div class="account-item">
+                    <div class="account-label">
+                        Account Created
+                    </div>
+
+                    <div class="account-value">
+                        @Model.CreatedDate
+                    </div>
+                </div>
+                <div class="account-item">
+                    <div class="account-label">
+                    Last Updated
+                </div>
+
+                <div class="account-value">
+                    @Model.LastUpdatedDate
+                 </div>
+                </div>
+                <div class="account-item">
+                    <div class="account-label">
+                        Patient ID
+                    </div>
+
+                    <div class="account-value">
+                        @Model.PatientId
+                    </div>
+                </div>
+
+                <div class="account-item">
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <div class="account-label">
+                                Password
+                            </div>
+
+                            <div class="account-value">
+                                ••••••••••••
+                            </div>
+                        </div>
+
+                        <a href="@Url.Action("ChangePassword", "Account")"
+                               class="btn btn-outline-primary">
+                            Change Password
+                        </a>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

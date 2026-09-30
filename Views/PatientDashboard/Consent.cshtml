@@ -1,0 +1,274 @@
+﻿@{
+    ViewBag.Title = "Consent Management";
+    var consents = ViewBag.Consents as List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>
+                   ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>();
+    var doctors = ViewBag.Doctors as List<NMB_HLabSys.Models.Account.RegisterUser>
+                  ?? new List<NMB_HLabSys.Models.Account.RegisterUser>();
+    var testRequests = ViewBag.TestRequests as List<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
+                       ?? new List<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>();
+}
+
+<style>
+    .consent-page { background: #f5f7fb; min-height: calc(100vh - 70px); padding: 30px; }
+    .page-card { background: white; border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .consent-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1.5px solid #e5e7eb; }
+    .consent-card-header { padding: 18px 25px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; }
+    .consent-card-header h5 { margin: 0; font-weight: 700; color: #1f2937; font-size: 1rem; }
+    .active-badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .revoked-badge { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
+    .record-item { padding: 12px 25px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
+    .record-item:last-child { border-bottom: none; }
+    .record-info strong { font-size: 0.88rem; color: #1f2937; }
+    .record-info small { color: #6b7280; display: block; font-size: 0.8rem; }
+    .grant-modal-form { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 25px; margin-bottom: 25px; display: none; }
+    .grant-modal-form.show { display: block; }
+    .security-note { margin-top: 20px; padding: 15px 18px; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 10px; color: #1e40af; font-size: 0.88rem; }
+    .empty-state { text-align: center; padding: 50px 20px; color: #6b7280; }
+    .step-badge { background: #0d6efd; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin-right: 8px; }
+    .revoke-zone { background: #fff5f5; border-top: 1px solid #fee2e2; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; }
+</style>
+
+<div class="consent-page">
+
+    <a href="/PatientDashboard/Index" class="btn btn-outline-secondary mb-4">
+        ← Back to Dashboard
+    </a>
+
+    <!-- Header -->
+    <div class="page-card">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h4 class="fw-bold mb-1">🔐 Consent Management</h4>
+                <p class="text-muted mb-0">
+                    You are in control of who sees your medical records.
+                    Grant a doctor access to specific test results, and revoke it at any time.
+                </p>
+            </div>
+            <button class="btn btn-success" onclick="toggleGrantForm()">
+                ➕ Grant Access to Doctor
+            </button>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            ✅ @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show">
+            ❌ @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- GRANT CONSENT FORM - hidden by default, shown on button click -->
+    <div class="grant-modal-form" id="grantForm">
+        <h5 class="fw-bold mb-1">
+            <span class="step-badge">1</span> Select a Doctor
+        </h5>
+        <p class="text-muted mb-3" style="font-size:0.88rem; margin-left:32px;">
+            Choose the doctor you want to give access to your records.
+        </p>
+
+        <form asp-action="GrantConsent" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="mb-4">
+                <select name="doctorUserId" class="form-select" required>
+                    <option value="" disabled selected>Choose a doctor...</option>
+                    @foreach (var d in doctors)
+                    {
+                        <option value="@d.Id">@d.FullName</option>
+                    }
+                </select>
+                @if (!doctors.Any())
+                {
+                    <small class="text-muted">All available doctors have already been granted access.</small>
+                }
+            </div>
+
+            <h5 class="fw-bold mb-1">
+                <span class="step-badge">2</span> Select Which Records To Share
+            </h5>
+            <p class="text-muted mb-3" style="font-size:0.88rem; margin-left:32px;">
+                Tick only the test requests you want this doctor to see.
+                You can add or remove records later.
+            </p>
+
+            @if (testRequests.Any())
+            {
+                <div class="border rounded p-3 mb-3" style="max-height:220px; overflow-y:auto; background:#fff;">
+                    @foreach (var r in testRequests)
+                    {
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox"
+                                   name="selectedRequestIds" value="@r.TestRequestId"
+                                   id="req_@r.TestRequestId" />
+                            <label class="form-check-label" for="req_@r.TestRequestId">
+                                <strong>@r.RequestNumber</strong>
+                                <span class="text-muted ms-2" style="font-size:0.85rem;">
+                                    @r.RequestDate.ToString("dd MMM yyyy") — @r.ClinicalNotes
+                                </span>
+                            </label>
+                        </div>
+                    }
+                </div>
+                <small class="text-muted">
+                    💡 You can leave all unchecked to grant general access without specific records.
+                </small>
+            }
+            else
+            {
+                <div class="alert alert-info py-2 mb-3">
+                    You have no test requests yet. You can still grant access and add records later.
+                </div>
+            }
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-success px-4">
+                    ✅ Confirm & Grant Access
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="toggleGrantForm()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- EXISTING CONSENTS -->
+    <h5 class="fw-bold mb-3">
+        Doctors Currently With Access
+        <span class="badge bg-secondary ms-2">@consents.Count</span>
+    </h5>
+
+    @if (!consents.Any())
+    {
+        <div class="page-card">
+            <div class="empty-state">
+                <div style="font-size:3rem;">🔐</div>
+                <h5 class="mt-3">No Doctors Have Access Yet</h5>
+                <p class="text-muted">
+                    Click <strong>Grant Access to Doctor</strong> above to get started.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var c in consents)
+        {
+            <div class="consent-card">
+
+                <!-- Doctor Header -->
+                <div class="consent-card-header">
+                    <div>
+                        <h5>👨‍⚕️ @(c.Doctor?.FullName ?? "Unknown Doctor")</h5>
+                        <small class="text-muted">
+                            Access granted: @c.GrantedDate.ToString("dd MMM yyyy")
+                            @if (c.RevokedDate.HasValue)
+                            {
+                                <span class="ms-2 text-danger">
+                                    | Revoked: @c.RevokedDate.Value.ToString("dd MMM yyyy")
+                                </span>
+                            }
+                        </small>
+                    </div>
+                    @if (c.IsActive)
+                    {
+                        <span class="active-badge">✅ Active</span>
+                    }
+                    else
+                    {
+                        <span class="revoked-badge">❌ Revoked</span>
+                    }
+                </div>
+
+                <!-- Records This Doctor Can See -->
+                @if (c.ConsentRequestItems != null && c.ConsentRequestItems.Any())
+                {
+                    <div class="px-4 pt-3 pb-1">
+                        <small class="fw-semibold text-muted text-uppercase" style="font-size:0.73rem; letter-spacing:0.05em;">
+                            Records This Doctor Can Access
+                        </small>
+                    </div>
+
+                    @foreach (var item in c.ConsentRequestItems)
+                    {
+                        <div class="record-item">
+                            <div class="record-info">
+                                <strong>
+                                    📋 @(item.TestRequest?.RequestNumber ?? "Unknown Request")
+                                </strong>
+                                <small>
+                                    @(item.TestRequest?.RequestDate.ToString("dd MMM yyyy"))
+                                    — @(item.TestRequest?.ClinicalNotes)
+                                </small>
+                            </div>
+                            @if (c.IsActive)
+                            {
+                                <form asp-action="RevokeConsentItem" method="post"
+                                      onsubmit="return confirm('Remove this record from this doctor access? The doctor will no longer see this test result.')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="itemId" value="@item.ConsentRequestItemId" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Remove Record
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="px-4 py-3 text-muted" style="font-size:0.88rem;">
+                        <em>No specific records selected — doctor has general access.</em>
+                    </div>
+                }
+
+                <!-- Revoke All — Last Resort -->
+                @if (c.IsActive)
+                {
+                    <div class="revoke-zone">
+                        <small class="text-danger">
+                            ⚠️ This will remove <strong>@(c.Doctor?.FullName ?? "this doctor")</strong> completely from your consent list.
+                        </small>
+                        <form asp-action="RevokeConsent" method="post"
+                              onsubmit="return confirm('Are you sure you want to revoke ALL access for @(c.Doctor?.FullName ?? "this doctor")? They will no longer be able to see any of your records.')">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="consentId" value="@c.PatientDoctorConsentId" />
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                Revoke All Access
+                            </button>
+                        </form>
+                    </div>
+                }
+
+            </div>
+        }
+    }
+
+    <!-- Privacy Note -->
+    <div class="security-note">
+        🔒 <strong>Your Privacy:</strong>
+        You are always in control. Doctors can only see the specific test results you choose to share.
+        You can remove individual records or revoke a doctor's access entirely at any time.
+    </div>
+
+</div>
+
+<script>
+    function toggleGrantForm() {
+        var form = document.getElementById('grantForm');
+        if (form.classList.contains('show')) {
+            form.classList.remove('show');
+        } else {
+            form.classList.add('show');
+            form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+</script>
