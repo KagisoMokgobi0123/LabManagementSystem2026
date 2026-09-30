@@ -1,0 +1,1647 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+
+    var doctorName =
+        currentUser?.FullName ?? "Doctor";
+
+    var doctorInitial =
+        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+            ? currentUser.FirstName.Substring(0, 1).ToUpper()
+            : "D";
+
+    var controller =
+        ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+
+    var action =
+        ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        @ViewData["Title"] - NMB-HLabSys
+    </title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+
+    <!-- Site CSS -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+
+    <style>
+
+            :root {
+                --sidebar-width: 265px;
+                --sidebar-collapsed-width: 78px;
+                --sidebar-dark: #052f4a;
+                --sidebar-blue: #073b5c;
+                --sidebar-light: #075985;
+                --accent: #0284c7;
+                --page-bg: #f4f7fb;
+            }
+
+
+            * {
+                box-sizing: border-box;
+            }
+
+
+            html,
+            body {
+                margin: 0;
+                min-height: 100%;
+            }
+
+
+            body {
+                background: var(--page-bg);
+                color: #334155;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            }
+
+
+            /* =====================================================
+                       APPLICATION
+                       ===================================================== */
+
+            .doctor-app {
+                min-height: 100vh;
+            }
+
+
+            /* =====================================================
+                       SIDEBAR
+                       ===================================================== */
+
+            .doctor-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                z-index: 1050;
+                width: var(--sidebar-width);
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto;
+                overflow-x: hidden;
+                background: linear-gradient( 180deg, var(--sidebar-dark) 0%, var(--sidebar-blue) 50%, var(--sidebar-light) 100% );
+                box-shadow: 5px 0 25px rgba(15,23,42,.13);
+                transition: width .25s ease, transform .25s ease;
+            }
+
+
+            /* =====================================================
+                       LOGO
+                       ===================================================== */
+
+            .sidebar-brand {
+                min-height: 105px;
+                display: flex;
+                align-items: center;
+                padding: 18px 20px;
+                border-bottom: 1px solid rgba(255,255,255,.10);
+                text-decoration: none !important;
+            }
+
+
+            .sidebar-logo {
+                width: 55px;
+                height: 55px;
+                flex-shrink: 0;
+                object-fit: contain;
+                margin-right: 12px;
+                filter: drop-shadow(0 4px 8px rgba(0,0,0,.20));
+            }
+
+
+            .sidebar-brand-text {
+                overflow: hidden;
+            }
+
+
+            .sidebar-brand-name {
+                color: #fff;
+                font-size: 17px;
+                font-weight: 700;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-brand-subtitle {
+                margin-top: 2px;
+                color: rgba(255,255,255,.60);
+                font-size: 10px;
+                white-space: nowrap;
+            }
+
+
+            /* =====================================================
+                       CONTROLS
+                       ===================================================== */
+
+            .sidebar-controls {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 7px;
+                padding: 8px 12px;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+
+            .sidebar-control-btn {
+                width: 33px;
+                height: 33px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(255,255,255,.16);
+                border-radius: 7px;
+                background: rgba(255,255,255,.07);
+                color: rgba(255,255,255,.82);
+                cursor: pointer;
+                transition: .2s ease;
+            }
+
+
+                .sidebar-control-btn:hover {
+                    background: rgba(255,255,255,.16);
+                    color: #fff;
+                    transform: translateY(-1px);
+                }
+
+
+            /* =====================================================
+                       DOCTOR
+                       ===================================================== */
+
+            .sidebar-user {
+                display: flex;
+                align-items: center;
+                margin: 15px 13px;
+                padding: 12px;
+                border: 1px solid rgba(255,255,255,.10);
+                border-radius: 10px;
+                background: rgba(255,255,255,.07);
+            }
+
+
+            .sidebar-avatar {
+                width: 39px;
+                height: 39px;
+                min-width: 39px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 10px;
+                border-radius: 50%;
+                background: linear-gradient( 135deg, #0284c7, #06b6d4 );
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+
+            .sidebar-user-details {
+                min-width: 0;
+                overflow: hidden;
+            }
+
+
+            .sidebar-user-name {
+                overflow: hidden;
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-user-role {
+                margin-top: 2px;
+                color: rgba(255,255,255,.55);
+                font-size: 9px;
+            }
+
+
+            /* =====================================================
+                       NAVIGATION
+                       ===================================================== */
+
+            .sidebar-navigation {
+                flex: 1;
+                padding: 5px 12px 25px;
+            }
+
+
+            .sidebar-section {
+                margin: 19px 10px 7px;
+                color: rgba(255,255,255,.40);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: .8px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-link {
+                position: relative;
+                display: flex;
+                align-items: center;
+                min-height: 45px;
+                margin-bottom: 4px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                color: rgba(255,255,255,.77) !important;
+                font-size: 12px;
+                font-weight: 500;
+                text-decoration: none !important;
+                transition: .2s ease;
+            }
+
+
+                .sidebar-link:hover {
+                    color: #fff !important;
+                    background: rgba(255,255,255,.10);
+                    transform: translateX(2px);
+                }
+
+
+                .sidebar-link.active {
+                    color: #fff !important;
+                    background: linear-gradient( 135deg, rgba(2,132,199,.85), rgba(6,182,212,.65) );
+                    box-shadow: 0 5px 15px rgba(0,0,0,.15);
+                }
+
+
+                    .sidebar-link.active::before {
+                        content: "";
+                        position: absolute;
+                        left: -12px;
+                        top: 8px;
+                        bottom: 8px;
+                        width: 3px;
+                        border-radius: 0 4px 4px 0;
+                        background: #38bdf8;
+                    }
+
+
+            .sidebar-link-icon {
+                width: 28px;
+                min-width: 28px;
+                margin-right: 8px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+
+            .sidebar-link-text {
+                flex: 1;
+                white-space: nowrap;
+            }
+
+
+            /* =====================================================
+                       LOGOUT
+                       ===================================================== */
+
+            .sidebar-bottom {
+                padding: 12px;
+                border-top: 1px solid rgba(255,255,255,.10);
+            }
+
+
+                .sidebar-bottom form {
+                    margin: 0;
+                }
+
+
+            .sidebar-logout {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                padding: 11px 12px;
+                border: 1px solid rgba(248,113,113,.28);
+                border-radius: 8px;
+                background: rgba(220,38,38,.10);
+                color: #fecaca;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: .2s ease;
+            }
+
+
+                .sidebar-logout:hover {
+                    background: rgba(220,38,38,.20);
+                    color: #fff;
+                }
+
+
+            /* =====================================================
+                       MAIN CONTENT
+                       ===================================================== */
+
+            .doctor-main {
+                min-height: 100vh;
+                margin-left: var(--sidebar-width);
+                transition: margin-left .25s ease, width .25s ease;
+            }
+
+
+            /* =====================================================
+                       COLLAPSED SIDEBAR
+                       ===================================================== */
+
+            body.sidebar-collapsed
+            .doctor-sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+
+
+            body.sidebar-collapsed
+            .doctor-main {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-brand {
+                justify-content: center;
+                min-height: 90px;
+                padding: 15px 8px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-logo {
+                width: 48px;
+                height: 48px;
+                margin-right: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-brand-text,
+            body.sidebar-collapsed
+            .sidebar-user-details,
+            body.sidebar-collapsed
+            .sidebar-link-text {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-controls {
+                justify-content: center;
+                padding: 8px 5px;
+            }
+
+
+            body.sidebar-collapsed
+            #fullScreenToggle {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-user {
+                justify-content: center;
+                margin: 12px 9px;
+                padding: 9px 5px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-avatar {
+                margin-right: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-section {
+                height: 8px;
+                margin: 8px 0;
+                overflow: hidden;
+                font-size: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-navigation {
+                padding: 5px 9px 20px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link {
+                justify-content: center;
+                padding: 10px 5px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link-icon {
+                width: auto;
+                min-width: 0;
+                margin-right: 0;
+                font-size: 16px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-bottom {
+                padding: 10px 9px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-logout {
+                justify-content: center;
+                padding: 11px 5px;
+            }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout
+                .sidebar-link-icon {
+                    margin-right: 0;
+                }
+
+
+            /* =====================================================
+                       FULL WIDTH MODE
+                       ===================================================== */
+
+            body.sidebar-hidden
+            .doctor-sidebar {
+                transform: translateX(-100%) !important;
+            }
+
+
+            body.sidebar-hidden
+            .doctor-main {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+
+            /* =====================================================
+                       RESTORE BUTTON
+                       ===================================================== */
+
+            .sidebar-restore-btn {
+                position: fixed;
+                top: 18px;
+                left: 18px;
+                z-index: 1200;
+                width: 44px;
+                height: 44px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                border-radius: 10px;
+                background: linear-gradient( 135deg, #075985, #0284c7 );
+                color: #fff;
+                font-size: 17px;
+                box-shadow: 0 6px 20px rgba(15,23,42,.25);
+                cursor: pointer;
+            }
+
+
+            body.sidebar-hidden
+            .sidebar-restore-btn {
+                display: flex;
+            }
+
+
+            /* =====================================================
+                       MOBILE
+                       ===================================================== */
+
+            .doctor-mobile-header {
+                display: none;
+                height: 64px;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 16px;
+                background: #073b5c;
+                color: #fff;
+                box-shadow: 0 2px 12px rgba(15,23,42,.15);
+            }
+
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                color: #fff;
+                font-weight: 700;
+            }
+
+
+            .mobile-logo {
+                width: 39px;
+                height: 39px;
+                margin-right: 9px;
+                object-fit: contain;
+            }
+
+
+            .sidebar-toggle {
+                width: 39px;
+                height: 39px;
+                border: 1px solid rgba(255,255,255,.20);
+                border-radius: 7px;
+                background: rgba(255,255,255,.08);
+                color: #fff;
+                cursor: pointer;
+            }
+
+
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 1040;
+                display: none;
+                background: rgba(15,23,42,.55);
+            }
+
+
+            /* =====================================================
+                       RESPONSIVE
+                       ===================================================== */
+
+            @@media(max-width: 991.98px) {
+
+                .doctor-sidebar {
+                    width: 265px;
+                    transform: translateX(-100%);
+                }
+
+
+                    .doctor-sidebar.show {
+                        transform: translateX(0);
+                    }
+
+
+                .sidebar-backdrop.show {
+                    display: block;
+                }
+
+
+                .doctor-main {
+                    margin-left: 0;
+                    width: 100%;
+                }
+
+
+                .doctor-mobile-header {
+                    display: flex;
+                }
+
+
+                .sidebar-controls {
+                    display: none;
+                }
+
+
+                body.sidebar-collapsed
+                .doctor-sidebar {
+                    width: 265px;
+                }
+
+
+                body.sidebar-collapsed
+                .doctor-main {
+                    margin-left: 0;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-brand {
+                    justify-content: flex-start;
+                    min-height: 105px;
+                    padding: 18px 20px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logo {
+                    width: 55px;
+                    height: 55px;
+                    margin-right: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-brand-text,
+                body.sidebar-collapsed
+                .sidebar-user-details,
+                body.sidebar-collapsed
+                .sidebar-link-text {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-user {
+                    justify-content: flex-start;
+                    margin: 15px 13px;
+                    padding: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-avatar {
+                    margin-right: 10px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-section {
+                    height: auto;
+                    margin: 19px 10px 7px;
+                    overflow: visible;
+                    font-size: 9px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-navigation {
+                    padding: 5px 12px 25px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link {
+                    justify-content: flex-start;
+                    padding: 10px 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link-icon {
+                    width: 28px;
+                    min-width: 28px;
+                    margin-right: 8px;
+                    font-size: 14px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-bottom {
+                    padding: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout {
+                    justify-content: flex-start;
+                    padding: 11px 12px;
+                }
+
+
+                    body.sidebar-collapsed
+                    .sidebar-logout
+                    .sidebar-link-icon {
+                        margin-right: 8px;
+                    }
+
+
+                .sidebar-restore-btn {
+                    display: none !important;
+                }
+            }
+
+    </style>
+
+
+    @await RenderSectionAsync(
+        "Styles",
+        required: false
+    )
+
+</head>
+
+
+<body>
+
+
+    <div class="doctor-app">
+
+
+        <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
+
+        <aside class="doctor-sidebar"
+               id="doctorSidebar">
+
+
+            <!-- LOGO -->
+
+            <a href="/Doctor/Home/Index"
+               class="sidebar-brand"
+               title="Doctor Dashboard">
+
+                <img src="~/assets/img/logo.png"
+                     class="sidebar-logo"
+                     alt="NMB-HLabSys Logo" />
+
+                <div class="sidebar-brand-text">
+
+                    <div class="sidebar-brand-name">
+                        NMB-HLabSys
+                    </div>
+
+                    <div class="sidebar-brand-subtitle">
+                        Doctor Portal
+                    </div>
+
+                </div>
+
+            </a>
+
+
+            <!-- CONTROLS -->
+
+            <div class="sidebar-controls">
+
+                <button type="button"
+                        class="sidebar-control-btn"
+                        id="desktopSidebarToggle"
+                        title="Collapse sidebar"
+                        aria-label="Collapse sidebar">
+
+                    <i class="fa-solid fa-chevron-left"
+                       id="desktopSidebarToggleIcon"></i>
+
+                </button>
+
+
+                <button type="button"
+                        class="sidebar-control-btn"
+                        id="fullScreenToggle"
+                        title="Hide sidebar and use full width"
+                        aria-label="Hide sidebar">
+
+                    <i class="fa-solid fa-expand"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- =====================================================
+             DOCTOR
+             ===================================================== -->
+
+            <div class="sidebar-user">
+
+                <div class="sidebar-avatar"
+                     title="@doctorName">
+
+                    @doctorInitial
+
+                </div>
+
+
+                <div class="sidebar-user-details">
+
+                    <div class="sidebar-user-name">
+                        @doctorName
+                    </div>
+
+                    <div class="sidebar-user-role">
+                        Doctor
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =====================================================
+             NAVIGATION
+             ===================================================== -->
+
+            <nav class="sidebar-navigation">
+
+
+                <!-- ================= MAIN ================= -->
+
+                <div class="sidebar-section">
+                    Main
+                </div>
+
+
+                <a href="/Doctor/Home/Index"
+                   title="Dashboard"
+                   class="sidebar-link @(controller == "Home" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Dashboard
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= PATIENTS ================= -->
+
+                <div class="sidebar-section">
+                    Patients
+                </div>
+
+
+                <a href="/Doctor/Patients/Index"
+                   title="My Patients"
+                   class="sidebar-link @(controller == "Patients" && action == "Index" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-hospital-user"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        My Patients
+                    </span>
+
+                </a>
+
+
+                <a href="/Doctor/Patients/Search"
+                   title="Find Patient"
+                   class="sidebar-link @(controller == "Patients" && action == "Search" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-user-magnifying-glass"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Find Patient
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= TEST REQUESTS ================= -->
+
+                <div class="sidebar-section">
+                    Test Requests
+                </div>
+
+
+                <a href="/Doctor/TestRequests/Create"
+                   title="Create Test Request"
+                   class="sidebar-link @(controller == "TestRequests" && action == "Create" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-file-circle-plus"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Create Test Request
+                    </span>
+
+                </a>
+
+
+                <a href="/Doctor/TestRequests/Index"
+                   title="My Test Requests"
+                   class="sidebar-link @(controller == "TestRequests" && action == "Index" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        My Test Requests
+                    </span>
+
+                </a>
+
+
+                <a href="/Doctor/TestRequests/Pending"
+                   title="Pending Requests"
+                   class="sidebar-link @(controller == "TestRequests" && action == "Pending" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-clock"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Pending Requests
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= RESULTS ================= -->
+
+                <div class="sidebar-section">
+                    Laboratory Results
+                </div>
+
+
+                <a href="/Doctor/Results/Index"
+                   title="Patient Results"
+                   class="sidebar-link @(controller == "Results" && action == "Index" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-file-medical"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Patient Results
+                    </span>
+
+                </a>
+
+
+                <a href="/Doctor/Results/New"
+                   title="New Results"
+                   class="sidebar-link @(controller == "Results" && action == "New" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-bell"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        New Results
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= REPORTS ================= -->
+
+                <div class="sidebar-section">
+                    Reports
+                </div>
+
+
+                <a href="/Doctor/Reports/Index"
+                   title="Reports"
+                   class="sidebar-link @(controller == "Reports" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-chart-column"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Reports
+                    </span>
+
+                </a>
+
+
+
+                <!-- ================= ACCOUNT ================= -->
+
+                <div class="sidebar-section">
+                    Account
+                </div>
+
+
+                <a href="/Doctor/Profile/Index"
+                   title="My Profile"
+                   class="sidebar-link @(controller == "Profile" && action == "Index" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-user-doctor"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        My Profile
+                    </span>
+
+                </a>
+
+
+                <a href="/Doctor/Profile/ChangePhoneNumber"
+                   title="Change Phone Number"
+                   class="sidebar-link @(controller == "Profile" && action == "ChangePhoneNumber" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-phone"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Change Phone Number
+                    </span>
+
+                </a>
+
+
+                <a href="/Doctor/Profile/ChangePassword"
+                   title="Change Password"
+                   class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-key"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Change Password
+                    </span>
+
+                </a>
+
+
+            </nav>
+
+
+
+            <!-- =====================================================
+             LOGOUT
+             ===================================================== -->
+
+            <div class="sidebar-bottom">
+
+                <form action="/Doctor/Profile/Logout"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <button type="submit"
+                            class="sidebar-logout"
+                            title="Secure Logout">
+
+                        <span class="sidebar-link-icon">
+
+                            <i class="fa-solid fa-right-from-bracket"></i>
+
+                        </span>
+
+
+                        <span class="sidebar-link-text">
+                            Secure Logout
+                        </span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+        </aside>
+
+
+
+        <!-- =====================================================
+         RESTORE SIDEBAR
+         ===================================================== -->
+
+        <button type="button"
+                class="sidebar-restore-btn"
+                id="sidebarRestoreButton"
+                title="Show sidebar"
+                aria-label="Show sidebar">
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+
+
+        <!-- =====================================================
+         MOBILE BACKDROP
+         ===================================================== -->
+
+        <div class="sidebar-backdrop"
+             id="sidebarBackdrop">
+        </div>
+
+
+
+        <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
+
+        <main class="doctor-main">
+
+
+            <!-- MOBILE HEADER -->
+
+            <div class="doctor-mobile-header">
+
+                <div class="mobile-brand">
+
+                    <img src="~/assets/img/logo.png"
+                         class="mobile-logo"
+                         alt="NMB-HLabSys" />
+
+                    <span>
+                        NMB-HLabSys Doctor
+                    </span>
+
+                </div>
+
+
+                <button type="button"
+                        class="sidebar-toggle"
+                        id="sidebarToggle"
+                        aria-label="Open navigation">
+
+                    <i class="fa-solid fa-bars"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- PAGE -->
+            @RenderBody()
+
+
+        </main>
+
+
+    </div>
+
+
+
+    <!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true">
+    </script>
+
+
+
+    <script>
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                function() {
+
+                    const body =
+                        document.body;
+
+
+                    const sidebar =
+                        document.getElementById(
+                            "doctorSidebar"
+                        );
+
+
+                    const mobileToggle =
+                        document.getElementById(
+                            "sidebarToggle"
+                        );
+
+
+                    const backdrop =
+                        document.getElementById(
+                            "sidebarBackdrop"
+                        );
+
+
+                    const desktopToggle =
+                        document.getElementById(
+                            "desktopSidebarToggle"
+                        );
+
+
+                    const desktopToggleIcon =
+                        document.getElementById(
+                            "desktopSidebarToggleIcon"
+                        );
+
+
+                    const fullScreenToggle =
+                        document.getElementById(
+                            "fullScreenToggle"
+                        );
+
+
+                    const restoreButton =
+                        document.getElementById(
+                            "sidebarRestoreButton"
+                        );
+
+
+
+                    /* =====================================================
+                       MOBILE
+                       ===================================================== */
+
+                    function openMobileSidebar() {
+
+                        if (!sidebar)
+                            return;
+
+
+                        sidebar.classList.add(
+                            "show"
+                        );
+
+
+                        if (backdrop) {
+
+                            backdrop.classList.add(
+                                "show"
+                            );
+                        }
+
+
+                        body.style.overflow =
+                            "hidden";
+                    }
+
+
+                    function closeMobileSidebar() {
+
+                        if (!sidebar)
+                            return;
+
+
+                        sidebar.classList.remove(
+                            "show"
+                        );
+
+
+                        if (backdrop) {
+
+                            backdrop.classList.remove(
+                                "show"
+                            );
+                        }
+
+
+                        body.style.overflow = "";
+                    }
+
+
+
+                    if (mobileToggle) {
+
+                        mobileToggle.addEventListener(
+                            "click",
+                            function() {
+
+                                if (
+                                    sidebar.classList.contains(
+                                        "show"
+                                    )
+                                ) {
+
+                                    closeMobileSidebar();
+
+                                }
+                                else {
+
+                                    openMobileSidebar();
+
+                                }
+                            }
+                        );
+                    }
+
+
+
+                    if (backdrop) {
+
+                        backdrop.addEventListener(
+                            "click",
+                            closeMobileSidebar
+                        );
+                    }
+
+
+
+                    /* =====================================================
+                       COLLAPSE
+                       ===================================================== */
+
+                    function updateCollapseIcon() {
+
+                        if (!desktopToggleIcon)
+                            return;
+
+
+                        const collapsed =
+                            body.classList.contains(
+                                "sidebar-collapsed"
+                            );
+
+
+                        if (collapsed) {
+
+                            desktopToggleIcon.className =
+                                "fa-solid fa-chevron-right";
+
+
+                            if (desktopToggle) {
+
+                                desktopToggle.title =
+                                    "Expand sidebar";
+                            }
+
+                        }
+                        else {
+
+                            desktopToggleIcon.className =
+                                "fa-solid fa-chevron-left";
+
+
+                            if (desktopToggle) {
+
+                                desktopToggle.title =
+                                    "Collapse sidebar";
+                            }
+
+                        }
+                    }
+
+
+
+                    if (desktopToggle) {
+
+                        desktopToggle.addEventListener(
+                            "click",
+                            function() {
+
+                                if (
+                                    window.innerWidth <= 991
+                                )
+                                    return;
+
+
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+
+                                body.classList.toggle(
+                                    "sidebar-collapsed"
+                                );
+
+
+                                const collapsed =
+                                    body.classList.contains(
+                                        "sidebar-collapsed"
+                                    );
+
+
+                                localStorage.setItem(
+                                    "doctorSidebarCollapsed",
+                                    collapsed
+                                        ? "true"
+                                        : "false"
+                                );
+
+
+                                updateCollapseIcon();
+                            }
+                        );
+                    }
+
+
+
+                    /* =====================================================
+                       FULL WIDTH
+                       ===================================================== */
+
+                    if (fullScreenToggle) {
+
+                        fullScreenToggle.addEventListener(
+                            "click",
+                            function() {
+
+                                if (
+                                    window.innerWidth <= 991
+                                )
+                                    return;
+
+
+                                body.classList.add(
+                                    "sidebar-hidden"
+                                );
+
+
+                                body.classList.remove(
+                                    "sidebar-collapsed"
+                                );
+
+
+                                updateCollapseIcon();
+                            }
+                        );
+                    }
+
+
+
+                    /* =====================================================
+                       RESTORE
+                       ===================================================== */
+
+                    if (restoreButton) {
+
+                        restoreButton.addEventListener(
+                            "click",
+                            function() {
+
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+
+                                const saved =
+                                    localStorage.getItem(
+                                        "doctorSidebarCollapsed"
+                                    );
+
+
+                                if (
+                                    saved === "true" &&
+                                    window.innerWidth > 991
+                                ) {
+
+                                    body.classList.add(
+                                        "sidebar-collapsed"
+                                    );
+
+                                }
+                                else {
+
+                                    body.classList.remove(
+                                        "sidebar-collapsed"
+                                    );
+
+                                }
+
+
+                                updateCollapseIcon();
+                            }
+                        );
+                    }
+
+
+
+                    /* =====================================================
+                       LOAD SAVED STATE
+                       ===================================================== */
+
+                    const saved =
+                        localStorage.getItem(
+                            "doctorSidebarCollapsed"
+                        );
+
+
+                    if (
+                        saved === "true" &&
+                        window.innerWidth > 991
+                    ) {
+
+                        body.classList.add(
+                            "sidebar-collapsed"
+                        );
+                    }
+
+
+                    updateCollapseIcon();
+
+
+
+                    /* =====================================================
+                       WINDOW RESIZE
+                       ===================================================== */
+
+                    window.addEventListener(
+                        "resize",
+                        function() {
+
+                            if (
+                                window.innerWidth > 991
+                            ) {
+
+                                closeMobileSidebar();
+
+                            }
+                            else {
+
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+                            }
+
+
+                            updateCollapseIcon();
+                        }
+                    );
+
+
+
+                    /* =====================================================
+                       ESCAPE KEY
+                       ===================================================== */
+
+                    document.addEventListener(
+                        "keydown",
+                        function(event) {
+
+                            if (
+                                event.key !== "Escape"
+                            )
+                                return;
+
+
+                            if (
+                                window.innerWidth <= 991
+                            ) {
+
+                                closeMobileSidebar();
+
+                                return;
+                            }
+
+
+                            if (
+                                body.classList.contains(
+                                    "sidebar-hidden"
+                                )
+                            ) {
+
+                                body.classList.remove(
+                                    "sidebar-hidden"
+                                );
+
+
+                                const savedState =
+                                    localStorage.getItem(
+                                        "doctorSidebarCollapsed"
+                                    );
+
+
+                                if (
+                                    savedState === "true"
+                                ) {
+
+                                    body.classList.add(
+                                        "sidebar-collapsed"
+                                    );
+
+                                }
+
+
+                                updateCollapseIcon();
+                            }
+                        }
+                    );
+
+                }
+            );
+
+    </script>
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false
+    )
+
+
+</body>
+
+</html>

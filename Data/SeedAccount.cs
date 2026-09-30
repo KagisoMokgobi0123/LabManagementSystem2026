@@ -13,6 +13,7 @@ namespace NMB_HLabSys.Data
         public const string LabTechnicianRole = "LabTechnician";
         public const string ManagerRole = "Manager";
         public const string PatientRole = "Patient";
+        public const string AdministratorRole = "Administrator";
 
 
         // ============================================================
@@ -31,6 +32,17 @@ namespace NMB_HLabSys.Data
             // Create roles
             await CreateRolesAsync(roleManager);
 
+            // ========================================================
+            // ADMINISTRATOR
+            // ========================================================
+
+            await CreateUserAsync(
+                userManager,
+                email: "administrator@nmbhlab.co.za",
+                password: "Admin@123",
+                firstName: "John",
+                lastName: "Administrator",
+                role: AdministratorRole);
 
             // ========================================================
             // DOCTOR
@@ -70,6 +82,14 @@ namespace NMB_HLabSys.Data
                 lastName: "Manager",
                 role: ManagerRole);
 
+            await CreateUserAsync(
+               userManager,
+               email: "manager@nmbhlab.co.za",
+               password: "Manager@123",
+               firstName: "Frank",
+               lastName: "Smith",
+               role: ManagerRole);
+
 
             // ========================================================
             // PATIENT
@@ -97,7 +117,8 @@ namespace NMB_HLabSys.Data
                 DoctorRole,
                 LabTechnicianRole,
                 ManagerRole,
-                PatientRole
+                PatientRole,
+                AdministratorRole
             };
 
 
