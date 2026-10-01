@@ -1,4 +1,4 @@
-﻿@model IEnumerable<NMB_HLabSys.Areas.Administrator.Models.AllergyModel>
+﻿@model IEnumerable<NMB_HLabSys.Areas.Administrator.Models.Allergy>
 
 @{
     ViewData["Title"] = "Allergies";
@@ -187,7 +187,7 @@
                                 <tr class="allergy-row"
                                     data-id="@allergy.AllergyId"
                                     data-name="@allergy.Name"
-                                    data-category="@allergy.AllergyCategory?.Name">
+                                    data-category="@allergy.Category?.Name">
 
                                     <td class="px-4 text-muted">
                                         @allergy.AllergyId
@@ -206,12 +206,12 @@
 
                                     <td>
 
-                                        @if (allergy.AllergyCategory != null)
+                                        @if (allergy.Category != null)
                                         {
                                             <span class="badge"
                                                   style="background:#e0f2fe; color:#075985;">
 
-                                                @allergy.AllergyCategory.Name
+                                                @allergy.Category.Name
 
                                             </span>
                                         }

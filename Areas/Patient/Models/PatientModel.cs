@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using NMB_HLabSys.Models.Account;
 using NMB_HLabSys.Areas.Doctor.Models;
+using NMB_HLabSys.Models.Identity;
 
 namespace NMB_HLabSys.Areas.Patient.Models
 {
@@ -14,7 +15,7 @@ namespace NMB_HLabSys.Areas.Patient.Models
         public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
-        public RegisterViewModel? User { get; set; }
+        public ApplicationUser? User { get; set; }//KG CHANGED FROM RegisterVeiwModel to ApplicationUser
 
         [Required]
         [StringLength(100)]

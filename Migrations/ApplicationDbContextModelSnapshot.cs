@@ -155,6 +155,159 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Allergy", b =>
+                {
+                    b.Property<int>("AllergyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyId"));
+
+                    b.Property<int>("AllergyCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("AllergyId");
+
+                    b.HasIndex("AllergyCategoryId");
+
+                    b.ToTable("Allergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", b =>
+                {
+                    b.Property<int>("AllergyCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyCategoryId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("AllergyCategoryId");
+
+                    b.ToTable("AllergyCategories");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalCondition", b =>
+                {
+                    b.Property<int>("MedicalConditionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicalConditionCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("MedicalConditionId");
+
+                    b.HasIndex("MedicalConditionCategoryId");
+
+                    b.ToTable("MedicalConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", b =>
+                {
+                    b.Property<int>("MedicalConditionCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionCategoryId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("MedicalConditionCategoryId");
+
+                    b.ToTable("MedicalConditionCategories");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Medication", b =>
+                {
+                    b.Property<int>("MedicationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicationCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("MedicationId");
+
+                    b.HasIndex("MedicationCategoryId");
+
+                    b.ToTable("Medications");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", b =>
+                {
+                    b.Property<int>("MedicationCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationCategoryId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("MedicationCategoryId");
+
+                    b.ToTable("MedicationCategories");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.Property<int>("TestRequestId")
@@ -173,6 +326,9 @@ namespace NMBHLabSys.Migrations
 
                     b.Property<string>("PatientId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PatientModelPatientId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("RequestDate")
@@ -196,6 +352,8 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("DoctorId");
 
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("PatientModelPatientId");
 
                     b.ToTable("TestRequests");
 
@@ -901,6 +1059,311 @@ namespace NMBHLabSys.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
+                {
+                    b.Property<int>("AllergyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyId"));
+
+                    b.Property<int>("AllergyCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AllergyName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("AllergyId");
+
+                    b.HasIndex("AllergyCategoryId");
+
+                    b.ToTable("AllergyModel");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.ConsentRequestItemModel", b =>
+                {
+                    b.Property<int>("ConsentRequestItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConsentRequestItemId"));
+
+                    b.Property<int>("PatientConsentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TestRequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ConsentRequestItemId");
+
+                    b.HasIndex("PatientConsentId");
+
+                    b.HasIndex("TestRequestId");
+
+                    b.ToTable("ConsentRequestItems");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalConditionModel", b =>
+                {
+                    b.Property<int>("MedicalConditionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionId"));
+
+                    b.Property<string>("ConditionName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicalConditionCategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MedicalConditionId");
+
+                    b.HasIndex("MedicalConditionCategoryId");
+
+                    b.ToTable("MedicalConditionModel");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
+                {
+                    b.Property<int>("MedicationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicationCategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MedicationName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("MedicationId");
+
+                    b.HasIndex("MedicationCategoryId");
+
+                    b.ToTable("MedicationModel");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel", b =>
+                {
+                    b.Property<int>("PatientAllergyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientAllergyId"));
+
+                    b.Property<int>("AllergyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Severity")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PatientAllergyId");
+
+                    b.HasIndex("AllergyId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("PatientAllergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientConditionModel", b =>
+                {
+                    b.Property<int>("PatientConditionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientConditionId"));
+
+                    b.Property<DateTime>("DateDiagnosed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("MedicalConditionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PatientConditionId");
+
+                    b.HasIndex("MedicalConditionId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("PatientConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel", b =>
+                {
+                    b.Property<int>("PatientDoctorConsentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientDoctorConsentId"));
+
+                    b.Property<string>("DoctorUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("GrantedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("RevokedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PatientDoctorConsentId");
+
+                    b.HasIndex("DoctorUserId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("PatientDoctorConsents");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel", b =>
+                {
+                    b.Property<int>("PatientMedicationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PatientMedicationId"));
+
+                    b.Property<string>("Dosage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Frequency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PatientId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("PatientMedicationId");
+
+                    b.HasIndex("MedicationId");
+
+                    b.HasIndex("PatientId");
+
+                    b.ToTable("PatientMedications");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientModel", b =>
+                {
+                    b.Property<string>("PatientId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IDNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastUpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PostalCode")
+                        .IsRequired()
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Suburb")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PatientId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Patients");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
                 {
                     b.Property<int>("SampleId")
@@ -1324,6 +1787,39 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Allergy", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", "Category")
+                        .WithMany("Allergies")
+                        .HasForeignKey("AllergyCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalCondition", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", "Category")
+                        .WithMany("MedicalConditions")
+                        .HasForeignKey("MedicalConditionCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Medication", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", "Category")
+                        .WithMany("Medications")
+                        .HasForeignKey("MedicationCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "Doctor")
@@ -1337,6 +1833,10 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.PatientModel", null)
+                        .WithMany("TestRequests")
+                        .HasForeignKey("PatientModelPatientId");
 
                     b.Navigation("Doctor");
 
@@ -1432,6 +1932,143 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestCategory");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", "AllergyCategory")
+                        .WithMany()
+                        .HasForeignKey("AllergyCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AllergyCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.ConsentRequestItemModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel", "PatientDoctorConsent")
+                        .WithMany("ConsentRequestItems")
+                        .HasForeignKey("PatientConsentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
+                        .WithMany()
+                        .HasForeignKey("TestRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PatientDoctorConsent");
+
+                    b.Navigation("TestRequest");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalConditionModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", "MedicalConditionCategory")
+                        .WithMany()
+                        .HasForeignKey("MedicalConditionCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicalConditionCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", "MedicationCategory")
+                        .WithMany()
+                        .HasForeignKey("MedicationCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicationCategory");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.AllergyModel", "Allergy")
+                        .WithMany("PatientAllergies")
+                        .HasForeignKey("AllergyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.PatientModel", "Patient")
+                        .WithMany("PatientAllergies")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Allergy");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientConditionModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.MedicalConditionModel", "MedicalCondition")
+                        .WithMany("PatientConditions")
+                        .HasForeignKey("MedicalConditionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.PatientModel", "Patient")
+                        .WithMany("PatientConditions")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicalCondition");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorUserId");
+
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.PatientModel", "Patient")
+                        .WithMany("PatientDoctorConsents")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.MedicationModel", "Medication")
+                        .WithMany("PatientMedications")
+                        .HasForeignKey("MedicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Patient.Models.PatientModel", "Patient")
+                        .WithMany("PatientMedications")
+                        .HasForeignKey("PatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Medication");
+
+                    b.Navigation("Patient");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Areas.Technician.Models.SampleTypeModel", "SampleType")
@@ -1493,6 +2130,21 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestType");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", b =>
+                {
+                    b.Navigation("Allergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", b =>
+                {
+                    b.Navigation("MedicalConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", b =>
+                {
+                    b.Navigation("Medications");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.Navigation("Samples");
@@ -1522,6 +2174,39 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TestTypeConsumables");
 
                     b.Navigation("TestTypes");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
+                {
+                    b.Navigation("PatientAllergies");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalConditionModel", b =>
+                {
+                    b.Navigation("PatientConditions");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
+                {
+                    b.Navigation("PatientMedications");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel", b =>
+                {
+                    b.Navigation("ConsentRequestItems");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientModel", b =>
+                {
+                    b.Navigation("PatientAllergies");
+
+                    b.Navigation("PatientConditions");
+
+                    b.Navigation("PatientDoctorConsents");
+
+                    b.Navigation("PatientMedications");
+
+                    b.Navigation("TestRequests");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleTypeModel", b =>

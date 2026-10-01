@@ -47,7 +47,6 @@
     <Folder Include="Areas\Administrator\Data\" />
     <Folder Include="Areas\Doctor\Data\" />
     <Folder Include="Areas\Patient\Data\" />
-    <Folder Include="Areas\Patient\Models\" />
     <Folder Include="Migrations\" />
     <Folder Include="Services\" />
   </ItemGroup>

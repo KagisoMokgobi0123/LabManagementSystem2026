@@ -6,6 +6,7 @@ using NMB_HLabSys.Areas.Administrator.Models;
 using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
+using NMB_HLabSys.Models.Identity;
 using System.Security.Claims;
 
 namespace NMB_HLabSys.Controllers
@@ -14,11 +15,11 @@ namespace NMB_HLabSys.Controllers
     public class PatientDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterViewModel> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public PatientDashboardController(
             ApplicationDbContext context,
-            UserManager<RegisterViewModel> userManager)
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;
@@ -118,16 +119,16 @@ namespace NMB_HLabSys.Controllers
                     r.Status,
                     r.Urgency,
                     r.ClinicalNotes,
-                    TestItems = _context.TestRequestItems
-                        .Where(ti => ti.TestRequestID == r.TestRequestId)
-                        .Select(ti => new
-                        {
-                            ti.TestRequestItemId,
-                            ti.TestTypeID,
-                            ti.ResultValue,
-                            ti.Status,
-                            ti.Notes
-                        }).ToList()
+                    TestItems = r.TestTypes//_context.TestRequestItems
+                        //.Where(ti => ti.TestRequestId == r.TestRequestId)//KG changed from THIS to TestTypes
+                        //.Select(ti => new
+                        //{
+                        //    ti.TestRequestItemId,
+                        //    ti.TestTypeID,
+                        //    ti.ResultValue,
+                        //    ti.Status,
+                        //    ti.Notes
+                        //}).ToList()
                 })
                 .ToListAsync();
 
@@ -220,7 +221,7 @@ namespace NMB_HLabSys.Controllers
                 .Where(r => r.PatientId == patient.PatientId &&
                            (r.Status == "Completed" || r.Status == "ReleasedByDoctor"))
                 .OrderByDescending(r => r.RequestDate)
-                .Include(r => r.TestRequestItems)
+                .Include(r => r.TestTypes)//KG changed from TestRequestItem to TestTypes
                 .ToListAsync();
 
             ViewBag.PatientName = patient.Name + " " + patient.Surname;
@@ -245,7 +246,7 @@ namespace NMB_HLabSys.Controllers
                             (r.Status == "Completed" ||
                              r.Status == "ReleasedByDoctor"))
                 .OrderByDescending(r => r.RequestDate)
-                .Include(r => r.TestRequestItems)
+                .Include(r => r.TestTypes)//KG changed from TestRequestItem to TestTypes
                 .ToListAsync();
 
             ViewBag.PatientName = patient.Name + " " + patient.Surname;
@@ -563,7 +564,7 @@ namespace NMB_HLabSys.Controllers
                             (r.Status == "Completed" ||
                              r.Status == "ReleasedByDoctor"))
                 .OrderByDescending(r => r.RequestDate)
-                .Include(r => r.TestRequestItems)
+                .Include(r => r.TestTypes)//KG changed from TestRequestItem to TestTypes
                 .ToListAsync();
 
             ViewBag.PatientName = patient.Name + " " + patient.Surname;

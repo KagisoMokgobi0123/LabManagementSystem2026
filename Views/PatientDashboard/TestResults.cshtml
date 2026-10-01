@@ -33,9 +33,10 @@
                         </div>
                         <div class="card-body">
                             <p><strong>Clinical Notes:</strong> @r.ClinicalNotes</p>
-                            @if (r.TestRequestItems != null && r.TestRequestItems.Any())
+                            <!--Possible TestRequestID THAT IS NEEDED-->
+                            @if (r.TestTypes != null && r.TestTypes.Any())
                             {
-                                <table class="table table-sm">
+                                @* <table class="table table-sm">
                                     <thead>
                                         <tr>
                                             <th>Test</th>
@@ -64,7 +65,7 @@
                                             </tr>
                                         }
                                     </tbody>
-                                </table>
+                                </table> *@<!--Kg commented-->
                             }
                             else
                             {

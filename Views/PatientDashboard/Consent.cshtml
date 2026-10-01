@@ -1,12 +1,16 @@
 ﻿@{
     ViewBag.Title = "Consent Management";
+
     var consents = ViewBag.Consents as List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>
                    ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>();
-    var doctors = ViewBag.Doctors as List<NMB_HLabSys.Models.Account.RegisterUser>
-                  ?? new List<NMB_HLabSys.Models.Account.RegisterUser>();
+
+    var doctors = ViewBag.Doctors as List<NMB_HLabSys.Models.Identity.ApplicationUser>
+                  ?? new List<NMB_HLabSys.Models.Identity.ApplicationUser>();
+
     var testRequests = ViewBag.TestRequests as List<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
                        ?? new List<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>();
 }
+
 
 <style>
     .consent-page { background: #f5f7fb; min-height: calc(100vh - 70px); padding: 30px; }

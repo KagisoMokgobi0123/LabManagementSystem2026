@@ -1,4 +1,4 @@
-﻿@model IEnumerable<NMB_HLabSys.Areas.Administrator.Models.MedicationModel>
+﻿@model IEnumerable<NMB_HLabSys.Areas.Administrator.Models.Medication>
 
 @{
     ViewData["Title"] = "Medications";
@@ -152,7 +152,7 @@
                                 <tr class="medication-row"
                                     data-id="@medication.MedicationId"
                                     data-name="@medication.Name?.ToLower()"
-                                    data-category="@medication.MedicationCategory?.Name?.ToLower()">
+                                    data-category="@medication.Category?.Name?.ToLower()">
 
                                     <td class="px-4 fw-semibold text-muted">
 
@@ -174,11 +174,11 @@
 
                                     <td>
 
-                                        @if (medication.MedicationCategory != null)
+                                        @if (medication.Category != null)
                                         {
                                             <span class="badge rounded-pill bg-info-subtle text-info-emphasis px-3 py-2">
 
-                                                @medication.MedicationCategory.Name
+                                                @medication.Category.Name
 
                                             </span>
                                         }

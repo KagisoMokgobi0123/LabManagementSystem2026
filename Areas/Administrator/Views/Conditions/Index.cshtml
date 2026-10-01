@@ -4,8 +4,8 @@
     ViewData["Title"] = "Medical Conditions";
     Layout = "~/Views/Shared/_AdministratorLayout.cshtml";
 
-    var categories = ViewBag.ConditionCategories as IEnumerable<ConditionCategoryModel>
-                     ?? Enumerable.Empty<ConditionCategoryModel>();
+    var categories = ViewBag.ConditionCategories as IEnumerable<MedicalConditionCategory>
+                     ?? Enumerable.Empty<MedicalConditionCategory>();
 }
 
 <div class="container-fluid py-4">
@@ -153,7 +153,7 @@
                             {
                                 var category =
                                     categories.FirstOrDefault(
-                                        x => x.ConditionCategoryId == condition.ConditionCategoryId);
+                                        x => x.MedicalConditionCategoryId == condition.ConditionCategoryId);
 
                                 var categoryName =
                                     category?.Name ?? "Uncategorized";
@@ -343,7 +343,7 @@
 
                             @foreach (var category in categories)
                             {
-                                <option value="@category.ConditionCategoryId">
+                                <option value="@category.MedicalConditionCategoryId">
                                     @category.Name
                                 </option>
                             }
