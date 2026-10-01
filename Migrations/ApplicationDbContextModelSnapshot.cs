@@ -478,6 +478,9 @@ namespace NMBHLabSys.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConsumableId"));
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -489,7 +492,15 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("ReorderLevel")
                         .HasColumnType("int");
 
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
                     b.HasKey("ConsumableId");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.HasIndex("SupplierId");
 
                     b.ToTable("Consumables");
 
@@ -497,86 +508,110 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             ConsumableId = 1,
+                            IsDeleted = false,
                             Name = "Test Tubes (EDTA)",
                             QuantityOnHand = 500,
-                            ReorderLevel = 100
+                            ReorderLevel = 100,
+                            SupplierId = 1
                         },
                         new
                         {
                             ConsumableId = 2,
+                            IsDeleted = false,
                             Name = "Test Tubes (Sodium Citrate)",
                             QuantityOnHand = 300,
-                            ReorderLevel = 75
+                            ReorderLevel = 75,
+                            SupplierId = 1
                         },
                         new
                         {
                             ConsumableId = 3,
+                            IsDeleted = false,
                             Name = "Syringes 5ml",
                             QuantityOnHand = 300,
-                            ReorderLevel = 50
+                            ReorderLevel = 50,
+                            SupplierId = 2
                         },
                         new
                         {
                             ConsumableId = 4,
+                            IsDeleted = false,
                             Name = "Blood Smear Slides",
                             QuantityOnHand = 1000,
-                            ReorderLevel = 200
+                            ReorderLevel = 200,
+                            SupplierId = 2
                         },
                         new
                         {
                             ConsumableId = 5,
+                            IsDeleted = false,
                             Name = "ESR Racks and Tubes",
                             QuantityOnHand = 50,
-                            ReorderLevel = 15
+                            ReorderLevel = 15,
+                            SupplierId = 2
                         },
                         new
                         {
                             ConsumableId = 6,
+                            IsDeleted = false,
                             Name = "Coagulation Test Cartridges",
                             QuantityOnHand = 200,
-                            ReorderLevel = 50
+                            ReorderLevel = 50,
+                            SupplierId = 3
                         },
                         new
                         {
                             ConsumableId = 7,
+                            IsDeleted = false,
                             Name = "D-Dimer Test Kits",
                             QuantityOnHand = 100,
-                            ReorderLevel = 30
+                            ReorderLevel = 30,
+                            SupplierId = 3
                         },
                         new
                         {
                             ConsumableId = 8,
+                            IsDeleted = false,
                             Name = "Chemistry Analyzer Reagents",
                             QuantityOnHand = 50,
-                            ReorderLevel = 15
+                            ReorderLevel = 15,
+                            SupplierId = 3
                         },
                         new
                         {
                             ConsumableId = 9,
+                            IsDeleted = false,
                             Name = "Urine Dipsticks",
                             QuantityOnHand = 500,
-                            ReorderLevel = 100
+                            ReorderLevel = 100,
+                            SupplierId = 2
                         },
                         new
                         {
                             ConsumableId = 10,
+                            IsDeleted = false,
                             Name = "Microscope Slides (Urine)",
                             QuantityOnHand = 500,
-                            ReorderLevel = 100
+                            ReorderLevel = 100,
+                            SupplierId = 2
                         },
                         new
                         {
                             ConsumableId = 11,
+                            IsDeleted = false,
                             Name = "Culture Media Plates",
                             QuantityOnHand = 300,
-                            ReorderLevel = 80
+                            ReorderLevel = 80,
+                            SupplierId = 3
                         },
                         new
                         {
                             ConsumableId = 12,
+                            IsDeleted = false,
                             Name = "Blood Culture Bottles",
                             QuantityOnHand = 150,
-                            ReorderLevel = 40
+                            ReorderLevel = 40,
+                            SupplierId = 3
                         });
                 });
 
@@ -701,6 +736,171 @@ namespace NMBHLabSys.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.OrderItemModel", b =>
+                {
+                    b.Property<int>("OrderItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderItemId"));
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("ConsumableId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DateCancelled")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateReceived")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("QuantityOrdered")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderItemId");
+
+                    b.HasIndex("ConsumableId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.OrderModel", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("DateCancelled")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateComplete")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId");
+
+                    b.HasIndex("OrderNumber")
+                        .IsUnique();
+
+                    b.HasIndex("SupplierId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockAdjustmentModel", b =>
+                {
+                    b.Property<int>("StockAdjustmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StockAdjustmentId"));
+
+                    b.Property<DateTime>("AdjustmentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("AdjustmentType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConsumableId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("StockAdjustmentId");
+
+                    b.HasIndex("ConsumableId");
+
+                    b.ToTable("StockAdjustments");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.SupplierModel", b =>
+                {
+                    b.Property<int>("SupplierId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierId"));
+
+                    b.Property<string>("ContactPerson")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SupplierName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("SupplierId");
+
+                    b.HasIndex("SupplierName")
+                        .IsUnique();
+
+                    b.ToTable("Suppliers");
+
+                    b.HasData(
+                        new
+                        {
+                            SupplierId = 1,
+                            ContactPerson = "Laboratory Supplies Department",
+                            Email = "supplies@medlabsupplies.example",
+                            IsDeleted = false,
+                            SupplierName = "MedLab Supplies"
+                        },
+                        new
+                        {
+                            SupplierId = 2,
+                            ContactPerson = "Sales Department",
+                            Email = "sales@biomedical.example",
+                            IsDeleted = false,
+                            SupplierName = "BioMedical Distributors"
+                        },
+                        new
+                        {
+                            SupplierId = 3,
+                            ContactPerson = "Diagnostics Sales",
+                            Email = "orders@clinicaldiagnostics.example",
+                            IsDeleted = false,
+                            SupplierName = "Clinical Diagnostics Ltd"
+                        });
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel", b =>
                 {
                     b.Property<int>("TechnicianTestTypeId")
@@ -799,11 +999,16 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestTypeId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TestTypeModelTestTypeId")
+                        .HasColumnType("int");
+
                     b.HasKey("TestTypeConsumableId");
 
                     b.HasIndex("ConsumableId");
 
                     b.HasIndex("TestTypeId");
+
+                    b.HasIndex("TestTypeModelTestTypeId");
 
                     b.ToTable("TestTypeConsumables");
 
@@ -1843,6 +2048,58 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("Patient");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.SupplierModel", "Supplier")
+                        .WithMany("Consumables")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.OrderItemModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ConsumableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.OrderModel", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Consumable");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.OrderModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.SupplierModel", "Supplier")
+                        .WithMany("Orders")
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Supplier");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockAdjustmentModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
+                        .WithMany("StockAdjustments")
+                        .HasForeignKey("ConsumableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Consumable");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "Manager")
@@ -1875,14 +2132,18 @@ namespace NMBHLabSys.Migrations
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
                         .WithMany("TestTypeConsumables")
                         .HasForeignKey("ConsumableId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
-                        .WithMany("TestTypeConsumables")
+                        .WithMany()
                         .HasForeignKey("TestTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", null)
+                        .WithMany("TestTypeConsumables")
+                        .HasForeignKey("TestTypeModelTestTypeId");
 
                     b.Navigation("Consumable");
 
@@ -2154,12 +2415,28 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", b =>
                 {
+                    b.Navigation("OrderItems");
+
+                    b.Navigation("StockAdjustments");
+
                     b.Navigation("TestTypeConsumables");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", b =>
                 {
                     b.Navigation("TestTypes");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.OrderModel", b =>
+                {
+                    b.Navigation("OrderItems");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.SupplierModel", b =>
+                {
+                    b.Navigation("Consumables");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", b =>

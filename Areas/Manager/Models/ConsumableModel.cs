@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NMB_HLabSys.Areas.Manager.Models
 {
@@ -22,10 +23,52 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Display(Name = "Reorder Level")]
         public int ReorderLevel { get; set; }
 
-        // One consumable can be required by many test types.
+
+        // ============================================================
+        // SOFT DELETE
+        // ============================================================
+
+        public bool IsDeleted { get; set; } = false;
+
+
+        // ============================================================
+        // SUPPLIER
+        // ============================================================
+
+        [Required]
+        public int SupplierId { get; set; }
+
+        [ForeignKey(nameof(SupplierId))]
+        public virtual SupplierModel? Supplier { get; set; }
+
+
+        // ============================================================
+        // TEST TYPES
+        // ============================================================
+
         public virtual ICollection<TestTypeConsumableModel>
             TestTypeConsumables
         { get; set; }
             = new List<TestTypeConsumableModel>();
+
+
+        // ============================================================
+        // ORDER ITEMS
+        // ============================================================
+
+        public virtual ICollection<OrderItemModel>
+            OrderItems
+        { get; set; }
+            = new List<OrderItemModel>();
+
+
+        // ============================================================
+        // STOCK ADJUSTMENTS
+        // ============================================================
+
+        public virtual ICollection<StockAdjustmentModel>
+            StockAdjustments
+        { get; set; }
+            = new List<StockAdjustmentModel>();
     }
 }

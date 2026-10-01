@@ -39,6 +39,15 @@ namespace NMB_HLabSys.Data
         public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
 
         public DbSet<TestTypeConsumableModel> TestTypeConsumables { get; set; }
+        
+        // MANAGER - CONSUMABLES & ORDERS
+        public DbSet<SupplierModel> Suppliers { get; set; }
+
+        public DbSet<OrderModel> Orders { get; set; }
+
+        public DbSet<OrderItemModel> OrderItems { get; set; }
+
+        public DbSet<StockAdjustmentModel> StockAdjustments { get; set; }
 
         //PATIENT MODELS
         public DbSet<PatientModel> Patients { get; set; }
@@ -95,6 +104,69 @@ namespace NMB_HLabSys.Data
                 .HasForeignKey(x => x.MedicationCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            //Supplier to orders(kg)
+            builder.Entity<ConsumableModel>()
+                .HasOne(c => c.Supplier)
+                .WithMany(s => s.Consumables)
+                .HasForeignKey(c => c.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+            //Test type and consumable relationship (kg)
+            builder.Entity<TestTypeConsumableModel>()
+                .HasOne(x => x.TestType)
+                .WithMany()
+                .HasForeignKey(x => x.TestTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.Entity<TestTypeConsumableModel>()
+                .HasOne(x => x.Consumable)
+                .WithMany(c => c.TestTypeConsumables)
+                .HasForeignKey(x => x.ConsumableId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //Order and supplier relationship (kg)
+            builder.Entity<OrderModel>()
+                .HasOne(o => o.Supplier)
+                .WithMany(s => s.Orders)
+                .HasForeignKey(o => o.SupplierId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //Order and orderitem relationship (kg)
+            builder.Entity<OrderItemModel>()
+                .HasOne(i => i.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(i => i.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //Orderitem and consumable relationship (kg)
+            builder.Entity<OrderItemModel>()
+                .HasOne(i => i.Consumable)
+                .WithMany(c => c.OrderItems)
+                .HasForeignKey(i => i.ConsumableId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            //Consumable and stock adjustments relationship (kg)
+            builder.Entity<StockAdjustmentModel>()
+                .HasOne(x => x.Consumable)
+                .WithMany(c => c.StockAdjustments)
+                .HasForeignKey(x => x.ConsumableId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ============================================================
+            // UNIQUE CONSTRAINTS(kg)
+            // ============================================================
+
+            builder.Entity<SupplierModel>()
+                .HasIndex(s => s.SupplierName)
+                .IsUnique();
+
+            builder.Entity<ConsumableModel>()
+                .HasIndex(c => c.Name)
+                .IsUnique();
+
+            builder.Entity<OrderModel>()
+                .HasIndex(o => o.OrderNumber)
+                .IsUnique();
 
 
             builder.Entity<PasswordResetOtp>()
@@ -774,92 +846,165 @@ namespace NMB_HLabSys.Data
     }
 );
 
+
+            // ============================================================
+            // SUPPLIER SEED DATA
+            // ============================================================
+
+            builder.Entity<SupplierModel>().HasData(
+
+                new SupplierModel
+                {
+                    SupplierId = 1,
+                    SupplierName = "MedLab Supplies",
+                    ContactPerson = "Laboratory Supplies Department",
+                    Email = "supplies@medlabsupplies.example",
+                    IsDeleted = false
+                },
+
+                new SupplierModel
+                {
+                    SupplierId = 2,
+                    SupplierName = "BioMedical Distributors",
+                    ContactPerson = "Sales Department",
+                    Email = "sales@biomedical.example",
+                    IsDeleted = false
+                },
+
+                new SupplierModel
+                {
+                    SupplierId = 3,
+                    SupplierName = "Clinical Diagnostics Ltd",
+                    ContactPerson = "Diagnostics Sales",
+                    Email = "orders@clinicaldiagnostics.example",
+                    IsDeleted = false
+                }
+            );
+
             builder.Entity<ConsumableModel>().HasData(
     new ConsumableModel
     {
         ConsumableId = 1,
         Name = "Test Tubes (EDTA)",
         QuantityOnHand = 500,
-        ReorderLevel = 100
+        ReorderLevel = 100,
+        SupplierId = 1,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 2,
         Name = "Test Tubes (Sodium Citrate)",
         QuantityOnHand = 300,
-        ReorderLevel = 75
+        ReorderLevel = 75,
+        SupplierId = 1,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 3,
         Name = "Syringes 5ml",
         QuantityOnHand = 300,
-        ReorderLevel = 50
+        ReorderLevel = 50,
+        SupplierId = 2,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 4,
         Name = "Blood Smear Slides",
         QuantityOnHand = 1000,
-        ReorderLevel = 200
+        ReorderLevel = 200,
+        SupplierId = 2,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 5,
         Name = "ESR Racks and Tubes",
         QuantityOnHand = 50,
-        ReorderLevel = 15
+        ReorderLevel = 15,
+        SupplierId = 2,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 6,
         Name = "Coagulation Test Cartridges",
         QuantityOnHand = 200,
-        ReorderLevel = 50
+        ReorderLevel = 50,
+        SupplierId = 3,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 7,
         Name = "D-Dimer Test Kits",
         QuantityOnHand = 100,
-        ReorderLevel = 30
+        ReorderLevel = 30,
+        SupplierId = 3,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 8,
         Name = "Chemistry Analyzer Reagents",
         QuantityOnHand = 50,
-        ReorderLevel = 15
+        ReorderLevel = 15,
+        SupplierId = 3,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 9,
         Name = "Urine Dipsticks",
         QuantityOnHand = 500,
-        ReorderLevel = 100
+        ReorderLevel = 100,
+        SupplierId = 2,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 10,
         Name = "Microscope Slides (Urine)",
         QuantityOnHand = 500,
-        ReorderLevel = 100
+        ReorderLevel = 100,
+        SupplierId = 2,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 11,
         Name = "Culture Media Plates",
         QuantityOnHand = 300,
-        ReorderLevel = 80
+        ReorderLevel = 80,
+        SupplierId = 3,
+        IsDeleted = false
     },
+
     new ConsumableModel
     {
         ConsumableId = 12,
         Name = "Blood Culture Bottles",
         QuantityOnHand = 150,
-        ReorderLevel = 40
+        ReorderLevel = 40,
+        SupplierId = 3,
+        IsDeleted = false
     }
 );
+
+
+
             builder.Entity<TestTypeModel>().HasData(
     new TestTypeModel
     {

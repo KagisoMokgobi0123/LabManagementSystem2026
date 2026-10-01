@@ -1,0 +1,185 @@
+﻿@using NMB_HLabSys.Areas.Manager.Models
+@model IEnumerable<StockAdjustmentModel>
+
+
+@{
+    var consumables =
+    ViewBag.Consumables as IEnumerable<ConsumableModel>
+    ?? Enumerable.Empty<ConsumableModel>();
+
+    Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+}
+
+<div class="modal-header border-0">
+    <div>
+
+        <h5 class="modal-title fw-bold">
+            <i class="fa-solid fa-sliders text-primary me-2"></i>
+            Stock Adjustment
+        </h5>
+
+        <small class="text-muted">
+            Manually update consumable stock.
+        </small>
+
+    </div>
+
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close">
+    </button>
+
+</div>
+<form asp-area="Manager" asp-controller="StockAdjustment" asp-action="Create" method="post" id="stockAdjustmentForm">
+    @Html.AntiForgeryToken()
+
+    <div class="modal-body">
+
+        <!-- VALIDATION -->
+
+        <div asp-validation-summary="ModelOnly"
+             class="alert alert-danger small">
+        </div>
+
+
+        <!-- CONSUMABLE -->
+
+        <div class="mb-3">
+
+            <label asp-for="ConsumableId"
+                   class="form-label fw-semibold">
+                Consumable
+            </label>
+
+            <select asp-for="ConsumableId"
+                    class="form-select">
+
+                <option value="">
+                    -- Select Consumable --
+                </option>
+
+                @foreach (var consumable in consumables)
+                {
+                    <option value="@consumable.ConsumableId">
+                        @consumable.Name
+                    </option>
+                }
+
+            </select>
+
+            <span asp-validation-for="ConsumableId"
+                  class="text-danger small">
+            </span>
+
+        </div>
+
+
+        <!-- ADJUSTMENT TYPE -->
+
+        <div class="mb-3">
+
+            <label asp-for="AdjustmentType"
+                   class="form-label fw-semibold">
+                Adjustment Type
+            </label>
+
+            <select asp-for="AdjustmentType"
+                    class="form-select">
+
+                <option value="@StockAdjustmentType.Increase">
+                    Increase Stock
+                </option>
+
+                <option value="@StockAdjustmentType.Decrease">
+                    Decrease Stock
+                </option>
+
+                <option value="@StockAdjustmentType.Set">
+                    Set Stock Quantity
+                </option>
+
+            </select>
+
+            <span asp-validation-for="AdjustmentType"
+                  class="text-danger small">
+            </span>
+
+        </div>
+
+
+        <!-- QUANTITY -->
+
+        <div class="mb-3">
+
+            <label asp-for="Quantity"
+                   class="form-label fw-semibold">
+                Quantity
+            </label>
+
+            <input asp-for="Quantity"
+                   type="number"
+                   min="0"
+                   step="1"
+                   class="form-control"
+                   placeholder="Enter quantity" />
+
+            <span asp-validation-for="Quantity"
+                  class="text-danger small">
+            </span>
+
+            <div class="form-text">
+
+                <i class="fa-solid fa-circle-info me-1"></i>
+
+                <strong>Increase</strong> adds to the current stock.
+
+                <strong>Decrease</strong> removes from the current stock.
+
+                <strong>Set</strong> replaces the current stock quantity.
+
+            </div>
+
+        </div>
+
+
+        <!-- WARNING -->
+
+        <div class="alert alert-warning
+            border-0
+            bg-warning
+            bg-opacity-10
+            small mb-0">
+
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+            This adjustment will immediately change the
+            consumable's quantity on hand.
+
+        </div>
+
+    </div>
+
+
+    <div class="modal-footer border-0">
+
+        <button type="button"
+                class="btn btn-light"
+                data-bs-dismiss="modal">
+
+            Cancel
+
+        </button>
+
+        <button type="submit"
+                class="btn btn-primary">
+
+            <i class="fa-solid fa-check me-2"></i>
+
+            Apply Adjustment
+
+        </button>
+
+    </div>
+
+</form><script> $(document).ready(function () { const form = $('#stockAdjustmentForm'); if ($.validator && $.validator.unobtrusive) { $.validator.unobtrusive.parse(form); } }); </script>

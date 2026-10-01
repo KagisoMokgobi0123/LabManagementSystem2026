@@ -936,9 +936,9 @@
                 </div>
 
 
-                <a href="/Manager/Consumables/Index"
+                <a href="/Manager/Consumable/Index"
                    title="Consumables"
-                   class="sidebar-link @(controller == "Consumables" ? "active" : "")">
+                   class="sidebar-link @(controller == "Consumable" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
                         <i class="fa-solid fa-boxes-stacked"></i>
@@ -951,9 +951,9 @@
                 </a>
 
 
-                <a href="/Manager/Suppliers/Index"
+                <a href="/Manager/Supplier/Index"
                    title="Suppliers"
-                   class="sidebar-link @(controller == "Suppliers" ? "active" : "")">
+                   class="sidebar-link @(controller == "Supplier" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
                         <i class="fa-solid fa-truck-medical"></i>
@@ -966,9 +966,24 @@
                 </a>
 
 
-                <a href="/Manager/Orders/Index"
+                <a href="/Manager/Order/Index"
                    title="Orders"
-                   class="sidebar-link @(controller == "Orders" ? "active" : "")">
+                   class="sidebar-link @(controller == "Order" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Orders
+                    </span>
+
+                </a>
+
+
+                <a href="/Manager/StockAdjustment/Index"
+                   title="Orders"
+                   class="sidebar-link @(controller == "StockAdjustment" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
                         <i class="fa-solid fa-cart-shopping"></i>
