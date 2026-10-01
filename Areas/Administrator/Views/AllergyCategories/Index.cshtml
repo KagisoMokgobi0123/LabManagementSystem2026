@@ -1,0 +1,919 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Administrator.Models.AllergyCategoryModel>
+
+@{
+    ViewData["Title"] = "Allergy Categories";
+    Layout = "~/Views/Shared/_AdministratorLayout.cshtml";
+}
+
+<div class="container-fluid px-4 py-4">
+
+    <!-- =========================================================
+         PAGE HEADER
+         ========================================================= -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+            <h4 class="fw-bold mb-1" style="color:#052f4a;">
+                Allergy Categories
+            </h4>
+
+            <p class="text-muted mb-0" style="font-size:13px;">
+                Manage the categories used to organize allergies.
+            </p>
+        </div>
+
+        <button type="button"
+                class="btn btn-primary px-4"
+                data-bs-toggle="modal"
+                data-bs-target="#allergyCategoryModal"
+                onclick="openCreateModal()">
+
+            <i class="fa-solid fa-plus me-2"></i>
+            Add Category
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         ALERTS
+         ========================================================= -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-check me-2"></i>
+
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- =========================================================
+         TABLE CARD
+         ========================================================= -->
+
+    <div class="card border-0 shadow-sm"
+         style="border-radius:12px;">
+
+        <div class="card-body p-0">
+
+            <!-- TABLE TOOLBAR -->
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center p-3 border-bottom">
+
+                <div>
+
+                    <span class="fw-semibold"
+                          style="color:#334155; font-size:14px;">
+
+                        Allergy Category List
+
+                    </span>
+
+                    <span class="badge ms-2"
+                          id="recordCount"
+                          style="background:#e0f2fe; color:#075985;">
+
+                        @Model.Count()
+
+                    </span>
+
+                </div>
+
+
+                <div class="mt-2 mt-md-0"
+                     style="width:280px;">
+
+                    <div class="input-group input-group-sm">
+
+                        <span class="input-group-text bg-white">
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+                        </span>
+
+                        <input type="text"
+                               id="categorySearch"
+                               class="form-control"
+                               placeholder="Search categories..."
+                               autocomplete="off" />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0"
+                       id="allergyCategoriesTable">
+
+                    <thead style="background:#f8fafc;">
+
+                        <tr>
+
+                            <th class="px-4 py-3"
+                                style="width:90px; cursor:pointer;"
+                                data-sort="id">
+
+                                #
+                                <i class="fa-solid fa-sort ms-1 text-muted"></i>
+
+                            </th>
+
+                            <th class="py-3"
+                                style="cursor:pointer;"
+                                data-sort="name">
+
+                                Category
+                                <i class="fa-solid fa-sort ms-1 text-muted"></i>
+
+                            </th>
+
+                            <th class="py-3 text-center"
+                                style="width:150px;">
+
+                                Actions
+
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="allergyCategoriesTableBody">
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var category in Model)
+                            {
+                                <tr class="category-row"
+                                    data-id="@category.AllergyCategoryId"
+                                    data-name="@category.Name">
+
+                                    <td class="px-4 text-muted">
+
+                                        @category.AllergyCategoryId
+
+                                    </td>
+
+                                    <td>
+
+                                        <div class="fw-semibold"
+                                             style="color:#334155;">
+
+                                            @category.Name
+
+                                        </div>
+
+                                    </td>
+
+                                    <td class="text-center">
+
+                                        <div class="btn-group btn-group-sm"
+                                             role="group">
+
+                                            <!-- VIEW -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-secondary"
+                                                    title="View"
+                                                    onclick="viewCategory(
+                                                '@category.AllergyCategoryId',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(category.Name ?? ""))'
+                                                )">
+
+                                                <i class="fa-solid fa-eye"></i>
+
+                                            </button>
+
+
+                                            <!-- EDIT -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-primary"
+                                                    title="Edit"
+                                                    onclick="editCategory(
+                                                '@category.AllergyCategoryId',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(category.Name ?? ""))'
+                                                )">
+
+                                                <i class="fa-solid fa-pen"></i>
+
+                                            </button>
+
+
+                                            <!-- DELETE -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    title="Delete"
+                                                    onclick="deleteCategory(
+                                                '@category.AllergyCategoryId',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(category.Name ?? ""))'
+                                                )">
+
+                                                <i class="fa-solid fa-trash"></i>
+
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr id="emptyRow">
+
+                                <td colspan="3"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="fa-solid fa-folder-open fa-2x mb-3"></i>
+
+                                        <div>
+                                            No allergy categories have been added yet.
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     ADD / EDIT MODAL
+     ============================================================= -->
+
+<div class="modal fade"
+     id="allergyCategoryModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow"
+             style="border-radius:14px;">
+
+            <form id="allergyCategoryForm"
+                  method="post"
+                  asp-area="Administrator"
+                  asp-controller="AllergyCategories"
+                  asp-action="Create">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header border-0 px-4 pt-4">
+
+                    <div>
+
+                        <h5 class="modal-title fw-bold"
+                            id="categoryModalTitle"
+                            style="color:#052f4a;">
+
+                            Add Allergy Category
+
+                        </h5>
+
+                        <small class="text-muted">
+                            Add a category used to organize allergies.
+                        </small>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+                <div class="modal-body px-4">
+
+                    <input type="hidden"
+                           id="AllergyCategoryId"
+                           name="AllergyCategoryId"
+                           value="0" />
+
+
+                    <div class="mb-3">
+
+                        <label for="Name"
+                               class="form-label fw-semibold">
+
+                            Category Name
+
+                        </label>
+
+                        <input type="text"
+                               id="Name"
+                               name="Name"
+                               class="form-control"
+                               placeholder="Enter category name"
+                               maxlength="200"
+                               required />
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer border-0 px-4 pb-4">
+
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary px-4">
+
+                        <i class="fa-solid fa-floppy-disk me-2"></i>
+
+                        <span id="saveButtonText">
+                            Save Category
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     VIEW MODAL
+     ============================================================= -->
+
+<div class="modal fade"
+     id="viewCategoryModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow"
+             style="border-radius:14px;">
+
+            <div class="modal-header border-0 px-4 pt-4">
+
+                <div>
+
+                    <h5 class="modal-title fw-bold"
+                        style="color:#052f4a;">
+
+                        Allergy Category Details
+
+                    </h5>
+
+                    <small class="text-muted">
+                        Category information
+                    </small>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body px-4">
+
+                <div class="mb-3">
+
+                    <label class="text-muted small">
+                        Category
+                    </label>
+
+                    <div class="fw-semibold"
+                         id="viewCategoryName">
+                    </div>
+
+                </div>
+
+
+                <div>
+
+                    <label class="text-muted small">
+                        Category ID
+                    </label>
+
+                    <div class="fw-semibold"
+                         id="viewCategoryId">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer border-0 px-4 pb-4">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     DELETE MODAL
+     ============================================================= -->
+
+<div class="modal fade"
+     id="deleteCategoryModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow"
+             style="border-radius:14px;">
+
+            <form method="post"
+                  asp-area="Administrator"
+                  asp-controller="AllergyCategories"
+                  asp-action="Delete">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       id="deleteCategoryId"
+                       name="id" />
+
+
+                <div class="modal-header border-0 px-4 pt-4">
+
+                    <h5 class="modal-title fw-bold text-danger">
+
+                        Delete Allergy Category
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+
+                <div class="modal-body px-4">
+
+                    <p class="mb-0">
+
+                        Are you sure you want to delete
+
+                        <strong id="deleteCategoryName"></strong>?
+
+                    </p>
+
+                </div>
+
+
+                <div class="modal-footer border-0 px-4 pb-4">
+
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger">
+
+                        <i class="fa-solid fa-trash me-2"></i>
+
+                        Delete
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Styles {
+
+    <style>
+
+        #allergyCategoriesTable thead th {
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        #allergyCategoriesTable tbody td {
+            font-size: 13px;
+            color: #475569;
+        }
+
+        #allergyCategoriesTable tbody tr {
+            transition: background .15s ease;
+        }
+
+            #allergyCategoriesTable tbody tr:hover {
+                background: #f8fafc;
+            }
+
+        .btn-outline-primary {
+            border-color: #0284c7;
+            color: #0284c7;
+        }
+
+            .btn-outline-primary:hover {
+                background: #0284c7;
+                border-color: #0284c7;
+                color: #fff;
+            }
+
+        .form-control:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 .2rem rgba(2,132,199,.12);
+        }
+
+    </style>
+
+}
+
+
+@section Scripts {
+
+    <script>
+
+        let currentSortColumn = "id";
+        let currentSortDirection = "asc";
+
+
+        /* =========================================================
+           CREATE
+           ========================================================= */
+
+        function openCreateModal() {
+
+            const form =
+                document.getElementById("allergyCategoryForm");
+
+            form.action =
+                "@Url.Action("Create", "AllergyCategories", new { area = "Administrator" })";
+
+            document.getElementById("categoryModalTitle")
+                .innerText = "Add Allergy Category";
+
+            document.getElementById("saveButtonText")
+                .innerText = "Save Category";
+
+            document.getElementById("AllergyCategoryId")
+                .value = "0";
+
+            document.getElementById("Name")
+                .value = "";
+
+        }
+
+
+        /* =========================================================
+           VIEW
+           ========================================================= */
+
+        function viewCategory(id, name) {
+
+            document.getElementById("viewCategoryId")
+                .innerText = id;
+
+            document.getElementById("viewCategoryName")
+                .innerText = name;
+
+            new bootstrap.Modal(
+                document.getElementById("viewCategoryModal")
+            ).show();
+
+        }
+
+
+        /* =========================================================
+           EDIT
+           ========================================================= */
+
+        function editCategory(id, name) {
+
+            const form =
+                document.getElementById("allergyCategoryForm");
+
+            form.action =
+                "@Url.Action("Edit", "AllergyCategories", new { area = "Administrator" })";
+
+            document.getElementById("categoryModalTitle")
+                .innerText = "Edit Allergy Category";
+
+            document.getElementById("saveButtonText")
+                .innerText = "Update Category";
+
+            document.getElementById("AllergyCategoryId")
+                .value = id;
+
+            document.getElementById("Name")
+                .value = name;
+
+            new bootstrap.Modal(
+                document.getElementById("allergyCategoryModal")
+            ).show();
+
+        }
+
+
+        /* =========================================================
+           DELETE
+           ========================================================= */
+
+        function deleteCategory(id, name) {
+
+            document.getElementById("deleteCategoryId")
+                .value = id;
+
+            document.getElementById("deleteCategoryName")
+                .innerText = name;
+
+            new bootstrap.Modal(
+                document.getElementById("deleteCategoryModal")
+            ).show();
+
+        }
+
+
+        /* =========================================================
+           SEARCH
+           ========================================================= */
+
+        document.getElementById("categorySearch")
+            .addEventListener(
+                "input",
+                function () {
+
+                    const search =
+                        this.value.toLowerCase().trim();
+
+                    const rows =
+                        document.querySelectorAll(
+                            "#allergyCategoriesTableBody .category-row"
+                        );
+
+                    let visibleCount = 0;
+
+                    rows.forEach(function (row) {
+
+                        const name =
+                            row.dataset.name
+                                .toLowerCase();
+
+                        const id =
+                            row.dataset.id
+                                .toLowerCase();
+
+                        const matches =
+                            name.includes(search) ||
+                            id.includes(search);
+
+                        row.style.display =
+                            matches ? "" : "none";
+
+                        if (matches)
+                            visibleCount++;
+
+                    });
+
+                    document.getElementById("recordCount")
+                        .innerText = visibleCount;
+
+                }
+            );
+
+
+        /* =========================================================
+           SORTING
+           ========================================================= */
+
+        document.querySelectorAll(
+            "#allergyCategoriesTable thead th[data-sort]"
+        ).forEach(function (header) {
+
+            header.addEventListener(
+                "click",
+                function () {
+
+                    const column =
+                        this.dataset.sort;
+
+                    if (
+                        currentSortColumn === column
+                    ) {
+
+                        currentSortDirection =
+                            currentSortDirection === "asc"
+                                ? "desc"
+                                : "asc";
+
+                    }
+                    else {
+
+                        currentSortColumn =
+                            column;
+
+                        currentSortDirection =
+                            "asc";
+
+                    }
+
+                    sortCategories();
+
+                }
+            );
+
+        });
+
+
+        function sortCategories() {
+
+            const tbody =
+                document.getElementById(
+                    "allergyCategoriesTableBody"
+                );
+
+            const rows =
+                Array.from(
+                    tbody.querySelectorAll(
+                        ".category-row"
+                    )
+                );
+
+            rows.sort(function (a, b) {
+
+                let valueA;
+                let valueB;
+
+                if (
+                    currentSortColumn === "id"
+                ) {
+
+                    valueA =
+                        parseInt(a.dataset.id);
+
+                    valueB =
+                        parseInt(b.dataset.id);
+
+                }
+                else {
+
+                    valueA =
+                        a.dataset.name.toLowerCase();
+
+                    valueB =
+                        b.dataset.name.toLowerCase();
+
+                }
+
+                if (valueA < valueB)
+                    return currentSortDirection === "asc"
+                        ? -1
+                        : 1;
+
+                if (valueA > valueB)
+                    return currentSortDirection === "asc"
+                        ? 1
+                        : -1;
+
+                return 0;
+
+            });
+
+
+            rows.forEach(function (row) {
+
+                tbody.appendChild(row);
+
+            });
+
+
+            updateSortIcons();
+
+        }
+
+
+        function updateSortIcons() {
+
+            document.querySelectorAll(
+                "#allergyCategoriesTable thead th[data-sort] i"
+            ).forEach(function (icon) {
+
+                icon.className =
+                    "fa-solid fa-sort ms-1 text-muted";
+
+            });
+
+
+            const activeHeader =
+                document.querySelector(
+                    '#allergyCategoriesTable thead th[data-sort="' +
+                    currentSortColumn +
+                    '"]'
+                );
+
+            if (!activeHeader)
+                return;
+
+            const icon =
+                activeHeader.querySelector("i");
+
+            if (!icon)
+                return;
+
+            icon.className =
+                currentSortDirection === "asc"
+                    ? "fa-solid fa-sort-up ms-1 text-primary"
+                    : "fa-solid fa-sort-down ms-1 text-primary";
+
+        }
+
+    </script>
+
+}

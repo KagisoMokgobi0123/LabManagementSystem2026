@@ -14,7 +14,7 @@ namespace NMB_HLabSys.Areas.Patient.Models
         public string UserId { get; set; } = string.Empty;
 
         [ForeignKey("UserId")]
-        public RegisterUser? User { get; set; }
+        public RegisterViewModel? User { get; set; }
 
         [Required]
         [StringLength(100)]

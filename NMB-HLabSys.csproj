@@ -45,7 +45,6 @@
 
   <ItemGroup>
     <Folder Include="Areas\Administrator\Data\" />
-    <Folder Include="Areas\Administrator\Models\" />
     <Folder Include="Areas\Doctor\Data\" />
     <Folder Include="Areas\Patient\Data\" />
     <Folder Include="Areas\Patient\Models\" />

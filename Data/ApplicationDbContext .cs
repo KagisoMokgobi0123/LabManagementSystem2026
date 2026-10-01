@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Administrator.Models;
+using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
@@ -37,9 +39,63 @@ namespace NMB_HLabSys.Data
         public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
 
         public DbSet<TestTypeConsumableModel> TestTypeConsumables { get; set; }
+
+        //PATIENT MODELS
+        public DbSet<PatientModel> Patients { get; set; }
+        //public DbSet<TestRequestItem> TestRequestItems { get; set; }
+        public DbSet<PatientConditionModel> PatientConditions { get; set; }
+        public DbSet<PatientAllergyModel> PatientAllergies { get; set; }
+        public DbSet<PatientMedicationModel> PatientMedications { get; set; }
+        public DbSet<PatientDoctorConsentModel> PatientDoctorConsents { get; set; }
+        public DbSet<ConsentRequestItemModel> ConsentRequestItems { get; set; }
+
+        //Administrator
+        // ADMINISTRATOR - MEDICAL CONDITIONS, ALLERGIES & MEDICATIONS
+        public DbSet<MedicalConditionCategory> MedicalConditionCategories { get; set; }
+
+        public DbSet<MedicalCondition> MedicalConditions { get; set; }
+
+        public DbSet<AllergyCategory> AllergyCategories { get; set; }
+
+        public DbSet<Allergy> Allergies { get; set; }
+
+        public DbSet<MedicationCategory> MedicationCategories { get; set; }
+
+        public DbSet<Medication> Medications { get; set; }
+
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            // ============================================================
+            // ADMINISTRATOR MODEL RELATIONSHIPS
+            // ============================================================
+
+            // Medical Condition Category -> Medical Conditions
+            builder.Entity<MedicalCondition>()
+                .HasOne(x => x.Category)
+                .WithMany(x => x.MedicalConditions)
+                .HasForeignKey(x => x.MedicalConditionCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Allergy Category -> Allergies
+            builder.Entity<Allergy>()
+                .HasOne(x => x.Category)
+                .WithMany(x => x.Allergies)
+                .HasForeignKey(x => x.AllergyCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // Medication Category -> Medications
+            builder.Entity<Medication>()
+                .HasOne(x => x.Category)
+                .WithMany(x => x.Medications)
+                .HasForeignKey(x => x.MedicationCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
 
             builder.Entity<PasswordResetOtp>()
         .HasOne(x => x.User)

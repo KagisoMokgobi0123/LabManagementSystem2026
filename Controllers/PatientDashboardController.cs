@@ -14,11 +14,11 @@ namespace NMB_HLabSys.Controllers
     public class PatientDashboardController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<RegisterUser> _userManager;
+        private readonly UserManager<RegisterViewModel> _userManager;
 
         public PatientDashboardController(
             ApplicationDbContext context,
-            UserManager<RegisterUser> userManager)
+            UserManager<RegisterViewModel> userManager)
         {
             _context = context;
             _userManager = userManager;
