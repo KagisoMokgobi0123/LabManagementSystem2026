@@ -36,26 +36,11 @@
 
     </div>
 
+
+
     <!-- =========================================================
-     MESSAGES
-     ========================================================= -->
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show"
-             role="alert">
-
-            <i class="fa-solid fa-circle-check me-2"></i>
-
-            @TempData["SuccessMessage"]
-
-            <button type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert">
-            </button>
-
-        </div>
-    }
-
+ MESSAGES
+ ========================================================= -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -86,6 +71,7 @@
 
         </div>
     }
+
 
     <!-- =========================================================
      INFORMATION
@@ -912,9 +898,108 @@
 </div>
 
 </div>
+
+<!-- =============================================================
+ SUCCESS MESSAGE MODAL
+ ============================================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="modal fade"
+         id="successMessageModal"
+         tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-success">
+
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        Success
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body text-center py-4">
+
+                    <div class="mb-3">
+
+                        <div class="d-inline-flex
+                            align-items-center
+                            justify-content-center
+                            rounded-circle
+                            bg-success-subtle
+                            text-success"
+                             style="width:70px;height:70px;">
+
+                            <i class="fa-solid fa-check fa-2x"></i>
+
+                        </div>
+
+                    </div>
+
+                    <h6 class="fw-semibold mb-2">
+                        Operation Successful
+                    </h6>
+
+                    <p class="text-muted mb-0">
+                        @TempData["SuccessMessage"]
+                    </p>
+
+                </div>
+
+                <div class="modal-footer border-0 justify-content-center">
+
+                    <button type="button"
+                            class="btn btn-success px-4"
+                            data-bs-dismiss="modal">
+
+                        <i class="fa-solid fa-check me-1"></i>
+                        OK
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
 @section Scripts {
 
     <script>
+        /* =========================================================
+           SUCCESS MESSAGE POPUP
+           ========================================================= */
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const successModal =
+                document.getElementById("successMessageModal");
+
+            if (successModal) {
+
+                const modal =
+                    new bootstrap.Modal(successModal);
+
+                modal.show();
+
+            }
+
+        });
+
 
         /* =========================================================
            CREATE
