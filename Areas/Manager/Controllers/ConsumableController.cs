@@ -17,6 +17,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             _context = context;
         }
 
+
         // ============================================================
         // INDEX
         // ============================================================
@@ -30,7 +31,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 .OrderBy(c => c.Name)
                 .ToListAsync();
 
-            // Load suppliers for the Add/Edit dropdowns
             await LoadSuppliers();
 
             return View(consumables);
@@ -38,7 +38,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
 
         // ============================================================
-        // DETAILS - POPUP
+        // DETAILS
         // ============================================================
 
         [HttpGet]
@@ -53,44 +53,57 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             if (consumable == null)
                 return NotFound();
 
-            return PartialView("_Details", consumable);
+            return Json(new
+            {
+                success = true,
+                consumable = new
+                {
+                    consumable.ConsumableId,
+                    consumable.Name,
+                    consumable.QuantityOnHand,
+                    consumable.ReorderLevel,
+                    consumable.SupplierId,
+                    SupplierName =
+                        consumable.Supplier != null
+                            ? consumable.Supplier.SupplierName
+                            : "No supplier"
+                }
+            });
         }
 
-        // ============================================================
-        // CREATE - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            await LoadSuppliers();
-
-            return PartialView("_Create");
-        }
 
         // ============================================================
-        // CREATE - POST
+        // CREATE
         // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ConsumableModel model)
+        public async Task<IActionResult> Create(
+            ConsumableModel model)
         {
+            // Trim the name before validation/duplicate checking.
+            model.Name = model.Name?.Trim() ?? string.Empty;
+
             await ValidateConsumable(model);
 
             if (!ModelState.IsValid)
             {
                 await LoadSuppliers();
-                return PartialView("_Create", model);
+
+                var consumables =
+                    await GetActiveConsumables();
+
+                return View("Index", consumables);
             }
 
-            model.Name = model.Name.Trim();
 
-            // Prevent duplicate names among active records.
-            bool duplicateName = await _context.Consumables
-                .AnyAsync(c =>
-                    !c.IsDeleted &&
-                    c.Name.ToLower() == model.Name.ToLower());
+            // Prevent duplicate active consumable names.
+            bool duplicateName =
+                await _context.Consumables
+                    .AnyAsync(c =>
+                        !c.IsDeleted &&
+                        c.Name.ToLower() ==
+                        model.Name.ToLower());
 
             if (duplicateName)
             {
@@ -99,72 +112,75 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "A consumable with this name already exists.");
 
                 await LoadSuppliers();
-                return PartialView("_Create", model);
+
+                var consumables =
+                    await GetActiveConsumables();
+
+                return View("Index", consumables);
             }
 
-            model.QuantityOnHand = Math.Max(0, model.QuantityOnHand);
+
+            // Make sure this is treated as a new entity.
+            model.ConsumableId = 0;
+
+            model.IsDeleted = false;
+
+            // Quantity cannot be negative.
+            model.QuantityOnHand =
+                Math.Max(0, model.QuantityOnHand);
+
 
             _context.Consumables.Add(model);
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Consumable added successfully."
-            });
+
+            TempData["SuccessMessage"] =
+                $"Consumable '{model.Name}' added successfully.";
+
+
+            return RedirectToAction(
+                nameof(Index));
         }
 
-        // ============================================================
-        // EDIT - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var consumable = await _context.Consumables
-                .FirstOrDefaultAsync(c =>
-                    c.ConsumableId == id &&
-                    !c.IsDeleted);
-
-            if (consumable == null)
-                return NotFound();
-
-            await LoadSuppliers();
-
-            return PartialView("_Edit", consumable);
-        }
 
         // ============================================================
-        // EDIT - POST
+        // EDIT
         // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            int id,
             ConsumableModel model)
         {
-            if (id != model.ConsumableId)
-                return BadRequest();
+            model.Name = model.Name?.Trim() ?? string.Empty;
 
-            var existing = await _context.Consumables
-                .FirstOrDefaultAsync(c =>
-                    c.ConsumableId == id &&
-                    !c.IsDeleted);
+
+            var existing =
+                await _context.Consumables
+                    .FirstOrDefaultAsync(c =>
+                        c.ConsumableId ==
+                        model.ConsumableId &&
+                        !c.IsDeleted);
+
 
             if (existing == null)
                 return NotFound();
 
+
             await ValidateConsumable(model);
 
-            model.Name = model.Name.Trim();
 
-            bool duplicateName = await _context.Consumables
-                .AnyAsync(c =>
-                    c.ConsumableId != id &&
-                    !c.IsDeleted &&
-                    c.Name.ToLower() == model.Name.ToLower());
+            // Prevent duplicate active names.
+            bool duplicateName =
+                await _context.Consumables
+                    .AnyAsync(c =>
+                        c.ConsumableId !=
+                        model.ConsumableId &&
+                        !c.IsDeleted &&
+                        c.Name.ToLower() ==
+                        model.Name.ToLower());
+
 
             if (duplicateName)
             {
@@ -173,95 +189,106 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "A consumable with this name already exists.");
             }
 
+
             if (!ModelState.IsValid)
             {
                 await LoadSuppliers();
-                return PartialView("_Edit", model);
+
+                var consumables =
+                    await GetActiveConsumables();
+
+                return View("Index", consumables);
             }
 
-            existing.Name = model.Name;
-            existing.ReorderLevel = model.ReorderLevel;
-            existing.SupplierId = model.SupplierId;
 
-            // QuantityOnHand should NOT normally be edited here.
-            // Stock changes should go through StockAdjustmentController.
+            // Update editable fields only.
+            existing.Name = model.Name;
+            existing.ReorderLevel =
+                model.ReorderLevel;
+            existing.SupplierId =
+                model.SupplierId;
+
+
+            // QuantityOnHand is deliberately NOT changed here.
+            //
+            // Stock changes should be performed through
+            // the stock adjustment functionality.
+
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Consumable updated successfully."
-            });
+
+            TempData["SuccessMessage"] =
+                $"Consumable '{existing.Name}' updated successfully.";
+
+
+            return RedirectToAction(
+                nameof(Index));
         }
 
-        // ============================================================
-        // DELETE - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var consumable = await _context.Consumables
-                .Include(c => c.Supplier)
-                .FirstOrDefaultAsync(c =>
-                    c.ConsumableId == id &&
-                    !c.IsDeleted);
-
-            if (consumable == null)
-                return NotFound();
-
-            return PartialView("_Delete", consumable);
-        }
 
         // ============================================================
-        // DELETE - SOFT DELETE
+        // DELETE
         // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(
+            int id)
         {
-            var consumable = await _context.Consumables
-                .FirstOrDefaultAsync(c =>
-                    c.ConsumableId == id &&
-                    !c.IsDeleted);
+            var consumable =
+                await _context.Consumables
+                    .FirstOrDefaultAsync(c =>
+                        c.ConsumableId == id &&
+                        !c.IsDeleted);
+
 
             if (consumable == null)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = "Consumable could not be found."
-                });
+                TempData["ErrorMessage"] =
+                    "Consumable could not be found.";
+
+                return RedirectToAction(
+                    nameof(Index));
             }
 
-            // Do not allow deletion when active orders reference it.
-            bool hasActiveOrders = await _context.OrderItems
-                .AnyAsync(i =>
-                    i.ConsumableId == id &&
-                    i.Order!.Status != OrderStatus.Cancelled);
+
+            // Do not allow deletion when active orders
+            // reference this consumable.
+            bool hasActiveOrders =
+                await _context.OrderItems
+                    .AnyAsync(i =>
+                        i.ConsumableId == id &&
+                        i.Order != null &&
+                        i.Order.Status !=
+                        OrderStatus.Cancelled);
+
 
             if (hasActiveOrders)
             {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "This consumable cannot be deleted because it is linked to an active order."
-                });
+                TempData["ErrorMessage"] =
+                    "This consumable cannot be deleted because it is linked to an active order.";
+
+                return RedirectToAction(
+                    nameof(Index));
             }
 
+
+            // Soft delete.
             consumable.IsDeleted = true;
+
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Consumable deleted successfully."
-            });
+
+            TempData["SuccessMessage"] =
+                $"Consumable '{consumable.Name}' deleted successfully.";
+
+
+            return RedirectToAction(
+                nameof(Index));
         }
+
 
         // ============================================================
         // REORDER LIST
@@ -270,16 +297,21 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         [HttpGet]
         public async Task<IActionResult> Reorder()
         {
-            var consumables = await _context.Consumables
-                .Include(c => c.Supplier)
-                .Where(c =>
-                    !c.IsDeleted &&
-                    c.QuantityOnHand <= c.ReorderLevel * 1.10)
-                .OrderBy(c => c.QuantityOnHand)
-                .ToListAsync();
+            var consumables =
+                await _context.Consumables
+                    .Include(c => c.Supplier)
+                    .Where(c =>
+                        !c.IsDeleted &&
+                        c.QuantityOnHand <=
+                        c.ReorderLevel * 1.10m)
+                    .OrderBy(c =>
+                        c.QuantityOnHand)
+                    .ToListAsync();
+
 
             return View(consumables);
         }
+
 
         // ============================================================
         // VALIDATION
@@ -288,12 +320,29 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         private async Task ValidateConsumable(
             ConsumableModel model)
         {
+            if (string.IsNullOrWhiteSpace(model.Name))
+            {
+                ModelState.AddModelError(
+                    nameof(model.Name),
+                    "Consumable name is required.");
+            }
+
+
+            if (model.Name.Length > 150)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Name),
+                    "Consumable name cannot exceed 150 characters.");
+            }
+
+
             if (model.ReorderLevel < 0)
             {
                 ModelState.AddModelError(
                     nameof(model.ReorderLevel),
                     "Reorder level cannot be negative.");
             }
+
 
             if (model.QuantityOnHand < 0)
             {
@@ -302,37 +351,60 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "Quantity on hand cannot be negative.");
             }
 
+
             if (model.SupplierId <= 0)
             {
                 ModelState.AddModelError(
                     nameof(model.SupplierId),
                     "Please select a supplier.");
+
+                return;
             }
-            else
-            {
-                bool supplierExists =
-                    await _context.Suppliers.AnyAsync(s =>
-                        s.SupplierId == model.SupplierId &&
+
+
+            bool supplierExists =
+                await _context.Suppliers
+                    .AnyAsync(s =>
+                        s.SupplierId ==
+                        model.SupplierId &&
                         !s.IsDeleted);
 
-                if (!supplierExists)
-                {
-                    ModelState.AddModelError(
-                        nameof(model.SupplierId),
-                        "The selected supplier is invalid.");
-                }
+
+            if (!supplierExists)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SupplierId),
+                    "The selected supplier is invalid.");
             }
         }
 
+
         // ============================================================
-        // SUPPLIER DROPDOWN
+        // LOAD SUPPLIERS
         // ============================================================
 
         private async Task LoadSuppliers()
         {
-            ViewBag.Suppliers = await _context.Suppliers
-                .Where(s => !s.IsDeleted)
-                .OrderBy(s => s.SupplierName)
+            ViewBag.Suppliers =
+                await _context.Suppliers
+                    .Where(s => !s.IsDeleted)
+                    .OrderBy(s =>
+                        s.SupplierName)
+                    .ToListAsync();
+        }
+
+
+        // ============================================================
+        // LOAD ACTIVE CONSUMABLES
+        // ============================================================
+
+        private async Task<List<ConsumableModel>>
+            GetActiveConsumables()
+        {
+            return await _context.Consumables
+                .Include(c => c.Supplier)
+                .Where(c => !c.IsDeleted)
+                .OrderBy(c => c.Name)
                 .ToListAsync();
         }
     }

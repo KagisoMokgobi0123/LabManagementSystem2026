@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "Consumables";
-
     Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 }
 
@@ -27,7 +26,8 @@
         <button type="button"
                 class="btn btn-primary"
                 data-bs-toggle="modal"
-                data-bs-target="#addConsumableModal">
+                data-bs-target="#consumableModal"
+                onclick="openCreateModal()">
 
             <i class="fa-solid fa-plus me-1"></i>
             Add Consumable
@@ -41,7 +41,8 @@
      ========================================================= -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
 
             <i class="fa-solid fa-circle-check me-2"></i>
 
@@ -57,7 +58,8 @@
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
 
             <i class="fa-solid fa-circle-exclamation me-2"></i>
 
@@ -185,22 +187,10 @@
 
                     <tbody>
 
-                        @if (Model.Any())
+                        @if (Model != null && Model.Any())
                         {
                             foreach (var consumable in Model)
                             {
-                                /*
-                                 * Reorder threshold:
-                                 *
-                                 * A consumable is considered near/below
-                                 * reorder level when:
-                                 *
-                                 * QuantityOnHand <= ReorderLevel * 1.10
-                                 *
-                                 * The calculation is performed here only
-                                 * for display. It is not stored in the DB.
-                                 */
-
                                 var reorderThreshold =
                                     consumable.ReorderLevel * 1.10m;
 
@@ -212,6 +202,14 @@
                                     !isBelow &&
                                     consumable.QuantityOnHand <=
                                     reorderThreshold;
+
+                                var encodedName =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        consumable.Name ?? "");
+
+                                var encodedSupplier =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        consumable.Supplier?.SupplierName ?? "No supplier");
 
                                 <tr>
 
@@ -249,9 +247,7 @@
                                     <td>
 
                                         <span class="fw-semibold">
-
                                             @consumable.QuantityOnHand
-
                                         </span>
 
                                     </td>
@@ -259,9 +255,7 @@
                                     <!-- REORDER LEVEL -->
 
                                     <td>
-
                                         @consumable.ReorderLevel
-
                                     </td>
 
                                     <!-- STATUS -->
@@ -302,68 +296,73 @@
 
                                     <td class="text-end">
 
-                                        <!-- VIEW -->
+                                        <div class="btn-group btn-group-sm"
+                                             role="group">
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-info me-1"
-                                                title="View consumable"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#viewConsumableModal"
-                                                data-id="@consumable.ConsumableId"
-                                                data-name="@consumable.Name"
-                                                data-quantity="@consumable.QuantityOnHand"
-                                                data-reorder="@consumable.ReorderLevel"
-                                                data-supplier="@(consumable.Supplier?.SupplierName ?? "No supplier")">
+                                            <!-- VIEW -->
 
-                                            <i class="fa-solid fa-eye"></i>
+                                            <button type="button"
+                                                    class="btn btn-outline-info"
+                                                    title="View consumable"
+                                                    onclick="viewConsumable(
+                                                '@consumable.ConsumableId',
+                                                '@Html.Raw(encodedName)',
+                                                '@Html.Raw(encodedSupplier)',
+                                                '@consumable.QuantityOnHand',
+                                                '@consumable.ReorderLevel'
+                                                )">
 
-                                        </button>
+                                                <i class="fa-solid fa-eye"></i>
 
-                                        <!-- STOCK ADJUSTMENT -->
+                                            </button>
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-success me-1"
-                                                title="Adjust stock"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#adjustStockModal"
-                                                data-id="@consumable.ConsumableId"
-                                                data-name="@consumable.Name"
-                                                data-quantity="@consumable.QuantityOnHand">
+                                            <!-- STOCK ADJUSTMENT -->
 
-                                            <i class="fa-solid fa-arrows-up-down"></i>
+                                            <button type="button"
+                                                    class="btn btn-outline-success"
+                                                    title="Adjust stock"
+                                                    onclick="adjustStock(
+                                                '@consumable.ConsumableId',
+                                                '@Html.Raw(encodedName)',
+                                                '@consumable.QuantityOnHand'
+                                                )">
 
-                                        </button>
+                                                <i class="fa-solid fa-arrows-up-down"></i>
 
-                                        <!-- EDIT -->
+                                            </button>
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-primary me-1"
-                                                title="Edit consumable"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editConsumableModal"
-                                                data-id="@consumable.ConsumableId"
-                                                data-name="@consumable.Name"
-                                                data-quantity="@consumable.QuantityOnHand"
-                                                data-reorder="@consumable.ReorderLevel"
-                                                data-supplier-id="@consumable.SupplierId">
+                                            <!-- EDIT -->
 
-                                            <i class="fa-solid fa-pen"></i>
+                                            <button type="button"
+                                                    class="btn btn-outline-primary"
+                                                    title="Edit consumable"
+                                                    onclick="editConsumable(
+                                                '@consumable.ConsumableId',
+                                                '@Html.Raw(encodedName)',
+                                                '@consumable.SupplierId',
+                                                '@consumable.QuantityOnHand',
+                                                '@consumable.ReorderLevel'
+                                                )">
 
-                                        </button>
+                                                <i class="fa-solid fa-pen"></i>
 
-                                        <!-- DELETE -->
+                                            </button>
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Delete consumable"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteConsumableModal"
-                                                data-id="@consumable.ConsumableId"
-                                                data-name="@consumable.Name">
+                                            <!-- DELETE -->
 
-                                            <i class="fa-solid fa-trash"></i>
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    title="Delete consumable"
+                                                    onclick="deleteConsumable(
+                                                '@consumable.ConsumableId',
+                                                '@Html.Raw(encodedName)'
+                                                )">
 
-                                        </button>
+                                                <i class="fa-solid fa-trash"></i>
+
+                                            </button>
+
+                                        </div>
 
                                     </td>
 
@@ -406,19 +405,23 @@
 
     </div>
 
-</div> <!-- ============================================================= ADD CONSUMABLE MODAL ============================================================= --> <div class="modal fade" id="addConsumableModal" tabindex="-1" aria-hidden="true">
+</div> <!-- ============================================================= ADD / EDIT CONSUMABLE MODAL ============================================================= --> <div class="modal fade" id="consumableModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
 
-        <form asp-action="Create"
-              method="post">
+        <form id="consumableForm"
+              method="post"
+              asp-area="Manager"
+              asp-controller="Consumable"
+              asp-action="Create">
 
             @Html.AntiForgeryToken()
 
             <div class="modal-header">
 
-                <h5 class="modal-title fw-bold">
+                <h5 class="modal-title fw-bold"
+                    id="consumableModalTitle">
 
                     <i class="fa-solid fa-plus text-primary me-2"></i>
                     Add Consumable
@@ -434,11 +437,29 @@
 
             <div class="modal-body">
 
+                <!-- ID USED BY EDIT -->
+
+                <input type="hidden"
+                       id="ConsumableId"
+                       name="ConsumableId"
+                       value="0" />
+
+                <!-- ROUTE ID USED BY EDIT -->
+
+                <input type="hidden"
+                       id="consumableRouteId"
+                       name="id"
+                       value="0" />
+
+                <!-- NAME -->
+
                 <div class="mb-3">
 
                     <label class="form-label fw-semibold"
                            for="Name">
+
                         Consumable Name
+
                     </label>
 
                     <input type="text"
@@ -450,11 +471,15 @@
 
                 </div>
 
+                <!-- SUPPLIER -->
+
                 <div class="mb-3">
 
                     <label class="form-label fw-semibold"
                            for="SupplierId">
+
                         Supplier
+
                     </label>
 
                     <select id="SupplierId"
@@ -480,13 +505,17 @@
 
                 </div>
 
+                <!-- QUANTITY / REORDER -->
+
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
 
                         <label class="form-label fw-semibold"
                                for="QuantityOnHand">
+
                             Quantity On Hand
+
                         </label>
 
                         <input type="number"
@@ -496,13 +525,22 @@
                                min="0"
                                required />
 
+                        <div id="quantityHelp"
+                             class="form-text">
+
+                            For normal stock changes use Adjust Stock.
+
+                        </div>
+
                     </div>
 
                     <div class="col-md-6 mb-3">
 
                         <label class="form-label fw-semibold"
                                for="ReorderLevel">
+
                             Reorder Level
+
                         </label>
 
                         <input type="number"
@@ -523,14 +561,19 @@
                 <button type="button"
                         class="btn btn-light"
                         data-bs-dismiss="modal">
+
                     Cancel
+
                 </button>
 
                 <button type="submit"
                         class="btn btn-primary">
 
                     <i class="fa-solid fa-check me-1"></i>
-                    Save Consumable
+
+                    <span id="saveButtonText">
+                        Save Consumable
+                    </span>
 
                 </button>
 
@@ -617,6 +660,18 @@
 
             </div>
 
+            <div class="mt-3">
+
+                <small class="text-muted d-block">
+                    Consumable ID
+                </small>
+
+                <div id="viewConsumableId"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
         </div>
 
         <div class="modal-footer">
@@ -624,7 +679,9 @@
             <button type="button"
                     class="btn btn-secondary"
                     data-bs-dismiss="modal">
+
                 Close
+
             </button>
 
         </div>
@@ -638,8 +695,10 @@
 
     <div class="modal-content border-0 shadow">
 
-        <form asp-action="AdjustStock"
-              method="post">
+        <form method="post"
+              asp-area="Manager"
+              asp-controller="Consumable"
+              asp-action="AdjustStock">
 
             @Html.AntiForgeryToken()
 
@@ -687,8 +746,11 @@
 
                 <div class="mb-3">
 
-                    <label class="form-label fw-semibold">
+                    <label class="form-label fw-semibold"
+                           for="adjustmentType">
+
                         Adjustment Type
+
                     </label>
 
                     <select name="adjustmentType"
@@ -716,7 +778,9 @@
 
                     <label class="form-label fw-semibold"
                            for="adjustmentValue">
+
                         Quantity
+
                     </label>
 
                     <input type="number"
@@ -744,158 +808,17 @@
                 <button type="button"
                         class="btn btn-light"
                         data-bs-dismiss="modal">
+
                     Cancel
+
                 </button>
 
                 <button type="submit"
+                        id="applyAdjustmentButton"
                         class="btn btn-success">
 
                     <i class="fa-solid fa-check me-1"></i>
                     Apply Adjustment
-
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
-</div> <!-- ============================================================= EDIT CONSUMABLE MODAL ============================================================= --> <div class="modal fade" id="editConsumableModal" tabindex="-1" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered">
-
-    <div class="modal-content border-0 shadow">
-
-        <form asp-action="Edit"
-              method="post">
-
-            @Html.AntiForgeryToken()
-
-            <input type="hidden"
-                   id="editConsumableId"
-                   name="ConsumableId" />
-
-            <div class="modal-header">
-
-                <h5 class="modal-title fw-bold">
-
-                    <i class="fa-solid fa-pen text-primary me-2"></i>
-                    Edit Consumable
-
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal">
-                </button>
-
-            </div>
-
-            <div class="modal-body">
-
-                <div class="mb-3">
-
-                    <label class="form-label fw-semibold"
-                           for="editConsumableName">
-                        Consumable Name
-                    </label>
-
-                    <input type="text"
-                           id="editConsumableName"
-                           name="Name"
-                           class="form-control"
-                           maxlength="150"
-                           required />
-
-                </div>
-
-                <div class="mb-3">
-
-                    <label class="form-label fw-semibold"
-                           for="editSupplierId">
-                        Supplier
-                    </label>
-
-                    <select id="editSupplierId"
-                            name="SupplierId"
-                            class="form-select"
-                            required>
-
-                        <option value="">
-                            -- Select Supplier --
-                        </option>
-
-                        @if (ViewBag.Suppliers != null)
-                        {
-                            foreach (var supplier in ViewBag.Suppliers)
-                            {
-                                <option value="@supplier.SupplierId">
-                                    @supplier.SupplierName
-                                </option>
-                            }
-                        }
-
-                    </select>
-
-                </div>
-
-                <div class="row">
-
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label fw-semibold"
-                               for="editQuantityOnHand">
-                            Quantity On Hand
-                        </label>
-
-                        <input type="number"
-                               id="editQuantityOnHand"
-                               name="QuantityOnHand"
-                               class="form-control"
-                               min="0"
-                               required />
-
-                        <div class="form-text">
-                            For normal stock changes use Adjust Stock.
-                        </div>
-
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label fw-semibold"
-                               for="editReorderLevel">
-                            Reorder Level
-                        </label>
-
-                        <input type="number"
-                               id="editReorderLevel"
-                               name="ReorderLevel"
-                               class="form-control"
-                               min="0"
-                               required />
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="modal-footer">
-
-                <button type="button"
-                        class="btn btn-light"
-                        data-bs-dismiss="modal">
-                    Cancel
-                </button>
-
-                <button type="submit"
-                        class="btn btn-primary">
-
-                    <i class="fa-solid fa-floppy-disk me-1"></i>
-                    Save Changes
 
                 </button>
 
@@ -912,8 +835,10 @@
 
     <div class="modal-content border-0 shadow">
 
-        <form asp-action="Delete"
-              method="post">
+        <form method="post"
+              asp-area="Manager"
+              asp-controller="Consumable"
+              asp-action="DeleteConfirmed">
 
             @Html.AntiForgeryToken()
 
@@ -950,8 +875,10 @@
                     <strong id="deleteConsumableName"></strong>
 
                     <div class="small mt-1">
+
                         This will be a soft delete. The consumable
                         will not be permanently removed.
+
                     </div>
 
                 </div>
@@ -963,7 +890,9 @@
                 <button type="button"
                         class="btn btn-light"
                         data-bs-dismiss="modal">
+
                     Cancel
+
                 </button>
 
                 <button type="submit"
@@ -987,246 +916,270 @@
 
     <script>
 
-        document.addEventListener("DOMContentLoaded", function () {
+        /* =========================================================
+           CREATE
+           ========================================================= */
 
-            /* =====================================================
-               VIEW
-               ===================================================== */
+        function openCreateModal() {
 
-            const viewModal =
-                document.getElementById("viewConsumableModal");
+            const form =
+                document.getElementById("consumableForm");
 
-            if (viewModal) {
+            form.action =
+                "@Url.Action("Create", "Consumable", new { area = "Manager" })";
 
-                viewModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
+            document.getElementById("consumableModalTitle")
+                .innerText = "Add Consumable";
 
-                        const button =
-                            event.relatedTarget;
+            document.getElementById("saveButtonText")
+                .innerText = "Save Consumable";
 
-                        if (!button)
-                            return;
+            document.getElementById("ConsumableId")
+                .value = "0";
 
-                        document.getElementById(
-                            "viewConsumableName"
-                        ).textContent =
-                            button.dataset.name || "";
+            document.getElementById("consumableRouteId")
+                .value = "0";
 
-                        document.getElementById(
-                            "viewConsumableSupplier"
-                        ).textContent =
-                            button.dataset.supplier || "";
+            document.getElementById("Name")
+                .value = "";
 
-                        document.getElementById(
-                            "viewConsumableQuantity"
-                        ).textContent =
-                            button.dataset.quantity || "0";
+            document.getElementById("SupplierId")
+                .value = "";
 
-                        document.getElementById(
-                            "viewConsumableReorder"
-                        ).textContent =
-                            button.dataset.reorder || "0";
-                    }
+            document.getElementById("QuantityOnHand")
+                .value = "";
+
+            document.getElementById("ReorderLevel")
+                .value = "";
+
+            document.getElementById("quantityHelp")
+                .innerText =
+                "Enter the current quantity on hand.";
+
+        }
+
+        /* =========================================================
+           VIEW
+           ========================================================= */
+
+        function viewConsumable(
+            id,
+            name,
+            supplier,
+            quantity,
+            reorderLevel) {
+
+            document.getElementById("viewConsumableId")
+                .innerText = id;
+
+            document.getElementById("viewConsumableName")
+                .innerText = name;
+
+            document.getElementById("viewConsumableSupplier")
+                .innerText = supplier;
+
+            document.getElementById("viewConsumableQuantity")
+                .innerText = quantity;
+
+            document.getElementById("viewConsumableReorder")
+                .innerText = reorderLevel;
+
+            new bootstrap.Modal(
+                document.getElementById("viewConsumableModal")
+            ).show();
+
+        }
+
+        /* =========================================================
+           EDIT
+           ========================================================= */
+
+        function editConsumable(
+            id,
+            name,
+            supplierId,
+            quantity,
+            reorderLevel) {
+
+            const form =
+                document.getElementById("consumableForm");
+
+            form.action =
+                "@Url.Action("Edit", "Consumable", new { area = "Manager" })";
+
+            document.getElementById("consumableModalTitle")
+                .innerText = "Edit Consumable";
+
+            document.getElementById("saveButtonText")
+                .innerText = "Update Consumable";
+
+            document.getElementById("ConsumableId")
+                .value = id;
+
+            document.getElementById("consumableRouteId")
+                .value = id;
+
+            document.getElementById("Name")
+                .value = name;
+
+            document.getElementById("SupplierId")
+                .value = supplierId;
+
+            document.getElementById("QuantityOnHand")
+                .value = quantity;
+
+            document.getElementById("ReorderLevel")
+                .value = reorderLevel;
+
+            document.getElementById("quantityHelp")
+                .innerText =
+                "For normal stock changes use Adjust Stock.";
+
+            new bootstrap.Modal(
+                document.getElementById("consumableModal")
+            ).show();
+
+        }
+
+        /* =========================================================
+           STOCK ADJUSTMENT
+           ========================================================= */
+
+        function adjustStock(
+            id,
+            name,
+            quantity) {
+
+            document.getElementById("adjustConsumableId")
+                .value = id;
+
+            document.getElementById("adjustConsumableName")
+                .innerText = name;
+
+            document.getElementById("adjustCurrentQuantity")
+                .innerText = quantity;
+
+            document.getElementById("adjustmentType")
+                .value = "increase";
+
+            document.getElementById("adjustmentValue")
+                .value = "";
+
+            document.getElementById("decreaseWarning")
+                .classList.add("d-none");
+
+            document.getElementById("adjustmentValue")
+                .setCustomValidity("");
+
+            new bootstrap.Modal(
+                document.getElementById("adjustStockModal")
+            ).show();
+
+        }
+
+        /* =========================================================
+           DELETE
+           ========================================================= */
+
+        function deleteConsumable(id, name) {
+
+            document.getElementById("deleteConsumableId")
+                .value = id;
+
+            document.getElementById("deleteConsumableName")
+                .innerText = name;
+
+            new bootstrap.Modal(
+                document.getElementById("deleteConsumableModal")
+            ).show();
+
+        }
+
+        /* =========================================================
+           ADJUSTMENT VALIDATION
+           ========================================================= */
+
+        const adjustmentType =
+            document.getElementById("adjustmentType");
+
+        const adjustmentValue =
+            document.getElementById("adjustmentValue");
+
+        const warning =
+            document.getElementById("decreaseWarning");
+
+        const currentQuantity =
+            document.getElementById("adjustCurrentQuantity");
+
+        const applyAdjustmentButton =
+            document.getElementById("applyAdjustmentButton");
+
+        function validateAdjustment() {
+
+            if (!adjustmentType ||
+                !adjustmentValue ||
+                !warning ||
+                !currentQuantity ||
+                !applyAdjustmentButton) {
+
+                return;
+
+            }
+
+            const type =
+                adjustmentType.value;
+
+            const value =
+                parseInt(
+                    adjustmentValue.value || "0"
                 );
-            }
 
-            /* =====================================================
-               EDIT
-               ===================================================== */
-
-            const editModal =
-                document.getElementById("editConsumableModal");
-
-            if (editModal) {
-
-                editModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
-
-                        const button =
-                            event.relatedTarget;
-
-                        if (!button)
-                            return;
-
-                        document.getElementById(
-                            "editConsumableId"
-                        ).value =
-                            button.dataset.id || "";
-
-                        document.getElementById(
-                            "editConsumableName"
-                        ).value =
-                            button.dataset.name || "";
-
-                        document.getElementById(
-                            "editQuantityOnHand"
-                        ).value =
-                            button.dataset.quantity || "0";
-
-                        document.getElementById(
-                            "editReorderLevel"
-                        ).value =
-                            button.dataset.reorder || "0";
-
-                        document.getElementById(
-                            "editSupplierId"
-                        ).value =
-                            button.dataset.supplierId || "";
-                    }
+            const current =
+                parseInt(
+                    currentQuantity.innerText || "0"
                 );
-            }
 
-            /* =====================================================
-               STOCK ADJUSTMENT
-               ===================================================== */
+            if (type === "decrease" &&
+                value > current) {
 
-            const adjustModal =
-                document.getElementById("adjustStockModal");
+                warning.classList.remove("d-none");
 
-            if (adjustModal) {
-
-                adjustModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
-
-                        const button =
-                            event.relatedTarget;
-
-                        if (!button)
-                            return;
-
-                        document.getElementById(
-                            "adjustConsumableId"
-                        ).value =
-                            button.dataset.id || "";
-
-                        document.getElementById(
-                            "adjustConsumableName"
-                        ).textContent =
-                            button.dataset.name || "";
-
-                        document.getElementById(
-                            "adjustCurrentQuantity"
-                        ).textContent =
-                            button.dataset.quantity || "0";
-
-                        document.getElementById(
-                            "adjustmentValue"
-                        ).value = "";
-
-                        document.getElementById(
-                            "adjustmentType"
-                        ).value = "increase";
-
-                        document.getElementById(
-                            "decreaseWarning"
-                        ).classList.add("d-none");
-                    }
+                adjustmentValue.setCustomValidity(
+                    "Stock cannot become negative."
                 );
+
+                applyAdjustmentButton.disabled = true;
+
+            }
+            else {
+
+                warning.classList.add("d-none");
+
+                adjustmentValue.setCustomValidity("");
+
+                applyAdjustmentButton.disabled = false;
+
             }
 
-            /* =====================================================
-               DELETE
-               ===================================================== */
+        }
 
-            const deleteModal =
-                document.getElementById("deleteConsumableModal");
+        if (adjustmentType) {
 
-            if (deleteModal) {
+            adjustmentType.addEventListener(
+                "change",
+                validateAdjustment
+            );
 
-                deleteModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
+        }
 
-                        const button =
-                            event.relatedTarget;
+        if (adjustmentValue) {
 
-                        if (!button)
-                            return;
+            adjustmentValue.addEventListener(
+                "input",
+                validateAdjustment
+            );
 
-                        document.getElementById(
-                            "deleteConsumableId"
-                        ).value =
-                            button.dataset.id || "";
-
-                        document.getElementById(
-                            "deleteConsumableName"
-                        ).textContent =
-                            button.dataset.name || "";
-                    }
-                );
-            }
-
-            /* =====================================================
-               ADJUSTMENT TYPE VALIDATION
-               ===================================================== */
-
-            const adjustmentType =
-                document.getElementById("adjustmentType");
-
-            const adjustmentValue =
-                document.getElementById("adjustmentValue");
-
-            const warning =
-                document.getElementById("decreaseWarning");
-
-            const currentQuantity =
-                document.getElementById("adjustCurrentQuantity");
-
-            function validateAdjustment() {
-
-                if (!adjustmentType ||
-                    !adjustmentValue ||
-                    !warning ||
-                    !currentQuantity)
-                    return;
-
-                const type =
-                    adjustmentType.value;
-
-                const value =
-                    parseInt(adjustmentValue.value || "0");
-
-                const current =
-                    parseInt(currentQuantity.textContent || "0");
-
-                if (type === "decrease" &&
-                    value > current) {
-
-                    warning.classList.remove("d-none");
-
-                    adjustmentValue.setCustomValidity(
-                        "Stock cannot become negative."
-                    );
-
-                }
-                else {
-
-                    warning.classList.add("d-none");
-
-                    adjustmentValue.setCustomValidity("");
-                }
-            }
-
-            if (adjustmentType) {
-
-                adjustmentType.addEventListener(
-                    "change",
-                    validateAdjustment
-                );
-            }
-
-            if (adjustmentValue) {
-
-                adjustmentValue.addEventListener(
-                    "input",
-                    validateAdjustment
-                );
-            }
-
-        });
+        }
 
     </script>
 
