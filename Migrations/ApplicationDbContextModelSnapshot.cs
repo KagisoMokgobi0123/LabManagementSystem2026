@@ -492,6 +492,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("ReorderLevel")
                         .HasColumnType("int");
 
+                    b.Property<int>("StockStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("SupplierId")
                         .HasColumnType("int");
 
@@ -512,6 +515,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Test Tubes (EDTA)",
                             QuantityOnHand = 500,
                             ReorderLevel = 100,
+                            StockStatus = 1,
                             SupplierId = 1
                         },
                         new
@@ -521,6 +525,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Test Tubes (Sodium Citrate)",
                             QuantityOnHand = 300,
                             ReorderLevel = 75,
+                            StockStatus = 1,
                             SupplierId = 1
                         },
                         new
@@ -530,6 +535,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Syringes 5ml",
                             QuantityOnHand = 300,
                             ReorderLevel = 50,
+                            StockStatus = 1,
                             SupplierId = 2
                         },
                         new
@@ -539,6 +545,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Blood Smear Slides",
                             QuantityOnHand = 1000,
                             ReorderLevel = 200,
+                            StockStatus = 1,
                             SupplierId = 2
                         },
                         new
@@ -548,6 +555,7 @@ namespace NMBHLabSys.Migrations
                             Name = "ESR Racks and Tubes",
                             QuantityOnHand = 50,
                             ReorderLevel = 15,
+                            StockStatus = 1,
                             SupplierId = 2
                         },
                         new
@@ -557,6 +565,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Coagulation Test Cartridges",
                             QuantityOnHand = 200,
                             ReorderLevel = 50,
+                            StockStatus = 1,
                             SupplierId = 3
                         },
                         new
@@ -566,6 +575,7 @@ namespace NMBHLabSys.Migrations
                             Name = "D-Dimer Test Kits",
                             QuantityOnHand = 100,
                             ReorderLevel = 30,
+                            StockStatus = 1,
                             SupplierId = 3
                         },
                         new
@@ -575,6 +585,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Chemistry Analyzer Reagents",
                             QuantityOnHand = 50,
                             ReorderLevel = 15,
+                            StockStatus = 1,
                             SupplierId = 3
                         },
                         new
@@ -584,6 +595,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Urine Dipsticks",
                             QuantityOnHand = 500,
                             ReorderLevel = 100,
+                            StockStatus = 1,
                             SupplierId = 2
                         },
                         new
@@ -593,6 +605,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Microscope Slides (Urine)",
                             QuantityOnHand = 500,
                             ReorderLevel = 100,
+                            StockStatus = 1,
                             SupplierId = 2
                         },
                         new
@@ -602,6 +615,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Culture Media Plates",
                             QuantityOnHand = 300,
                             ReorderLevel = 80,
+                            StockStatus = 1,
                             SupplierId = 3
                         },
                         new
@@ -611,6 +625,7 @@ namespace NMBHLabSys.Migrations
                             Name = "Blood Culture Bottles",
                             QuantityOnHand = 150,
                             ReorderLevel = 40,
+                            StockStatus = 1,
                             SupplierId = 3
                         });
                 });
@@ -839,6 +854,36 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("ConsumableId");
 
                     b.ToTable("StockAdjustments");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockStatusHistoryModel", b =>
+                {
+                    b.Property<int>("StockStatusHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StockStatusHistoryId"));
+
+                    b.Property<int>("ConsumableId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("DateRecorded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("QuantityOnHand")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReorderLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StockStatus")
+                        .HasColumnType("int");
+
+                    b.HasKey("StockStatusHistoryId");
+
+                    b.HasIndex("ConsumableId");
+
+                    b.ToTable("StockStatusHistories");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.SupplierModel", b =>
@@ -2100,6 +2145,17 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("Consumable");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockStatusHistoryModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
+                        .WithMany("StockStatusHistories")
+                        .HasForeignKey("ConsumableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Consumable");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "Manager")
@@ -2418,6 +2474,8 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("StockAdjustments");
+
+                    b.Navigation("StockStatusHistories");
 
                     b.Navigation("TestTypeConsumables");
                 });

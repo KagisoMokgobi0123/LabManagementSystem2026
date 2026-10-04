@@ -27,7 +27,8 @@
         <button type="button"
                 class="btn btn-primary"
                 data-bs-toggle="modal"
-                data-bs-target="#addSupplierModal">
+                data-bs-target="#addSupplierModal"
+                onclick="openCreateSupplierModal()">
 
             <i class="fa-solid fa-plus me-1"></i>
             Add Supplier
@@ -38,31 +39,39 @@
 
 
     <!-- =========================================================
-         VALIDATION / SUCCESS MESSAGES
+         MESSAGES
          ========================================================= -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show">
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+
             <i class="fa-solid fa-circle-check me-2"></i>
+
             @TempData["SuccessMessage"]
 
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert">
             </button>
+
         </div>
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show">
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
             <i class="fa-solid fa-circle-exclamation me-2"></i>
+
             @TempData["ErrorMessage"]
 
             <button type="button"
                     class="btn-close"
                     data-bs-dismiss="alert">
             </button>
+
         </div>
     }
 
@@ -71,8 +80,11 @@
         <div class="alert alert-danger">
 
             <div class="fw-semibold mb-2">
+
                 <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
                 Please correct the following errors:
+
             </div>
 
             <div asp-validation-summary="All"></div>
@@ -82,16 +94,17 @@
 
 
     <!-- =========================================================
-         SUPPLIERS TABLE
+         SUPPLIER TABLE
          ========================================================= -->
 
     <div class="card border-0 shadow-sm">
 
         <div class="card-header bg-white border-0 py-3">
 
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
                 <div>
+
                     <h6 class="fw-bold mb-0">
                         Supplier List
                     </h6>
@@ -99,11 +112,42 @@
                     <small class="text-muted">
                         Active laboratory suppliers
                     </small>
+
                 </div>
 
-                <span class="badge bg-primary-subtle text-primary">
-                    @Model.Count() supplier(s)
-                </span>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- SEARCH -->
+
+                    <div class="input-group input-group-sm"
+                         style="width:280px;">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                        </span>
+
+                        <input type="text"
+                               id="supplierSearch"
+                               class="form-control"
+                               placeholder="Search suppliers..."
+                               autocomplete="off" />
+
+                    </div>
+
+
+                    <!-- RECORD COUNT -->
+
+                    <span class="badge bg-primary-subtle text-primary"
+                          id="recordCount">
+
+                        @Model.Count() supplier(s)
+
+                    </span>
+
+                </div>
 
             </div>
 
@@ -114,50 +158,106 @@
 
             <div class="table-responsive">
 
-                <table class="table table-hover align-middle mb-0">
+                <table class="table table-hover align-middle mb-0"
+                       id="suppliersTable">
 
                     <thead class="table-light">
 
                         <tr>
-                            <th>Supplier</th>
-                            <th>Contact Person</th>
-                            <th>E-mail</th>
-                            <th>Consumables</th>
-                            <th class="text-end">Actions</th>
+
+                            <th>
+                                Supplier
+                            </th>
+
+                            <th>
+                                Contact Person
+                            </th>
+
+                            <th>
+                                E-mail
+                            </th>
+
+                            <th>
+                                Consumables
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th class="text-end">
+                                Actions
+                            </th>
+
                         </tr>
 
                     </thead>
 
 
-                    <tbody>
+                    <tbody id="suppliersTableBody">
 
-                        @if (Model.Any())
+                        @if (Model != null && Model.Any())
                         {
                             foreach (var supplier in Model)
                             {
-                                <tr>
+                                <tr class="supplier-row"
+                                    data-name="@supplier.SupplierName"
+                                    data-contact="@supplier.ContactPerson"
+                                    data-email="@supplier.Email">
+
+                                    <!-- SUPPLIER -->
 
                                     <td>
+
                                         <div class="fw-semibold">
                                             @supplier.SupplierName
                                         </div>
+
                                     </td>
 
+
+                                    <!-- CONTACT -->
 
                                     <td>
-                                        @supplier.ContactPerson
+
+                                        @if (!string.IsNullOrWhiteSpace(supplier.ContactPerson))
+                                        {
+                                            @supplier.ContactPerson
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Not provided
+                                            </span>
+                                        }
+
                                     </td>
 
+
+                                    <!-- EMAIL -->
 
                                     <td>
-                                        <a href="mailto:@supplier.Email"
-                                           class="text-decoration-none">
 
-                                            @supplier.Email
+                                        @if (!string.IsNullOrWhiteSpace(supplier.Email))
+                                        {
+                                            <a href="mailto:@supplier.Email"
+                                                   class="text-decoration-none">
 
-                                        </a>
+                                                @supplier.Email
+
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Not provided
+                                            </span>
+                                        }
+
                                     </td>
 
+
+                                    <!-- CONSUMABLE COUNT -->
 
                                     <td>
 
@@ -170,56 +270,77 @@
                                     </td>
 
 
+                                    <!-- STATUS -->
+
+                                    <td>
+
+                                        <span class="badge bg-success">
+
+                                            <i class="fa-solid fa-check me-1"></i>
+                                            Active
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <!-- ACTIONS -->
+
                                     <td class="text-end">
 
-                                        <!-- VIEW -->
+                                        <div class="btn-group btn-group-sm"
+                                             role="group">
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-info me-1"
-                                                title="View supplier"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#viewSupplierModal"
-                                                data-id="@supplier.SupplierId"
-                                                data-name="@supplier.SupplierName"
-                                                data-contact="@supplier.ContactPerson"
-                                                data-email="@supplier.Email"
-                                                data-consumables="@(supplier.Consumables?.Count ?? 0)">
+                                            <!-- VIEW -->
 
-                                            <i class="fa-solid fa-eye"></i>
+                                            <button type="button"
+                                                    class="btn btn-outline-info"
+                                                    title="View supplier"
+                                                    onclick="viewSupplier(
+                                                '@supplier.SupplierId',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.SupplierName ?? ""))',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.ContactPerson ?? ""))',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.Email ?? ""))',
+                                                '@(supplier.Consumables?.Count ?? 0)'
+                                                )">
 
-                                        </button>
+                                                <i class="fa-solid fa-eye"></i>
 
-
-                                        <!-- EDIT -->
-
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-primary me-1"
-                                                title="Edit supplier"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editSupplierModal"
-                                                data-id="@supplier.SupplierId"
-                                                data-name="@supplier.SupplierName"
-                                                data-contact="@supplier.ContactPerson"
-                                                data-email="@supplier.Email">
-
-                                            <i class="fa-solid fa-pen"></i>
-
-                                        </button>
+                                            </button>
 
 
-                                        <!-- DELETE -->
+                                            <!-- EDIT -->
 
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Delete supplier"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteSupplierModal"
-                                                data-id="@supplier.SupplierId"
-                                                data-name="@supplier.SupplierName">
+                                            <button type="button"
+                                                    class="btn btn-outline-primary"
+                                                    title="Edit supplier"
+                                                    onclick="editSupplier(
+                                                '@supplier.SupplierId',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.SupplierName ?? ""))',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.ContactPerson ?? ""))',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.Email ?? ""))'
+                                                )">
 
-                                            <i class="fa-solid fa-trash"></i>
+                                                <i class="fa-solid fa-pen"></i>
 
-                                        </button>
+                                            </button>
+
+
+                                            <!-- DELETE -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    title="Delete supplier"
+                                                    onclick="deleteSupplier(
+                                                '@supplier.SupplierId',
+                                                '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(supplier.SupplierName ?? ""))'
+                                                )">
+
+                                                <i class="fa-solid fa-trash"></i>
+
+                                            </button>
+
+                                        </div>
 
                                     </td>
 
@@ -228,9 +349,9 @@
                         }
                         else
                         {
-                            <tr>
+                            <tr id="noSuppliersRow">
 
-                                <td colspan="5"
+                                <td colspan="6"
                                     class="text-center py-5">
 
                                     <div class="text-muted">
@@ -251,6 +372,33 @@
 
                             </tr>
                         }
+
+
+                        <!-- NO SEARCH RESULTS -->
+
+                        <tr id="noSearchResultsRow"
+                            style="display:none;">
+
+                            <td colspan="6"
+                                class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+
+                                    <div class="fw-semibold">
+                                        No matching suppliers found
+                                    </div>
+
+                                    <small>
+                                        Try a different supplier, contact person, or email.
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
 
                     </tbody>
 
@@ -278,16 +426,21 @@
 
         <div class="modal-content border-0 shadow">
 
-            <form asp-action="Create"
-                  method="post">
+            <form id="createSupplierForm"
+                  method="post"
+                  asp-controller="Supplier"
+                  asp-action="Create">
 
                 @Html.AntiForgeryToken()
 
                 <div class="modal-header">
 
                     <h5 class="modal-title fw-bold">
+
                         <i class="fa-solid fa-plus text-primary me-2"></i>
+
                         Add Supplier
+
                     </h5>
 
                     <button type="button"
@@ -300,11 +453,20 @@
 
                 <div class="modal-body">
 
+                    <div id="createSupplierValidation"
+                         class="alert alert-danger d-none">
+                    </div>
+
+
+                    <!-- SUPPLIER NAME -->
+
                     <div class="mb-3">
 
                         <label for="SupplierName"
                                class="form-label fw-semibold">
+
                             Supplier Name
+
                         </label>
 
                         <input type="text"
@@ -321,11 +483,15 @@
                     </div>
 
 
+                    <!-- CONTACT -->
+
                     <div class="mb-3">
 
                         <label for="ContactPerson"
                                class="form-label fw-semibold">
+
                             Contact Person
+
                         </label>
 
                         <input type="text"
@@ -338,11 +504,15 @@
                     </div>
 
 
+                    <!-- EMAIL -->
+
                     <div class="mb-3">
 
                         <label for="Email"
                                class="form-label fw-semibold">
+
                             E-mail Address
+
                         </label>
 
                         <input type="email"
@@ -362,14 +532,20 @@
                     <button type="button"
                             class="btn btn-light"
                             data-bs-dismiss="modal">
+
                         Cancel
+
                     </button>
 
                     <button type="submit"
+                            id="createSupplierButton"
                             class="btn btn-primary">
 
                         <i class="fa-solid fa-check me-1"></i>
-                        Save Supplier
+
+                        <span>
+                            Save Supplier
+                        </span>
 
                     </button>
 
@@ -400,8 +576,11 @@
             <div class="modal-header">
 
                 <h5 class="modal-title fw-bold">
+
                     <i class="fa-solid fa-circle-info text-info me-2"></i>
+
                     Supplier Details
+
                 </h5>
 
                 <button type="button"
@@ -453,7 +632,7 @@
                 </div>
 
 
-                <div>
+                <div class="mb-3">
 
                     <small class="text-muted d-block">
                         Consumables Supplied
@@ -465,6 +644,22 @@
 
                 </div>
 
+
+                <div>
+
+                    <small class="text-muted d-block">
+                        Status
+                    </small>
+
+                    <span class="badge bg-success">
+
+                        <i class="fa-solid fa-check me-1"></i>
+                        Active
+
+                    </span>
+
+                </div>
+
             </div>
 
 
@@ -473,7 +668,9 @@
                 <button type="button"
                         class="btn btn-secondary"
                         data-bs-dismiss="modal">
+
                     Close
+
                 </button>
 
             </div>
@@ -498,8 +695,10 @@
 
         <div class="modal-content border-0 shadow">
 
-            <form asp-action="Edit"
-                  method="post">
+            <form id="editSupplierForm"
+                  method="post"
+                  asp-controller="Supplier"
+                  asp-action="Edit">
 
                 @Html.AntiForgeryToken()
 
@@ -513,6 +712,7 @@
                     <h5 class="modal-title fw-bold">
 
                         <i class="fa-solid fa-pen text-primary me-2"></i>
+
                         Edit Supplier
 
                     </h5>
@@ -527,11 +727,20 @@
 
                 <div class="modal-body">
 
+                    <div id="editSupplierValidation"
+                         class="alert alert-danger d-none">
+                    </div>
+
+
+                    <!-- SUPPLIER NAME -->
+
                     <div class="mb-3">
 
                         <label for="editSupplierName"
                                class="form-label fw-semibold">
+
                             Supplier Name
+
                         </label>
 
                         <input type="text"
@@ -544,11 +753,15 @@
                     </div>
 
 
+                    <!-- CONTACT -->
+
                     <div class="mb-3">
 
                         <label for="editContactPerson"
                                class="form-label fw-semibold">
+
                             Contact Person
+
                         </label>
 
                         <input type="text"
@@ -561,11 +774,15 @@
                     </div>
 
 
+                    <!-- EMAIL -->
+
                     <div class="mb-3">
 
                         <label for="editEmail"
                                class="form-label fw-semibold">
+
                             E-mail Address
+
                         </label>
 
                         <input type="email"
@@ -585,14 +802,20 @@
                     <button type="button"
                             class="btn btn-light"
                             data-bs-dismiss="modal">
+
                         Cancel
+
                     </button>
 
                     <button type="submit"
+                            id="editSupplierButton"
                             class="btn btn-primary">
 
                         <i class="fa-solid fa-floppy-disk me-1"></i>
-                        Save Changes
+
+                        <span>
+                            Save Changes
+                        </span>
 
                     </button>
 
@@ -620,8 +843,10 @@
 
         <div class="modal-content border-0 shadow">
 
-            <form asp-action="Delete"
-                  method="post">
+            <form id="deleteSupplierForm"
+                  method="post"
+                  asp-controller="Supplier"
+                  asp-action="DeleteConfirmed">
 
                 @Html.AntiForgeryToken()
 
@@ -635,6 +860,7 @@
                     <h5 class="modal-title fw-bold text-danger">
 
                         <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
                         Delete Supplier
 
                     </h5>
@@ -660,10 +886,17 @@
                         <strong id="deleteSupplierName"></strong>
 
                         <div class="small mt-1">
+
                             This will be a soft delete. The supplier will not
                             be permanently removed from the database.
+
                         </div>
 
+                    </div>
+
+
+                    <div id="deleteSupplierError"
+                         class="alert alert-danger mt-3 d-none mb-0">
                     </div>
 
                 </div>
@@ -674,20 +907,109 @@
                     <button type="button"
                             class="btn btn-light"
                             data-bs-dismiss="modal">
+
                         Cancel
+
                     </button>
 
                     <button type="submit"
+                            id="deleteSupplierButton"
                             class="btn btn-danger">
 
                         <i class="fa-solid fa-trash me-1"></i>
-                        Delete Supplier
+
+                        <span>
+                            Delete Supplier
+                        </span>
 
                     </button>
 
                 </div>
 
             </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =============================================================
+     SUCCESS MESSAGE MODAL
+     ============================================================= -->
+
+<div class="modal fade"
+     id="supplierSuccessModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold text-success">
+
+                    <i class="fa-solid fa-circle-check me-2"></i>
+
+                    Success
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body text-center py-4">
+
+                <div class="mb-3">
+
+                    <div class="d-inline-flex
+                        align-items-center
+                        justify-content-center
+                        rounded-circle
+                        bg-success-subtle
+                        text-success"
+                         style="width:70px;height:70px;">
+
+                        <i class="fa-solid fa-check fa-2x"></i>
+
+                    </div>
+
+                </div>
+
+
+                <h6 class="fw-semibold mb-2">
+                    Operation Successful
+                </h6>
+
+
+                <p id="supplierSuccessMessage"
+                       class="text-muted mb-0">
+                </p>
+
+            </div>
+
+
+            <div class="modal-footer border-0 justify-content-center">
+
+                <button type="button"
+                        class="btn btn-success px-4"
+                        data-bs-dismiss="modal">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    OK
+
+                </button>
+
+            </div>
 
         </div>
 
@@ -703,43 +1025,421 @@
         document.addEventListener("DOMContentLoaded", function () {
 
             /* =====================================================
+               URLS
+               ===================================================== */
+
+            const createUrl =
+                "@Url.Action("Create", "Supplier", new { area = "Manager" })";
+
+            const editUrl =
+                "@Url.Action("Edit", "Supplier", new { area = "Manager" })";
+
+            const deleteUrl =
+                "@Url.Action("DeleteConfirmed", "Supplier", new { area = "Manager" })";
+
+
+            /* =====================================================
+               SUCCESS MESSAGE
+               ===================================================== */
+
+            function showSuccess(message) {
+
+                document.getElementById(
+                    "supplierSuccessMessage"
+                ).textContent = message || "Operation successful.";
+
+                const modal =
+                    new bootstrap.Modal(
+                        document.getElementById(
+                            "supplierSuccessModal"
+                        )
+                    );
+
+                modal.show();
+            }
+
+
+            /* =====================================================
+               ERROR MESSAGE
+               ===================================================== */
+
+            function showValidationErrors(
+                container,
+                errors) {
+
+                if (!container)
+                    return;
+
+                container.innerHTML = "";
+
+                if (!errors || errors.length === 0) {
+
+                    container.classList.add("d-none");
+
+                    return;
+                }
+
+                const ul =
+                    document.createElement("ul");
+
+                ul.className = "mb-0";
+
+                errors.forEach(function (error) {
+
+                    const li =
+                        document.createElement("li");
+
+                    li.textContent = error;
+
+                    ul.appendChild(li);
+
+                });
+
+                container.appendChild(ul);
+
+                container.classList.remove("d-none");
+            }
+
+
+            /* =====================================================
+               OPEN CREATE MODAL
+               ===================================================== */
+
+            window.openCreateSupplierModal =
+                function () {
+
+                    const form =
+                        document.getElementById(
+                            "createSupplierForm"
+                        );
+
+                    if (form)
+                        form.reset();
+
+                    const validation =
+                        document.getElementById(
+                            "createSupplierValidation"
+                        );
+
+                    if (validation)
+                        validation.classList.add("d-none");
+                };
+
+
+            /* =====================================================
                VIEW SUPPLIER
                ===================================================== */
 
-            const viewModal =
-                document.getElementById("viewSupplierModal");
+            window.viewSupplier =
+                function (
+                    id,
+                    name,
+                    contact,
+                    email,
+                    consumables) {
 
-            if (viewModal) {
+                    document.getElementById(
+                        "viewSupplierName"
+                    ).textContent = name || "";
 
-                viewModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
+                    document.getElementById(
+                        "viewSupplierContact"
+                    ).textContent =
+                        contact || "Not provided";
+
+                    document.getElementById(
+                        "viewSupplierEmail"
+                    ).textContent =
+                        email || "Not provided";
+
+                    document.getElementById(
+                        "viewSupplierConsumables"
+                    ).textContent =
+                        consumables || "0";
+
+                    new bootstrap.Modal(
+                        document.getElementById(
+                            "viewSupplierModal"
+                        )
+                    ).show();
+                };
+
+
+            /* =====================================================
+               EDIT SUPPLIER
+               ===================================================== */
+
+            window.editSupplier =
+                function (
+                    id,
+                    name,
+                    contact,
+                    email) {
+
+                    document.getElementById(
+                        "editSupplierId"
+                    ).value = id;
+
+                    document.getElementById(
+                        "editSupplierName"
+                    ).value = name || "";
+
+                    document.getElementById(
+                        "editContactPerson"
+                    ).value = contact || "";
+
+                    document.getElementById(
+                        "editEmail"
+                    ).value = email || "";
+
+                    document.getElementById(
+                        "editSupplierValidation"
+                    ).classList.add("d-none");
+
+                    new bootstrap.Modal(
+                        document.getElementById(
+                            "editSupplierModal"
+                        )
+                    ).show();
+                };
+
+
+            /* =====================================================
+               DELETE SUPPLIER
+               ===================================================== */
+
+            window.deleteSupplier =
+                function (
+                    id,
+                    name) {
+
+                    document.getElementById(
+                        "deleteSupplierId"
+                    ).value = id;
+
+                    document.getElementById(
+                        "deleteSupplierName"
+                    ).textContent = name || "";
+
+                    document.getElementById(
+                        "deleteSupplierError"
+                    ).classList.add("d-none");
+
+                    new bootstrap.Modal(
+                        document.getElementById(
+                            "deleteSupplierModal"
+                        )
+                    ).show();
+                };
+
+
+            /* =====================================================
+               SEARCH
+               ===================================================== */
+
+            const searchInput =
+                document.getElementById(
+                    "supplierSearch"
+                );
+
+            if (searchInput) {
+
+                searchInput.addEventListener(
+                    "input",
+                    function () {
+
+                        const search =
+                            this.value
+                                .toLowerCase()
+                                .trim();
+
+                        const rows =
+                            document.querySelectorAll(
+                                "#suppliersTableBody .supplier-row"
+                            );
+
+                        let visibleCount = 0;
+
+                        rows.forEach(function (row) {
+
+                            const name =
+                                (
+                                    row.dataset.name || ""
+                                ).toLowerCase();
+
+                            const contact =
+                                (
+                                    row.dataset.contact || ""
+                                ).toLowerCase();
+
+                            const email =
+                                (
+                                    row.dataset.email || ""
+                                ).toLowerCase();
+
+                            const matches =
+                                name.includes(search) ||
+                                contact.includes(search) ||
+                                email.includes(search);
+
+                            row.style.display =
+                                matches ? "" : "none";
+
+                            if (matches)
+                                visibleCount++;
+
+                        });
+
+
+                        document.getElementById(
+                            "recordCount"
+                        ).innerText =
+                            visibleCount + " supplier(s)";
+
+
+                        const noSearchResults =
+                            document.getElementById(
+                                "noSearchResultsRow"
+                            );
+
+                        if (noSearchResults) {
+
+                            noSearchResults.style.display =
+                                rows.length > 0 &&
+                                visibleCount === 0
+                                    ? ""
+                                    : "none";
+                        }
+
+                    }
+                );
+            }
+
+
+            /* =====================================================
+               CREATE SUPPLIER
+               ===================================================== */
+
+            const createForm =
+                document.getElementById(
+                    "createSupplierForm"
+                );
+
+            if (createForm) {
+
+                createForm.addEventListener(
+                    "submit",
+                    async function (event) {
+
+                        event.preventDefault();
 
                         const button =
-                            event.relatedTarget;
+                            document.getElementById(
+                                "createSupplierButton"
+                            );
 
-                        if (!button)
-                            return;
+                        const validation =
+                            document.getElementById(
+                                "createSupplierValidation"
+                            );
 
-                        document.getElementById(
-                            "viewSupplierName"
-                        ).textContent =
-                            button.dataset.name || "";
+                        validation.classList.add("d-none");
 
-                        document.getElementById(
-                            "viewSupplierContact"
-                        ).textContent =
-                            button.dataset.contact || "";
+                        button.disabled = true;
 
-                        document.getElementById(
-                            "viewSupplierEmail"
-                        ).textContent =
-                            button.dataset.email || "";
+                        try {
 
-                        document.getElementById(
-                            "viewSupplierConsumables"
-                        ).textContent =
-                            button.dataset.consumables || "0";
+                            const response =
+                                await fetch(
+                                    createUrl,
+                                    {
+                                        method: "POST",
+                                        body:
+                                            new FormData(createForm),
+                                        headers: {
+                                            "X-Requested-With":
+                                                "XMLHttpRequest"
+                                        }
+                                    }
+                                );
+
+                            const contentType =
+                                response.headers.get(
+                                    "content-type"
+                                ) || "";
+
+
+                            if (contentType.includes(
+                                "application/json")) {
+
+                                const result =
+                                    await response.json();
+
+                                if (result.success) {
+
+                                    bootstrap.Modal
+                                        .getInstance(
+                                            document.getElementById(
+                                                "addSupplierModal"
+                                            )
+                                        )
+                                        ?.hide();
+
+                                    showSuccess(
+                                        result.message
+                                    );
+
+                                    setTimeout(
+                                        function () {
+                                            location.reload();
+                                        },
+                                        800
+                                    );
+
+                                }
+                                else {
+
+                                    showValidationErrors(
+                                        validation,
+                                        [
+                                            result.message ||
+                                            "Unable to add supplier."
+                                        ]
+                                    );
+
+                                }
+
+                            }
+                            else {
+
+                                const html =
+                                    await response.text();
+
+                                validation.innerHTML =
+                                    "Unable to add supplier. Please check the entered information.";
+
+                                validation.classList.remove(
+                                    "d-none"
+                                );
+                            }
+
+                        }
+                        catch (error) {
+
+                            showValidationErrors(
+                                validation,
+                                [
+                                    "An unexpected error occurred while adding the supplier."
+                                ]
+                            );
+
+                        }
+                        finally {
+
+                            button.disabled = false;
+
+                        }
+
                     }
                 );
             }
@@ -749,40 +1449,131 @@
                EDIT SUPPLIER
                ===================================================== */
 
-            const editModal =
-                document.getElementById("editSupplierModal");
+            const editForm =
+                document.getElementById(
+                    "editSupplierForm"
+                );
 
-            if (editModal) {
+            if (editForm) {
 
-                editModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
+                editForm.addEventListener(
+                    "submit",
+                    async function (event) {
+
+                        event.preventDefault();
 
                         const button =
-                            event.relatedTarget;
+                            document.getElementById(
+                                "editSupplierButton"
+                            );
 
-                        if (!button)
-                            return;
+                        const validation =
+                            document.getElementById(
+                                "editSupplierValidation"
+                            );
 
-                        document.getElementById(
-                            "editSupplierId"
-                        ).value =
-                            button.dataset.id || "";
+                        validation.classList.add("d-none");
 
-                        document.getElementById(
-                            "editSupplierName"
-                        ).value =
-                            button.dataset.name || "";
+                        button.disabled = true;
 
-                        document.getElementById(
-                            "editContactPerson"
-                        ).value =
-                            button.dataset.contact || "";
+                        try {
 
-                        document.getElementById(
-                            "editEmail"
-                        ).value =
-                            button.dataset.email || "";
+                            const id =
+                                document.getElementById(
+                                    "editSupplierId"
+                                ).value;
+
+                            const response =
+                                await fetch(
+                                    editUrl +
+                                    "?id=" +
+                                    encodeURIComponent(id),
+                                    {
+                                        method: "POST",
+                                        body:
+                                            new FormData(editForm),
+                                        headers: {
+                                            "X-Requested-With":
+                                                "XMLHttpRequest"
+                                        }
+                                    }
+                                );
+
+
+                            const contentType =
+                                response.headers.get(
+                                    "content-type"
+                                ) || "";
+
+
+                            if (contentType.includes(
+                                "application/json")) {
+
+                                const result =
+                                    await response.json();
+
+                                if (result.success) {
+
+                                    bootstrap.Modal
+                                        .getInstance(
+                                            document.getElementById(
+                                                "editSupplierModal"
+                                            )
+                                        )
+                                        ?.hide();
+
+                                    showSuccess(
+                                        result.message
+                                    );
+
+                                    setTimeout(
+                                        function () {
+                                            location.reload();
+                                        },
+                                        800
+                                    );
+
+                                }
+                                else {
+
+                                    showValidationErrors(
+                                        validation,
+                                        [
+                                            result.message ||
+                                            "Unable to update supplier."
+                                        ]
+                                    );
+
+                                }
+
+                            }
+                            else {
+
+                                validation.innerHTML =
+                                    "Unable to update supplier. Please check the entered information.";
+
+                                validation.classList.remove(
+                                    "d-none"
+                                );
+                            }
+
+                        }
+                        catch (error) {
+
+                            showValidationErrors(
+                                validation,
+                                [
+                                    "An unexpected error occurred while updating the supplier."
+                                ]
+                            );
+
+                        }
+                        finally {
+
+                            button.disabled = false;
+
+                        }
+
                     }
                 );
             }
@@ -792,30 +1583,107 @@
                DELETE SUPPLIER
                ===================================================== */
 
-            const deleteModal =
-                document.getElementById("deleteSupplierModal");
+            const deleteForm =
+                document.getElementById(
+                    "deleteSupplierForm"
+                );
 
-            if (deleteModal) {
+            if (deleteForm) {
 
-                deleteModal.addEventListener(
-                    "show.bs.modal",
-                    function (event) {
+                deleteForm.addEventListener(
+                    "submit",
+                    async function (event) {
+
+                        event.preventDefault();
 
                         const button =
-                            event.relatedTarget;
+                            document.getElementById(
+                                "deleteSupplierButton"
+                            );
 
-                        if (!button)
-                            return;
+                        const errorBox =
+                            document.getElementById(
+                                "deleteSupplierError"
+                            );
 
-                        document.getElementById(
-                            "deleteSupplierId"
-                        ).value =
-                            button.dataset.id || "";
+                        errorBox.classList.add(
+                            "d-none"
+                        );
 
-                        document.getElementById(
-                            "deleteSupplierName"
-                        ).textContent =
-                            button.dataset.name || "";
+                        button.disabled = true;
+
+                        try {
+
+                            const response =
+                                await fetch(
+                                    deleteUrl,
+                                    {
+                                        method: "POST",
+                                        body:
+                                            new FormData(deleteForm),
+                                        headers: {
+                                            "X-Requested-With":
+                                                "XMLHttpRequest"
+                                        }
+                                    }
+                                );
+
+
+                            const result =
+                                await response.json();
+
+
+                            if (result.success) {
+
+                                bootstrap.Modal
+                                    .getInstance(
+                                        document.getElementById(
+                                            "deleteSupplierModal"
+                                        )
+                                    )
+                                    ?.hide();
+
+                                showSuccess(
+                                    result.message
+                                );
+
+                                setTimeout(
+                                    function () {
+                                        location.reload();
+                                    },
+                                    800
+                                );
+
+                            }
+                            else {
+
+                                errorBox.textContent =
+                                    result.message ||
+                                    "Unable to delete supplier.";
+
+                                errorBox.classList.remove(
+                                    "d-none"
+                                );
+
+                            }
+
+                        }
+                        catch (error) {
+
+                            errorBox.textContent =
+                                "An unexpected error occurred while deleting the supplier.";
+
+                            errorBox.classList.remove(
+                                "d-none"
+                            );
+
+                        }
+                        finally {
+
+                            button.disabled = false;
+
+                        }
+
                     }
                 );
             }

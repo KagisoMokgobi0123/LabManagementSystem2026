@@ -3,6 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NMB_HLabSys.Areas.Manager.Models
 {
+    public enum StockStatus
+    {
+        Sufficient = 1,
+        ReorderNow = 2,
+        OutOfStock = 3
+    }
+
     public class ConsumableModel
     {
         [Key]
@@ -22,6 +29,15 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Range(0, int.MaxValue)]
         [Display(Name = "Reorder Level")]
         public int ReorderLevel { get; set; }
+
+        // ============================================================
+        // CURRENT STOCK STATUS
+        // ============================================================
+
+        [Required]
+        [Display(Name = "Stock Status")]
+        public StockStatus StockStatus { get; set; }
+            = StockStatus.Sufficient;
 
 
         // ============================================================
@@ -70,5 +86,15 @@ namespace NMB_HLabSys.Areas.Manager.Models
             StockAdjustments
         { get; set; }
             = new List<StockAdjustmentModel>();
+
+
+        // ============================================================
+        // STOCK STATUS HISTORY
+        // ============================================================
+
+        public virtual ICollection<StockStatusHistoryModel>
+            StockStatusHistories
+        { get; set; }
+            = new List<StockStatusHistoryModel>();
     }
 }

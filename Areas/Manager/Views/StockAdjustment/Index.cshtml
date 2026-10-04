@@ -1,185 +1,1376 @@
 ﻿@using NMB_HLabSys.Areas.Manager.Models
-@model IEnumerable<StockAdjustmentModel>
-
+@model IEnumerable<OrderModel>
 
 @{
-    var consumables =
-    ViewBag.Consumables as IEnumerable<ConsumableModel>
-    ?? Enumerable.Empty<ConsumableModel>();
-
     Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+
+    var orders = Model?.ToList()
+        ?? new List<OrderModel>();
 }
 
-<div class="modal-header border-0">
-    <div>
+<div class="container-fluid py-4">
 
-        <h5 class="modal-title fw-bold">
-            <i class="fa-solid fa-sliders text-primary me-2"></i>
-            Stock Adjustment
-        </h5>
+    <!-- ============================================================
+         PAGE HEADER
+         ============================================================ -->
 
-        <small class="text-muted">
-            Manually update consumable stock.
-        </small>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fa-solid fa-boxes-stacked text-primary me-2"></i>
+                Stock Receiving
+            </h2>
+
+            <p class="text-muted mb-0">
+                Receive ordered consumables and update inventory stock.
+            </p>
+        </div>
 
     </div>
 
-    <button type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close">
-    </button>
 
-</div>
-<form asp-area="Manager" asp-controller="StockAdjustment" asp-action="Create" method="post" id="stockAdjustmentForm">
-    @Html.AntiForgeryToken()
+    <!-- ============================================================
+         ALERTS
+         ============================================================ -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
 
-    <div class="modal-body">
+            <i class="fa-solid fa-circle-check me-2"></i>
 
-        <!-- VALIDATION -->
+            @TempData["SuccessMessage"]
 
-        <div asp-validation-summary="ModelOnly"
-             class="alert alert-danger small">
-        </div>
-
-
-        <!-- CONSUMABLE -->
-
-        <div class="mb-3">
-
-            <label asp-for="ConsumableId"
-                   class="form-label fw-semibold">
-                Consumable
-            </label>
-
-            <select asp-for="ConsumableId"
-                    class="form-select">
-
-                <option value="">
-                    -- Select Consumable --
-                </option>
-
-                @foreach (var consumable in consumables)
-                {
-                    <option value="@consumable.ConsumableId">
-                        @consumable.Name
-                    </option>
-                }
-
-            </select>
-
-            <span asp-validation-for="ConsumableId"
-                  class="text-danger small">
-            </span>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
 
         </div>
+    }
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
 
-        <!-- ADJUSTMENT TYPE -->
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
 
-        <div class="mb-3">
+            @TempData["ErrorMessage"]
 
-            <label asp-for="AdjustmentType"
-                   class="form-label fw-semibold">
-                Adjustment Type
-            </label>
-
-            <select asp-for="AdjustmentType"
-                    class="form-select">
-
-                <option value="@StockAdjustmentType.Increase">
-                    Increase Stock
-                </option>
-
-                <option value="@StockAdjustmentType.Decrease">
-                    Decrease Stock
-                </option>
-
-                <option value="@StockAdjustmentType.Set">
-                    Set Stock Quantity
-                </option>
-
-            </select>
-
-            <span asp-validation-for="AdjustmentType"
-                  class="text-danger small">
-            </span>
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
 
         </div>
+    }
 
 
-        <!-- QUANTITY -->
+    <!-- ============================================================
+         ORDERS CARD
+         ============================================================ -->
 
-        <div class="mb-3">
+    <div class="card border-0 shadow-sm">
 
-            <label asp-for="Quantity"
-                   class="form-label fw-semibold">
-                Quantity
-            </label>
+        <div class="card-header bg-white border-0 py-3">
 
-            <input asp-for="Quantity"
-                   type="number"
-                   min="0"
-                   step="1"
-                   class="form-control"
-                   placeholder="Enter quantity" />
+            <div class="d-flex justify-content-between align-items-center">
 
-            <span asp-validation-for="Quantity"
-                  class="text-danger small">
-            </span>
+                <div>
+                    <h5 class="fw-bold mb-0">
+                        Orders
+                    </h5>
 
-            <div class="form-text">
+                    <small class="text-muted">
+                        Select an order to receive its items.
+                    </small>
+                </div>
 
-                <i class="fa-solid fa-circle-info me-1"></i>
-
-                <strong>Increase</strong> adds to the current stock.
-
-                <strong>Decrease</strong> removes from the current stock.
-
-                <strong>Set</strong> replaces the current stock quantity.
+                <span class="badge bg-primary rounded-pill">
+                    @orders.Count order@(orders.Count == 1 ? "" : "s")
+                </span>
 
             </div>
 
         </div>
 
 
-        <!-- WARNING -->
+        <div class="card-body p-0">
 
-        <div class="alert alert-warning
-            border-0
-            bg-warning
-            bg-opacity-10
-            small mb-0">
+            @if (!orders.Any())
+            {
+                <div class="text-center py-5">
 
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    <i class="fa-solid fa-box-open
+                        fa-3x
+                        text-muted
+                        mb-3">
+                    </i>
 
-            This adjustment will immediately change the
-            consumable's quantity on hand.
+                    <h5 class="fw-semibold">
+                        No orders found
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        There are currently no orders available for receiving.
+                    </p>
+
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th class="ps-4">
+                                    Order Number
+                                </th>
+
+                                <th>
+                                    Supplier
+                                </th>
+
+                                <th>
+                                    Items
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Date
+                                </th>
+
+                                <th class="text-end pe-4">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var order in orders)
+                            {
+                                var itemCount =
+                                    order.OrderItems?.Count ?? 0;
+
+                                var orderedCount =
+                                    order.OrderItems?
+                                        .Count(i =>
+                                            i.Status ==
+                                            OrderItemStatus.Ordered)
+                                    ?? 0;
+
+                                var receivedCount =
+                                    order.OrderItems?
+                                        .Count(i =>
+                                            i.Status ==
+                                            OrderItemStatus.Received)
+                                    ?? 0;
+
+                                var cancelledCount =
+                                    order.OrderItems?
+                                        .Count(i =>
+                                            i.Status ==
+                                            OrderItemStatus.Cancelled)
+                                    ?? 0;
+
+                                string statusClass;
+
+                                switch (order.Status)
+                                {
+                                    case OrderStatus.Complete:
+                                        statusClass = "bg-success";
+                                        break;
+
+                                    case OrderStatus.PartiallyComplete:
+                                        statusClass = "bg-warning text-dark";
+                                        break;
+
+                                    case OrderStatus.Cancelled:
+                                        statusClass = "bg-danger";
+                                        break;
+
+                                    default:
+                                        statusClass = "bg-primary";
+                                        break;
+                                }
+
+                                <tr>
+
+                                    <td class="ps-4">
+
+                                        <div class="fw-semibold">
+                                            @order.OrderNumber
+                                        </div>
+
+                                        <small class="text-muted">
+                                            Order #@order.OrderId
+                                        </small>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        @if (order.Supplier != null)
+                                        {
+                                            @order.Supplier.SupplierName
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Unknown supplier
+                                            </span>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="fw-semibold">
+                                            @itemCount
+                                        </span>
+
+                                        <small class="text-muted">
+                                            item@(itemCount == 1 ? "" : "s")
+                                        </small>
+
+                                        @if (orderedCount > 0)
+                                        {
+                                            <div class="small text-muted mt-1">
+
+                                                @orderedCount pending
+
+                                                @if (receivedCount > 0)
+                                                {
+                                                    <span>
+                                                        · @receivedCount received
+                                                    </span>
+                                                }
+
+                                                @if (cancelledCount > 0)
+                                                {
+                                                    <span>
+                                                        · @cancelledCount cancelled
+                                                    </span>
+                                                }
+
+                                            </div>
+                                        }
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span class="badge @statusClass">
+
+                                            @switch (order.Status)
+                                            {
+                                                case OrderStatus.Ordered:
+                                                    @:Ordered
+                                                    break;
+
+                                                case OrderStatus.PartiallyComplete:
+                                                    @:Partially Delivered
+                                                    break;
+
+                                                case OrderStatus.Complete:
+                                                    @:Delivered
+                                                    break;
+
+                                                case OrderStatus.Cancelled:
+                                                    @:Cancelled
+                                                    break;
+                                            }
+
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <span>
+                                            —
+                                        </span>
+
+                                    </td>
+
+
+                                    <td class="text-end pe-4">
+
+                                        @if (order.Status !=
+                                            OrderStatus.Complete &&
+                                            order.Status !=
+                                            OrderStatus.Cancelled &&
+                                            orderedCount > 0)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-primary"
+                                                    onclick="openOrderModal(@order.OrderId)">
+
+                                                <i class="fa-solid fa-box-open me-1"></i>
+
+                                                Open Order
+
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-secondary"
+                                                    onclick="openOrderModal(@order.OrderId)">
+
+                                                <i class="fa-solid fa-eye me-1"></i>
+
+                                                View
+
+                                            </button>
+                                        }
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
 
         </div>
 
     </div>
 
+</div>
 
-    <div class="modal-footer border-0">
 
-        <button type="button"
-                class="btn btn-light"
-                data-bs-dismiss="modal">
+<!-- ================================================================
+     ORDER DETAILS MODAL
+     ================================================================ -->
 
-            Cancel
+<div class="modal fade"
+     id="orderDetailsModal"
+     tabindex="-1"
+     aria-labelledby="orderDetailsModalLabel"
+     aria-hidden="true">
 
-        </button>
+    <div class="modal-dialog modal-xl modal-dialog-centered">
 
-        <button type="submit"
-                class="btn btn-primary">
+        <div class="modal-content border-0 shadow">
 
-            <i class="fa-solid fa-check me-2"></i>
+            <div class="modal-header border-0">
 
-            Apply Adjustment
+                <div>
 
-        </button>
+                    <h5 class="modal-title fw-bold"
+                        id="orderDetailsModalLabel">
+
+                        <i class="fa-solid fa-box-open text-primary me-2"></i>
+
+                        Order Details
+
+                    </h5>
+
+                    <small class="text-muted"
+                           id="orderModalSubtitle">
+                        Loading order...
+                    </small>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <!-- LOADING -->
+
+                <div id="orderModalLoading"
+                     class="text-center py-5">
+
+                    <div class="spinner-border text-primary"
+                         role="status">
+
+                        <span class="visually-hidden">
+                            Loading...
+                        </span>
+
+                    </div>
+
+                    <div class="text-muted mt-3">
+                        Loading order details...
+                    </div>
+
+                </div>
+
+
+                <!-- ERROR -->
+
+                <div id="orderModalError"
+                     class="alert alert-danger d-none">
+
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+                    <span id="orderModalErrorText">
+                        Unable to load the order.
+                    </span>
+
+                </div>
+
+
+                <!-- CONTENT -->
+
+                <div id="orderModalContent"
+                     class="d-none">
+
+                    <!-- ORDER SUMMARY -->
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-4">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block">
+                                    Order Number
+                                </small>
+
+                                <strong id="modalOrderNumber">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block">
+                                    Supplier
+                                </small>
+
+                                <strong id="modalSupplier">
+                                    —
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="col-md-4">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block">
+                                    Status
+                                </small>
+
+                                <span id="modalOrderStatus"
+                                      class="badge bg-primary">
+                                    —
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ITEMS -->
+
+                    <div class="d-flex justify-content-between
+                        align-items-center mb-3">
+
+                        <div>
+
+                            <h6 class="fw-bold mb-1">
+                                Order Items
+                            </h6>
+
+                            <small class="text-muted">
+                                Deliver the entire order or individual items.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered
+                            table-hover align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th>
+                                        Consumable
+                                    </th>
+
+                                    <th class="text-center">
+                                        Ordered
+                                    </th>
+
+                                    <th class="text-center">
+                                        Current Stock
+                                    </th>
+
+                                    <th class="text-center">
+                                        Status
+                                    </th>
+
+                                    <th class="text-end">
+                                        Action
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="orderItemsBody">
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+                <button type="button"
+                        id="completeOrderButton"
+                        class="btn btn-success d-none"
+                        onclick="completeEntireOrder()">
+
+                    <i class="fa-solid fa-check-double me-2"></i>
+
+                    Complete Entire Order
+
+                </button>
+
+            </div>
+
+        </div>
 
     </div>
 
-</form><script> $(document).ready(function () { const form = $('#stockAdjustmentForm'); if ($.validator && $.validator.unobtrusive) { $.validator.unobtrusive.parse(form); } }); </script>
+</div>
+
+
+<!-- ================================================================
+     CONFIRM DELIVERY MODAL
+     ================================================================ -->
+
+<div class="modal fade"
+     id="deliveryConfirmModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold">
+
+                    <i class="fa-solid fa-truck-ramp-box
+                        text-success
+                        me-2">
+                    </i>
+
+                    Confirm Delivery
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <p class="mb-2">
+                    Are you sure you want to mark this item as delivered?
+                </p>
+
+                <div class="alert alert-info
+                    bg-info
+                    bg-opacity-10
+                    border-0
+                    small">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    The ordered quantity will be added to the
+                    consumable's current Quantity On Hand.
+
+                </div>
+
+                <strong id="deliveryItemName">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="button"
+                        id="confirmDeliveryButton"
+                        class="btn btn-success">
+
+                    <i class="fa-solid fa-check me-2"></i>
+
+                    Confirm Delivery
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================================
+     CONFIRM COMPLETE ORDER MODAL
+     ================================================================ -->
+
+<div class="modal fade"
+     id="completeOrderConfirmModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold">
+
+                    <i class="fa-solid fa-boxes-packing
+                        text-success
+                        me-2">
+                    </i>
+
+                    Complete Order
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+
+            <div class="modal-body">
+
+                <p>
+                    Are you sure you want to complete this entire order?
+                </p>
+
+                <div class="alert alert-warning
+                    bg-warning
+                    bg-opacity-10
+                    border-0
+                    small">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    All remaining ordered items will be delivered and
+                    their quantities will be added to inventory.
+
+                </div>
+
+            </div>
+
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="button"
+                        id="confirmCompleteOrderButton"
+                        class="btn btn-success">
+
+                    <i class="fa-solid fa-check-double me-2"></i>
+
+                    Complete Order
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================================
+     HIDDEN ANTI-FORGERY TOKEN
+     ================================================================ -->
+
+<form id="stockReceivingTokenForm"
+      class="d-none">
+
+    @Html.AntiForgeryToken()
+
+</form>
+
+
+@section Scripts
+{
+    <script>
+
+        let currentOrderId = 0;
+        let selectedOrderItemId = 0;
+
+        const orderDetailsModal =
+            new bootstrap.Modal(
+                document.getElementById('orderDetailsModal')
+            );
+
+        const deliveryConfirmModal =
+            new bootstrap.Modal(
+                document.getElementById('deliveryConfirmModal')
+            );
+
+        const completeOrderConfirmModal =
+            new bootstrap.Modal(
+                document.getElementById('completeOrderConfirmModal')
+            );
+
+
+        // ============================================================
+        // OPEN ORDER
+        // ============================================================
+
+        async function openOrderModal(orderId) {
+
+            currentOrderId = orderId;
+
+            document
+                .getElementById('orderModalLoading')
+                .classList.remove('d-none');
+
+            document
+                .getElementById('orderModalContent')
+                .classList.add('d-none');
+
+            document
+                .getElementById('orderModalError')
+                .classList.add('d-none');
+
+            document
+                .getElementById('completeOrderButton')
+                .classList.add('d-none');
+
+            document
+                .getElementById('orderItemsBody')
+                .innerHTML = '';
+
+            orderDetailsModal.show();
+
+            try {
+
+                const response =
+                    await fetch(
+                        '@Url.Action("Details", "StockAdjustment", new { area = "Manager" })'
+                        + '?id='
+                        + encodeURIComponent(orderId),
+                        {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }
+                    );
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Unable to load order details.'
+                    );
+                }
+
+                const data =
+                    await response.json();
+
+                if (!data.success) {
+                    throw new Error(
+                        data.message ||
+                        'Unable to load order details.'
+                    );
+                }
+
+                renderOrder(data);
+
+            }
+            catch (error) {
+
+                document
+                    .getElementById('orderModalErrorText')
+                    .textContent =
+                    error.message ||
+                    'Unable to load order details.';
+
+                document
+                    .getElementById('orderModalError')
+                    .classList.remove('d-none');
+
+            }
+            finally {
+
+                document
+                    .getElementById('orderModalLoading')
+                    .classList.add('d-none');
+
+            }
+        }
+
+
+        // ============================================================
+        // RENDER ORDER
+        // ============================================================
+
+        function renderOrder(data) {
+
+            const order =
+                data.order;
+
+            document
+                .getElementById('orderModalSubtitle')
+                .textContent =
+                'Order ' +
+                order.orderNumber;
+
+            document
+                .getElementById('modalOrderNumber')
+                .textContent =
+                order.orderNumber;
+
+            document
+                .getElementById('modalSupplier')
+                .textContent =
+                order.supplierName || 'Unknown supplier';
+
+            const statusBadge =
+                document.getElementById(
+                    'modalOrderStatus'
+                );
+
+            statusBadge.textContent =
+                order.statusText;
+
+            statusBadge.className =
+                'badge ' +
+                getStatusClass(order.status);
+
+
+            const tbody =
+                document.getElementById(
+                    'orderItemsBody'
+                );
+
+            tbody.innerHTML = '';
+
+
+            let pendingItems = 0;
+
+
+            order.items.forEach(function (item) {
+
+                const row =
+                    document.createElement('tr');
+
+                const delivered =
+                    item.status === 2;
+
+                const cancelled =
+                    item.status === 3;
+
+                const ordered =
+                    item.status === 1;
+
+                if (ordered) {
+                    pendingItems++;
+                }
+
+
+                let statusBadgeHtml = '';
+
+                if (delivered) {
+
+                    statusBadgeHtml =
+                        '<span class="badge bg-success">' +
+                        '<i class="fa-solid fa-check me-1"></i>' +
+                        'Delivered' +
+                        '</span>';
+
+                }
+                else if (cancelled) {
+
+                    statusBadgeHtml =
+                        '<span class="badge bg-danger">' +
+                        'Cancelled' +
+                        '</span>';
+
+                }
+                else {
+
+                    statusBadgeHtml =
+                        '<span class="badge bg-primary">' +
+                        'Ordered' +
+                        '</span>';
+
+                }
+
+
+                let actionHtml = '';
+
+                if (ordered) {
+
+                    actionHtml =
+                        '<button type="button" ' +
+                        'class="btn btn-sm btn-success" ' +
+                        'onclick="confirmDeliverItem(' +
+                        item.orderItemId +
+                        ', \'' +
+                        escapeHtml(item.consumableName) +
+                        '\')">' +
+
+                        '<i class="fa-solid fa-truck-ramp-box me-1"></i>' +
+                        'Deliver' +
+
+                        '</button>';
+
+                }
+                else if (delivered) {
+
+                    actionHtml =
+                        '<span class="text-success small">' +
+                        '<i class="fa-solid fa-circle-check me-1"></i>' +
+                        'Stock updated' +
+                        '</span>';
+
+                }
+                else {
+
+                    actionHtml =
+                        '<span class="text-muted small">' +
+                        'No action' +
+                        '</span>';
+
+                }
+
+
+                row.innerHTML =
+
+                    '<td>' +
+
+                        '<div class="fw-semibold">' +
+                            escapeHtml(item.consumableName) +
+                        '</div>' +
+
+                    '</td>' +
+
+                    '<td class="text-center">' +
+
+                        '<span class="fw-bold">' +
+                            item.quantityOrdered +
+                        '</span>' +
+
+                    '</td>' +
+
+                    '<td class="text-center">' +
+
+                        '<span>' +
+                            item.quantityOnHand +
+                        '</span>' +
+
+                    '</td>' +
+
+                    '<td class="text-center">' +
+                        statusBadgeHtml +
+                    '</td>' +
+
+                    '<td class="text-end">' +
+                        actionHtml +
+                    '</td>';
+
+
+                tbody.appendChild(row);
+
+            });
+
+
+            document
+                .getElementById('orderModalContent')
+                .classList.remove('d-none');
+
+
+            const completeButton =
+                document.getElementById(
+                    'completeOrderButton'
+                );
+
+
+            if (pendingItems > 0) {
+
+                completeButton
+                    .classList
+                    .remove('d-none');
+
+            }
+            else {
+
+                completeButton
+                    .classList
+                    .add('d-none');
+
+            }
+
+        }
+
+
+        // ============================================================
+        // DELIVER INDIVIDUAL ITEM
+        // ============================================================
+
+        function confirmDeliverItem(
+            orderItemId,
+            itemName) {
+
+            selectedOrderItemId =
+                orderItemId;
+
+            document
+                .getElementById('deliveryItemName')
+                .textContent =
+                itemName;
+
+            deliveryConfirmModal.show();
+        }
+
+
+        document
+            .getElementById('confirmDeliveryButton')
+            .addEventListener(
+                'click',
+                async function () {
+
+                    const button =
+                        this;
+
+                    button.disabled = true;
+
+                    try {
+
+                        await postAction(
+                            '@Url.Action("DeliverItem", "StockAdjustment", new { area = "Manager" })',
+                            {
+                                id: selectedOrderItemId
+                            }
+                        );
+
+                        deliveryConfirmModal.hide();
+
+                        await reloadOrder();
+
+                    }
+                    catch (error) {
+
+                        alert(
+                            error.message ||
+                            'Unable to deliver the item.'
+                        );
+
+                    }
+                    finally {
+
+                        button.disabled = false;
+
+                    }
+
+                }
+            );
+
+
+        // ============================================================
+        // COMPLETE ENTIRE ORDER
+        // ============================================================
+
+        function completeEntireOrder() {
+
+            if (!currentOrderId) {
+                return;
+            }
+
+            completeOrderConfirmModal.show();
+
+        }
+
+
+        document
+            .getElementById('confirmCompleteOrderButton')
+            .addEventListener(
+                'click',
+                async function () {
+
+                    const button =
+                        this;
+
+                    button.disabled = true;
+
+                    try {
+
+                        await postAction(
+                            '@Url.Action("CompleteOrder", "StockAdjustment", new { area = "Manager" })',
+                            {
+                                id: currentOrderId
+                            }
+                        );
+
+                        completeOrderConfirmModal.hide();
+
+                        await reloadOrder();
+
+                    }
+                    catch (error) {
+
+                        alert(
+                            error.message ||
+                            'Unable to complete the order.'
+                        );
+
+                    }
+                    finally {
+
+                        button.disabled = false;
+
+                    }
+
+                }
+            );
+
+
+        // ============================================================
+        // RELOAD CURRENT ORDER
+        // ============================================================
+
+        async function reloadOrder() {
+
+            await openOrderModal(
+                currentOrderId
+            );
+
+            /*
+             * Refresh the underlying order list as well so
+             * status/counts reflect the newly delivered items.
+             */
+            setTimeout(function () {
+                window.location.reload();
+            }, 700);
+
+        }
+
+
+        // ============================================================
+        // POST ACTION
+        // ============================================================
+
+        async function postAction(
+            url,
+            data) {
+
+            const token =
+                document.querySelector(
+                    '#stockReceivingTokenForm input[name="__RequestVerificationToken"]'
+                ).value;
+
+
+            const body =
+                new URLSearchParams();
+
+
+            Object.keys(data).forEach(function (key) {
+
+                body.append(
+                    key,
+                    data[key]
+                );
+
+            });
+
+
+            body.append(
+                '__RequestVerificationToken',
+                token
+            );
+
+
+            const response =
+                await fetch(
+                    url,
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type':
+                                'application/x-www-form-urlencoded; charset=UTF-8',
+
+                            'X-Requested-With':
+                                'XMLHttpRequest'
+                        },
+
+                        body: body.toString()
+                    }
+                );
+
+
+            let result;
+
+            try {
+                result =
+                    await response.json();
+            }
+            catch {
+                throw new Error(
+                    'The server returned an invalid response.'
+                );
+            }
+
+
+            if (!response.ok ||
+                !result.success) {
+
+                throw new Error(
+                    result.message ||
+                    'The requested operation failed.'
+                );
+
+            }
+
+
+            return result;
+
+        }
+
+
+        // ============================================================
+        // STATUS CLASS
+        // ============================================================
+
+        function getStatusClass(status) {
+
+            switch (status) {
+
+                case 0:
+                    return 'bg-primary';
+
+                case 1:
+                    return 'bg-warning text-dark';
+
+                case 2:
+                    return 'bg-success';
+
+                case 3:
+                    return 'bg-danger';
+
+                default:
+                    return 'bg-secondary';
+
+            }
+
+        }
+
+
+        // ============================================================
+        // HTML ESCAPE
+        // ============================================================
+
+        function escapeHtml(value) {
+
+            if (value === null ||
+                value === undefined) {
+
+                return '';
+
+            }
+
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        }
+
+    </script>
+}

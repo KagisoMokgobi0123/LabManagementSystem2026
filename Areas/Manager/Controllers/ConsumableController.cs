@@ -62,7 +62,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     consumable.Name,
                     consumable.QuantityOnHand,
                     consumable.ReorderLevel,
+                    StockStatus = consumable.StockStatus.ToString(),
                     consumable.SupplierId,
+
                     SupplierName =
                         consumable.Supplier != null
                             ? consumable.Supplier.SupplierName
@@ -81,8 +83,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         public async Task<IActionResult> Create(
             ConsumableModel model)
         {
-            // Trim the name before validation/duplicate checking.
-            model.Name = model.Name?.Trim() ?? string.Empty;
+            model.Name =
+                model.Name?.Trim() ?? string.Empty;
 
             await ValidateConsumable(model);
 
@@ -97,7 +99,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Prevent duplicate active consumable names.
+            // --------------------------------------------------------
+            // DUPLICATE NAME CHECK
+            // --------------------------------------------------------
+
             bool duplicateName =
                 await _context.Consumables
                     .AnyAsync(c =>
@@ -120,17 +125,51 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Make sure this is treated as a new entity.
-            model.ConsumableId = 0;
+            // --------------------------------------------------------
+            // NEW ENTITY
+            // --------------------------------------------------------
 
+            model.ConsumableId = 0;
             model.IsDeleted = false;
 
-            // Quantity cannot be negative.
             model.QuantityOnHand =
                 Math.Max(0, model.QuantityOnHand);
 
 
+            // --------------------------------------------------------
+            // DETERMINE INITIAL STATUS
+            // --------------------------------------------------------
+
+            model.StockStatus =
+                DetermineStockStatus(
+                    model.QuantityOnHand,
+                    model.ReorderLevel);
+
+
             _context.Consumables.Add(model);
+
+            await _context.SaveChangesAsync();
+
+
+            // --------------------------------------------------------
+            // CREATE INITIAL HISTORY RECORD
+            // --------------------------------------------------------
+
+            var initialHistory =
+                new StockStatusHistoryModel
+                {
+                    ConsumableId =
+                        model.ConsumableId,
+
+                    StockStatus =
+                        model.StockStatus,
+
+                    DateRecorded =
+                        DateTime.UtcNow
+                };
+
+            _context.StockStatusHistories
+                .Add(initialHistory);
 
             await _context.SaveChangesAsync();
 
@@ -153,7 +192,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         public async Task<IActionResult> Edit(
             ConsumableModel model)
         {
-            model.Name = model.Name?.Trim() ?? string.Empty;
+            model.Name =
+                model.Name?.Trim() ?? string.Empty;
 
 
             var existing =
@@ -171,7 +211,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateConsumable(model);
 
 
-            // Prevent duplicate active names.
+            // --------------------------------------------------------
+            // DUPLICATE NAME CHECK
+            // --------------------------------------------------------
+
             bool duplicateName =
                 await _context.Consumables
                     .AnyAsync(c =>
@@ -201,18 +244,31 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Update editable fields only.
-            existing.Name = model.Name;
+            // --------------------------------------------------------
+            // UPDATE EDITABLE FIELDS
+            // --------------------------------------------------------
+
+            existing.Name =
+                model.Name;
+
             existing.ReorderLevel =
                 model.ReorderLevel;
+
             existing.SupplierId =
                 model.SupplierId;
 
 
             // QuantityOnHand is deliberately NOT changed here.
             //
-            // Stock changes should be performed through
-            // the stock adjustment functionality.
+            // Stock changes must go through AdjustStock.
+
+
+            // --------------------------------------------------------
+            // RE-CALCULATE STATUS
+            // --------------------------------------------------------
+
+            await UpdateStockStatusAndHistory(
+                existing);
 
 
             await _context.SaveChangesAsync();
@@ -220,6 +276,123 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             TempData["SuccessMessage"] =
                 $"Consumable '{existing.Name}' updated successfully.";
+
+
+            return RedirectToAction(
+                nameof(Index));
+        }
+
+
+        // ============================================================
+        // ADJUST STOCK
+        // ============================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdjustStock(
+            int id,
+            string adjustmentType,
+            int quantity)
+        {
+            if (quantity < 0)
+            {
+                TempData["ErrorMessage"] =
+                    "Quantity cannot be negative.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+
+
+            var consumable =
+                await _context.Consumables
+                    .FirstOrDefaultAsync(c =>
+                        c.ConsumableId == id &&
+                        !c.IsDeleted);
+
+
+            if (consumable == null)
+            {
+                TempData["ErrorMessage"] =
+                    "Consumable could not be found.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+
+
+            int oldQuantity =
+                consumable.QuantityOnHand;
+
+
+            // --------------------------------------------------------
+            // CALCULATE NEW QUANTITY
+            // --------------------------------------------------------
+
+            switch (
+                adjustmentType?.ToLower())
+            {
+                case "increase":
+
+                    consumable.QuantityOnHand =
+                        checked(
+                            consumable.QuantityOnHand +
+                            quantity);
+
+                    break;
+
+
+                case "decrease":
+
+                    if (quantity >
+                        consumable.QuantityOnHand)
+                    {
+                        TempData["ErrorMessage"] =
+                            "Stock cannot become negative.";
+
+                        return RedirectToAction(
+                            nameof(Index));
+                    }
+
+                    consumable.QuantityOnHand -=
+                        quantity;
+
+                    break;
+
+
+                case "set":
+
+                    consumable.QuantityOnHand =
+                        quantity;
+
+                    break;
+
+
+                default:
+
+                    TempData["ErrorMessage"] =
+                        "Invalid stock adjustment type.";
+
+                    return RedirectToAction(
+                        nameof(Index));
+            }
+
+
+            // --------------------------------------------------------
+            // UPDATE STATUS + HISTORY
+            // --------------------------------------------------------
+
+            await UpdateStockStatusAndHistory(
+                consumable);
+
+
+            await _context.SaveChangesAsync();
+
+
+            TempData["SuccessMessage"] =
+                $"Stock for '{consumable.Name}' updated from " +
+                $"{oldQuantity} to " +
+                $"{consumable.QuantityOnHand}.";
 
 
             return RedirectToAction(
@@ -253,8 +426,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Do not allow deletion when active orders
-            // reference this consumable.
+            // --------------------------------------------------------
+            // ACTIVE ORDERS CHECK
+            // --------------------------------------------------------
+
             bool hasActiveOrders =
                 await _context.OrderItems
                     .AnyAsync(i =>
@@ -274,7 +449,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Soft delete.
+            // --------------------------------------------------------
+            // SOFT DELETE
+            // --------------------------------------------------------
+
             consumable.IsDeleted = true;
 
 
@@ -302,14 +480,124 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .Include(c => c.Supplier)
                     .Where(c =>
                         !c.IsDeleted &&
-                        c.QuantityOnHand <=
-                        c.ReorderLevel * 1.10m)
+                        (
+                            c.StockStatus ==
+                                StockStatus.ReorderNow
+                            ||
+                            c.StockStatus ==
+                                StockStatus.OutOfStock
+                        ))
                     .OrderBy(c =>
+                        c.StockStatus ==
+                            StockStatus.OutOfStock
+                            ? 0
+                            : 1)
+                    .ThenBy(c =>
                         c.QuantityOnHand)
                     .ToListAsync();
 
 
             return View(consumables);
+        }
+
+
+        // ============================================================
+        // STOCK STATUS CALCULATION
+        // ============================================================
+
+        private StockStatus DetermineStockStatus(
+            int quantityOnHand,
+            int reorderLevel)
+        {
+            // --------------------------------------------------------
+            // OUT OF STOCK
+            // --------------------------------------------------------
+
+            if (quantityOnHand <= 0)
+            {
+                return StockStatus.OutOfStock;
+            }
+
+
+            // --------------------------------------------------------
+            // REORDER NOW
+            //
+            // Includes:
+            //   Quantity <= Reorder Level
+            //   Quantity <= 110% of Reorder Level
+            // --------------------------------------------------------
+
+            decimal reorderThreshold =
+                reorderLevel * 1.10m;
+
+
+            if (quantityOnHand <=
+                reorderThreshold)
+            {
+                return StockStatus.ReorderNow;
+            }
+
+
+            // --------------------------------------------------------
+            // SUFFICIENT
+            // --------------------------------------------------------
+
+            return StockStatus.Sufficient;
+        }
+
+
+        // ============================================================
+        // UPDATE STATUS + HISTORY
+        // ============================================================
+
+        private async Task UpdateStockStatusAndHistory(
+            ConsumableModel consumable)
+        {
+            StockStatus newStatus =
+                DetermineStockStatus(
+                    consumable.QuantityOnHand,
+                    consumable.ReorderLevel);
+
+
+            // No status change.
+            //
+            // Do not create another history record.
+
+            if (consumable.StockStatus ==
+                newStatus)
+            {
+                return;
+            }
+
+
+            // --------------------------------------------------------
+            // UPDATE CURRENT STATUS
+            // --------------------------------------------------------
+
+            consumable.StockStatus =
+                newStatus;
+
+
+            // --------------------------------------------------------
+            // ADD HISTORY RECORD
+            // --------------------------------------------------------
+
+            var history =
+                new StockStatusHistoryModel
+                {
+                    ConsumableId =
+                        consumable.ConsumableId,
+
+                    StockStatus =
+                        newStatus,
+
+                    DateRecorded =
+                        DateTime.UtcNow
+                };
+
+
+            _context.StockStatusHistories
+                .Add(history);
         }
 
 
@@ -320,7 +608,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         private async Task ValidateConsumable(
             ConsumableModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.Name))
+            if (string.IsNullOrWhiteSpace(
+                model.Name))
             {
                 ModelState.AddModelError(
                     nameof(model.Name),
@@ -398,8 +687,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         // LOAD ACTIVE CONSUMABLES
         // ============================================================
 
-        private async Task<List<ConsumableModel>>
-            GetActiveConsumables()
+        private async Task<List<ConsumableModel>> GetActiveConsumables()
         {
             return await _context.Consumables
                 .Include(c => c.Supplier)

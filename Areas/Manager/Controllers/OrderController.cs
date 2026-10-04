@@ -17,7 +17,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             _context = context;
         }
 
-
         // ============================================================
         // INDEX
         // ============================================================
@@ -25,54 +24,70 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var orders = await _context.Orders
-                .Include(o => o.Supplier)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(i => i.Consumable)
-                .OrderByDescending(o => o.OrderId)
-                .ToListAsync();
+            try
+            {
+                await LoadOrderData();
 
-            return View(orders);
+                var orders = await GetOrders();
+
+                return View(orders);
+            }
+            catch (Exception ex)
+            {
+                return HandleException(
+                    ex,
+                    "Unable to load the orders page.");
+            }
         }
 
 
         // ============================================================
-        // DETAILS - POPUP
+        // DETAILS
         // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var order = await _context.Orders
-                .Include(o => o.Supplier)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(i => i.Consumable)
-                .FirstOrDefaultAsync(o => o.OrderId == id);
+            try
+            {
+                var order = await _context.Orders
+                    .AsNoTracking()
+                    .Include(o => o.Supplier)
+                    .Include(o => o.OrderItems)
+                        .ThenInclude(i => i.Consumable)
+                    .FirstOrDefaultAsync(o =>
+                        o.OrderId == id);
 
-            if (order == null)
-                return NotFound();
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The selected order could not be found.";
 
-            return PartialView("_Details", order);
+                    return RedirectToAction(nameof(Index));
+                }
+
+                /*
+                 * The current UI uses Index.cshtml.
+                 * Keep that behaviour so Details does not require
+                 * a separate view.
+                 */
+                await LoadOrderData();
+
+                return View(
+                    "Index",
+                    await GetOrders());
+            }
+            catch (Exception ex)
+            {
+                return HandleException(
+                    ex,
+                    "Unable to load the selected order.");
+            }
         }
 
 
         // ============================================================
-        // CREATE - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Create()
-        {
-            await LoadOrderData();
-
-            var model = new CreateOrderViewModel();
-
-            return PartialView("_Create", model);
-        }
-
-
-        // ============================================================
-        // CREATE - POST
+        // CREATE
         // ============================================================
 
         [HttpPost]
@@ -80,444 +95,410 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         public async Task<IActionResult> Create(
             CreateOrderViewModel model)
         {
-            // ========================================================
-            // CLEAN INPUT
-            // ========================================================
-
-            model.OrderNumber =
-                model.OrderNumber?.Trim() ?? string.Empty;
-
-
-            // ========================================================
-            // BASIC MODEL VALIDATION
-            // ========================================================
-
-            if (!ModelState.IsValid)
-            {
-                await LoadOrderData();
-
-                return PartialView("_Create", model);
-            }
-
-
-            // ========================================================
-            // ORDER NUMBER VALIDATION
-            // ========================================================
-
-            if (string.IsNullOrWhiteSpace(model.OrderNumber))
-            {
-                ModelState.AddModelError(
-                    nameof(model.OrderNumber),
-                    "Order number is required.");
-            }
-
-            if (model.OrderNumber.Length > 50)
-            {
-                ModelState.AddModelError(
-                    nameof(model.OrderNumber),
-                    "Order number cannot exceed 50 characters.");
-            }
-
-
-            // ========================================================
-            // ORDER NUMBER UNIQUENESS
-            // ========================================================
-
-            bool orderNumberExists =
-                await _context.Orders.AnyAsync(o =>
-                    o.OrderNumber.ToLower()
-                    == model.OrderNumber.ToLower());
-
-            if (orderNumberExists)
-            {
-                ModelState.AddModelError(
-                    nameof(model.OrderNumber),
-                    "This order number already exists.");
-            }
-
-
-            // ========================================================
-            // SUPPLIER VALIDATION
-            // ========================================================
-
-            var supplier = await _context.Suppliers
-                .FirstOrDefaultAsync(s =>
-                    s.SupplierId == model.SupplierId &&
-                    !s.IsDeleted);
-
-            if (supplier == null)
-            {
-                ModelState.AddModelError(
-                    nameof(model.SupplierId),
-                    "Please select a valid supplier.");
-            }
-
-
-            // ========================================================
-            // ORDER ITEMS VALIDATION
-            // ========================================================
-
-            if (model.Items == null ||
-                !model.Items.Any())
-            {
-                ModelState.AddModelError(
-                    nameof(model.Items),
-                    "At least one consumable must be added.");
-            }
-
-
-            if (!ModelState.IsValid)
-            {
-                await LoadOrderData();
-
-                return PartialView("_Create", model);
-            }
-
-
-            // ========================================================
-            // DUPLICATE CONSUMABLE VALIDATION
-            // ========================================================
-
-            var duplicateConsumables =
-                model.Items
-                    .GroupBy(i => i.ConsumableId)
-                    .Where(g => g.Count() > 1)
-                    .ToList();
-
-            if (duplicateConsumables.Any())
-            {
-                ModelState.AddModelError(
-                    nameof(model.Items),
-                    "The same consumable cannot be added more than once.");
-
-                await LoadOrderData();
-
-                return PartialView("_Create", model);
-            }
-
-
-            // ========================================================
-            // LOAD SELECTED CONSUMABLES
-            // ========================================================
-
-            var consumableIds = model.Items
-                .Select(i => i.ConsumableId)
-                .Distinct()
-                .ToList();
-
-            var consumables = await _context.Consumables
-                .Where(c =>
-                    consumableIds.Contains(c.ConsumableId) &&
-                    !c.IsDeleted)
-                .ToListAsync();
-
-
-            // ========================================================
-            // VERIFY ALL CONSUMABLES EXIST
-            // ========================================================
-
-            if (consumables.Count != consumableIds.Count)
-            {
-                ModelState.AddModelError(
-                    nameof(model.Items),
-                    "One or more selected consumables are invalid.");
-
-                await LoadOrderData();
-
-                return PartialView("_Create", model);
-            }
-
-
-            // ========================================================
-            // VALIDATE EACH ORDER ITEM
-            // ========================================================
-
-            foreach (var item in model.Items)
-            {
-                var consumable = consumables
-                    .First(c =>
-                        c.ConsumableId == item.ConsumableId);
-
-
-                // ----------------------------------------------------
-                // QUANTITY
-                // ----------------------------------------------------
-
-                if (item.QuantityOrdered <= 0)
-                {
-                    ModelState.AddModelError(
-                        nameof(model.Items),
-                        $"Quantity for '{consumable.Name}' must be greater than zero.");
-                }
-
-
-                // ----------------------------------------------------
-                // SUPPLIER
-                // ----------------------------------------------------
-
-                if (consumable.SupplierId != model.SupplierId)
-                {
-                    ModelState.AddModelError(
-                        nameof(model.Items),
-                        $"'{consumable.Name}' is not supplied by the selected supplier.");
-                }
-            }
-
-
-            // ========================================================
-            // FINAL VALIDATION CHECK
-            // ========================================================
-
-            if (!ModelState.IsValid)
-            {
-                await LoadOrderData();
-
-                return PartialView("_Create", model);
-            }
-
-
-            // ========================================================
-            // CREATE ORDER + ORDER ITEMS
-            // ========================================================
-
-            using var transaction =
-                await _context.Database.BeginTransactionAsync();
-
             try
             {
-                // ----------------------------------------------------
-                // CREATE ORDER
-                // ----------------------------------------------------
+                // --------------------------------------------------------
+                // NORMALISE INPUT
+                // --------------------------------------------------------
 
-                var order = new OrderModel
+                model.OrderNumber =
+                    model.OrderNumber?.Trim()
+                    ?? string.Empty;
+
+                model.Items ??=
+                    new List<CreateOrderItemViewModel>();
+
+
+                // --------------------------------------------------------
+                // SERVER-SIDE VALIDATION
+                // --------------------------------------------------------
+
+                await ValidateCreateOrder(model);
+
+
+                if (!ModelState.IsValid)
                 {
-                    OrderNumber = model.OrderNumber,
-                    SupplierId = model.SupplierId,
-                    Status = OrderStatus.Ordered
-                };
+                    await LoadOrderData();
 
-                _context.Orders.Add(order);
-
-                await _context.SaveChangesAsync();
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
 
 
-                // ----------------------------------------------------
-                // CREATE ORDER ITEMS
-                // ----------------------------------------------------
+                // --------------------------------------------------------
+                // REMOVE INVALID/EMPTY ITEM VALUES
+                // --------------------------------------------------------
+
+                model.Items =
+                    model.Items
+                        .Where(i => i != null)
+                        .ToList();
+
+
+                if (!model.Items.Any())
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Items),
+                        "At least one consumable must be added.");
+
+                    await LoadOrderData();
+
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
+
+
+                // --------------------------------------------------------
+                // DUPLICATE CONSUMABLE CHECK
+                // --------------------------------------------------------
+
+                bool hasDuplicates =
+                    model.Items
+                        .GroupBy(i => i.ConsumableId)
+                        .Any(g => g.Count() > 1);
+
+                if (hasDuplicates)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Items),
+                        "The same consumable cannot be added more than once.");
+
+                    await LoadOrderData();
+
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
+
+
+                // --------------------------------------------------------
+                // LOAD SUPPLIER
+                // --------------------------------------------------------
+
+                var supplier =
+                    await _context.Suppliers
+                        .FirstOrDefaultAsync(s =>
+                            s.SupplierId == model.SupplierId &&
+                            !s.IsDeleted);
+
+                if (supplier == null)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.SupplierId),
+                        "The selected supplier does not exist.");
+
+                    await LoadOrderData();
+
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
+
+
+                // --------------------------------------------------------
+                // LOAD CONSUMABLES
+                // --------------------------------------------------------
+
+                var consumableIds =
+                    model.Items
+                        .Select(i => i.ConsumableId)
+                        .Distinct()
+                        .ToList();
+
+                var consumables =
+                    await _context.Consumables
+                        .Where(c =>
+                            consumableIds.Contains(c.ConsumableId) &&
+                            !c.IsDeleted)
+                        .ToListAsync();
+
+
+                // --------------------------------------------------------
+                // MAKE SURE ALL CONSUMABLES EXIST
+                // --------------------------------------------------------
+
+                if (consumables.Count != consumableIds.Count)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Items),
+                        "One or more selected consumables could not be found.");
+
+                    await LoadOrderData();
+
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
+
+
+                // --------------------------------------------------------
+                // VALIDATE EACH CONSUMABLE
+                // --------------------------------------------------------
 
                 foreach (var item in model.Items)
                 {
-                    var orderItem = new OrderItemModel
-                    {
-                        OrderId = order.OrderId,
-                        ConsumableId = item.ConsumableId,
-                        QuantityOrdered =
-                            item.QuantityOrdered,
-                        Status = OrderItemStatus.Ordered
-                    };
+                    var consumable =
+                        consumables.FirstOrDefault(c =>
+                            c.ConsumableId == item.ConsumableId);
 
-                    _context.OrderItems.Add(orderItem);
+                    if (consumable == null)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Items),
+                            "One or more selected consumables are invalid.");
+
+                        continue;
+                    }
+
+
+                    if (item.QuantityOrdered <= 0)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Items),
+                            $"Quantity for '{consumable.Name}' must be greater than zero.");
+                    }
+
+
+                    if (consumable.SupplierId != model.SupplierId)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Items),
+                            $"'{consumable.Name}' does not belong to the selected supplier.");
+                    }
+
+
+                    /*
+                     * Only consumables currently requiring replenishment
+                     * should be ordered through this screen.
+                     */
+                    if (consumable.StockStatus != StockStatus.ReorderNow &&
+                        consumable.StockStatus != StockStatus.OutOfStock)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.Items),
+                            $"'{consumable.Name}' does not currently require reordering.");
+                    }
                 }
 
-                await _context.SaveChangesAsync();
 
-
-                // ----------------------------------------------------
-                // COMMIT
-                // ----------------------------------------------------
-
-                await transaction.CommitAsync();
-
-                return Json(new
+                if (!ModelState.IsValid)
                 {
-                    success = true,
-                    message = "Order created successfully."
-                });
+                    await LoadOrderData();
+
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
+
+
+                // ========================================================
+                // TRANSACTION
+                // ========================================================
+
+                await using var transaction =
+                    await _context.Database.BeginTransactionAsync();
+
+                try
+                {
+                    // ----------------------------------------------------
+                    // STEP 1
+                    // CREATE ORDER ONLY
+                    // ----------------------------------------------------
+
+                    var order = new OrderModel
+                    {
+                        OrderNumber = model.OrderNumber,
+                        SupplierId = model.SupplierId,
+                        Status = OrderStatus.Ordered,
+                        DateComplete = null,
+                        CancellationReason = null,
+                        DateCancelled = null
+                    };
+
+                    _context.Orders.Add(order);
+
+                    /*
+                     * IMPORTANT:
+                     *
+                     * Save the order first.
+                     *
+                     * This guarantees that OrderId is generated by the
+                     * database before any OrderItemModel is created.
+                     */
+                    await _context.SaveChangesAsync();
+
+
+                    // ----------------------------------------------------
+                    // STEP 2
+                    // CREATE ORDER ITEMS
+                    // ----------------------------------------------------
+
+                    foreach (var item in model.Items)
+                    {
+                        var orderItem =
+                            new OrderItemModel
+                            {
+                                OrderId = order.OrderId,
+                                ConsumableId = item.ConsumableId,
+                                QuantityOrdered = item.QuantityOrdered,
+                                Status = OrderItemStatus.Ordered,
+                                DateReceived = null,
+                                CancellationReason = null,
+                                DateCancelled = null
+                            };
+
+                        _context.OrderItems.Add(orderItem);
+                    }
+
+
+                    // ----------------------------------------------------
+                    // STEP 3
+                    // SAVE ORDER ITEMS
+                    // ----------------------------------------------------
+
+                    await _context.SaveChangesAsync();
+
+
+                    // ----------------------------------------------------
+                    // STEP 4
+                    // COMMIT
+                    // ----------------------------------------------------
+
+                    await transaction.CommitAsync();
+
+
+                    // ----------------------------------------------------
+                    // SUCCESS
+                    // ----------------------------------------------------
+
+                    TempData["SuccessMessage"] =
+                        $"Order '{order.OrderNumber}' was created successfully.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+
+                    throw;
+                }
             }
-            catch
+            catch (DbUpdateException ex)
             {
-                // ----------------------------------------------------
-                // ROLLBACK
-                // ----------------------------------------------------
+                /*
+                 * This is intentionally handled separately so database
+                 * errors are easier to identify during development.
+                 */
 
-                await transaction.RollbackAsync();
+                var root =
+                    GetRootException(ex);
 
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "The order could not be created. Please try again."
-                });
+                Console.Error.WriteLine(
+                    "============================================================");
+
+                Console.Error.WriteLine(
+                    "ORDER CREATE DATABASE ERROR");
+
+                Console.Error.WriteLine(
+                    $"Message: {ex.Message}");
+
+                Console.Error.WriteLine(
+                    $"Root Message: {root.Message}");
+
+                Console.Error.WriteLine(
+                    $"Stack Trace: {ex.StackTrace}");
+
+                Console.Error.WriteLine(
+                    "============================================================");
+
+                TempData["ErrorMessage"] =
+                    $"The order could not be saved. {root.Message}";
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return HandleException(
+                    ex,
+                    "Unable to create the order.");
             }
         }
 
 
         // ============================================================
-        // EDIT - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(int id)
-        {
-            var order = await _context.Orders
-                .Include(o => o.Supplier)
-                .Include(o => o.OrderItems)
-                    .ThenInclude(i => i.Consumable)
-                .FirstOrDefaultAsync(o =>
-                    o.OrderId == id);
-
-            if (order == null)
-                return NotFound();
-
-            // --------------------------------------------------------
-            // Completed and cancelled orders should not be edited.
-            // --------------------------------------------------------
-
-            if (order.Status == OrderStatus.Complete ||
-                order.Status == OrderStatus.Cancelled)
-            {
-                return BadRequest(
-                    "Completed or cancelled orders cannot be edited.");
-            }
-
-            await LoadOrderData();
-
-            return PartialView("_Edit", order);
-        }
-
-
-        // ============================================================
-        // EDIT - POST
+        // EDIT
         // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            int id,
             OrderModel model)
         {
-            if (id != model.OrderId)
-                return BadRequest();
-
-
-            // ========================================================
-            // LOAD EXISTING ORDER
-            // ========================================================
-
-            var existingOrder = await _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o =>
-                    o.OrderId == id);
-
-            if (existingOrder == null)
-                return NotFound();
-
-
-            // ========================================================
-            // STATUS PROTECTION
-            // ========================================================
-
-            if (existingOrder.Status == OrderStatus.Complete ||
-                existingOrder.Status == OrderStatus.Cancelled)
+            try
             {
-                return Json(new
+                model.OrderNumber =
+                    model.OrderNumber?.Trim()
+                    ?? string.Empty;
+
+                var existingOrder =
+                    await _context.Orders
+                        .Include(o => o.OrderItems)
+                        .FirstOrDefaultAsync(o =>
+                            o.OrderId == model.OrderId);
+
+                if (existingOrder == null)
                 {
-                    success = false,
-                    message =
-                        "Completed or cancelled orders cannot be edited."
-                });
+                    TempData["ErrorMessage"] =
+                        "The selected order could not be found.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (existingOrder.Status ==
+                        OrderStatus.Complete ||
+                    existingOrder.Status ==
+                        OrderStatus.Cancelled)
+                {
+                    TempData["ErrorMessage"] =
+                        "Completed or cancelled orders cannot be edited.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                await ValidateEditOrder(
+                    model.OrderId,
+                    model);
+
+                if (!ModelState.IsValid)
+                {
+                    await LoadOrderData();
+
+                    return View(
+                        "Index",
+                        await GetOrders());
+                }
+
+                existingOrder.OrderNumber =
+                    model.OrderNumber;
+
+                existingOrder.SupplierId =
+                    model.SupplierId;
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] =
+                    $"Order '{existingOrder.OrderNumber}' updated successfully.";
+
+                return RedirectToAction(nameof(Index));
             }
-
-
-            // ========================================================
-            // CLEAN INPUT
-            // ========================================================
-
-            model.OrderNumber =
-                model.OrderNumber?.Trim() ?? string.Empty;
-
-
-            // ========================================================
-            // ORDER NUMBER VALIDATION
-            // ========================================================
-
-            if (string.IsNullOrWhiteSpace(model.OrderNumber))
+            catch (Exception ex)
             {
-                ModelState.AddModelError(
-                    nameof(model.OrderNumber),
-                    "Order number is required.");
+                return HandleException(
+                    ex,
+                    "Unable to update the order.");
             }
-
-
-            // ========================================================
-            // UNIQUE ORDER NUMBER
-            // ========================================================
-
-            bool duplicateOrderNumber =
-                await _context.Orders.AnyAsync(o =>
-                    o.OrderId != id &&
-                    o.OrderNumber.ToLower()
-                    == model.OrderNumber.ToLower());
-
-            if (duplicateOrderNumber)
-            {
-                ModelState.AddModelError(
-                    nameof(model.OrderNumber),
-                    "This order number already exists.");
-            }
-
-
-            // ========================================================
-            // SUPPLIER VALIDATION
-            // ========================================================
-
-            bool supplierExists =
-                await _context.Suppliers.AnyAsync(s =>
-                    s.SupplierId == model.SupplierId &&
-                    !s.IsDeleted);
-
-            if (!supplierExists)
-            {
-                ModelState.AddModelError(
-                    nameof(model.SupplierId),
-                    "Please select a valid supplier.");
-            }
-
-
-            // ========================================================
-            // VALIDATE MODEL
-            // ========================================================
-
-            if (!ModelState.IsValid)
-            {
-                await LoadOrderData();
-
-                return PartialView("_Edit", model);
-            }
-
-
-            // ========================================================
-            // UPDATE BASIC ORDER INFORMATION
-            // ========================================================
-
-            existingOrder.OrderNumber =
-                model.OrderNumber;
-
-            existingOrder.SupplierId =
-                model.SupplierId;
-
-
-            // ========================================================
-            // SAVE
-            // ========================================================
-
-            await _context.SaveChangesAsync();
-
-            return Json(new
-            {
-                success = true,
-                message = "Order updated successfully."
-            });
         }
 
 
@@ -529,142 +510,95 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ReceiveItem(int id)
         {
-            var item = await _context.OrderItems
-                .Include(i => i.Order)
-                .Include(i => i.Consumable)
-                .FirstOrDefaultAsync(i =>
-                    i.OrderItemId == id);
-
-            if (item == null)
-                return NotFound();
-
-
-            // ========================================================
-            // ITEM STATUS CHECK
-            // ========================================================
-
-            if (item.Status != OrderItemStatus.Ordered)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "This order item has already been processed."
-                });
-            }
-
-
-            // ========================================================
-            // REQUIRED RELATIONSHIPS
-            // ========================================================
-
-            if (item.Order == null ||
-                item.Consumable == null)
-            {
-                return BadRequest();
-            }
-
-
-            // ========================================================
-            // ORDER STATUS CHECK
-            // ========================================================
-
-            if (item.Order.Status == OrderStatus.Cancelled)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "Items from a cancelled order cannot be received."
-                });
-            }
-
-
-            // ========================================================
-            // UPDATE STOCK
-            // ========================================================
-
             try
             {
+                var item =
+                    await _context.OrderItems
+                        .Include(i => i.Order)
+                        .Include(i => i.Consumable)
+                        .FirstOrDefaultAsync(i =>
+                            i.OrderItemId == id);
+
+                if (item == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The selected order item could not be found.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (item.Status !=
+                    OrderItemStatus.Ordered)
+                {
+                    TempData["ErrorMessage"] =
+                        "This order item has already been processed.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (item.Order == null ||
+                    item.Consumable == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The order item is missing required information.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (item.Order.Status ==
+                    OrderStatus.Cancelled)
+                {
+                    TempData["ErrorMessage"] =
+                        "Items from a cancelled order cannot be received.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
                 checked
                 {
                     item.Consumable.QuantityOnHand +=
                         item.QuantityOrdered;
                 }
+
+                item.Consumable.StockStatus =
+                    CalculateStockStatus(
+                        item.Consumable.QuantityOnHand,
+                        item.Consumable.ReorderLevel);
+
+                item.Status =
+                    OrderItemStatus.Received;
+
+                item.DateReceived =
+                    DateTime.Now;
+
+                await UpdateOrderStatus(
+                    item.Order);
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] =
+                    "Item received and stock updated successfully.";
+
+                return RedirectToAction(nameof(Index));
             }
             catch (OverflowException)
             {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "The stock quantity is too large to process."
-                });
+                TempData["ErrorMessage"] =
+                    "The stock quantity is too large to process.";
+
+                return RedirectToAction(nameof(Index));
             }
-
-
-            // ========================================================
-            // UPDATE ORDER ITEM
-            // ========================================================
-
-            item.Status =
-                OrderItemStatus.Received;
-
-            item.DateReceived =
-                DateTime.Now;
-
-
-            // ========================================================
-            // UPDATE ORDER STATUS
-            // ========================================================
-
-            await UpdateOrderStatus(item.Order);
-
-
-            // ========================================================
-            // SAVE
-            // ========================================================
-
-            await _context.SaveChangesAsync();
-
-            return Json(new
+            catch (Exception ex)
             {
-                success = true,
-                message =
-                    "Item received and stock updated successfully."
-            });
+                return HandleException(
+                    ex,
+                    "Unable to receive the order item.");
+            }
         }
 
 
         // ============================================================
-        // CANCEL ITEM - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> CancelItem(int id)
-        {
-            var item = await _context.OrderItems
-                .Include(i => i.Order)
-                .Include(i => i.Consumable)
-                .FirstOrDefaultAsync(i =>
-                    i.OrderItemId == id);
-
-            if (item == null)
-                return NotFound();
-
-
-            if (item.Status != OrderItemStatus.Ordered)
-            {
-                return BadRequest(
-                    "This item can no longer be cancelled.");
-            }
-
-            return PartialView("_CancelItem", item);
-        }
-
-
-        // ============================================================
-        // CANCEL ITEM - POST
+        // CANCEL ITEM
         // ============================================================
 
         [HttpPost]
@@ -673,147 +607,98 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             int id,
             string cancellationReason)
         {
-            cancellationReason =
-                cancellationReason?.Trim() ?? string.Empty;
-
-
-            // ========================================================
-            // REASON VALIDATION
-            // ========================================================
-
-            if (string.IsNullOrWhiteSpace(
-                cancellationReason))
+            try
             {
-                return Json(new
+                cancellationReason =
+                    cancellationReason?.Trim()
+                    ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(cancellationReason))
                 {
-                    success = false,
-                    message =
-                        "A cancellation reason is required."
-                });
-            }
+                    TempData["ErrorMessage"] =
+                        "A cancellation reason is required.";
 
+                    return RedirectToAction(nameof(Index));
+                }
 
-            if (cancellationReason.Length > 500)
-            {
-                return Json(new
+                if (cancellationReason.Length > 500)
                 {
-                    success = false,
-                    message =
-                        "Cancellation reason cannot exceed 500 characters."
-                });
-            }
+                    TempData["ErrorMessage"] =
+                        "Cancellation reason cannot exceed 500 characters.";
 
+                    return RedirectToAction(nameof(Index));
+                }
 
-            // ========================================================
-            // LOAD ITEM
-            // ========================================================
+                var item =
+                    await _context.OrderItems
+                        .Include(i => i.Order)
+                        .FirstOrDefaultAsync(i =>
+                            i.OrderItemId == id);
 
-            var item = await _context.OrderItems
-                .Include(i => i.Order)
-                .FirstOrDefaultAsync(i =>
-                    i.OrderItemId == id);
-
-            if (item == null)
-                return NotFound();
-
-
-            // ========================================================
-            // STATUS VALIDATION
-            // ========================================================
-
-            if (item.Status != OrderItemStatus.Ordered)
-            {
-                return Json(new
+                if (item == null)
                 {
-                    success = false,
-                    message =
-                        "Only ordered items can be cancelled."
-                });
-            }
+                    TempData["ErrorMessage"] =
+                        "The selected order item could not be found.";
 
+                    return RedirectToAction(nameof(Index));
+                }
 
-            if (item.Order == null)
-                return BadRequest();
-
-
-            if (item.Order.Status ==
-                OrderStatus.Cancelled)
-            {
-                return Json(new
+                if (item.Status !=
+                    OrderItemStatus.Ordered)
                 {
-                    success = false,
-                    message =
-                        "This order has already been cancelled."
-                });
+                    TempData["ErrorMessage"] =
+                        "Only ordered items can be cancelled.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (item.Order == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The order could not be found.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (item.Order.Status ==
+                    OrderStatus.Cancelled)
+                {
+                    TempData["ErrorMessage"] =
+                        "This order has already been cancelled.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                item.Status =
+                    OrderItemStatus.Cancelled;
+
+                item.CancellationReason =
+                    cancellationReason;
+
+                item.DateCancelled =
+                    DateTime.Now;
+
+                await UpdateOrderStatus(
+                    item.Order);
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] =
+                    "Order item cancelled successfully.";
+
+                return RedirectToAction(nameof(Index));
             }
-
-
-            // ========================================================
-            // CANCEL ITEM
-            // ========================================================
-
-            item.Status =
-                OrderItemStatus.Cancelled;
-
-            item.CancellationReason =
-                cancellationReason;
-
-            item.DateCancelled =
-                DateTime.Now;
-
-
-            // ========================================================
-            // UPDATE ORDER STATUS
-            // ========================================================
-
-            await UpdateOrderStatus(item.Order);
-
-
-            // ========================================================
-            // SAVE
-            // ========================================================
-
-            await _context.SaveChangesAsync();
-
-            return Json(new
+            catch (Exception ex)
             {
-                success = true,
-                message =
-                    "Order item cancelled successfully."
-            });
+                return HandleException(
+                    ex,
+                    "Unable to cancel the order item.");
+            }
         }
 
 
         // ============================================================
-        // CANCEL ORDER - POPUP
-        // ============================================================
-
-        [HttpGet]
-        public async Task<IActionResult> Cancel(int id)
-        {
-            var order = await _context.Orders
-                .Include(o => o.Supplier)
-                .FirstOrDefaultAsync(o =>
-                    o.OrderId == id);
-
-            if (order == null)
-                return NotFound();
-
-
-            if (order.Status == OrderStatus.Complete ||
-                order.Status == OrderStatus.Cancelled)
-            {
-                return BadRequest(
-                    "This order can no longer be cancelled.");
-            }
-
-
-            return PartialView("_Cancel", order);
-        }
-
-
-        // ============================================================
-        // CANCEL ORDER - POST
+        // CANCEL ORDER
         // ============================================================
 
         [HttpPost]
@@ -822,128 +707,98 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             int id,
             string cancellationReason)
         {
-            cancellationReason =
-                cancellationReason?.Trim() ?? string.Empty;
-
-
-            // ========================================================
-            // VALIDATE REASON
-            // ========================================================
-
-            if (string.IsNullOrWhiteSpace(
-                cancellationReason))
+            try
             {
-                return Json(new
+                cancellationReason =
+                    cancellationReason?.Trim()
+                    ?? string.Empty;
+
+                if (string.IsNullOrWhiteSpace(cancellationReason))
                 {
-                    success = false,
-                    message =
-                        "A cancellation reason is required."
-                });
-            }
+                    TempData["ErrorMessage"] =
+                        "A cancellation reason is required.";
 
-
-            if (cancellationReason.Length > 500)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "Cancellation reason cannot exceed 500 characters."
-                });
-            }
-
-
-            // ========================================================
-            // LOAD ORDER
-            // ========================================================
-
-            var order = await _context.Orders
-                .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o =>
-                    o.OrderId == id);
-
-            if (order == null)
-                return NotFound();
-
-
-            // ========================================================
-            // STATUS VALIDATION
-            // ========================================================
-
-            if (order.Status == OrderStatus.Complete)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "A completed order cannot be cancelled."
-                });
-            }
-
-
-            if (order.Status == OrderStatus.Cancelled)
-            {
-                return Json(new
-                {
-                    success = false,
-                    message =
-                        "This order has already been cancelled."
-                });
-            }
-
-
-            // ========================================================
-            // CANCEL ORDER
-            // ========================================================
-
-            order.Status =
-                OrderStatus.Cancelled;
-
-            order.CancellationReason =
-                cancellationReason;
-
-            order.DateCancelled =
-                DateTime.Now;
-
-
-            // ========================================================
-            // CANCEL REMAINING ORDER ITEMS
-            // ========================================================
-
-            foreach (var item in order.OrderItems)
-            {
-                // ----------------------------------------------------
-                // Only items that have not already been received
-                // can be cancelled.
-                // ----------------------------------------------------
-
-                if (item.Status ==
-                    OrderItemStatus.Ordered)
-                {
-                    item.Status =
-                        OrderItemStatus.Cancelled;
-
-                    item.CancellationReason =
-                        cancellationReason;
-
-                    item.DateCancelled =
-                        DateTime.Now;
+                    return RedirectToAction(nameof(Index));
                 }
+
+                if (cancellationReason.Length > 500)
+                {
+                    TempData["ErrorMessage"] =
+                        "Cancellation reason cannot exceed 500 characters.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var order =
+                    await _context.Orders
+                        .Include(o => o.OrderItems)
+                        .FirstOrDefaultAsync(o =>
+                            o.OrderId == id);
+
+                if (order == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The selected order could not be found.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (order.Status ==
+                    OrderStatus.Complete)
+                {
+                    TempData["ErrorMessage"] =
+                        "A completed order cannot be cancelled.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (order.Status ==
+                    OrderStatus.Cancelled)
+                {
+                    TempData["ErrorMessage"] =
+                        "This order has already been cancelled.";
+
+                    return RedirectToAction(nameof(Index));
+                }
+
+                order.Status =
+                    OrderStatus.Cancelled;
+
+                order.CancellationReason =
+                    cancellationReason;
+
+                order.DateCancelled =
+                    DateTime.Now;
+
+                foreach (var item in order.OrderItems)
+                {
+                    if (item.Status ==
+                        OrderItemStatus.Ordered)
+                    {
+                        item.Status =
+                            OrderItemStatus.Cancelled;
+
+                        item.CancellationReason =
+                            cancellationReason;
+
+                        item.DateCancelled =
+                            DateTime.Now;
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] =
+                    "Order cancelled successfully.";
+
+                return RedirectToAction(nameof(Index));
             }
-
-
-            // ========================================================
-            // SAVE
-            // ========================================================
-
-            await _context.SaveChangesAsync();
-
-            return Json(new
+            catch (Exception ex)
             {
-                success = true,
-                message =
-                    "Order cancelled successfully."
-            });
+                return HandleException(
+                    ex,
+                    "Unable to cancel the order.");
+            }
         }
 
 
@@ -954,11 +809,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         private async Task UpdateOrderStatus(
             OrderModel order)
         {
-            var items = await _context.OrderItems
-                .Where(i =>
-                    i.OrderId == order.OrderId)
-                .ToListAsync();
-
+            var items =
+                await _context.OrderItems
+                    .Where(i =>
+                        i.OrderId ==
+                        order.OrderId)
+                    .ToListAsync();
 
             if (!items.Any())
             {
@@ -967,11 +823,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
                 return;
             }
-
-
-            // ========================================================
-            // CHECK ITEM STATES
-            // ========================================================
 
             bool hasOrdered =
                 items.Any(i =>
@@ -988,11 +839,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     i.Status ==
                     OrderItemStatus.Cancelled);
 
-
-            // ========================================================
-            // ORDERED
-            // ========================================================
-
             if (hasOrdered &&
                 !hasReceived &&
                 !hasCancelled)
@@ -1003,12 +849,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return;
             }
 
-
-            // ========================================================
-            // PARTIALLY COMPLETE
-            // ========================================================
-
-            if (hasOrdered && hasReceived)
+            if (hasOrdered &&
+                hasReceived)
             {
                 order.Status =
                     OrderStatus.PartiallyComplete;
@@ -1016,25 +858,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return;
             }
 
-
-            // ========================================================
-            // PARTIALLY COMPLETE
-            // ========================================================
-            //
-            // Example:
-            //
-            // Item 1 = Received
-            // Item 2 = Cancelled
-            //
-            // The order is not "fully received", but there are
-            // no remaining ordered items.
-            //
-            // We consider this complete because there is nothing
-            // left outstanding.
-            // ========================================================
-
             if (!hasOrdered &&
-                (hasReceived || hasCancelled))
+                (hasReceived ||
+                 hasCancelled))
             {
                 order.Status =
                     OrderStatus.Complete;
@@ -1048,18 +874,163 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return;
             }
 
-
-            // ========================================================
-            // FALLBACK
-            // ========================================================
-
             order.Status =
                 OrderStatus.Ordered;
         }
 
 
         // ============================================================
-        // LOAD SUPPLIERS AND CONSUMABLES
+        // VALIDATE CREATE
+        // ============================================================
+
+        private async Task ValidateCreateOrder(
+            CreateOrderViewModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.OrderNumber))
+            {
+                ModelState.AddModelError(
+                    nameof(model.OrderNumber),
+                    "Order number is required.");
+            }
+            else if (model.OrderNumber.Length > 50)
+            {
+                ModelState.AddModelError(
+                    nameof(model.OrderNumber),
+                    "Order number cannot exceed 50 characters.");
+            }
+
+
+            // --------------------------------------------------------
+            // DUPLICATE ORDER NUMBER
+            // --------------------------------------------------------
+
+            if (!string.IsNullOrWhiteSpace(model.OrderNumber))
+            {
+                bool exists =
+                    await _context.Orders
+                        .AnyAsync(o =>
+                            o.OrderNumber.ToLower()
+                            ==
+                            model.OrderNumber.ToLower());
+
+                if (exists)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.OrderNumber),
+                        "This order number already exists.");
+                }
+            }
+
+
+            // --------------------------------------------------------
+            // SUPPLIER
+            // --------------------------------------------------------
+
+            if (model.SupplierId <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SupplierId),
+                    "Please select a valid supplier.");
+            }
+            else
+            {
+                bool supplierExists =
+                    await _context.Suppliers
+                        .AnyAsync(s =>
+                            s.SupplierId == model.SupplierId &&
+                            !s.IsDeleted);
+
+                if (!supplierExists)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.SupplierId),
+                        "Please select a valid supplier.");
+                }
+            }
+
+
+            // --------------------------------------------------------
+            // ITEMS
+            // --------------------------------------------------------
+
+            if (model.Items == null ||
+                !model.Items.Any())
+            {
+                ModelState.AddModelError(
+                    nameof(model.Items),
+                    "At least one consumable must be added.");
+            }
+        }
+
+
+        // ============================================================
+        // VALIDATE EDIT
+        // ============================================================
+
+        private async Task ValidateEditOrder(
+            int id,
+            OrderModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.OrderNumber))
+            {
+                ModelState.AddModelError(
+                    nameof(model.OrderNumber),
+                    "Order number is required.");
+            }
+            else if (model.OrderNumber.Length > 50)
+            {
+                ModelState.AddModelError(
+                    nameof(model.OrderNumber),
+                    "Order number cannot exceed 50 characters.");
+            }
+
+
+            if (!string.IsNullOrWhiteSpace(model.OrderNumber))
+            {
+                bool duplicate =
+                    await _context.Orders
+                        .AnyAsync(o =>
+                            o.OrderId != id &&
+                            o.OrderNumber.ToLower()
+                            ==
+                            model.OrderNumber.ToLower());
+
+                if (duplicate)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.OrderNumber),
+                        "This order number already exists.");
+                }
+            }
+
+
+            if (model.SupplierId <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SupplierId),
+                    "Please select a valid supplier.");
+
+                return;
+            }
+
+
+            bool supplierExists =
+                await _context.Suppliers
+                    .AnyAsync(s =>
+                        s.SupplierId == model.SupplierId &&
+                        !s.IsDeleted);
+
+            if (!supplierExists)
+            {
+                ModelState.AddModelError(
+                    nameof(model.SupplierId),
+                    "Please select a valid supplier.");
+            }
+        }
+
+
+        // ============================================================
+        // LOAD ORDER DATA
         // ============================================================
 
         private async Task LoadOrderData()
@@ -1073,10 +1044,154 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             ViewBag.Consumables =
                 await _context.Consumables
-                    .Where(c => !c.IsDeleted)
                     .Include(c => c.Supplier)
-                    .OrderBy(c => c.Name)
+                    .Where(c =>
+                        !c.IsDeleted &&
+                        (
+                            c.StockStatus ==
+                                StockStatus.ReorderNow ||
+                            c.StockStatus ==
+                                StockStatus.OutOfStock
+                        ))
+                    .OrderBy(c =>
+                        c.StockStatus ==
+                            StockStatus.OutOfStock
+                            ? 0
+                            : 1)
+                    .ThenBy(c => c.Name)
                     .ToListAsync();
+
+
+            ViewBag.ReorderConsumables =
+                await GetReorderConsumables();
+        }
+
+
+        // ============================================================
+        // GET ORDERS
+        // ============================================================
+
+        private async Task<List<OrderModel>> GetOrders()
+        {
+            return await _context.Orders
+                .Include(o => o.Supplier)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(i => i.Consumable)
+                .OrderByDescending(o => o.OrderId)
+                .ToListAsync();
+        }
+
+
+        // ============================================================
+        // GET REORDER CONSUMABLES
+        // ============================================================
+
+        private async Task<List<ConsumableModel>>
+            GetReorderConsumables()
+        {
+            return await _context.Consumables
+                .Include(c => c.Supplier)
+                .Where(c =>
+                    !c.IsDeleted &&
+                    (
+                        c.StockStatus ==
+                            StockStatus.ReorderNow ||
+                        c.StockStatus ==
+                            StockStatus.OutOfStock
+                    ))
+                .OrderBy(c =>
+                    c.StockStatus ==
+                        StockStatus.OutOfStock
+                        ? 0
+                        : 1)
+                .ThenBy(c => c.QuantityOnHand)
+                .ThenBy(c => c.Name)
+                .ToListAsync();
+        }
+
+
+        // ============================================================
+        // STOCK STATUS
+        // ============================================================
+
+        private StockStatus CalculateStockStatus(
+            int quantityOnHand,
+            int reorderLevel)
+        {
+            if (quantityOnHand <= 0)
+            {
+                return StockStatus.OutOfStock;
+            }
+
+            decimal reorderThreshold =
+                reorderLevel * 1.10m;
+
+            if (quantityOnHand <= reorderThreshold)
+            {
+                return StockStatus.ReorderNow;
+            }
+
+            return StockStatus.Sufficient;
+        }
+
+
+        // ============================================================
+        // ROOT EXCEPTION
+        // ============================================================
+
+        private Exception GetRootException(
+            Exception exception)
+        {
+            var root = exception;
+
+            while (root.InnerException != null)
+            {
+                root = root.InnerException;
+            }
+
+            return root;
+        }
+
+
+        // ============================================================
+        // EXCEPTION HANDLING
+        // ============================================================
+
+        private IActionResult HandleException(
+            Exception ex,
+            string userMessage)
+        {
+            var rootException =
+                GetRootException(ex);
+
+            Console.Error.WriteLine(
+                "============================================================");
+
+            Console.Error.WriteLine(
+                userMessage);
+
+            Console.Error.WriteLine(
+                $"Exception: {ex.GetType().FullName}");
+
+            Console.Error.WriteLine(
+                $"Message: {ex.Message}");
+
+            Console.Error.WriteLine(
+                $"Root Exception: {rootException.GetType().FullName}");
+
+            Console.Error.WriteLine(
+                $"Root Message: {rootException.Message}");
+
+            Console.Error.WriteLine(
+                $"Stack Trace:{Environment.NewLine}{ex.StackTrace}");
+
+            Console.Error.WriteLine(
+                "============================================================");
+
+            TempData["ErrorMessage"] =
+                $"{userMessage} {rootException.Message}";
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
