@@ -8,6 +8,17 @@ namespace NMB_HLabSys.Areas.Manager.Models
     public class TestTypeModel
     {
         // ============================================================
+        // RECORD STATUS
+        // ============================================================
+
+        public enum RecordStatus
+        {
+            Inactive = 0,
+            Active = 1
+        }
+
+
+        // ============================================================
         // PRIMARY KEY
         // ============================================================
 
@@ -17,10 +28,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         // ============================================================
         // TEST NAME
-        // Examples:
-        // Full Blood Count (FBC)
-        // Prothrombin Time (PT)
-        // Glucose (Fasting)
         // ============================================================
 
         [Required]
@@ -95,9 +102,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         // ============================================================
         // EXISTING PRIMARY CONSUMABLE
-        //
-        // Keep this because your current seed data still supplies
-        // ConsumableId directly on TestTypeModel.
         // ============================================================
 
         [Required]
@@ -109,9 +113,17 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
 
         // ============================================================
+        // SOFT DELETE / RECORD STATUS
+        // ============================================================
+
+        [Required]
+        [Display(Name = "Status")]
+        public RecordStatus IsActive { get; set; }
+            = RecordStatus.Active;
+
+
+        // ============================================================
         // TEST REQUESTS
-        //
-        // A test type can appear in many test requests.
         // ============================================================
 
         public virtual ICollection<TestTypeModel>
@@ -122,8 +134,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         // ============================================================
         // TECHNICIAN ASSIGNMENTS
-        //
-        // Multiple technicians can be assigned to perform this test.
         // ============================================================
 
         public virtual ICollection<TechnicianTestTypeModel>
@@ -134,8 +144,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         // ============================================================
         // CONSUMABLE REQUIREMENTS
-        //
-        // A test can use multiple consumables.
         // ============================================================
 
         public virtual ICollection<TestTypeConsumableModel>

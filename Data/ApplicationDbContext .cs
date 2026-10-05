@@ -105,6 +105,16 @@ namespace NMB_HLabSys.Data
 
 
             // ============================================================
+            // TEST CATEGORY STATUS
+            // ============================================================
+
+            builder.Entity<TestCategoryModel>()
+                .Property(x => x.IsActive)
+                .HasConversion<int>()
+                .HasDefaultValue(TestCategoryModel.RecordStatus.Active);
+
+
+            // ============================================================
             // ADMINISTRATOR MODEL RELATIONSHIPS
             // ============================================================
 
@@ -555,31 +565,36 @@ namespace NMB_HLabSys.Data
                 new TestCategoryModel
                 {
                     TestCategoryId = 1,
-                    Description = "Hematology"
+                    Description = "Hematology",
+                    IsActive = TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 2,
-                    Description = "Coagulation"
+                    Description = "Coagulation",
+                    IsActive = TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 3,
-                    Description = "Clinical Chemistry"
+                    Description = "Clinical Chemistry",
+                    IsActive = TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 4,
-                    Description = "Urinalysis"
+                    Description = "Urinalysis",
+                    IsActive = TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 5,
-                    Description = "Microbiology"
+                    Description = "Microbiology",
+                    IsActive = TestCategoryModel.RecordStatus.Active
                 }
             );
 

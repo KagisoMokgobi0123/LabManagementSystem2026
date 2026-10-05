@@ -1,0 +1,1099 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestCategoryModel>
+
+@{
+ViewData["Title"] = "Test Categories";
+Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+<!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h4 class="fw-bold mb-1">
+
+            <i class="fa-solid fa-layer-group text-primary me-2"></i>
+
+            Test Categories
+
+        </h4>
+
+        <p class="text-muted mb-0">
+
+            Manage laboratory test categories and their associated
+            test types.
+
+        </p>
+
+    </div>
+
+    <button type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#testCategoryModal"
+            onclick="openCreateModal()">
+
+        <i class="fa-solid fa-plus me-1"></i>
+
+        Add Test Category
+
+    </button>
+
+</div>
+
+<!-- =========================================================
+     MESSAGES
+     ========================================================= -->
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show"
+         role="alert">
+
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+        @TempData["ErrorMessage"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+
+        <div class="fw-semibold mb-2">
+
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+            Please correct the following errors:
+
+        </div>
+
+        <div asp-validation-summary="All"></div>
+
+    </div>
+}
+
+<!-- =========================================================
+     INFORMATION
+     ========================================================= -->
+
+<div class="alert alert-info border-0 shadow-sm">
+
+    <div class="d-flex">
+
+        <i class="fa-solid fa-circle-info mt-1 me-3"></i>
+
+        <div>
+
+            <div class="fw-semibold">
+                Test category management
+            </div>
+
+            <div class="small">
+
+                Test categories organize laboratory test types.
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- =========================================================
+     TEST CATEGORY TABLE
+     ========================================================= -->
+
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white border-0 py-3">
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+            <div>
+
+                <h6 class="fw-bold mb-0">
+                    Test Categories
+                </h6>
+
+                <small class="text-muted">
+                    Active laboratory test categories
+                </small>
+
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+
+                <!-- SEARCH -->
+
+                <div class="input-group input-group-sm"
+                     style="width:280px;">
+
+                    <span class="input-group-text bg-white">
+
+                        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                    </span>
+
+                    <input type="text"
+                           id="testCategorySearch"
+                           class="form-control"
+                           placeholder="Search categories..."
+                           autocomplete="off" />
+
+                </div>
+
+                <!-- RECORD COUNT -->
+
+                <span class="badge bg-primary-subtle text-primary"
+                      id="recordCount">
+
+                    @(Model?.Count() ?? 0) category(s)
+
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0"
+                   id="testCategoriesTable">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>
+                            Test Category
+                        </th>
+
+                        <th>
+                            Test Types
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th class="text-end">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="testCategoriesTableBody">
+
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var category in Model)
+                        {
+                            var encodedDescription =
+                                System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                    category.Description ?? "");
+
+                            /*
+                             * IsActive is RecordStatus enum.
+                             * It must be compared with RecordStatus.Active.
+                             */
+                            var isActive =
+                                category.IsActive ==
+                                NMB_HLabSys.Areas.Manager.Models.TestCategoryModel.RecordStatus.Active;
+
+                            var status =
+                                isActive
+                                    ? "Active"
+                                    : "Inactive";
+
+                            var encodedStatus =
+                                System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                    status);
+
+                            <tr class="test-category-row"
+                                data-description="@category.Description"
+                                data-status="@status">
+
+                                <!-- =================================================
+                                     CATEGORY
+                                     ================================================= -->
+
+                                <td>
+
+                                    <div class="fw-semibold">
+
+                                        @category.Description
+
+                                    </div>
+
+                                </td>
+
+                                <!-- =================================================
+                                     TEST TYPE COUNT
+                                     ================================================= -->
+
+                                <td>
+
+                                    <span class="badge bg-secondary-subtle text-secondary">
+
+                                        @(category.TestTypes?.Count ?? 0)
+
+                                    </span>
+
+                                    <span class="text-muted small ms-1">
+
+                                        test type(s)
+
+                                    </span>
+
+                                </td>
+
+                                <!-- =================================================
+                                     STATUS
+                                     ================================================= -->
+
+                                <td>
+
+                                    @if (isActive)
+                                    {
+                                        <span class="badge bg-success">
+
+                                            <i class="fa-solid fa-check me-1"></i>
+
+                                            Active
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+
+                                            <i class="fa-solid fa-ban me-1"></i>
+
+                                            Inactive
+
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <!-- =================================================
+                                     ACTIONS
+                                     ================================================= -->
+
+                                <td class="text-end">
+
+                                    <div class="btn-group btn-group-sm"
+                                         role="group">
+
+                                        <!-- VIEW -->
+
+                                        <button type="button"
+                                                class="btn btn-outline-info"
+                                                title="View category"
+                                                onclick="viewTestCategory(
+                                                    '@category.TestCategoryId',
+                                                    '@Html.Raw(encodedDescription)',
+                                                    '@(category.TestTypes?.Count ?? 0)',
+                                                    '@Html.Raw(encodedStatus)'
+                                                )">
+
+                                            <i class="fa-solid fa-eye"></i>
+
+                                        </button>
+
+                                        <!-- EDIT -->
+
+                                        @if (isActive)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-outline-primary"
+                                                    title="Edit category"
+                                                    onclick="editTestCategory(
+                                                        '@category.TestCategoryId',
+                                                        '@Html.Raw(encodedDescription)'
+                                                    )">
+
+                                                <i class="fa-solid fa-pen"></i>
+
+                                            </button>
+                                        }
+
+                                        <!-- SOFT DELETE -->
+
+                                        @if (isActive)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    title="Deactivate category"
+                                                    onclick="deleteTestCategory(
+                                                        '@category.TestCategoryId',
+                                                        '@Html.Raw(encodedDescription)'
+                                                    )">
+
+                                                <i class="fa-solid fa-trash"></i>
+
+                                            </button>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+
+                            <td colspan="4"
+                                class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    <i class="fa-solid fa-layer-group fa-2x mb-3"></i>
+
+                                    <div class="fw-semibold">
+
+                                        No test categories found
+
+                                    </div>
+
+                                    <small>
+
+                                        Add a test category to begin
+                                        organizing laboratory tests.
+
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                    <!-- =================================================
+                         SEARCH EMPTY
+                         ================================================= -->
+
+                    <tr id="noSearchResultsRow"
+                        style="display:none;">
+
+                        <td colspan="4"
+                            class="text-center py-5">
+
+                            <div class="text-muted">
+
+                                <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+
+                                <div class="fw-semibold">
+
+                                    No matching categories found
+
+                                </div>
+
+                                <small>
+
+                                    Try a different category name
+                                    or status.
+
+                                </small>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= ADD / EDIT TEST CATEGORY MODAL ============================================================= --> <div class="modal fade" id="testCategoryModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <form id="testCategoryForm"
+              method="post"
+              asp-area="Manager"
+              asp-controller="TestCategory"
+              asp-action="Create">
+
+            @Html.AntiForgeryToken()
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold"
+                    id="testCategoryModalTitle">
+
+                    <i class="fa-solid fa-plus text-primary me-2"></i>
+
+                    Add Test Category
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="TestCategoryId"
+                       name="TestCategoryId"
+                       value="0" />
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold"
+                           for="Description">
+
+                        Test Category
+
+                    </label>
+
+                    <input type="text"
+                           id="Description"
+                           name="Description"
+                           class="form-control"
+                           maxlength="100"
+                           required
+                           autocomplete="off" />
+
+                    <div class="form-text">
+
+                        Enter a unique laboratory test category.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    <span id="saveButtonText">
+                        Save Category
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= VIEW TEST CATEGORY MODAL ============================================================= --> <div class="modal fade" id="viewTestCategoryModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <div class="modal-header">
+
+            <h5 class="modal-title fw-bold">
+
+                <i class="fa-solid fa-circle-info text-info me-2"></i>
+
+                Test Category Details
+
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Test Category
+                </small>
+
+                <div id="viewTestCategoryDescription"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Test Types
+                </small>
+
+                <div>
+
+                    <span id="viewTestCategoryTestTypeCount"
+                          class="fw-semibold">
+                    </span>
+
+                    <span class="text-muted">
+                        test type(s)
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div>
+
+                <small class="text-muted d-block">
+                    Status
+                </small>
+
+                <div id="viewTestCategoryStatus"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= DELETE / SOFT DELETE TEST CATEGORY MODAL ============================================================= --> <div class="modal fade" id="deleteTestCategoryModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <!--
+            IMPORTANT:
+            This form explicitly submits a POST request to the
+            Manager/TestCategory/Delete action.
+        -->
+
+        <form id="deleteTestCategoryForm"
+              method="post"
+              action="@Url.Action("Delete", "TestCategory", new { area = "Manager" })">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   id="deleteTestCategoryId"
+                   name="id"
+                   value="" />
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold text-danger">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    Deactivate Test Category
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+
+                    Are you sure you want to deactivate this
+                    test category?
+
+                </p>
+
+                <div class="alert alert-warning mb-0">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    <strong id="deleteTestCategoryName"></strong>
+
+                    <div class="small mt-1">
+
+                        This is a soft delete. The category will be
+                        marked as inactive instead of being permanently
+                        removed from the database.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger">
+
+                    <i class="fa-solid fa-trash me-1"></i>
+
+                    Deactivate Category
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold text-success">
+
+                    <i class="fa-solid fa-circle-check me-2"></i>
+
+                    Success
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body text-center py-4">
+
+                <div class="mb-3">
+
+                    <div class="d-inline-flex
+                        align-items-center
+                        justify-content-center
+                        rounded-circle
+                        bg-success-subtle
+                        text-success"
+                         style="width:70px;height:70px;">
+
+                        <i class="fa-solid fa-check fa-2x"></i>
+
+                    </div>
+
+                </div>
+
+                <h6 class="fw-semibold mb-2">
+
+                    Operation Successful
+
+                </h6>
+
+                <p class="text-muted mb-0">
+
+                    @TempData["SuccessMessage"]
+
+                </p>
+
+            </div>
+
+            <div class="modal-footer border-0 justify-content-center">
+
+                <button type="button"
+                        class="btn btn-success px-4"
+                        data-bs-dismiss="modal">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    OK
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+}
+
+@section Scripts {
+
+<script>
+
+    /* =========================================================
+       SUCCESS MESSAGE
+       ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const successModal =
+                document.getElementById(
+                    "successMessageModal"
+                );
+
+            if (successModal) {
+
+                const modal =
+                    new bootstrap.Modal(
+                        successModal
+                    );
+
+                modal.show();
+
+            }
+
+        }
+    );
+
+    /* =========================================================
+       CREATE
+       ========================================================= */
+
+    function openCreateModal() {
+
+        const form =
+            document.getElementById(
+                "testCategoryForm"
+            );
+
+        form.method = "post";
+
+        form.action =
+            "@Url.Action("Create", "TestCategory", new { area = "Manager" })";
+
+        document.getElementById(
+            "testCategoryModalTitle"
+        ).innerHTML =
+            '<i class="fa-solid fa-plus text-primary me-2"></i>' +
+            'Add Test Category';
+
+        document.getElementById(
+            "saveButtonText"
+        ).innerText =
+            "Save Category";
+
+        document.getElementById(
+            "TestCategoryId"
+        ).value = "0";
+
+        document.getElementById(
+            "Description"
+        ).value = "";
+
+    }
+
+    /* =========================================================
+       VIEW
+       ========================================================= */
+
+    function viewTestCategory(
+        id,
+        description,
+        testTypeCount,
+        status) {
+
+        document.getElementById(
+            "viewTestCategoryDescription"
+        ).innerText =
+            description;
+
+        document.getElementById(
+            "viewTestCategoryTestTypeCount"
+        ).innerText =
+            testTypeCount;
+
+        const statusElement =
+            document.getElementById(
+                "viewTestCategoryStatus"
+            );
+
+        if (status === "Active") {
+
+            statusElement.innerHTML =
+                '<span class="badge bg-success">' +
+                '<i class="fa-solid fa-check me-1"></i>' +
+                'Active' +
+                '</span>';
+
+        }
+        else {
+
+            statusElement.innerHTML =
+                '<span class="badge bg-secondary">' +
+                '<i class="fa-solid fa-ban me-1"></i>' +
+                'Inactive' +
+                '</span>';
+
+        }
+
+        new bootstrap.Modal(
+            document.getElementById(
+                "viewTestCategoryModal"
+            )
+        ).show();
+
+    }
+
+    /* =========================================================
+       EDIT
+       ========================================================= */
+
+    function editTestCategory(
+        id,
+        description) {
+
+        const form =
+            document.getElementById(
+                "testCategoryForm"
+            );
+
+        form.method = "post";
+
+        form.action =
+            "@Url.Action("Edit", "TestCategory", new { area = "Manager" })";
+
+        document.getElementById(
+            "testCategoryModalTitle"
+        ).innerHTML =
+            '<i class="fa-solid fa-pen text-primary me-2"></i>' +
+            'Edit Test Category';
+
+        document.getElementById(
+            "saveButtonText"
+        ).innerText =
+            "Update Category";
+
+        document.getElementById(
+            "TestCategoryId"
+        ).value = id;
+
+        document.getElementById(
+            "Description"
+        ).value = description;
+
+        new bootstrap.Modal(
+            document.getElementById(
+                "testCategoryModal"
+            )
+        ).show();
+
+    }
+
+    /* =========================================================
+       SOFT DELETE
+       ========================================================= */
+
+    function deleteTestCategory(
+        id,
+        description) {
+
+        const form =
+            document.getElementById(
+                "deleteTestCategoryForm"
+            );
+
+        /*
+         * Explicitly force the delete form to use POST.
+         */
+
+        form.method = "post";
+
+        /*
+         * Explicitly point the form to the Delete action.
+         */
+
+        form.action =
+            "@Url.Action("Delete", "TestCategory", new { area = "Manager" })";
+
+        /*
+         * Set the category ID that will be submitted as:
+         *
+         * id = category ID
+         */
+
+        document.getElementById(
+            "deleteTestCategoryId"
+        ).value = id;
+
+        /*
+         * Display the category being deactivated.
+         */
+
+        document.getElementById(
+            "deleteTestCategoryName"
+        ).innerText = description;
+
+        /*
+         * Show confirmation modal.
+         */
+
+        new bootstrap.Modal(
+            document.getElementById(
+                "deleteTestCategoryModal"
+            )
+        ).show();
+
+    }
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    const searchInput =
+        document.getElementById(
+            "testCategorySearch"
+        );
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+
+                const search =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+                const rows =
+                    document.querySelectorAll(
+                        "#testCategoriesTableBody .test-category-row"
+                    );
+
+                let visibleCount = 0;
+
+                rows.forEach(
+                    function (row) {
+
+                        const description =
+                            (
+                                row.dataset.description ||
+                                ""
+                            ).toLowerCase();
+
+                        const status =
+                            (
+                                row.dataset.status ||
+                                ""
+                            ).toLowerCase();
+
+                        const matches =
+                            description.includes(search) ||
+                            status.includes(search);
+
+                        row.style.display =
+                            matches
+                                ? ""
+                                : "none";
+
+                        if (matches) {
+
+                            visibleCount++;
+
+                        }
+
+                    }
+                );
+
+                document.getElementById(
+                    "recordCount"
+                ).innerText =
+                    visibleCount +
+                    " category(s)";
+
+                const noSearchResultsRow =
+                    document.getElementById(
+                        "noSearchResultsRow"
+                    );
+
+                if (noSearchResultsRow) {
+
+                    noSearchResultsRow.style.display =
+                        rows.length > 0 &&
+                        visibleCount === 0
+                            ? ""
+                            : "none";
+
+                }
+
+            }
+        );
+
+    }
+
+</script>
+
+}

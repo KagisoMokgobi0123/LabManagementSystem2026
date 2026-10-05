@@ -995,6 +995,11 @@ namespace NMBHLabSys.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
                     b.HasKey("TestCategoryId");
 
                     b.ToTable("TestCategories");
@@ -1003,27 +1008,32 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestCategoryId = 1,
-                            Description = "Hematology"
+                            Description = "Hematology",
+                            IsActive = 1
                         },
                         new
                         {
                             TestCategoryId = 2,
-                            Description = "Coagulation"
+                            Description = "Coagulation",
+                            IsActive = 1
                         },
                         new
                         {
                             TestCategoryId = 3,
-                            Description = "Clinical Chemistry"
+                            Description = "Clinical Chemistry",
+                            IsActive = 1
                         },
                         new
                         {
                             TestCategoryId = 4,
-                            Description = "Urinalysis"
+                            Description = "Urinalysis",
+                            IsActive = 1
                         },
                         new
                         {
                             TestCategoryId = 5,
-                            Description = "Microbiology"
+                            Description = "Microbiology",
+                            IsActive = 1
                         });
                 });
 
@@ -1141,6 +1151,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("ConsumableId")
                         .HasColumnType("int");
 
+                    b.Property<int>("IsActive")
+                        .HasColumnType("int");
+
                     b.Property<int>("MeasurementUnit")
                         .HasColumnType("int");
 
@@ -1191,6 +1204,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 1,
                             ConsumableId = 1,
+                            IsActive = 1,
                             MeasurementUnit = 1,
                             Name = "Full Blood Count (FBC)",
                             NormalMax = 11.0m,
@@ -1203,6 +1217,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 2,
                             ConsumableId = 1,
+                            IsActive = 1,
                             MeasurementUnit = 2,
                             Name = "White Blood Cell Differential",
                             NormalMax = 0m,
@@ -1215,6 +1230,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 3,
                             ConsumableId = 4,
+                            IsActive = 1,
                             MeasurementUnit = 3,
                             Name = "Peripheral Blood Film",
                             NormalMax = 0m,
@@ -1227,6 +1243,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 6,
                             ConsumableId = 6,
+                            IsActive = 1,
                             MeasurementUnit = 5,
                             Name = "Prothrombin Time (PT)",
                             NormalMax = 13.5m,
@@ -1239,6 +1256,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 7,
                             ConsumableId = 6,
+                            IsActive = 1,
                             MeasurementUnit = 5,
                             Name = "Activated Partial Thromboplastin Time (aPTT)",
                             NormalMax = 35m,
@@ -1251,6 +1269,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 8,
                             ConsumableId = 6,
+                            IsActive = 1,
                             MeasurementUnit = 6,
                             Name = "International Normalized Ratio (INR)",
                             NormalMax = 1.2m,
@@ -1263,6 +1282,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 11,
                             ConsumableId = 8,
+                            IsActive = 1,
                             MeasurementUnit = 9,
                             Name = "Glucose (Fasting)",
                             NormalMax = 5.5m,
@@ -1275,6 +1295,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 12,
                             ConsumableId = 1,
+                            IsActive = 1,
                             MeasurementUnit = 2,
                             Name = "Hemoglobin A1C (HbA1c)",
                             NormalMax = 5.6m,
@@ -1287,6 +1308,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 17,
                             ConsumableId = 9,
+                            IsActive = 1,
                             MeasurementUnit = 3,
                             Name = "Urinalysis (Dipstick)",
                             NormalMax = 0m,
@@ -1299,6 +1321,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestTypeId = 20,
                             ConsumableId = 12,
+                            IsActive = 1,
                             MeasurementUnit = 3,
                             Name = "Blood Culture",
                             NormalMax = 0m,

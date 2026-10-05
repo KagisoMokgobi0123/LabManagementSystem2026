@@ -4,38 +4,27 @@ namespace NMB_HLabSys.Areas.Manager.Models
 {
     public class TestCategoryModel
     {
-        // ============================================================
-        // PRIMARY KEY
-        // ============================================================
+        public enum RecordStatus
+        {
+            Inactive = 0,
+            Active = 1
+        }
 
         [Key]
         public int TestCategoryId { get; set; }
-
-
-        // ============================================================
-        // CATEGORY DESCRIPTION
-        //
-        // Examples:
-        // Hematology
-        // Biochemistry
-        // Microbiology
-        // Immunology
-        // Blood Banking
-        // ============================================================
 
         [Required]
         [StringLength(100)]
         [Display(Name = "Test Category")]
         public string Description { get; set; } = string.Empty;
 
-
-        // ============================================================
-        // TEST TYPES
-        //
-        // One category can contain many test types.
-        // ============================================================
+        [Required]
+        [Display(Name = "Status")]
+        public RecordStatus IsActive { get; set; }
+            = RecordStatus.Active;
 
         public virtual ICollection<TestTypeModel> TestTypes { get; set; }
             = new List<TestTypeModel>();
     }
+
 }
