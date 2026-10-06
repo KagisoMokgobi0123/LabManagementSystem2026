@@ -18,14 +18,12 @@
 
     var action =
         ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
 }
 
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
     <meta charset="utf-8" />
 
     <meta name="viewport"
@@ -35,22 +33,18 @@
         @ViewData["Title"] - NMB-HLabSys
     </title>
 
-
     <!-- Bootstrap -->
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
 
     <!-- Font Awesome 6 -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
-
     <!-- Site CSS -->
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
-
 
     <style>
 
@@ -64,11 +58,9 @@
                 --page-bg: #f4f7fb;
             }
 
-
             * {
                 box-sizing: border-box;
             }
-
 
             html,
             body {
@@ -76,26 +68,23 @@
                 min-height: 100%;
             }
 
-
             body {
                 background: var(--page-bg);
                 color: #334155;
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             }
 
-
             /* =====================================================
-                       APPLICATION
-                       ===================================================== */
+                                       APPLICATION
+                                       ===================================================== */
 
             .manager-app {
                 min-height: 100vh;
             }
 
-
             /* =====================================================
-                       SIDEBAR
-                       ===================================================== */
+                                       SIDEBAR
+                                       ===================================================== */
 
             .manager-sidebar {
                 position: fixed;
@@ -109,15 +98,14 @@
                 overflow-y: auto;
                 scrollbar-width: none;
                 overflow-x: hidden;
-                background: linear-gradient( 180deg, var(--sidebar-dark) 0%, var(--sidebar-blue) 50%, var(--sidebar-light) 100% );
+                background: linear-gradient(180deg, var(--sidebar-dark) 0%, var(--sidebar-blue) 50%, var(--sidebar-light) 100%);
                 box-shadow: 5px 0 25px rgba(15, 23, 42, .13);
                 transition: width .25s ease, transform .25s ease;
             }
 
-
             /* =====================================================
-                       LOGO
-                       ===================================================== */
+                                       LOGO
+                                       ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -128,21 +116,18 @@
                 text-decoration: none !important;
             }
 
-
             .sidebar-logo {
                 width: 55px;
                 height: 55px;
                 flex-shrink: 0;
                 object-fit: contain;
                 margin-right: 12px;
-                filter: drop-shadow( 0 4px 8px rgba(0,0,0,.20) );
+                filter: drop-shadow(0 4px 8px rgba(0,0,0,.20));
             }
-
 
             .sidebar-brand-text {
                 overflow: hidden;
             }
-
 
             .sidebar-brand-name {
                 color: #fff;
@@ -151,7 +136,6 @@
                 white-space: nowrap;
             }
 
-
             .sidebar-brand-subtitle {
                 margin-top: 2px;
                 color: rgba(255,255,255,.60);
@@ -159,10 +143,9 @@
                 white-space: nowrap;
             }
 
-
             /* =====================================================
-                       SIDEBAR CONTROLS
-                       ===================================================== */
+                                       SIDEBAR CONTROLS
+                                       ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -172,7 +155,6 @@
                 padding: 8px 12px;
                 border-bottom: 1px solid rgba(255,255,255,.08);
             }
-
 
             .sidebar-control-btn {
                 width: 33px;
@@ -189,17 +171,15 @@
                 transition: .2s ease;
             }
 
-
                 .sidebar-control-btn:hover {
                     background: rgba(255,255,255,.16);
                     color: #fff;
                     transform: translateY(-1px);
                 }
 
-
             /* =====================================================
-                       MANAGER USER
-                       ===================================================== */
+                                       MANAGER USER
+                                       ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -211,7 +191,6 @@
                 background: rgba(255,255,255,.07);
             }
 
-
             .sidebar-avatar {
                 width: 39px;
                 height: 39px;
@@ -221,18 +200,16 @@
                 justify-content: center;
                 margin-right: 10px;
                 border-radius: 50%;
-                background: linear-gradient( 135deg, #0284c7, #06b6d4 );
+                background: linear-gradient(135deg, #0284c7, #06b6d4);
                 color: #fff;
                 font-size: 14px;
                 font-weight: 700;
             }
 
-
             .sidebar-user-details {
                 min-width: 0;
                 overflow: hidden;
             }
-
 
             .sidebar-user-name {
                 overflow: hidden;
@@ -243,23 +220,20 @@
                 white-space: nowrap;
             }
 
-
             .sidebar-user-role {
                 margin-top: 2px;
                 color: rgba(255,255,255,.55);
                 font-size: 9px;
             }
 
-
             /* =====================================================
-                       NAVIGATION
-                       ===================================================== */
+                                       NAVIGATION
+                                       ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
                 padding: 5px 12px 25px;
             }
-
 
             .sidebar-section {
                 margin: 19px 10px 7px;
@@ -270,7 +244,6 @@
                 text-transform: uppercase;
                 white-space: nowrap;
             }
-
 
             .sidebar-link {
                 position: relative;
@@ -287,20 +260,17 @@
                 transition: .2s ease;
             }
 
-
                 .sidebar-link:hover {
                     color: #fff !important;
                     background: rgba(255,255,255,.10);
                     transform: translateX(2px);
                 }
 
-
                 .sidebar-link.active {
                     color: #fff !important;
-                    background: linear-gradient( 135deg, rgba(2,132,199,.85), rgba(6,182,212,.65) );
+                    background: linear-gradient(135deg, rgba(2,132,199,.85), rgba(6,182,212,.65));
                     box-shadow: 0 5px 15px rgba(0,0,0,.15);
                 }
-
 
                     .sidebar-link.active::before {
                         content: "";
@@ -313,7 +283,6 @@
                         background: #38bdf8;
                     }
 
-
             .sidebar-link-icon {
                 width: 28px;
                 min-width: 28px;
@@ -322,27 +291,23 @@
                 font-size: 14px;
             }
 
-
             .sidebar-link-text {
                 flex: 1;
                 white-space: nowrap;
             }
 
-
             /* =====================================================
-                       LOGOUT
-                       ===================================================== */
+                                       LOGOUT
+                                       ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
                 border-top: 1px solid rgba(255,255,255,.10);
             }
 
-
                 .sidebar-bottom form {
                     margin: 0;
                 }
-
 
             .sidebar-logout {
                 width: 100%;
@@ -359,16 +324,14 @@
                 transition: .2s ease;
             }
 
-
                 .sidebar-logout:hover {
                     background: rgba(220,38,38,.20);
                     color: #fff;
                 }
 
-
             /* =====================================================
-                       MAIN CONTENT
-                       ===================================================== */
+                                       MAIN CONTENT
+                                       ===================================================== */
 
             .manager-main {
                 min-height: 100vh;
@@ -376,147 +339,107 @@
                 transition: margin-left .25s ease, width .25s ease;
             }
 
-
             /* =====================================================
-                       COLLAPSED SIDEBAR
-                       ===================================================== */
+                                       COLLAPSED SIDEBAR
+                                       ===================================================== */
 
-            body.sidebar-collapsed
-            .manager-sidebar {
+            body.sidebar-collapsed .manager-sidebar {
                 width: var(--sidebar-collapsed-width);
             }
 
-
-            body.sidebar-collapsed
-            .manager-main {
+            body.sidebar-collapsed .manager-main {
                 margin-left: var(--sidebar-collapsed-width);
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-brand {
+            body.sidebar-collapsed .sidebar-brand {
                 justify-content: center;
                 min-height: 90px;
                 padding: 15px 8px;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-logo {
+            body.sidebar-collapsed .sidebar-logo {
                 width: 48px;
                 height: 48px;
                 margin-right: 0;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-brand-text,
-            body.sidebar-collapsed
-            .sidebar-user-details,
-            body.sidebar-collapsed
-            .sidebar-link-text {
+            body.sidebar-collapsed .sidebar-brand-text,
+            body.sidebar-collapsed .sidebar-user-details,
+            body.sidebar-collapsed .sidebar-link-text {
                 display: none;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-controls {
+            body.sidebar-collapsed .sidebar-controls {
                 justify-content: center;
                 padding: 8px 5px;
             }
 
-
-            body.sidebar-collapsed
-            #fullScreenToggle {
+            body.sidebar-collapsed #fullScreenToggle {
                 display: none;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-user {
+            body.sidebar-collapsed .sidebar-user {
                 justify-content: center;
                 margin: 12px 9px;
                 padding: 9px 5px;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-avatar {
+            body.sidebar-collapsed .sidebar-avatar {
                 margin-right: 0;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-section {
+            body.sidebar-collapsed .sidebar-section {
                 height: 8px;
                 margin: 8px 0;
                 overflow: hidden;
                 font-size: 0;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-navigation {
+            body.sidebar-collapsed .sidebar-navigation {
                 padding: 5px 9px 20px;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-link {
+            body.sidebar-collapsed .sidebar-link {
                 justify-content: center;
                 padding: 10px 5px;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-link-icon {
+            body.sidebar-collapsed .sidebar-link-icon {
                 width: auto;
                 min-width: 0;
                 margin-right: 0;
                 font-size: 16px;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-bottom {
+            body.sidebar-collapsed .sidebar-bottom {
                 padding: 10px 9px;
             }
 
-
-            body.sidebar-collapsed
-            .sidebar-logout {
+            body.sidebar-collapsed .sidebar-logout {
                 justify-content: center;
                 padding: 11px 5px;
             }
 
-
-                body.sidebar-collapsed
-                .sidebar-logout
-                .sidebar-link-icon {
+                body.sidebar-collapsed .sidebar-logout .sidebar-link-icon {
                     margin-right: 0;
                 }
 
-
             /* =====================================================
-                       FULL WIDTH MODE
-                       ===================================================== */
+                                       FULL WIDTH MODE
+                                       ===================================================== */
 
-            body.sidebar-hidden
-            .manager-sidebar {
+            body.sidebar-hidden .manager-sidebar {
                 transform: translateX(-100%) !important;
             }
 
-
-            body.sidebar-hidden
-            .manager-main {
+            body.sidebar-hidden .manager-main {
                 margin-left: 0 !important;
                 width: 100% !important;
             }
 
-
             /* =====================================================
-                       RESTORE BUTTON
-                       ===================================================== */
+                                       RESTORE BUTTON
+                                       ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -530,23 +453,20 @@
                 justify-content: center;
                 border: none;
                 border-radius: 10px;
-                background: linear-gradient( 135deg, #075985, #0284c7 );
+                background: linear-gradient(135deg, #075985, #0284c7);
                 color: #fff;
                 font-size: 17px;
                 box-shadow: 0 6px 20px rgba(15,23,42,.25);
                 cursor: pointer;
             }
 
-
-            body.sidebar-hidden
-            .sidebar-restore-btn {
+            body.sidebar-hidden .sidebar-restore-btn {
                 display: flex;
             }
 
-
             /* =====================================================
-                       MOBILE
-                       ===================================================== */
+                                       MOBILE
+                                       ===================================================== */
 
             .manager-mobile-header {
                 display: none;
@@ -559,7 +479,6 @@
                 box-shadow: 0 2px 12px rgba(15,23,42,.15);
             }
 
-
             .mobile-brand {
                 display: flex;
                 align-items: center;
@@ -567,14 +486,12 @@
                 font-weight: 700;
             }
 
-
             .mobile-logo {
                 width: 39px;
                 height: 39px;
                 margin-right: 9px;
                 object-fit: contain;
             }
-
 
             .sidebar-toggle {
                 width: 39px;
@@ -586,7 +503,6 @@
                 cursor: pointer;
             }
 
-
             .sidebar-backdrop {
                 position: fixed;
                 inset: 0;
@@ -595,7 +511,6 @@
                 background: rgba(15,23,42,.55);
             }
 
-
             @@media(max-width: 991.98px) {
 
                 .manager-sidebar {
@@ -603,135 +518,98 @@
                     transform: translateX(-100%);
                 }
 
-
                     .manager-sidebar.show {
                         transform: translateX(0);
                     }
 
-
                 .sidebar-backdrop.show {
                     display: block;
                 }
-
 
                 .manager-main {
                     margin-left: 0;
                     width: 100%;
                 }
 
-
                 .manager-mobile-header {
                     display: flex;
                 }
-
 
                 .sidebar-controls {
                     display: none;
                 }
 
-
-                body.sidebar-collapsed
-                .manager-sidebar {
+                body.sidebar-collapsed .manager-sidebar {
                     width: 265px;
                 }
 
-
-                body.sidebar-collapsed
-                .manager-main {
+                body.sidebar-collapsed .manager-main {
                     margin-left: 0;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-brand {
+                body.sidebar-collapsed .sidebar-brand {
                     justify-content: flex-start;
                     min-height: 105px;
                     padding: 18px 20px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-logo {
+                body.sidebar-collapsed .sidebar-logo {
                     width: 55px;
                     height: 55px;
                     margin-right: 12px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-brand-text,
-                body.sidebar-collapsed
-                .sidebar-user-details,
-                body.sidebar-collapsed
-                .sidebar-link-text {
+                body.sidebar-collapsed .sidebar-brand-text,
+                body.sidebar-collapsed .sidebar-user-details,
+                body.sidebar-collapsed .sidebar-link-text {
                     display: block;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-user {
+                body.sidebar-collapsed .sidebar-user {
                     justify-content: flex-start;
                     margin: 15px 13px;
                     padding: 12px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-avatar {
+                body.sidebar-collapsed .sidebar-avatar {
                     margin-right: 10px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-section {
+                body.sidebar-collapsed .sidebar-section {
                     height: auto;
                     margin: 19px 10px 7px;
                     overflow: visible;
                     font-size: 9px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-navigation {
+                body.sidebar-collapsed .sidebar-navigation {
                     padding: 5px 12px 25px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-link {
+                body.sidebar-collapsed .sidebar-link {
                     justify-content: flex-start;
                     padding: 10px 12px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-link-icon {
+                body.sidebar-collapsed .sidebar-link-icon {
                     width: 28px;
                     min-width: 28px;
                     margin-right: 8px;
                     font-size: 14px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-bottom {
+                body.sidebar-collapsed .sidebar-bottom {
                     padding: 12px;
                 }
 
-
-                body.sidebar-collapsed
-                .sidebar-logout {
+                body.sidebar-collapsed .sidebar-logout {
                     justify-content: flex-start;
                     padding: 11px 12px;
                 }
 
-
-                    body.sidebar-collapsed
-                    .sidebar-logout
-                    .sidebar-link-icon {
+                    body.sidebar-collapsed .sidebar-logout .sidebar-link-icon {
                         margin-right: 8px;
                     }
-
 
                 .sidebar-restore-btn {
                     display: none !important;
@@ -740,32 +618,27 @@
 
     </style>
 
-
     @await RenderSectionAsync(
         "Styles",
         required: false
     )
 
 </head>
-
-
 <body>
-
-
     <div class="manager-app">
 
-
         <!-- =====================================================
-         SIDEBAR
-         ===================================================== -->
+     SIDEBAR
+     ===================================================== -->
 
         <aside class="manager-sidebar"
                id="managerSidebar">
 
-
             <!-- LOGO -->
 
-            <a href="/Manager/Home/Index"
+            <a asp-area="Manager"
+               asp-controller="Home"
+               asp-action="Index"
                class="sidebar-brand"
                title="Manager Dashboard">
 
@@ -787,7 +660,6 @@
 
             </a>
 
-
             <!-- SIDEBAR CONTROLS -->
 
             <div class="sidebar-controls">
@@ -802,7 +674,6 @@
 
                 </button>
 
-
                 <button type="button"
                         class="sidebar-control-btn"
                         id="fullScreenToggle"
@@ -814,7 +685,6 @@
 
             </div>
 
-
             <!-- MANAGER INFORMATION -->
 
             <div class="sidebar-user">
@@ -825,7 +695,6 @@
                     @managerInitial
 
                 </div>
-
 
                 <div class="sidebar-user-details">
 
@@ -841,13 +710,11 @@
 
             </div>
 
-
             <!-- =====================================================
-             NAVIGATION
-             ===================================================== -->
+         NAVIGATION
+         ===================================================== -->
 
             <nav class="sidebar-navigation">
-
 
                 <!-- MAIN -->
 
@@ -855,8 +722,9 @@
                     Main
                 </div>
 
-
-                <a href="/Manager/Home/Index"
+                <a asp-area="Manager"
+                   asp-controller="Home"
+                   asp-action="Index"
                    title="Dashboard"
                    class="sidebar-link @(controller == "Home" ? "active" : "")">
 
@@ -870,18 +738,17 @@
 
                 </a>
 
-
-
                 <!-- =================================================
-                 TEST MANAGEMENT
-                 ================================================= -->
+             TEST MANAGEMENT
+             ================================================= -->
 
                 <div class="sidebar-section">
                     Test Management
                 </div>
 
-
-                <a href="/Manager/TestCategory/Index"
+                <a asp-area="Manager"
+                   asp-controller="TestCategory"
+                   asp-action="Index"
                    title="Test Categories"
                    class="sidebar-link @(controller == "TestCategory" ? "active" : "")">
 
@@ -895,10 +762,27 @@
 
                 </a>
 
+                <a asp-area="Manager"
+                   asp-controller="SampleType"
+                   asp-action="Index"
+                   title="Sample Type"
+                   class="sidebar-link @(controller == "SampleType" ? "active" : "")">
 
-                <a href="/Manager/TestTypes/Index"
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-folder-tree"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Sample Type
+                    </span>
+
+                </a>
+
+                <a asp-area="Manager"
+                   asp-controller="TestType"
+                   asp-action="Index"
                    title="Test Types"
-                   class="sidebar-link @(controller == "TestTypes" ? "active" : "")">
+                   class="sidebar-link @(controller == "TestType" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
                         <i class="fa-solid fa-flask-vial"></i>
@@ -910,8 +794,9 @@
 
                 </a>
 
-
-                <a href="/Manager/TestAssignments/Index"
+                <a asp-area="Manager"
+                   asp-controller="TestAssignments"
+                   asp-action="Index"
                    title="Technician Test Assignments"
                    class="sidebar-link @(controller == "TestAssignments" ? "active" : "")">
 
@@ -925,18 +810,17 @@
 
                 </a>
 
-
-
                 <!-- =================================================
-                 INVENTORY
-                 ================================================= -->
+             INVENTORY
+             ================================================= -->
 
                 <div class="sidebar-section">
                     Inventory
                 </div>
 
-
-                <a href="/Manager/Consumable/Index"
+                <a asp-area="Manager"
+                   asp-controller="Consumable"
+                   asp-action="Index"
                    title="Consumables"
                    class="sidebar-link @(controller == "Consumable" ? "active" : "")">
 
@@ -950,8 +834,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Supplier/Index"
+                <a asp-area="Manager"
+                   asp-controller="Supplier"
+                   asp-action="Index"
                    title="Suppliers"
                    class="sidebar-link @(controller == "Supplier" ? "active" : "")">
 
@@ -965,8 +850,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Order/Index"
+                <a asp-area="Manager"
+                   asp-controller="Order"
+                   asp-action="Index"
                    title="Orders"
                    class="sidebar-link @(controller == "Order" ? "active" : "")">
 
@@ -980,33 +866,33 @@
 
                 </a>
 
-
-                <a href="/Manager/StockAdjustment/Index"
-                   title="Orders"
+                <a asp-area="Manager"
+                   asp-controller="StockAdjustment"
+                   asp-action="Index"
+                   title="Stock Adjustments"
                    class="sidebar-link @(controller == "StockAdjustment" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-                        <i class="fa-solid fa-cart-shopping"></i>
+                        <i class="fa-solid fa-boxes-packing"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Orders
+                        Stock Adjustments
                     </span>
 
                 </a>
 
-
-
                 <!-- =================================================
-                 STAFF MANAGEMENT
-                 ================================================= -->
+             STAFF MANAGEMENT
+             ================================================= -->
 
                 <div class="sidebar-section">
                     Staff Management
                 </div>
 
-
-                <a href="/Manager/Doctors/Index"
+                <a asp-area="Manager"
+                   asp-controller="Doctors"
+                   asp-action="Index"
                    title="Doctors"
                    class="sidebar-link @(controller == "Doctors" ? "active" : "")">
 
@@ -1020,8 +906,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Technicians/Index"
+                <a asp-area="Manager"
+                   asp-controller="Technicians"
+                   asp-action="Index"
                    title="Lab Technicians"
                    class="sidebar-link @(controller == "Technicians" ? "active" : "")">
 
@@ -1035,18 +922,17 @@
 
                 </a>
 
-
-
                 <!-- =================================================
-                 REPORTS
-                 ================================================= -->
+             REPORTS
+             ================================================= -->
 
                 <div class="sidebar-section">
                     Reports
                 </div>
 
-
-                <a href="/Manager/Reports/Index"
+                <a asp-area="Manager"
+                   asp-controller="Reports"
+                   asp-action="Index"
                    title="Laboratory Reports"
                    class="sidebar-link @(controller == "Reports" && action == "Index" ? "active" : "")">
 
@@ -1060,8 +946,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Reports/TestActivity"
+                <a asp-area="Manager"
+                   asp-controller="Reports"
+                   asp-action="TestActivity"
                    title="Test Activity Reports"
                    class="sidebar-link @(controller == "Reports" && action == "TestActivity" ? "active" : "")">
 
@@ -1075,8 +962,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Reports/Inventory"
+                <a asp-area="Manager"
+                   asp-controller="Reports"
+                   asp-action="Inventory"
                    title="Inventory Reports"
                    class="sidebar-link @(controller == "Reports" && action == "Inventory" ? "active" : "")">
 
@@ -1090,18 +978,17 @@
 
                 </a>
 
-
-
                 <!-- =================================================
-                 ACCOUNT
-                 ================================================= -->
+             ACCOUNT
+             ================================================= -->
 
                 <div class="sidebar-section">
                     Account
                 </div>
 
-
-                <a href="/Manager/Profile/Index"
+                <a asp-area="Manager"
+                   asp-controller="Profile"
+                   asp-action="Index"
                    title="My Profile"
                    class="sidebar-link @(controller == "Profile" && action == "Index" ? "active" : "")">
 
@@ -1115,8 +1002,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Profile/ChangePhoneNumber"
+                <a asp-area="Manager"
+                   asp-controller="Profile"
+                   asp-action="ChangePhoneNumber"
                    title="Change Phone Number"
                    class="sidebar-link @(controller == "Profile" && action == "ChangePhoneNumber" ? "active" : "")">
 
@@ -1130,8 +1018,9 @@
 
                 </a>
 
-
-                <a href="/Manager/Profile/ChangePassword"
+                <a asp-area="Manager"
+                   asp-controller="Profile"
+                   asp-action="ChangePassword"
                    title="Change Password"
                    class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
 
@@ -1147,14 +1036,15 @@
 
             </nav>
 
-
             <!-- =====================================================
-             LOGOUT
-             ===================================================== -->
+         LOGOUT
+         ===================================================== -->
 
             <div class="sidebar-bottom">
 
-                <form action="/Manager/Profile/Logout"
+                <form asp-area="Manager"
+                      asp-controller="Profile"
+                      asp-action="Logout"
                       method="post">
 
                     @Html.AntiForgeryToken()
@@ -1179,11 +1069,9 @@
 
         </aside>
 
-
-
         <!-- =====================================================
-         RESTORE SIDEBAR BUTTON
-         ===================================================== -->
+     RESTORE SIDEBAR BUTTON
+     ===================================================== -->
 
         <button type="button"
                 class="sidebar-restore-btn"
@@ -1194,22 +1082,17 @@
 
         </button>
 
-
-
         <!-- MOBILE BACKDROP -->
 
         <div class="sidebar-backdrop"
              id="sidebarBackdrop">
         </div>
 
-
-
         <!-- =====================================================
-         MAIN CONTENT
-         ===================================================== -->
+     MAIN CONTENT
+     ===================================================== -->
 
         <main class="manager-main">
-
 
             <!-- MOBILE HEADER -->
 
@@ -1227,7 +1110,6 @@
 
                 </div>
 
-
                 <button type="button"
                         class="sidebar-toggle"
                         id="sidebarToggle">
@@ -1238,20 +1120,15 @@
 
             </div>
 
-
             @RenderBody()
-
 
         </main>
 
-
     </div>
 
-
-
     <!-- =========================================================
-     SCRIPTS
-     ========================================================= -->
+ SCRIPTS
+ ========================================================= -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
@@ -1261,381 +1138,348 @@
             asp-append-version="true">
     </script>
 
-
-
     <script>
 
-            document.addEventListener(
-                "DOMContentLoaded",
-                function() {
+        document.addEventListener(
+        "DOMContentLoaded",
+        function() {
 
-                    const body =
-                        document.body;
+        const body =
+        document.body;
 
-                    const sidebar =
-                        document.getElementById(
-                            "managerSidebar"
-                        );
+        const sidebar =
+        document.getElementById(
+        "managerSidebar"
+        );
 
-                    const mobileToggle =
-                        document.getElementById(
-                            "sidebarToggle"
-                        );
+        const mobileToggle =
+        document.getElementById(
+        "sidebarToggle"
+        );
 
-                    const backdrop =
-                        document.getElementById(
-                            "sidebarBackdrop"
-                        );
+        const backdrop =
+        document.getElementById(
+        "sidebarBackdrop"
+        );
 
-                    const desktopToggle =
-                        document.getElementById(
-                            "desktopSidebarToggle"
-                        );
+        const desktopToggle =
+        document.getElementById(
+        "desktopSidebarToggle"
+        );
 
-                    const desktopToggleIcon =
-                        document.getElementById(
-                            "desktopSidebarToggleIcon"
-                        );
+        const desktopToggleIcon =
+        document.getElementById(
+        "desktopSidebarToggleIcon"
+        );
 
-                    const fullScreenToggle =
-                        document.getElementById(
-                            "fullScreenToggle"
-                        );
+        const fullScreenToggle =
+        document.getElementById(
+        "fullScreenToggle"
+        );
 
-                    const restoreButton =
-                        document.getElementById(
-                            "sidebarRestoreButton"
-                        );
+        const restoreButton =
+        document.getElementById(
+        "sidebarRestoreButton"
+        );
 
+        /* ============================================
+        MOBILE
+        ============================================ */
 
-                    /* ============================================
-                       MOBILE
-                       ============================================ */
+        function openMobileSidebar() {
 
-                    function openMobileSidebar() {
+        if (!sidebar)
+        return;
 
-                        if (!sidebar)
-                            return;
+        sidebar.classList.add("show");
 
-                        sidebar.classList.add("show");
+        if (backdrop)
+        backdrop.classList.add("show");
 
-                        if (backdrop)
-                            backdrop.classList.add("show");
+        body.style.overflow =
+        "hidden";
+        }
 
-                        body.style.overflow =
-                            "hidden";
-                    }
+        function closeMobileSidebar() {
 
+        if (!sidebar)
+        return;
 
-                    function closeMobileSidebar() {
+        sidebar.classList.remove("show");
 
-                        if (!sidebar)
-                            return;
+        if (backdrop)
+        backdrop.classList.remove("show");
 
-                        sidebar.classList.remove("show");
+        body.style.overflow = "";
+        }
 
-                        if (backdrop)
-                            backdrop.classList.remove("show");
+        if (mobileToggle) {
 
-                        body.style.overflow = "";
-                    }
+        mobileToggle.addEventListener(
+        "click",
+        function() {
 
+        if (
+        sidebar.classList.contains(
+        "show"
+        )
+        ) {
 
-                    if (mobileToggle) {
+        closeMobileSidebar();
 
-                        mobileToggle.addEventListener(
-                            "click",
-                            function() {
+        }
+        else {
 
-                                if (
-                                    sidebar.classList.contains(
-                                        "show"
-                                    )
-                                ) {
+        openMobileSidebar();
 
-                                    closeMobileSidebar();
+        }
+        }
+        );
+        }
 
-                                }
-                                else {
+        if (backdrop) {
 
-                                    openMobileSidebar();
+        backdrop.addEventListener(
+        "click",
+        closeMobileSidebar
+        );
+        }
 
-                                }
-                            }
-                        );
-                    }
+        /* ============================================
+        COLLAPSE
+        ============================================ */
 
+        function updateCollapseIcon() {
+
+        if (!desktopToggleIcon)
+        return;
 
-                    if (backdrop) {
+        const collapsed =
+        body.classList.contains(
+        "sidebar-collapsed"
+        );
 
-                        backdrop.addEventListener(
-                            "click",
-                            closeMobileSidebar
-                        );
-                    }
+        if (collapsed) {
 
+        desktopToggleIcon.className =
+        "fa-solid fa-chevron-right";
 
-                    /* ============================================
-                       COLLAPSE
-                       ============================================ */
+        if (desktopToggle) {
+
+        desktopToggle.title =
+        "Expand sidebar";
+        }
+        }
+        else {
 
-                    function updateCollapseIcon() {
+        desktopToggleIcon.className =
+        "fa-solid fa-chevron-left";
+
+        if (desktopToggle) {
 
-                        if (!desktopToggleIcon)
-                            return;
+        desktopToggle.title =
+        "Collapse sidebar";
+        }
+        }
+        }
+
+        if (desktopToggle) {
 
-                        const collapsed =
-                            body.classList.contains(
-                                "sidebar-collapsed"
-                            );
+        desktopToggle.addEventListener(
+        "click",
+        function() {
 
-                        if (collapsed) {
+        if (
+        window.innerWidth <= 991
+        )
+        return;
+
+        body.classList.remove(
+        "sidebar-hidden"
+        );
+
+        body.classList.toggle(
+        "sidebar-collapsed"
+        );
+
+        const collapsed =
+        body.classList.contains(
+        "sidebar-collapsed"
+        );
+
+        localStorage.setItem(
+        "managerSidebarCollapsed",
+        collapsed
+        ? "true"
+        : "false"
+        );
+
+        updateCollapseIcon();
+        }
+        );
+        }
+
+        /* ============================================
+        FULL WIDTH
+        ============================================ */
+
+        if (fullScreenToggle) {
 
-                            desktopToggleIcon.className =
-                                "fa-solid fa-chevron-right";
+        fullScreenToggle.addEventListener(
+        "click",
+        function() {
 
-                            if (desktopToggle) {
+        if (
+        window.innerWidth <= 991
+        )
+        return;
+
+        body.classList.add(
+        "sidebar-hidden"
+        );
+
+        body.classList.remove(
+        "sidebar-collapsed"
+        );
+
+        updateCollapseIcon();
+        }
+        );
+        }
+
+        /* ============================================
+        RESTORE SIDEBAR
+        ============================================ */
+
+        if (restoreButton) {
 
-                                desktopToggle.title =
-                                    "Expand sidebar";
-                            }
-                        }
-                        else {
+        restoreButton.addEventListener(
+        "click",
+        function() {
 
-                            desktopToggleIcon.className =
-                                "fa-solid fa-chevron-left";
+        body.classList.remove(
+        "sidebar-hidden"
+        );
 
-                            if (desktopToggle) {
-
-                                desktopToggle.title =
-                                    "Collapse sidebar";
-                            }
-                        }
-                    }
-
-
-                    if (desktopToggle) {
-
-                        desktopToggle.addEventListener(
-                            "click",
-                            function() {
-
-                                if (
-                                    window.innerWidth <= 991
-                                )
-                                    return;
-
-
-                                body.classList.remove(
-                                    "sidebar-hidden"
-                                );
-
-
-                                body.classList.toggle(
-                                    "sidebar-collapsed"
-                                );
-
-
-                                const collapsed =
-                                    body.classList.contains(
-                                        "sidebar-collapsed"
-                                    );
-
-
-                                localStorage.setItem(
-                                    "managerSidebarCollapsed",
-                                    collapsed
-                                        ? "true"
-                                        : "false"
-                                );
-
-
-                                updateCollapseIcon();
-                            }
-                        );
-                    }
-
-
-                    /* ============================================
-                       FULL WIDTH
-                       ============================================ */
-
-                    if (fullScreenToggle) {
-
-                        fullScreenToggle.addEventListener(
-                            "click",
-                            function() {
-
-                                if (
-                                    window.innerWidth <= 991
-                                )
-                                    return;
-
-
-                                body.classList.add(
-                                    "sidebar-hidden"
-                                );
-
-
-                                body.classList.remove(
-                                    "sidebar-collapsed"
-                                );
-
-
-                                updateCollapseIcon();
-                            }
-                        );
-                    }
-
-
-                    /* ============================================
-                       RESTORE SIDEBAR
-                       ============================================ */
-
-                    if (restoreButton) {
-
-                        restoreButton.addEventListener(
-                            "click",
-                            function() {
-
-                                body.classList.remove(
-                                    "sidebar-hidden"
-                                );
-
-
-                                const saved =
-                                    localStorage.getItem(
-                                        "managerSidebarCollapsed"
-                                    );
-
-
-                                if (
-                                    saved === "true" &&
-                                    window.innerWidth > 991
-                                ) {
-
-                                    body.classList.add(
-                                        "sidebar-collapsed"
-                                    );
-
-                                }
-                                else {
-
-                                    body.classList.remove(
-                                        "sidebar-collapsed"
-                                    );
-                                }
-
-
-                                updateCollapseIcon();
-                            }
-                        );
-                    }
-
-
-                    /* ============================================
-                       RESTORE SAVED STATE
-                       ============================================ */
-
-                    const saved =
-                        localStorage.getItem(
-                            "managerSidebarCollapsed"
-                        );
-
-
-                    if (
-                        saved === "true" &&
-                        window.innerWidth > 991
-                    ) {
-
-                        body.classList.add(
-                            "sidebar-collapsed"
-                        );
-                    }
-
-
-                    updateCollapseIcon();
-
-
-                    /* ============================================
-                       RESIZE
-                       ============================================ */
-
-                    window.addEventListener(
-                        "resize",
-                        function() {
-
-                            if (
-                                window.innerWidth > 991
-                            ) {
-
-                                closeMobileSidebar();
-
-                            }
-                            else {
-
-                                body.classList.remove(
-                                    "sidebar-hidden"
-                                );
-                            }
-
-
-                            updateCollapseIcon();
-                        }
-                    );
-
-
-                    /* ============================================
-                       ESCAPE KEY
-                       ============================================ */
-
-                    document.addEventListener(
-                        "keydown",
-                        function(event) {
-
-                            if (
-                                event.key !== "Escape"
-                            )
-                                return;
-
-
-                            if (
-                                window.innerWidth <= 991
-                            ) {
-
-                                closeMobileSidebar();
-
-                                return;
-                            }
-
-
-                            if (
-                                body.classList.contains(
-                                    "sidebar-hidden"
-                                )
-                            ) {
-
-                                body.classList.remove(
-                                    "sidebar-hidden"
-                                );
-
-                                updateCollapseIcon();
-                            }
-                        }
-                    );
-
-                }
-            );
+        const saved =
+        localStorage.getItem(
+        "managerSidebarCollapsed"
+        );
+
+        if (
+        saved === "true" &&
+        window.innerWidth > 991
+        ) {
+
+        body.classList.add(
+        "sidebar-collapsed"
+        );
+
+        }
+        else {
+
+        body.classList.remove(
+        "sidebar-collapsed"
+        );
+        }
+
+        updateCollapseIcon();
+        }
+        );
+        }
+
+        /* ============================================
+        RESTORE SAVED STATE
+        ============================================ */
+
+        const saved =
+        localStorage.getItem(
+        "managerSidebarCollapsed"
+        );
+
+        if (
+        saved === "true" &&
+        window.innerWidth > 991
+        ) {
+
+        body.classList.add(
+        "sidebar-collapsed"
+        );
+        }
+
+        updateCollapseIcon();
+
+        /* ============================================
+        RESIZE
+        ============================================ */
+
+        window.addEventListener(
+        "resize",
+        function() {
+
+        if (
+        window.innerWidth > 991
+        ) {
+
+        closeMobileSidebar();
+
+        }
+        else {
+
+        body.classList.remove(
+        "sidebar-hidden"
+        );
+        }
+
+        updateCollapseIcon();
+        }
+        );
+
+        /* ============================================
+        ESCAPE KEY
+        ============================================ */
+
+        document.addEventListener(
+        "keydown",
+        function(event) {
+
+        if (
+        event.key !== "Escape"
+        )
+        return;
+
+        if (
+        window.innerWidth <= 991
+        ) {
+
+        closeMobileSidebar();
+
+        return;
+        }
+
+        if (
+        body.classList.contains(
+        "sidebar-hidden"
+        )
+        ) {
+
+        body.classList.remove(
+        "sidebar-hidden"
+        );
+
+        updateCollapseIcon();
+        }
+        }
+        );
+
+        }
+        );
 
     </script>
-
 
     @await RenderSectionAsync(
         "Scripts",
         required: false
     )
 
-
-</body>
-
-</html>
+</body></html>

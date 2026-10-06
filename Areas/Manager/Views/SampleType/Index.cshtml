@@ -1,0 +1,1091 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.SampleTypeModel>
+
+@{
+    ViewData["Title"] = "Sample Types";
+    Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                <i class="fa-solid fa-vial text-primary me-2"></i>
+
+                Sample Types
+
+            </h4>
+
+            <p class="text-muted mb-0">
+
+                Manage laboratory sample types and their associated
+                samples.
+
+            </p>
+
+        </div>
+
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#sampleTypeModal"
+                onclick="openCreateModal()">
+
+            <i class="fa-solid fa-plus me-1"></i>
+
+            Add Sample Type
+
+        </button>
+
+    </div>
+
+    <!-- =========================================================
+     MESSAGES
+     ========================================================= -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+
+            <div class="fw-semibold mb-2">
+
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                Please correct the following errors:
+
+            </div>
+
+            <div asp-validation-summary="All"></div>
+
+        </div>
+    }
+
+    <!-- =========================================================
+     INFORMATION
+     ========================================================= -->
+
+    <div class="alert alert-info border-0 shadow-sm">
+
+        <div class="d-flex">
+
+            <i class="fa-solid fa-circle-info mt-1 me-3"></i>
+
+            <div>
+
+                <div class="fw-semibold">
+                    Sample type management
+                </div>
+
+                <div class="small">
+
+                    Sample types identify the different types of
+                    laboratory specimens collected and processed.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+     SAMPLE TYPE TABLE
+     ========================================================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+
+                    <h6 class="fw-bold mb-0">
+                        Sample Types
+                    </h6>
+
+                    <small class="text-muted">
+                        Active laboratory sample types
+                    </small>
+
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- SEARCH -->
+
+                    <div class="input-group input-group-sm"
+                         style="width:280px;">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                        </span>
+
+                        <input type="text"
+                               id="sampleTypeSearch"
+                               class="form-control"
+                               placeholder="Search sample types..."
+                               autocomplete="off" />
+
+                    </div>
+
+                    <!-- RECORD COUNT -->
+
+                    <span class="badge bg-primary-subtle text-primary"
+                          id="recordCount">
+
+                        @(Model?.Count() ?? 0) sample type(s)
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0"
+                       id="sampleTypesTable">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Sample Type
+                            </th>
+
+                            <th>
+                                Samples
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th class="text-end">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="sampleTypesTableBody">
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var sampleType in Model)
+                            {
+                                var encodedName =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        sampleType.Name ?? "");
+
+                                var status =
+                                    sampleType.IsActive
+                                        ? "Active"
+                                        : "Inactive";
+
+                                var encodedStatus =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        status);
+
+                                <tr class="sample-type-row"
+                                    data-name="@sampleType.Name"
+                                    data-status="@status">
+
+                                    <!-- =================================================
+                                     SAMPLE TYPE
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            @sampleType.Name
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     SAMPLE COUNT
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <span class="badge bg-secondary-subtle text-secondary">
+
+                                            @(sampleType.Samples?.Count ?? 0)
+
+                                        </span>
+
+                                        <span class="text-muted small ms-1">
+
+                                            sample(s)
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     STATUS
+                                     ================================================= -->
+
+                                    <td>
+
+                                        @if (sampleType.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+
+                                                <i class="fa-solid fa-check me-1"></i>
+
+                                                Active
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+
+                                                <i class="fa-solid fa-ban me-1"></i>
+
+                                                Inactive
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     ACTIONS
+                                     ================================================= -->
+
+                                    <td class="text-end">
+
+                                        <div class="btn-group btn-group-sm"
+                                             role="group">
+
+                                            <!-- VIEW -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-info"
+                                                    title="View sample type"
+                                                    onclick="viewSampleType(
+                                                '@sampleType.SampleTypeId',
+                                                '@Html.Raw(encodedName)',
+                                                '@(sampleType.Samples?.Count ?? 0)',
+                                                '@Html.Raw(encodedStatus)'
+                                                )">
+
+                                                <i class="fa-solid fa-eye"></i>
+
+                                            </button>
+
+                                            <!-- EDIT -->
+                                            @if (sampleType.IsActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-primary"
+                                                        title="Edit sample type"
+                                                        onclick="editSampleType(
+                                                    '@sampleType.SampleTypeId',
+                                                    '@Html.Raw(encodedName)'
+                                                    )">
+
+                                                    <i class="fa-solid fa-pen"></i>
+
+                                                </button>
+                                            }
+
+                                            <!-- SOFT DELETE -->
+                                            @if (sampleType.IsActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-danger"
+                                                        title="Deactivate sample type"
+                                                        onclick="deleteSampleType(
+                                                    '@sampleType.SampleTypeId',
+                                                    '@Html.Raw(encodedName)'
+                                                    )">
+
+                                                    <i class="fa-solid fa-trash"></i>
+
+                                                </button>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="4"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="fa-solid fa-vial fa-2x mb-3"></i>
+
+                                        <div class="fw-semibold">
+
+                                            No sample types found
+
+                                        </div>
+
+                                        <small>
+
+                                            Add a sample type to begin
+                                            managing laboratory specimens.
+
+                                        </small>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        <!-- =================================================
+                         SEARCH EMPTY
+                         ================================================= -->
+
+                        <tr id="noSearchResultsRow"
+                            style="display:none;">
+
+                            <td colspan="4"
+                                class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+
+                                    <div class="fw-semibold">
+
+                                        No matching sample types found
+
+                                    </div>
+
+                                    <small>
+
+                                        Try a different sample type name
+                                        or status.
+
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div> <!-- ============================================================= ADD / EDIT SAMPLE TYPE MODAL ============================================================= --> <div class="modal fade" id="sampleTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <form id="sampleTypeForm"
+              method="post"
+              asp-area="Manager"
+              asp-controller="SampleType"
+              asp-action="Create">
+
+            @Html.AntiForgeryToken()
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold"
+                    id="sampleTypeModalTitle">
+
+                    <i class="fa-solid fa-plus text-primary me-2"></i>
+
+                    Add Sample Type
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="SampleTypeId"
+                       name="SampleTypeId"
+                       value="0" />
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold"
+                           for="Name">
+
+                        Sample Type
+
+                    </label>
+
+                    <input type="text"
+                           id="Name"
+                           name="Name"
+                           class="form-control"
+                           maxlength="100"
+                           required
+                           autocomplete="off" />
+
+                    <div class="form-text">
+
+                        Enter a unique laboratory sample type.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    <span id="saveButtonText">
+                        Save Sample Type
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= VIEW SAMPLE TYPE MODAL ============================================================= --> <div class="modal fade" id="viewSampleTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <div class="modal-header">
+
+            <h5 class="modal-title fw-bold">
+
+                <i class="fa-solid fa-circle-info text-info me-2"></i>
+
+                Sample Type Details
+
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Sample Type
+                </small>
+
+                <div id="viewSampleTypeName"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Samples
+                </small>
+
+                <div>
+
+                    <span id="viewSampleTypeSampleCount"
+                          class="fw-semibold">
+                    </span>
+
+                    <span class="text-muted">
+                        sample(s)
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div>
+
+                <small class="text-muted d-block">
+                    Status
+                </small>
+
+                <div id="viewSampleTypeStatus"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= DELETE / SOFT DELETE SAMPLE TYPE MODAL ============================================================= --> <div class="modal fade" id="deleteSampleTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <!--
+            IMPORTANT:
+            This form explicitly submits a POST request to the
+            Manager/SampleType/Delete action.
+        -->
+
+        <form id="deleteSampleTypeForm"
+              method="post"
+              action="@Url.Action("Delete", "SampleType", new { area = "Manager" })">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   id="deleteSampleTypeId"
+                   name="id"
+                   value="" />
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold text-danger">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    Deactivate Sample Type
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+
+                    Are you sure you want to deactivate this
+                    sample type?
+
+                </p>
+
+                <div class="alert alert-warning mb-0">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    <strong id="deleteSampleTypeName"></strong>
+
+                    <div class="small mt-1">
+
+                        This is a soft delete. The sample type will
+                        be marked as inactive instead of being
+                        permanently removed from the database.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger">
+
+                    <i class="fa-solid fa-trash me-1"></i>
+
+                    Deactivate Sample Type
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-success">
+
+                        <i class="fa-solid fa-circle-check me-2"></i>
+
+                        Success
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body text-center py-4">
+
+                    <div class="mb-3">
+
+                        <div class="d-inline-flex
+                            align-items-center
+                            justify-content-center
+                            rounded-circle
+                            bg-success-subtle
+                            text-success"
+                             style="width:70px;height:70px;">
+
+                            <i class="fa-solid fa-check fa-2x"></i>
+
+                        </div>
+
+                    </div>
+
+                    <h6 class="fw-semibold mb-2">
+
+                        Operation Successful
+
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        @TempData["SuccessMessage"]
+
+                    </p>
+
+                </div>
+
+                <div class="modal-footer border-0 justify-content-center">
+
+                    <button type="button"
+                            class="btn btn-success px-4"
+                            data-bs-dismiss="modal">
+
+                        <i class="fa-solid fa-check me-1"></i>
+
+                        OK
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+}
+
+@section Scripts {
+
+    <script>
+        /* =========================================================
+           SUCCESS MESSAGE
+           ========================================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const successModal =
+                    document.getElementById(
+                        "successMessageModal"
+                    );
+
+                if (successModal) {
+
+                    const modal =
+                        new bootstrap.Modal(
+                            successModal
+                        );
+
+                    modal.show();
+
+                }
+
+            }
+        );
+
+        /* =========================================================
+           CREATE
+           ========================================================= */
+
+        function openCreateModal() {
+
+            const form =
+                document.getElementById(
+                    "sampleTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Create", "SampleType", new { area = "Manager" })";
+
+            document.getElementById(
+                "sampleTypeModalTitle"
+            ).innerHTML =
+                '<i class="fa-solid fa-plus text-primary me-2"></i>' +
+                'Add Sample Type';
+
+            document.getElementById(
+                "saveButtonText"
+            ).innerText =
+                "Save Sample Type";
+
+            document.getElementById(
+                "SampleTypeId"
+            ).value = "0";
+
+            document.getElementById(
+                "Name"
+            ).value = "";
+
+        }
+
+        /* =========================================================
+           VIEW
+           ========================================================= */
+
+        function viewSampleType(
+            id,
+            name,
+            sampleCount,
+            status) {
+
+            document.getElementById(
+                "viewSampleTypeName"
+            ).innerText =
+                name;
+
+            document.getElementById(
+                "viewSampleTypeSampleCount"
+            ).innerText =
+                sampleCount;
+
+            const statusElement =
+                document.getElementById(
+                    "viewSampleTypeStatus"
+                );
+
+            if (status === "Active") {
+
+                statusElement.innerHTML =
+                    '<span class="badge bg-success">' +
+                    '<i class="fa-solid fa-check me-1"></i>' +
+                    'Active' +
+                    '</span>';
+
+            }
+            else {
+
+                statusElement.innerHTML =
+                    '<span class="badge bg-secondary">' +
+                    '<i class="fa-solid fa-ban me-1"></i>' +
+                    'Inactive' +
+                    '</span>';
+
+            }
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "viewSampleTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           EDIT
+           ========================================================= */
+
+        function editSampleType(
+            id,
+            name) {
+
+            const form =
+                document.getElementById(
+                    "sampleTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Edit", "SampleType", new { area = "Manager" })";
+
+            document.getElementById(
+                "sampleTypeModalTitle"
+            ).innerHTML =
+                '<i class="fa-solid fa-pen text-primary me-2"></i>' +
+                'Edit Sample Type';
+
+            document.getElementById(
+                "saveButtonText"
+            ).innerText =
+                "Update Sample Type";
+
+            document.getElementById(
+                "SampleTypeId"
+            ).value =
+                id;
+
+            document.getElementById(
+                "Name"
+            ).value =
+                name;
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "sampleTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           SOFT DELETE
+           ========================================================= */
+
+        function deleteSampleType(
+            id,
+            name) {
+
+            const form =
+                document.getElementById(
+                    "deleteSampleTypeForm"
+                );
+
+            /*
+             * Explicitly force the delete form to use POST.
+             */
+
+            form.method = "post";
+
+            /*
+             * Explicitly point the form to the Delete action.
+             */
+
+            form.action =
+                "@Url.Action("Delete", "SampleType", new { area = "Manager" })";
+
+            /*
+             * Set the sample type ID that will be submitted as:
+             *
+             * id = sample type ID
+             */
+
+            document.getElementById(
+                "deleteSampleTypeId"
+            ).value =
+                id;
+
+            /*
+             * Display the sample type being deactivated.
+             */
+
+            document.getElementById(
+                "deleteSampleTypeName"
+            ).innerText =
+                name;
+
+            /*
+             * Show confirmation modal.
+             */
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "deleteSampleTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           SEARCH
+           ========================================================= */
+
+        const searchInput =
+            document.getElementById(
+                "sampleTypeSearch"
+            );
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    const search =
+                        this.value
+                            .toLowerCase()
+                            .trim();
+
+                    const rows =
+                        document.querySelectorAll(
+                            "#sampleTypesTableBody .sample-type-row"
+                        );
+
+                    let visibleCount = 0;
+
+                    rows.forEach(
+                        function (row) {
+
+                            const name =
+                                (
+                                    row.dataset.name ||
+                                    ""
+                                ).toLowerCase();
+
+                            const status =
+                                (
+                                    row.dataset.status ||
+                                    ""
+                                ).toLowerCase();
+
+                            const matches =
+                                name.includes(search) ||
+                                status.includes(search);
+
+                            row.style.display =
+                                matches
+                                    ? ""
+                                    : "none";
+
+                            if (matches) {
+
+                                visibleCount++;
+
+                            }
+
+                        }
+                    );
+
+                    document.getElementById(
+                        "recordCount"
+                    ).innerText =
+                        visibleCount +
+                        " sample type(s)";
+
+                    const noSearchResultsRow =
+                        document.getElementById(
+                            "noSearchResultsRow"
+                        );
+
+                    if (noSearchResultsRow) {
+
+                        noSearchResultsRow.style.display =
+                            rows.length > 0 &&
+                            visibleCount === 0
+                                ? ""
+                                : "none";
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+}
