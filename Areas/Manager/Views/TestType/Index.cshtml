@@ -1,0 +1,1607 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestTypeModel>
+
+@{
+    ViewData["Title"] = "Test Types";
+    Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+
+    var testCategories =
+        ViewBag.TestCategories as IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestCategoryModel>
+        ?? Enumerable.Empty<NMB_HLabSys.Areas.Manager.Models.TestCategoryModel>();
+
+    var sampleTypes =
+        ViewBag.SampleTypes as IEnumerable<NMB_HLabSys.Areas.Technician.Models.SampleTypeModel>
+        ?? Enumerable.Empty<NMB_HLabSys.Areas.Technician.Models.SampleTypeModel>();
+
+    var measurementUnits =
+        ViewBag.MeasurementUnits as IEnumerable<NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel>
+        ?? Enumerable.Empty<NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel>();
+
+}
+
+<div class="container-fluid py-4">
+    <!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                <i class="fa-solid fa-flask text-primary me-2"></i>
+
+                Test Types
+
+            </h4>
+
+            <p class="text-muted mb-0">
+
+                Manage laboratory test types, normal ranges,
+                turnaround times and required sample information.
+
+            </p>
+
+        </div>
+
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#testTypeModal"
+                onclick="openCreateModal()">
+
+            <i class="fa-solid fa-plus me-1"></i>
+
+            Add Test Type
+
+        </button>
+
+    </div>
+
+    <!-- =========================================================
+     ERROR MESSAGE
+     ========================================================= -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    <!-- =========================================================
+     VALIDATION ERRORS
+     ========================================================= -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <div class="fw-semibold mb-2">
+
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                Please correct the following errors:
+
+            </div>
+
+            <ul class="mb-0">
+
+                @foreach (var entry in ViewData.ModelState)
+                {
+                    foreach (var error in entry.Value.Errors)
+                    {
+                        <li>
+
+                            @if (!string.IsNullOrEmpty(entry.Key))
+                            {
+                                <strong>@entry.Key:</strong>
+                            }
+
+                            @(string.IsNullOrWhiteSpace(error.ErrorMessage)
+                                ? "The value entered is invalid."
+                                : error.ErrorMessage)
+
+                        </li>
+                    }
+                }
+
+            </ul>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    <!-- =========================================================
+     INFORMATION
+     ========================================================= -->
+
+    <div class="alert alert-info border-0 shadow-sm">
+
+        <div class="d-flex">
+
+            <i class="fa-solid fa-circle-info mt-1 me-3"></i>
+
+            <div>
+
+                <div class="fw-semibold">
+                    Test type management
+                </div>
+
+                <div class="small">
+
+                    Test types define the laboratory tests performed,
+                    their required sample types, measurement units,
+                    normal ranges and turnaround times.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+     TEST TYPE TABLE
+     ========================================================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+
+                    <h6 class="fw-bold mb-0">
+                        Test Types
+                    </h6>
+
+                    <small class="text-muted">
+                        Active laboratory test types
+                    </small>
+
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- SEARCH -->
+
+                    <div class="input-group input-group-sm"
+                         style="width:320px;">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                        </span>
+
+                        <input type="text"
+                               id="testTypeSearch"
+                               class="form-control"
+                               placeholder="Search test types..."
+                               autocomplete="off" />
+
+                    </div>
+
+                    <!-- RECORD COUNT -->
+
+                    <span class="badge bg-primary-subtle text-primary"
+                          id="recordCount">
+
+                        @(Model?.Count() ?? 0) test type(s)
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0"
+                       id="testTypesTable">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Test Name
+                            </th>
+
+                            <th>
+                                Test Category
+                            </th>
+
+                            <th>
+                                Sample Type
+                            </th>
+
+                            <th>
+                                Measurement Unit
+                            </th>
+
+                            <th>
+                                Normal Range
+                            </th>
+
+                            <th>
+                                Turnaround
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th class="text-end">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="testTypesTableBody">
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var testType in Model)
+                            {
+                                var isActive =
+                                    testType.IsActive ==
+                                    NMB_HLabSys.Areas.Manager.Models.TestTypeModel.RecordStatus.Active;
+
+                                var status =
+                                    isActive
+                                        ? "Active"
+                                        : "Inactive";
+
+                                var categoryName =
+                                    testType.TestCategory?.Description
+                                    ?? "N/A";
+
+                                var sampleTypeName =
+                                    testType.SampleType?.Name
+                                    ?? "N/A";
+
+                                var measurementUnitName =
+                                    testType.MeasurementUnitDetails?.Unit
+                                    ?? "N/A";
+
+                                var encodedName =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        testType.Name ?? "");
+
+                                var encodedCategory =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        categoryName);
+
+                                var encodedSampleType =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        sampleTypeName);
+
+                                var encodedMeasurementUnit =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        measurementUnitName);
+
+                                var encodedStatus =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        status);
+
+                                <tr class="test-type-row"
+                                    data-name="@testType.Name"
+                                    data-category="@categoryName"
+                                    data-sample-type="@sampleTypeName"
+                                    data-measurement-unit="@measurementUnitName"
+                                    data-status="@status">
+
+                                    <!-- =================================================
+                                     TEST NAME
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            @testType.Name
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     CATEGORY
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <span class="badge bg-primary-subtle text-primary">
+
+                                            @categoryName
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     SAMPLE TYPE
+                                     ================================================= -->
+
+                                    <td>
+
+                                        @sampleTypeName
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     MEASUREMENT UNIT
+                                     ================================================= -->
+
+                                    <td>
+
+                                        @measurementUnitName
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     NORMAL RANGE
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <span class="fw-semibold">
+
+                                            @testType.NormalMin.ToString("0.####",
+                                                System.Globalization.CultureInfo.InvariantCulture)
+
+                                            -
+
+                                            @testType.NormalMax.ToString("0.####",
+                                                System.Globalization.CultureInfo.InvariantCulture)
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     TURNAROUND
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <span class="badge bg-secondary-subtle text-secondary">
+
+                                            @testType.TurnAroundTimeHours min
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     STATUS
+                                     ================================================= -->
+
+                                    <td>
+
+                                        @if (isActive)
+                                        {
+                                            <span class="badge bg-success">
+
+                                                <i class="fa-solid fa-check me-1"></i>
+
+                                                Active
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+
+                                                <i class="fa-solid fa-ban me-1"></i>
+
+                                                Inactive
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     ACTIONS
+                                     ================================================= -->
+
+                                    <td class="text-end">
+
+                                        <div class="btn-group btn-group-sm"
+                                             role="group">
+
+                                            <!-- VIEW -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-info"
+                                                    title="View test type"
+                                                    onclick="viewTestType(
+                                                '@testType.TestTypeId',
+                                                '@Html.Raw(encodedName)',
+                                                '@Html.Raw(encodedCategory)',
+                                                '@Html.Raw(encodedSampleType)',
+                                                '@Html.Raw(encodedMeasurementUnit)',
+                                                @testType.NormalMin.ToString(
+                                                                                                    System.Globalization.CultureInfo.InvariantCulture),
+                                                @testType.NormalMax.ToString(
+                                                                                                    System.Globalization.CultureInfo.InvariantCulture),
+                                                '@testType.TurnAroundTimeHours',
+                                                '@Html.Raw(encodedStatus)'
+                                                )">
+
+                                                <i class="fa-solid fa-eye"></i>
+
+                                            </button>
+
+                                            <!-- EDIT -->
+                                            @if (isActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-primary"
+                                                        title="Edit test type"
+                                                        onclick="editTestType(
+                                                    '@testType.TestTypeId',
+                                                    '@Html.Raw(encodedName)',
+                                                    '@testType.TestCategoryId',
+                                                    '@testType.SampleTypeId',
+                                                    '@testType.MeasurementUnit',
+                                                    @testType.NormalMin.ToString(
+                                                                                                            System.Globalization.CultureInfo.InvariantCulture),
+                                                    @testType.NormalMax.ToString(
+                                                                                                            System.Globalization.CultureInfo.InvariantCulture),
+                                                    '@testType.TurnAroundTimeHours'
+                                                    )">
+
+                                                    <i class="fa-solid fa-pen"></i>
+
+                                                </button>
+                                            }
+
+                                            <!-- DELETE -->
+                                            @if (isActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-danger"
+                                                        title="Deactivate test type"
+                                                        onclick="deleteTestType(
+                                                    '@testType.TestTypeId',
+                                                    '@Html.Raw(encodedName)'
+                                                    )">
+
+                                                    <i class="fa-solid fa-trash"></i>
+
+                                                </button>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="8"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="fa-solid fa-flask fa-2x mb-3"></i>
+
+                                        <div class="fw-semibold">
+
+                                            No test types found
+
+                                        </div>
+
+                                        <small>
+
+                                            Add a test type to begin
+                                            configuring laboratory tests.
+
+                                        </small>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        <!-- =================================================
+                         SEARCH EMPTY
+                         ================================================= -->
+
+                        <tr id="noSearchResultsRow"
+                            style="display:none;">
+
+                            <td colspan="8"
+                                class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+
+                                    <div class="fw-semibold">
+
+                                        No matching test types found
+
+                                    </div>
+
+                                    <small>
+
+                                        Try a different test name,
+                                        category, sample type or unit.
+
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div> <!-- ============================================================= ADD / EDIT TEST TYPE MODAL ============================================================= --> <div class="modal fade" id="testTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <form id="testTypeForm"
+              method="post"
+              asp-area="Manager"
+              asp-controller="TestType"
+              asp-action="Create">
+
+            @Html.AntiForgeryToken()
+
+            <!-- =================================================
+                 HEADER
+                 ================================================= -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold"
+                    id="testTypeModalTitle">
+
+                    <i class="fa-solid fa-plus text-primary me-2"></i>
+
+                    Add Test Type
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <!-- =================================================
+                 BODY
+                 ================================================= -->
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="TestTypeId"
+                       name="TestTypeId"
+                       value="0" />
+
+                <!-- TEST NAME -->
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold"
+                           for="Name">
+
+                        Test Name
+
+                    </label>
+
+                    <input type="text"
+                           id="Name"
+                           name="Name"
+                           class="form-control"
+                           maxlength="150"
+                           required
+                           autocomplete="off" />
+
+                    <div class="form-text">
+
+                        Enter the laboratory test name.
+
+                    </div>
+
+                </div>
+
+                <!-- =================================================
+                     DROPDOWNS
+                     ================================================= -->
+
+                <div class="row">
+
+                    <!-- TEST CATEGORY -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label fw-semibold"
+                               for="TestCategoryId">
+
+                            Test Category
+
+                        </label>
+
+                        <select id="TestCategoryId"
+                                name="TestCategoryId"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Test Category --
+                            </option>
+
+                            @foreach (var category in testCategories)
+                            {
+                                <option value="@category.TestCategoryId">
+
+                                    @category.Description
+
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <!-- SAMPLE TYPE -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label fw-semibold"
+                               for="SampleTypeId">
+
+                            Required Sample Type
+
+                        </label>
+
+                        <select id="SampleTypeId"
+                                name="SampleTypeId"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Sample Type --
+                            </option>
+
+                            @foreach (var sampleType in sampleTypes)
+                            {
+                                <option value="@sampleType.SampleTypeId">
+
+                                    @sampleType.Name
+
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <!-- MEASUREMENT UNIT -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label fw-semibold"
+                               for="MeasurementUnit">
+
+                            Measurement Unit
+
+                        </label>
+
+                        <select id="MeasurementUnit"
+                                name="MeasurementUnit"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Measurement Unit --
+                            </option>
+
+                            @foreach (var unit in measurementUnits)
+                            {
+                                <option value="@unit.MeasurementUnitId">
+
+                                    @unit.Unit
+
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <!-- =================================================
+                     NORMAL RANGE
+                     ================================================= -->
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold"
+                               for="NormalMin">
+
+                            Normal Minimum
+
+                        </label>
+
+                        <input type="number"
+                               id="NormalMin"
+                               name="NormalMin"
+                               class="form-control"
+                               step="0.0001"
+                               inputmode="decimal"
+                               required />
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label fw-semibold"
+                               for="NormalMax">
+
+                            Normal Maximum
+
+                        </label>
+
+                        <input type="number"
+                               id="NormalMax"
+                               name="NormalMax"
+                               class="form-control"
+                               step="0.0001"
+                               inputmode="decimal"
+                               required />
+
+                    </div>
+
+                </div>
+
+                <!-- =================================================
+                     TURNAROUND TIME
+                     ================================================= -->
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold"
+                           for="TurnAroundTimeHours">
+
+                        Turnaround Time
+
+                    </label>
+
+                    <div class="input-group">
+
+                        <input type="number"
+                               id="TurnAroundTimeHours"
+                               name="TurnAroundTimeHours"
+                               class="form-control"
+                               min="1"
+                               max="10000"
+                               required />
+
+                        <span class="input-group-text">
+                            minutes
+                        </span>
+
+                    </div>
+
+                    <div class="form-text">
+
+                        Enter the expected turnaround time
+                        in minutes.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- =================================================
+                 FOOTER
+                 ================================================= -->
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    <span id="saveButtonText">
+                        Save Test Type
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= VIEW TEST TYPE MODAL ============================================================= --> <div class="modal fade" id="viewTestTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <div class="modal-header">
+
+            <h5 class="modal-title fw-bold">
+
+                <i class="fa-solid fa-circle-info text-info me-2"></i>
+
+                Test Type Details
+
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <small class="text-muted d-block">
+                        Test Name
+                    </small>
+
+                    <div id="viewTestTypeName"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <small class="text-muted d-block">
+                        Test Category
+                    </small>
+
+                    <div id="viewTestTypeCategory"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <small class="text-muted d-block">
+                        Required Sample Type
+                    </small>
+
+                    <div id="viewTestTypeSampleType"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <small class="text-muted d-block">
+                        Measurement Unit
+                    </small>
+
+                    <div id="viewTestTypeMeasurementUnit"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <small class="text-muted d-block">
+                        Normal Minimum
+                    </small>
+
+                    <div id="viewTestTypeNormalMin"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <small class="text-muted d-block">
+                        Normal Maximum
+                    </small>
+
+                    <div id="viewTestTypeNormalMax"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+                <div class="col-md-4 mb-3">
+
+                    <small class="text-muted d-block">
+                        Turnaround Time
+                    </small>
+
+                    <div>
+
+                        <span id="viewTestTypeTurnaround"
+                              class="fw-semibold">
+                        </span>
+
+                        <span class="text-muted">
+                            minutes
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="col-12">
+
+                    <small class="text-muted d-block">
+                        Status
+                    </small>
+
+                    <div id="viewTestTypeStatus"
+                         class="fw-semibold">
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= DELETE TEST TYPE MODAL ============================================================= --> <div class="modal fade" id="deleteTestTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <form id="deleteTestTypeForm"
+              method="post"
+              action="@Url.Action("Delete", "TestType", new { area = "Manager" })">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   id="deleteTestTypeId"
+                   name="id"
+                   value="" />
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold text-danger">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    Deactivate Test Type
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+
+                    Are you sure you want to deactivate this
+                    test type?
+
+                </p>
+
+                <div class="alert alert-warning mb-0">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    <strong id="deleteTestTypeName"></strong>
+
+                    <div class="small mt-1">
+
+                        This is a soft delete. The test type will
+                        be marked as inactive instead of being
+                        permanently removed from the database.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger">
+
+                    <i class="fa-solid fa-trash me-1"></i>
+
+                    Deactivate Test Type
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-success">
+
+                        <i class="fa-solid fa-circle-check me-2"></i>
+
+                        Success
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body text-center py-4">
+
+                    <div class="mb-3">
+
+                        <div class="d-inline-flex
+                            align-items-center
+                            justify-content-center
+                            rounded-circle
+                            bg-success-subtle
+                            text-success"
+                             style="width:70px;height:70px;">
+
+                            <i class="fa-solid fa-check fa-2x"></i>
+
+                        </div>
+
+                    </div>
+
+                    <h6 class="fw-semibold mb-2">
+
+                        Operation Successful
+
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        @TempData["SuccessMessage"]
+
+                    </p>
+
+                </div>
+
+                <div class="modal-footer border-0 justify-content-center">
+
+                    <button type="button"
+                            class="btn btn-success px-4"
+                            data-bs-dismiss="modal">
+
+                        <i class="fa-solid fa-check me-1"></i>
+
+                        OK
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+}
+
+@section Scripts {
+
+    <script>
+        /* =========================================================
+           SUCCESS MESSAGE
+           ========================================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const successModal =
+                    document.getElementById(
+                        "successMessageModal"
+                    );
+
+                if (successModal) {
+
+                    const modal =
+                        new bootstrap.Modal(
+                            successModal
+                        );
+
+                    modal.show();
+
+                }
+
+            }
+        );
+
+        /* =========================================================
+           CREATE
+           ========================================================= */
+
+        function openCreateModal() {
+
+            const form =
+                document.getElementById(
+                    "testTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Create", "TestType", new { area = "Manager" })";
+
+            document.getElementById(
+                "testTypeModalTitle"
+            ).innerHTML =
+                '<i class="fa-solid fa-plus text-primary me-2"></i>' +
+                'Add Test Type';
+
+            document.getElementById(
+                "saveButtonText"
+            ).innerText =
+                "Save Test Type";
+
+            document.getElementById(
+                "TestTypeId"
+            ).value = "0";
+
+            document.getElementById(
+                "Name"
+            ).value = "";
+
+            document.getElementById(
+                "TestCategoryId"
+            ).value = "";
+
+            document.getElementById(
+                "SampleTypeId"
+            ).value = "";
+
+            document.getElementById(
+                "MeasurementUnit"
+            ).value = "";
+
+            document.getElementById(
+                "NormalMin"
+            ).value = "";
+
+            document.getElementById(
+                "NormalMax"
+            ).value = "";
+
+            document.getElementById(
+                "TurnAroundTimeHours"
+            ).value = "";
+
+        }
+
+        /* =========================================================
+           VIEW
+           ========================================================= */
+
+        function viewTestType(
+            id,
+            name,
+            category,
+            sampleType,
+            measurementUnit,
+            normalMin,
+            normalMax,
+            turnaround,
+            status) {
+
+            document.getElementById(
+                "viewTestTypeName"
+            ).innerText =
+                name;
+
+            document.getElementById(
+                "viewTestTypeCategory"
+            ).innerText =
+                category;
+
+            document.getElementById(
+                "viewTestTypeSampleType"
+            ).innerText =
+                sampleType;
+
+            document.getElementById(
+                "viewTestTypeMeasurementUnit"
+            ).innerText =
+                measurementUnit;
+
+            document.getElementById(
+                "viewTestTypeNormalMin"
+            ).innerText =
+                Number(normalMin).toFixed(4);
+
+            document.getElementById(
+                "viewTestTypeNormalMax"
+            ).innerText =
+                Number(normalMax).toFixed(4);
+
+            document.getElementById(
+                "viewTestTypeTurnaround"
+            ).innerText =
+                turnaround;
+
+            const statusElement =
+                document.getElementById(
+                    "viewTestTypeStatus"
+                );
+
+            if (status === "Active") {
+
+                statusElement.innerHTML =
+                    '<span class="badge bg-success">' +
+                    '<i class="fa-solid fa-check me-1"></i>' +
+                    'Active' +
+                    '</span>';
+
+            }
+            else {
+
+                statusElement.innerHTML =
+                    '<span class="badge bg-secondary">' +
+                    '<i class="fa-solid fa-ban me-1"></i>' +
+                    'Inactive' +
+                    '</span>';
+
+            }
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "viewTestTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           EDIT
+           ========================================================= */
+
+        function editTestType(
+            id,
+            name,
+            categoryId,
+            sampleTypeId,
+            measurementUnitId,
+            normalMin,
+            normalMax,
+            turnaround) {
+
+            const form =
+                document.getElementById(
+                    "testTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Edit", "TestType", new { area = "Manager" })";
+
+            document.getElementById(
+                "testTypeModalTitle"
+            ).innerHTML =
+                '<i class="fa-solid fa-pen text-primary me-2"></i>' +
+                'Edit Test Type';
+
+            document.getElementById(
+                "saveButtonText"
+            ).innerText =
+                "Update Test Type";
+
+            document.getElementById(
+                "TestTypeId"
+            ).value =
+                id;
+
+            document.getElementById(
+                "Name"
+            ).value =
+                name;
+
+            document.getElementById(
+                "TestCategoryId"
+            ).value =
+                categoryId;
+
+            document.getElementById(
+                "SampleTypeId"
+            ).value =
+                sampleTypeId;
+
+            document.getElementById(
+                "MeasurementUnit"
+            ).value =
+                measurementUnitId;
+
+            /*
+             * IMPORTANT:
+             *
+             * Convert the values explicitly to JavaScript numbers
+             * before assigning them to the HTML number inputs.
+             *
+             * This prevents values such as "24.0000" from being
+             * treated as an invalid string by model binding.
+             */
+
+            document.getElementById(
+                "NormalMin"
+            ).value =
+                Number(normalMin);
+
+            document.getElementById(
+                "NormalMax"
+            ).value =
+                Number(normalMax);
+
+            document.getElementById(
+                "TurnAroundTimeHours"
+            ).value =
+                turnaround;
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "testTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           SOFT DELETE
+           ========================================================= */
+
+        function deleteTestType(
+            id,
+            name) {
+
+            const form =
+                document.getElementById(
+                    "deleteTestTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Delete", "TestType", new { area = "Manager" })";
+
+            document.getElementById(
+                "deleteTestTypeId"
+            ).value =
+                id;
+
+            document.getElementById(
+                "deleteTestTypeName"
+            ).innerText =
+                name;
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "deleteTestTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           SEARCH
+           ========================================================= */
+
+        const searchInput =
+            document.getElementById(
+                "testTypeSearch"
+            );
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    const search =
+                        this.value
+                            .toLowerCase()
+                            .trim();
+
+                    const rows =
+                        document.querySelectorAll(
+                            "#testTypesTableBody .test-type-row"
+                        );
+
+                    let visibleCount = 0;
+
+                    rows.forEach(
+                        function (row) {
+
+                            const name =
+                                (
+                                    row.dataset.name ||
+                                    ""
+                                ).toLowerCase();
+
+                            const category =
+                                (
+                                    row.dataset.category ||
+                                    ""
+                                ).toLowerCase();
+
+                            const sampleType =
+                                (
+                                    row.dataset.sampleType ||
+                                    ""
+                                ).toLowerCase();
+
+                            const measurementUnit =
+                                (
+                                    row.dataset.measurementUnit ||
+                                    ""
+                                ).toLowerCase();
+
+                            const status =
+                                (
+                                    row.dataset.status ||
+                                    ""
+                                ).toLowerCase();
+
+                            const matches =
+                                name.includes(search) ||
+                                category.includes(search) ||
+                                sampleType.includes(search) ||
+                                measurementUnit.includes(search) ||
+                                status.includes(search);
+
+                            row.style.display =
+                                matches
+                                    ? ""
+                                    : "none";
+
+                            if (matches) {
+
+                                visibleCount++;
+
+                            }
+
+                        }
+                    );
+
+                    document.getElementById(
+                        "recordCount"
+                    ).innerText =
+                        visibleCount +
+                        " test type(s)";
+
+                    const noSearchResultsRow =
+                        document.getElementById(
+                            "noSearchResultsRow"
+                        );
+
+                    if (noSearchResultsRow) {
+
+                        noSearchResultsRow.style.display =
+                            rows.length > 0 &&
+                            visibleCount === 0
+                                ? ""
+                                : "none";
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+}

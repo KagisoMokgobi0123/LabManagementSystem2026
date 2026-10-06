@@ -34,6 +34,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             var assignments =
                 await GetActiveAssignments();
 
+            // Load dropdown data.
+            await LoadDropdownData();
+
             return View(assignments);
         }
 
@@ -106,8 +109,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             // --------------------------------------------------------
 
             var currentManager =
-                await _userManager.GetUserAsync(
-                    User);
+                await _userManager.GetUserAsync(User);
 
             if (currentManager == null)
             {
@@ -121,6 +123,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             // The authenticated Manager is always recorded
             // as the Manager responsible for the assignment.
+
             model.ManagerId =
                 currentManager.Id;
 
@@ -152,10 +155,20 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
+            // --------------------------------------------------------
+            // VALIDATION FAILURE
+            // --------------------------------------------------------
+
             if (!ModelState.IsValid)
             {
                 var assignments =
                     await GetActiveAssignments();
+
+                // IMPORTANT:
+                // Reload dropdown data when returning the view
+                // because the request is not going through Index().
+
+                await LoadDropdownData();
 
                 return View("Index", assignments);
             }
@@ -173,8 +186,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             model.IsActive = true;
 
 
-            _context.TechnicianTestTypes.Add(
-                model);
+            _context.TechnicianTestTypes.Add(model);
 
             await _context.SaveChangesAsync();
 
@@ -245,10 +257,19 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
+            // --------------------------------------------------------
+            // VALIDATION FAILURE
+            // --------------------------------------------------------
+
             if (!ModelState.IsValid)
             {
                 var assignments =
                     await GetActiveAssignments();
+
+                // IMPORTANT:
+                // Reload dropdown data when returning the view.
+
+                await LoadDropdownData();
 
                 return View("Index", assignments);
             }
@@ -381,6 +402,17 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                             nameof(model.TechnicianId),
                             "The selected user is not a technician.");
                     }
+
+                    // ------------------------------------------------
+                    // TECHNICIAN ACTIVE CHECK
+                    // ------------------------------------------------
+
+                    if (!technician.IsActive)
+                    {
+                        ModelState.AddModelError(
+                            nameof(model.TechnicianId),
+                            "The selected technician account is inactive.");
+                    }
                 }
             }
 
@@ -415,7 +447,52 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         nameof(model.TestTypeId),
                         "The selected test type could not be found.");
                 }
+                else if (
+                    testType.IsActive !=
+                    TestTypeModel.RecordStatus.Active)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.TestTypeId),
+                        "The selected test type is inactive.");
+                }
             }
+        }
+
+
+        // ============================================================
+        // LOAD DROPDOWN DATA
+        // ============================================================
+
+        private async Task LoadDropdownData()
+        {
+            // --------------------------------------------------------
+            // LOAD ACTIVE TECHNICIANS
+            // --------------------------------------------------------
+
+            var technicianUsers =
+                await _userManager.GetUsersInRoleAsync(
+                    "Technician");
+
+
+            ViewBag.Technicians =
+                technicianUsers
+                    .Where(u => u.IsActive)
+                    .OrderBy(u => u.LastName)
+                    .ThenBy(u => u.FirstName)
+                    .ToList();
+
+
+            // --------------------------------------------------------
+            // LOAD ACTIVE TEST TYPES
+            // --------------------------------------------------------
+
+            ViewBag.TestTypes =
+                await _context.TestTypes
+                    .Where(t =>
+                        t.IsActive ==
+                        TestTypeModel.RecordStatus.Active)
+                    .OrderBy(t => t.Name)
+                    .ToListAsync();
         }
 
 
@@ -439,6 +516,4 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 .ToListAsync();
         }
     }
-
-
 }

@@ -1,8 +1,20 @@
 ﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel>
 
+@using NMB_HLabSys.Models.Identity
+@using NMB_HLabSys.Areas.Manager.Models
+
 @{
     ViewData["Title"] = "Technician Test Type Assignments";
     Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+
+    var technicians =
+        ViewBag.Technicians as IEnumerable<ApplicationUser>
+        ?? Enumerable.Empty<ApplicationUser>();
+
+    var testTypes =
+        ViewBag.TestTypes as IEnumerable<TestTypeModel>
+        ?? Enumerable.Empty<TestTypeModel>();
+
 }
 
 <div class="container-fluid py-4">
@@ -304,7 +316,8 @@
 
                                         <span class="text-muted">
 
-                                            @assignment.AssignedDate.ToString("dd MMM yyyy HH:mm")
+                                            @assignment.AssignedDate.ToString(
+                                                "dd MMM yyyy HH:mm")
 
                                         </span>
 
@@ -515,6 +528,10 @@
 
             <div class="modal-body">
 
+                <!-- =================================================
+                     HIDDEN ID
+                     ================================================= -->
+
                 <input type="hidden"
                        id="TechnicianTestTypeId"
                        name="TechnicianTestTypeId"
@@ -542,12 +559,22 @@
                             Select technician
                         </option>
 
+                        @foreach (var technician in technicians)
+                        {
+                            <option value="@technician.Id">
+
+                                @technician.FullName
+                                (@technician.UserName)
+
+                            </option>
+                        }
+
                     </select>
 
                     <div class="form-text">
 
-                        Select the technician who will receive
-                        this test type assignment.
+                        Select the active technician who will
+                        receive this test type assignment.
 
                     </div>
 
@@ -575,15 +602,29 @@
                             Select test type
                         </option>
 
+                        @foreach (var testType in testTypes)
+                        {
+                            <option value="@testType.TestTypeId">
+
+                                @testType.Name
+
+                            </option>
+                        }
+
                     </select>
 
                     <div class="form-text">
 
-                        Select the laboratory test type to assign.
+                        Select the active laboratory test type
+                        to assign.
 
                     </div>
 
                 </div>
+
+                <!-- =================================================
+                     INFORMATION
+                     ================================================= -->
 
                 <div class="alert alert-light border mb-0">
 
@@ -734,7 +775,10 @@
 
         <form id="deleteTechnicianTestTypeForm"
               method="post"
-              action="@Url.Action("Delete", "TechnicianTestType", new { area = "Manager" })">
+              action="@Url.Action(
+                                            "Delete",
+                                            "TechnicianTestType",
+                                            new { area = "Manager" })">
 
             @Html.AntiForgeryToken()
 
@@ -938,7 +982,11 @@
             form.method = "post";
 
             form.action =
-                "@Url.Action("Create", "TechnicianTestType", new { area = "Manager" })";
+                "@Url.Action(
+                            "Create",
+                            "TechnicianTestType",
+                                    new { area = "Manager" }
+                            )";
 
             document.getElementById(
                 "technicianTestTypeModalTitle"
@@ -954,6 +1002,10 @@
             document.getElementById(
                 "TechnicianTestTypeId"
             ).value = "0";
+
+            /*
+             * Reset dropdowns.
+             */
 
             document.getElementById(
                 "TechnicianId"
@@ -1046,7 +1098,11 @@
             form.method = "post";
 
             form.action =
-                "@Url.Action("Edit", "TechnicianTestType", new { area = "Manager" })";
+                "@Url.Action(
+                            "Edit",
+                            "TechnicianTestType",
+                                    new { area = "Manager" }
+                            )";
 
             document.getElementById(
                 "technicianTestTypeModalTitle"
@@ -1064,10 +1120,20 @@
             ).value =
                 id;
 
+            /*
+             * Set the technician dropdown to the
+             * existing technician.
+             */
+
             document.getElementById(
                 "TechnicianId"
             ).value =
                 technicianId;
+
+            /*
+             * Set the test type dropdown to the
+             * existing test type.
+             */
 
             document.getElementById(
                 "TestTypeId"
@@ -1099,7 +1165,11 @@
             form.method = "post";
 
             form.action =
-                "@Url.Action("Delete", "TechnicianTestType", new { area = "Manager" })";
+                "@Url.Action(
+                            "Delete",
+                            "TechnicianTestType",
+                                    new { area = "Manager" }
+                            )";
 
             document.getElementById(
                 "deleteTechnicianTestTypeId"
