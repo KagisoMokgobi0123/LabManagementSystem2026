@@ -93,23 +93,16 @@ namespace NMB_HLabSys.Areas.Manager.Models
         // ============================================================
         // TURNAROUND TIME
         // ============================================================
+        // Property name remains TurnAroundTimeHours for compatibility
+        // with existing subsystems.
+        //
+        // VALUE IS NOW STORED IN MINUTES.
+        // ============================================================
 
         [Required]
         [Range(1, 10000)]
-        [Display(Name = "Turnaround Time (Hours)")]
+        [Display(Name = "Turnaround Time (Minutes)")]
         public int TurnAroundTimeHours { get; set; }
-
-
-        // ============================================================
-        // EXISTING PRIMARY CONSUMABLE
-        // ============================================================
-
-        [Required]
-        [Display(Name = "Consumable")]
-        public int ConsumableId { get; set; }
-
-        [ForeignKey(nameof(ConsumableId))]
-        public virtual ConsumableModel? Consumable { get; set; }
 
 
         // ============================================================
@@ -120,16 +113,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Display(Name = "Status")]
         public RecordStatus IsActive { get; set; }
             = RecordStatus.Active;
-
-
-        // ============================================================
-        // TEST REQUESTS
-        // ============================================================
-
-        public virtual ICollection<TestTypeModel>
-            TestTypes
-        { get; set; }
-            = new List<TestTypeModel>();
 
 
         // ============================================================
@@ -144,6 +127,16 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         // ============================================================
         // CONSUMABLE REQUIREMENTS
+        // ============================================================
+        // Many-to-many relationship:
+        //
+        // TestType -> TestTypeConsumable -> Consumable
+        //
+        // A test can have many consumables.
+        // A consumable can be used by many tests.
+        //
+        // ConsumableId is intentionally NOT stored directly on
+        // TestTypeModel.
         // ============================================================
 
         public virtual ICollection<TestTypeConsumableModel>

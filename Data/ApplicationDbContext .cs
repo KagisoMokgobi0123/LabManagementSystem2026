@@ -162,19 +162,68 @@ namespace NMB_HLabSys.Data
 
 
             // ============================================================
+            // TEST TYPE -> TEST CATEGORY
+            // ============================================================
+
+            builder.Entity<TestTypeModel>()
+                .HasOne(x => x.TestCategory)
+                .WithMany()
+                .HasForeignKey(x => x.TestCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // ============================================================
+            // TEST TYPE -> SAMPLE TYPE
+            // ============================================================
+
+            builder.Entity<TestTypeModel>()
+                .HasOne(x => x.SampleType)
+                .WithMany()
+                .HasForeignKey(x => x.SampleTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // ============================================================
+            // TEST TYPE -> MEASUREMENT UNIT
+            // ============================================================
+
+            builder.Entity<TestTypeModel>()
+                .HasOne(x => x.MeasurementUnitDetails)
+                .WithMany()
+                .HasForeignKey(x => x.MeasurementUnit)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // ============================================================
+            // TEST TYPE -> TECHNICIAN ASSIGNMENTS
+            // ============================================================
+
+            builder.Entity<TechnicianTestTypeModel>()
+                .HasOne(x => x.TestType)
+                .WithMany(x => x.TechnicianTestTypes)
+                .HasForeignKey(x => x.TestTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            // ============================================================
             // TEST TYPE -> CONSUMABLE
+            // THROUGH TestTypeConsumable
             // ============================================================
 
             builder.Entity<TestTypeConsumableModel>()
+                .HasKey(x => x.TestTypeConsumableId);
+
+
+            builder.Entity<TestTypeConsumableModel>()
                 .HasOne(x => x.TestType)
-                .WithMany()
+                .WithMany(x => x.TestTypeConsumables)
                 .HasForeignKey(x => x.TestTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
 
             builder.Entity<TestTypeConsumableModel>()
                 .HasOne(x => x.Consumable)
-                .WithMany(c => c.TestTypeConsumables)
+                .WithMany(x => x.TestTypeConsumables)
                 .HasForeignKey(x => x.ConsumableId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -897,6 +946,15 @@ namespace NMB_HLabSys.Data
             // ============================================================
             // TEST TYPES
             // ============================================================
+            // ConsumableId has intentionally been removed.
+            //
+            // Consumables are now assigned through:
+            //
+            // TestType -> TestTypeConsumable -> Consumable
+            //
+            // TurnAroundTimeHours property remains for compatibility,
+            // but the stored value represents MINUTES.
+            // ============================================================
 
             builder.Entity<TestTypeModel>().HasData(
 
@@ -906,11 +964,11 @@ namespace NMB_HLabSys.Data
                     Name = "Full Blood Count (FBC)",
                     TestCategoryId = 1,
                     SampleTypeId = 1,
-                    ConsumableId = 1,
                     MeasurementUnit = 1,
                     NormalMin = 4.5m,
                     NormalMax = 11.0m,
-                    TurnAroundTimeHours = 2
+                    TurnAroundTimeHours = 120,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -919,11 +977,11 @@ namespace NMB_HLabSys.Data
                     Name = "White Blood Cell Differential",
                     TestCategoryId = 1,
                     SampleTypeId = 1,
-                    ConsumableId = 1,
                     MeasurementUnit = 2,
                     NormalMin = 0m,
                     NormalMax = 0m,
-                    TurnAroundTimeHours = 3
+                    TurnAroundTimeHours = 180,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -932,11 +990,11 @@ namespace NMB_HLabSys.Data
                     Name = "Peripheral Blood Film",
                     TestCategoryId = 1,
                     SampleTypeId = 1,
-                    ConsumableId = 4,
                     MeasurementUnit = 3,
                     NormalMin = 0m,
                     NormalMax = 0m,
-                    TurnAroundTimeHours = 4
+                    TurnAroundTimeHours = 240,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -945,11 +1003,11 @@ namespace NMB_HLabSys.Data
                     Name = "Prothrombin Time (PT)",
                     TestCategoryId = 2,
                     SampleTypeId = 4,
-                    ConsumableId = 6,
                     MeasurementUnit = 5,
                     NormalMin = 11.0m,
                     NormalMax = 13.5m,
-                    TurnAroundTimeHours = 2
+                    TurnAroundTimeHours = 120,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -958,11 +1016,11 @@ namespace NMB_HLabSys.Data
                     Name = "Activated Partial Thromboplastin Time (aPTT)",
                     TestCategoryId = 2,
                     SampleTypeId = 4,
-                    ConsumableId = 6,
                     MeasurementUnit = 5,
                     NormalMin = 25m,
                     NormalMax = 35m,
-                    TurnAroundTimeHours = 2
+                    TurnAroundTimeHours = 120,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -971,11 +1029,11 @@ namespace NMB_HLabSys.Data
                     Name = "International Normalized Ratio (INR)",
                     TestCategoryId = 2,
                     SampleTypeId = 4,
-                    ConsumableId = 6,
                     MeasurementUnit = 6,
                     NormalMin = 0.8m,
                     NormalMax = 1.2m,
-                    TurnAroundTimeHours = 2
+                    TurnAroundTimeHours = 120,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -984,11 +1042,11 @@ namespace NMB_HLabSys.Data
                     Name = "Glucose (Fasting)",
                     TestCategoryId = 3,
                     SampleTypeId = 4,
-                    ConsumableId = 8,
                     MeasurementUnit = 9,
                     NormalMin = 3.9m,
                     NormalMax = 5.5m,
-                    TurnAroundTimeHours = 1
+                    TurnAroundTimeHours = 60,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -997,11 +1055,11 @@ namespace NMB_HLabSys.Data
                     Name = "Hemoglobin A1C (HbA1c)",
                     TestCategoryId = 3,
                     SampleTypeId = 1,
-                    ConsumableId = 1,
                     MeasurementUnit = 2,
                     NormalMin = 4.0m,
                     NormalMax = 5.6m,
-                    TurnAroundTimeHours = 2
+                    TurnAroundTimeHours = 120,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1010,11 +1068,11 @@ namespace NMB_HLabSys.Data
                     Name = "Urinalysis (Dipstick)",
                     TestCategoryId = 4,
                     SampleTypeId = 2,
-                    ConsumableId = 9,
                     MeasurementUnit = 3,
                     NormalMin = 0m,
                     NormalMax = 0m,
-                    TurnAroundTimeHours = 1
+                    TurnAroundTimeHours = 60,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1023,17 +1081,23 @@ namespace NMB_HLabSys.Data
                     Name = "Blood Culture",
                     TestCategoryId = 5,
                     SampleTypeId = 1,
-                    ConsumableId = 12,
                     MeasurementUnit = 3,
                     NormalMin = 0m,
                     NormalMax = 0m,
-                    TurnAroundTimeHours = 72
+                    TurnAroundTimeHours = 4320,
+                    IsActive = TestTypeModel.RecordStatus.Active
                 }
             );
 
 
             // ============================================================
-            // TEST TYPE / CONSUMABLE RELATIONSHIPS
+            // TEST TYPE / CONSUMABLE SEED DATA
+            // ============================================================
+            // TestTypeConsumableId is now the identifier for the
+            // relationship between a test type and its consumable.
+            //
+            // ConsumableId remains REQUIRED HERE because this table
+            // identifies which consumable is required.
             // ============================================================
 
             builder.Entity<TestTypeConsumableModel>().HasData(

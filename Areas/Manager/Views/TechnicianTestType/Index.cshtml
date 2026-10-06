@@ -1,0 +1,1225 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel>
+
+@{
+    ViewData["Title"] = "Technician Test Type Assignments";
+    Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <!-- =========================================================
+     PAGE HEADER
+     ========================================================= -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                <i class="fa-solid fa-user-check text-primary me-2"></i>
+
+                Technician Test Type Assignments
+
+            </h4>
+
+            <p class="text-muted mb-0">
+
+                Assign laboratory test types to technicians and
+                manage their active assignments.
+
+            </p>
+
+        </div>
+
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#technicianTestTypeModal"
+                onclick="openCreateModal()">
+
+            <i class="fa-solid fa-plus me-1"></i>
+
+            Assign Test Type
+
+        </button>
+
+    </div>
+
+    <!-- =========================================================
+     MESSAGES
+     ========================================================= -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+
+            <div class="fw-semibold mb-2">
+
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                Please correct the following errors:
+
+            </div>
+
+            <div asp-validation-summary="All"></div>
+
+        </div>
+    }
+
+    <!-- =========================================================
+     INFORMATION
+     ========================================================= -->
+
+    <div class="alert alert-info border-0 shadow-sm">
+
+        <div class="d-flex">
+
+            <i class="fa-solid fa-circle-info mt-1 me-3"></i>
+
+            <div>
+
+                <div class="fw-semibold">
+                    Technician test type management
+                </div>
+
+                <div class="small">
+
+                    Assign specific laboratory test types to
+                    technicians so that their permitted laboratory
+                    testing responsibilities can be managed.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+     ASSIGNMENT TABLE
+     ========================================================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+
+                    <h6 class="fw-bold mb-0">
+                        Technician Test Type Assignments
+                    </h6>
+
+                    <small class="text-muted">
+                        Active test type assignments
+                    </small>
+
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- SEARCH -->
+
+                    <div class="input-group input-group-sm"
+                         style="width:300px;">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                        </span>
+
+                        <input type="text"
+                               id="technicianTestTypeSearch"
+                               class="form-control"
+                               placeholder="Search technician or test type..."
+                               autocomplete="off" />
+
+                    </div>
+
+                    <!-- RECORD COUNT -->
+
+                    <span class="badge bg-primary-subtle text-primary"
+                          id="recordCount">
+
+                        @(Model?.Count() ?? 0) assignment(s)
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0"
+                       id="technicianTestTypesTable">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>
+                                Technician
+                            </th>
+
+                            <th>
+                                Test Type
+                            </th>
+
+                            <th>
+                                Assigned By
+                            </th>
+
+                            <th>
+                                Assigned Date
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th class="text-end">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="technicianTestTypesTableBody">
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var assignment in Model)
+                            {
+                                var technicianName =
+                                    assignment.Technician?.UserName
+                                    ?? "Unknown Technician";
+
+                                var testTypeName =
+                                    assignment.TestType?.Name
+                                    ?? "Unknown Test Type";
+
+                                var managerName =
+                                    assignment.Manager?.UserName
+                                    ?? "Unknown Manager";
+
+                                var status =
+                                    assignment.IsActive
+                                        ? "Active"
+                                        : "Inactive";
+
+                                var encodedTechnicianName =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        technicianName);
+
+                                var encodedTestTypeName =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        testTypeName);
+
+                                var encodedManagerName =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        managerName);
+
+                                var encodedStatus =
+                                    System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
+                                        status);
+
+                                <tr class="technician-test-type-row"
+                                    data-technician="@technicianName"
+                                    data-testtype="@testTypeName"
+                                    data-manager="@managerName"
+                                    data-status="@status">
+
+                                    <!-- =================================================
+                                     TECHNICIAN
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            @technicianName
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     TEST TYPE
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            @testTypeName
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     ASSIGNED BY
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <span class="text-muted">
+
+                                            @managerName
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     ASSIGNED DATE
+                                     ================================================= -->
+
+                                    <td>
+
+                                        <span class="text-muted">
+
+                                            @assignment.AssignedDate.ToString("dd MMM yyyy HH:mm")
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     STATUS
+                                     ================================================= -->
+
+                                    <td>
+
+                                        @if (assignment.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+
+                                                <i class="fa-solid fa-check me-1"></i>
+
+                                                Active
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+
+                                                <i class="fa-solid fa-ban me-1"></i>
+
+                                                Inactive
+
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <!-- =================================================
+                                     ACTIONS
+                                     ================================================= -->
+
+                                    <td class="text-end">
+
+                                        <div class="btn-group btn-group-sm"
+                                             role="group">
+
+                                            <!-- VIEW -->
+
+                                            <button type="button"
+                                                    class="btn btn-outline-info"
+                                                    title="View assignment"
+                                                    onclick="viewTechnicianTestType(
+                                                '@assignment.TechnicianTestTypeId',
+                                                '@Html.Raw(encodedTechnicianName)',
+                                                '@Html.Raw(encodedTestTypeName)',
+                                                '@Html.Raw(encodedManagerName)',
+                                                '@assignment.AssignedDate.ToString("dd MMM yyyy HH:mm")',
+                                                '@Html.Raw(encodedStatus)'
+                                                )">
+
+                                                <i class="fa-solid fa-eye"></i>
+
+                                            </button>
+
+                                            <!-- EDIT -->
+                                            @if (assignment.IsActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-primary"
+                                                        title="Edit assignment"
+                                                        onclick="editTechnicianTestType(
+                                                    '@assignment.TechnicianTestTypeId',
+                                                    '@assignment.TechnicianId',
+                                                    '@assignment.TestTypeId'
+                                                    )">
+
+                                                    <i class="fa-solid fa-pen"></i>
+
+                                                </button>
+                                            }
+
+                                            <!-- SOFT DELETE -->
+                                            @if (assignment.IsActive)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-outline-danger"
+                                                        title="Deactivate assignment"
+                                                        onclick="deleteTechnicianTestType(
+                                                    '@assignment.TechnicianTestTypeId',
+                                                    '@Html.Raw(encodedTechnicianName)',
+                                                    '@Html.Raw(encodedTestTypeName)'
+                                                    )">
+
+                                                    <i class="fa-solid fa-trash"></i>
+
+                                                </button>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="6"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="fa-solid fa-user-check fa-2x mb-3"></i>
+
+                                        <div class="fw-semibold">
+
+                                            No technician test type assignments found
+
+                                        </div>
+
+                                        <small>
+
+                                            Assign a test type to a technician
+                                            to begin managing their laboratory
+                                            responsibilities.
+
+                                        </small>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        <!-- =================================================
+                         SEARCH EMPTY
+                         ================================================= -->
+
+                        <tr id="noSearchResultsRow"
+                            style="display:none;">
+
+                            <td colspan="6"
+                                class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+
+                                    <div class="fw-semibold">
+
+                                        No matching assignments found
+
+                                    </div>
+
+                                    <small>
+
+                                        Try a different technician,
+                                        test type, manager, or status.
+
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div> <!-- ============================================================= ADD / EDIT ASSIGNMENT MODAL ============================================================= --> <div class="modal fade" id="technicianTestTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <form id="technicianTestTypeForm"
+              method="post"
+              asp-area="Manager"
+              asp-controller="TechnicianTestType"
+              asp-action="Create">
+
+            @Html.AntiForgeryToken()
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold"
+                    id="technicianTestTypeModalTitle">
+
+                    <i class="fa-solid fa-plus text-primary me-2"></i>
+
+                    Assign Test Type
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <input type="hidden"
+                       id="TechnicianTestTypeId"
+                       name="TechnicianTestTypeId"
+                       value="0" />
+
+                <!-- =================================================
+                     TECHNICIAN
+                     ================================================= -->
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold"
+                           for="TechnicianId">
+
+                        Technician
+
+                    </label>
+
+                    <select id="TechnicianId"
+                            name="TechnicianId"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            Select technician
+                        </option>
+
+                    </select>
+
+                    <div class="form-text">
+
+                        Select the technician who will receive
+                        this test type assignment.
+
+                    </div>
+
+                </div>
+
+                <!-- =================================================
+                     TEST TYPE
+                     ================================================= -->
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-semibold"
+                           for="TestTypeId">
+
+                        Test Type
+
+                    </label>
+
+                    <select id="TestTypeId"
+                            name="TestTypeId"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            Select test type
+                        </option>
+
+                    </select>
+
+                    <div class="form-text">
+
+                        Select the laboratory test type to assign.
+
+                    </div>
+
+                </div>
+
+                <div class="alert alert-light border mb-0">
+
+                    <i class="fa-solid fa-circle-info text-info me-2"></i>
+
+                    The currently authenticated Manager will be
+                    recorded as the person making this assignment.
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    <span id="saveButtonText">
+                        Assign Test Type
+                    </span>
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= VIEW ASSIGNMENT MODAL ============================================================= --> <div class="modal fade" id="viewTechnicianTestTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <div class="modal-header">
+
+            <h5 class="modal-title fw-bold">
+
+                <i class="fa-solid fa-circle-info text-info me-2"></i>
+
+                Assignment Details
+
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+            </button>
+
+        </div>
+
+        <div class="modal-body">
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Technician
+                </small>
+
+                <div id="viewTechnicianName"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Test Type
+                </small>
+
+                <div id="viewTestTypeName"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Assigned By
+                </small>
+
+                <div id="viewManagerName"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+
+                <small class="text-muted d-block">
+                    Assigned Date
+                </small>
+
+                <div id="viewAssignedDate"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+            <div>
+
+                <small class="text-muted d-block">
+                    Status
+                </small>
+
+                <div id="viewAssignmentStatus"
+                     class="fw-semibold">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="modal-footer">
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                Close
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= DELETE / SOFT DELETE ASSIGNMENT MODAL ============================================================= --> <div class="modal fade" id="deleteTechnicianTestTypeModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+
+    <div class="modal-content border-0 shadow">
+
+        <form id="deleteTechnicianTestTypeForm"
+              method="post"
+              action="@Url.Action("Delete", "TechnicianTestType", new { area = "Manager" })">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   id="deleteTechnicianTestTypeId"
+                   name="id"
+                   value="" />
+
+            <div class="modal-header border-0">
+
+                <h5 class="modal-title fw-bold text-danger">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    Deactivate Assignment
+
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <p>
+
+                    Are you sure you want to deactivate this
+                    technician test type assignment?
+
+                </p>
+
+                <div class="alert alert-warning mb-0">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    <strong id="deleteAssignmentName"></strong>
+
+                    <div class="small mt-1">
+
+                        This is a soft delete. The assignment will
+                        be marked as inactive instead of being
+                        permanently removed from the database.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer border-0">
+
+                <button type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger">
+
+                    <i class="fa-solid fa-trash me-1"></i>
+
+                    Deactivate Assignment
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div> <!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-success">
+
+                        <i class="fa-solid fa-circle-check me-2"></i>
+
+                        Success
+
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="modal-body text-center py-4">
+
+                    <div class="mb-3">
+
+                        <div class="d-inline-flex
+                            align-items-center
+                            justify-content-center
+                            rounded-circle
+                            bg-success-subtle
+                            text-success"
+                             style="width:70px;height:70px;">
+
+                            <i class="fa-solid fa-check fa-2x"></i>
+
+                        </div>
+
+                    </div>
+
+                    <h6 class="fw-semibold mb-2">
+
+                        Operation Successful
+
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        @TempData["SuccessMessage"]
+
+                    </p>
+
+                </div>
+
+                <div class="modal-footer border-0 justify-content-center">
+
+                    <button type="button"
+                            class="btn btn-success px-4"
+                            data-bs-dismiss="modal">
+
+                        <i class="fa-solid fa-check me-1"></i>
+
+                        OK
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+}
+
+@section Scripts {
+
+    <script>
+        /* =========================================================
+           SUCCESS MESSAGE
+           ========================================================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+
+                const successModal =
+                    document.getElementById(
+                        "successMessageModal"
+                    );
+
+                if (successModal) {
+
+                    const modal =
+                        new bootstrap.Modal(
+                            successModal
+                        );
+
+                    modal.show();
+
+                }
+
+            }
+        );
+
+        /* =========================================================
+           CREATE
+           ========================================================= */
+
+        function openCreateModal() {
+
+            const form =
+                document.getElementById(
+                    "technicianTestTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Create", "TechnicianTestType", new { area = "Manager" })";
+
+            document.getElementById(
+                "technicianTestTypeModalTitle"
+            ).innerHTML =
+                '<i class="fa-solid fa-plus text-primary me-2"></i>' +
+                'Assign Test Type';
+
+            document.getElementById(
+                "saveButtonText"
+            ).innerText =
+                "Assign Test Type";
+
+            document.getElementById(
+                "TechnicianTestTypeId"
+            ).value = "0";
+
+            document.getElementById(
+                "TechnicianId"
+            ).value = "";
+
+            document.getElementById(
+                "TestTypeId"
+            ).value = "";
+
+        }
+
+        /* =========================================================
+           VIEW
+           ========================================================= */
+
+        function viewTechnicianTestType(
+            id,
+            technicianName,
+            testTypeName,
+            managerName,
+            assignedDate,
+            status) {
+
+            document.getElementById(
+                "viewTechnicianName"
+            ).innerText =
+                technicianName;
+
+            document.getElementById(
+                "viewTestTypeName"
+            ).innerText =
+                testTypeName;
+
+            document.getElementById(
+                "viewManagerName"
+            ).innerText =
+                managerName;
+
+            document.getElementById(
+                "viewAssignedDate"
+            ).innerText =
+                assignedDate;
+
+            const statusElement =
+                document.getElementById(
+                    "viewAssignmentStatus"
+                );
+
+            if (status === "Active") {
+
+                statusElement.innerHTML =
+                    '<span class="badge bg-success">' +
+                    '<i class="fa-solid fa-check me-1"></i>' +
+                    'Active' +
+                    '</span>';
+
+            }
+            else {
+
+                statusElement.innerHTML =
+                    '<span class="badge bg-secondary">' +
+                    '<i class="fa-solid fa-ban me-1"></i>' +
+                    'Inactive' +
+                    '</span>';
+
+            }
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "viewTechnicianTestTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           EDIT
+           ========================================================= */
+
+        function editTechnicianTestType(
+            id,
+            technicianId,
+            testTypeId) {
+
+            const form =
+                document.getElementById(
+                    "technicianTestTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Edit", "TechnicianTestType", new { area = "Manager" })";
+
+            document.getElementById(
+                "technicianTestTypeModalTitle"
+            ).innerHTML =
+                '<i class="fa-solid fa-pen text-primary me-2"></i>' +
+                'Edit Assignment';
+
+            document.getElementById(
+                "saveButtonText"
+            ).innerText =
+                "Update Assignment";
+
+            document.getElementById(
+                "TechnicianTestTypeId"
+            ).value =
+                id;
+
+            document.getElementById(
+                "TechnicianId"
+            ).value =
+                technicianId;
+
+            document.getElementById(
+                "TestTypeId"
+            ).value =
+                testTypeId;
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "technicianTestTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           SOFT DELETE
+           ========================================================= */
+
+        function deleteTechnicianTestType(
+            id,
+            technicianName,
+            testTypeName) {
+
+            const form =
+                document.getElementById(
+                    "deleteTechnicianTestTypeForm"
+                );
+
+            form.method = "post";
+
+            form.action =
+                "@Url.Action("Delete", "TechnicianTestType", new { area = "Manager" })";
+
+            document.getElementById(
+                "deleteTechnicianTestTypeId"
+            ).value =
+                id;
+
+            document.getElementById(
+                "deleteAssignmentName"
+            ).innerText =
+                technicianName +
+                " — " +
+                testTypeName;
+
+            new bootstrap.Modal(
+                document.getElementById(
+                    "deleteTechnicianTestTypeModal"
+                )
+            ).show();
+
+        }
+
+        /* =========================================================
+           SEARCH
+           ========================================================= */
+
+        const searchInput =
+            document.getElementById(
+                "technicianTestTypeSearch"
+            );
+
+        if (searchInput) {
+
+            searchInput.addEventListener(
+                "input",
+                function () {
+
+                    const search =
+                        this.value
+                            .toLowerCase()
+                            .trim();
+
+                    const rows =
+                        document.querySelectorAll(
+                            "#technicianTestTypesTableBody .technician-test-type-row"
+                        );
+
+                    let visibleCount = 0;
+
+                    rows.forEach(
+                        function (row) {
+
+                            const technician =
+                                (
+                                    row.dataset.technician ||
+                                    ""
+                                ).toLowerCase();
+
+                            const testType =
+                                (
+                                    row.dataset.testtype ||
+                                    ""
+                                ).toLowerCase();
+
+                            const manager =
+                                (
+                                    row.dataset.manager ||
+                                    ""
+                                ).toLowerCase();
+
+                            const status =
+                                (
+                                    row.dataset.status ||
+                                    ""
+                                ).toLowerCase();
+
+                            const matches =
+                                technician.includes(search) ||
+                                testType.includes(search) ||
+                                manager.includes(search) ||
+                                status.includes(search);
+
+                            row.style.display =
+                                matches
+                                    ? ""
+                                    : "none";
+
+                            if (matches) {
+
+                                visibleCount++;
+
+                            }
+
+                        }
+                    );
+
+                    document.getElementById(
+                        "recordCount"
+                    ).innerText =
+                        visibleCount +
+                        " assignment(s)";
+
+                    const noSearchResultsRow =
+                        document.getElementById(
+                            "noSearchResultsRow"
+                        );
+
+                    if (noSearchResultsRow) {
+
+                        noSearchResultsRow.style.display =
+                            rows.length > 0 &&
+                            visibleCount === 0
+                                ? ""
+                                : "none";
+
+                    }
+
+                }
+            );
+
+        }
+
+    </script>
+}

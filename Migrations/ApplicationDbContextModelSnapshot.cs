@@ -1054,16 +1054,11 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TestTypeModelTestTypeId")
-                        .HasColumnType("int");
-
                     b.HasKey("TestTypeConsumableId");
 
                     b.HasIndex("ConsumableId");
 
                     b.HasIndex("TestTypeId");
-
-                    b.HasIndex("TestTypeModelTestTypeId");
 
                     b.ToTable("TestTypeConsumables");
 
@@ -1148,13 +1143,13 @@ namespace NMBHLabSys.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestTypeId"));
 
-                    b.Property<int>("ConsumableId")
-                        .HasColumnType("int");
-
                     b.Property<int>("IsActive")
                         .HasColumnType("int");
 
                     b.Property<int>("MeasurementUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MeasurementUnitModelMeasurementUnitId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -1174,10 +1169,10 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TestRequestsModelTestRequestId")
+                    b.Property<int?>("TestCategoryModelTestCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TestTypeModelTestTypeId")
+                    b.Property<int?>("TestRequestsModelTestRequestId")
                         .HasColumnType("int");
 
                     b.Property<int>("TurnAroundTimeHours")
@@ -1185,17 +1180,17 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("TestTypeId");
 
-                    b.HasIndex("ConsumableId");
-
                     b.HasIndex("MeasurementUnit");
+
+                    b.HasIndex("MeasurementUnitModelMeasurementUnitId");
 
                     b.HasIndex("SampleTypeId");
 
                     b.HasIndex("TestCategoryId");
 
-                    b.HasIndex("TestRequestsModelTestRequestId");
+                    b.HasIndex("TestCategoryModelTestCategoryId");
 
-                    b.HasIndex("TestTypeModelTestTypeId");
+                    b.HasIndex("TestRequestsModelTestRequestId");
 
                     b.ToTable("TestTypes");
 
@@ -1203,7 +1198,6 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestTypeId = 1,
-                            ConsumableId = 1,
                             IsActive = 1,
                             MeasurementUnit = 1,
                             Name = "Full Blood Count (FBC)",
@@ -1211,12 +1205,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 4.5m,
                             SampleTypeId = 1,
                             TestCategoryId = 1,
-                            TurnAroundTimeHours = 2
+                            TurnAroundTimeHours = 120
                         },
                         new
                         {
                             TestTypeId = 2,
-                            ConsumableId = 1,
                             IsActive = 1,
                             MeasurementUnit = 2,
                             Name = "White Blood Cell Differential",
@@ -1224,12 +1217,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 0m,
                             SampleTypeId = 1,
                             TestCategoryId = 1,
-                            TurnAroundTimeHours = 3
+                            TurnAroundTimeHours = 180
                         },
                         new
                         {
                             TestTypeId = 3,
-                            ConsumableId = 4,
                             IsActive = 1,
                             MeasurementUnit = 3,
                             Name = "Peripheral Blood Film",
@@ -1237,12 +1229,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 0m,
                             SampleTypeId = 1,
                             TestCategoryId = 1,
-                            TurnAroundTimeHours = 4
+                            TurnAroundTimeHours = 240
                         },
                         new
                         {
                             TestTypeId = 6,
-                            ConsumableId = 6,
                             IsActive = 1,
                             MeasurementUnit = 5,
                             Name = "Prothrombin Time (PT)",
@@ -1250,12 +1241,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 11.0m,
                             SampleTypeId = 4,
                             TestCategoryId = 2,
-                            TurnAroundTimeHours = 2
+                            TurnAroundTimeHours = 120
                         },
                         new
                         {
                             TestTypeId = 7,
-                            ConsumableId = 6,
                             IsActive = 1,
                             MeasurementUnit = 5,
                             Name = "Activated Partial Thromboplastin Time (aPTT)",
@@ -1263,12 +1253,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 25m,
                             SampleTypeId = 4,
                             TestCategoryId = 2,
-                            TurnAroundTimeHours = 2
+                            TurnAroundTimeHours = 120
                         },
                         new
                         {
                             TestTypeId = 8,
-                            ConsumableId = 6,
                             IsActive = 1,
                             MeasurementUnit = 6,
                             Name = "International Normalized Ratio (INR)",
@@ -1276,12 +1265,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 0.8m,
                             SampleTypeId = 4,
                             TestCategoryId = 2,
-                            TurnAroundTimeHours = 2
+                            TurnAroundTimeHours = 120
                         },
                         new
                         {
                             TestTypeId = 11,
-                            ConsumableId = 8,
                             IsActive = 1,
                             MeasurementUnit = 9,
                             Name = "Glucose (Fasting)",
@@ -1289,12 +1277,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 3.9m,
                             SampleTypeId = 4,
                             TestCategoryId = 3,
-                            TurnAroundTimeHours = 1
+                            TurnAroundTimeHours = 60
                         },
                         new
                         {
                             TestTypeId = 12,
-                            ConsumableId = 1,
                             IsActive = 1,
                             MeasurementUnit = 2,
                             Name = "Hemoglobin A1C (HbA1c)",
@@ -1302,12 +1289,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 4.0m,
                             SampleTypeId = 1,
                             TestCategoryId = 3,
-                            TurnAroundTimeHours = 2
+                            TurnAroundTimeHours = 120
                         },
                         new
                         {
                             TestTypeId = 17,
-                            ConsumableId = 9,
                             IsActive = 1,
                             MeasurementUnit = 3,
                             Name = "Urinalysis (Dipstick)",
@@ -1315,12 +1301,11 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 0m,
                             SampleTypeId = 2,
                             TestCategoryId = 4,
-                            TurnAroundTimeHours = 1
+                            TurnAroundTimeHours = 60
                         },
                         new
                         {
                             TestTypeId = 20,
-                            ConsumableId = 12,
                             IsActive = 1,
                             MeasurementUnit = 3,
                             Name = "Blood Culture",
@@ -1328,7 +1313,7 @@ namespace NMBHLabSys.Migrations
                             NormalMin = 0m,
                             SampleTypeId = 1,
                             TestCategoryId = 5,
-                            TurnAroundTimeHours = 72
+                            TurnAroundTimeHours = 4320
                         });
                 });
 
@@ -2196,7 +2181,7 @@ namespace NMBHLabSys.Migrations
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
                         .WithMany("TechnicianTestTypes")
                         .HasForeignKey("TestTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Manager");
@@ -2215,14 +2200,10 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
-                        .WithMany()
+                        .WithMany("TestTypeConsumables")
                         .HasForeignKey("TestTypeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", null)
-                        .WithMany("TestTypeConsumables")
-                        .HasForeignKey("TestTypeModelTestTypeId");
 
                     b.Navigation("Consumable");
 
@@ -2231,39 +2212,35 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", b =>
                 {
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", "Consumable")
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", "MeasurementUnitDetails")
                         .WithMany()
-                        .HasForeignKey("ConsumableId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("MeasurementUnit")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", "MeasurementUnitDetails")
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.MeasurementUnitModel", null)
                         .WithMany("TestTypes")
-                        .HasForeignKey("MeasurementUnit")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MeasurementUnitModelMeasurementUnitId");
 
                     b.HasOne("NMB_HLabSys.Areas.Technician.Models.SampleTypeModel", "SampleType")
                         .WithMany()
                         .HasForeignKey("SampleTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", "TestCategory")
-                        .WithMany("TestTypes")
+                        .WithMany()
                         .HasForeignKey("TestCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", null)
+                        .WithMany("TestTypes")
+                        .HasForeignKey("TestCategoryModelTestCategoryId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", null)
                         .WithMany("TestTypes")
                         .HasForeignKey("TestRequestsModelTestRequestId");
-
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", null)
-                        .WithMany("TestTypes")
-                        .HasForeignKey("TestTypeModelTestTypeId");
-
-                    b.Navigation("Consumable");
 
                     b.Navigation("MeasurementUnitDetails");
 
@@ -2530,8 +2507,6 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("TechnicianTestTypes");
 
                     b.Navigation("TestTypeConsumables");
-
-                    b.Navigation("TestTypes");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.AllergyModel", b =>
