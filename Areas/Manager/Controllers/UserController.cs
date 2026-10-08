@@ -38,6 +38,15 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         {
             var users = await GetActiveUsers();
 
+            var testTypes = await _context.TestTypes
+                .Where(t =>
+                    t.IsActive ==
+                    TestTypeModel.RecordStatus.Active)
+                .OrderBy(t => t.Name)
+                .ToListAsync();
+
+            ViewBag.TestTypes = testTypes;
+
             return View(users);
         }
 
@@ -77,8 +86,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .Include(x => x.TestType)
                     .Select(x => new
                     {
-                        x.TestTypeId,
-                        TestType = x.TestType //!= null? x.TestType.Description: string.Empty
+                        x.TestTypeId,TestType = x.TestType != null? x.TestType.Name: string.Empty
                     })
                     .Cast<object>()
                     .ToListAsync();

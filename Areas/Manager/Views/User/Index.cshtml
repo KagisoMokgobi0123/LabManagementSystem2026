@@ -1,0 +1,1597 @@
+﻿@using NMB_HLabSys.Areas.Manager.Models
+@using NMB_HLabSys.Models.Identity
+
+@model IEnumerable<ApplicationUser>
+
+@{
+    ViewData["Title"] = "Users";
+    Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+
+    var testTypes =
+        ViewBag.TestTypes as IEnumerable<TestTypeModel>
+        ?? Enumerable.Empty<TestTypeModel>();
+}
+
+<div class="container-fluid py-4">
+
+    <!-- ========================================================= PAGE HEADER ========================================================= -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                <i class="fa-solid fa-users text-primary me-2"></i>
+
+                Users
+
+            </h4>
+
+            <p class="text-muted mb-0">
+
+                Manage laboratory doctors, technicians and user accounts.
+
+            </p>
+
+        </div>
+
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal" onclick="openCreateUserModal()">
+
+            <i class="fa-solid fa-user-plus me-1"></i>
+
+            Add User
+
+        </button>
+
+    </div>
+
+    <!-- ========================================================= MESSAGES ========================================================= -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"> </button>
+
+        </div>
+    }
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+
+            <div class="fw-semibold mb-2">
+
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                Please correct the following errors:
+
+            </div>
+
+            <div asp-validation-summary="All"></div>
+
+        </div>
+    }
+
+    <!-- ========================================================= INFORMATION ========================================================= -->
+
+    <div class="alert alert-info border-0 shadow-sm">
+
+        <div class="d-flex">
+
+            <i class="fa-solid fa-circle-info mt-1 me-3"></i>
+
+            <div>
+
+                <div class="fw-semibold"> User management </div>
+
+                <div class="small">
+
+                    Create and manage laboratory doctors and technicians. Deactivated accounts are retained in the system.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ========================================================= USER TABLE ========================================================= -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                <div>
+
+                    <h6 class="fw-bold mb-0"> Laboratory Users </h6>
+
+                    <small class="text-muted"> Active user accounts </small>
+
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <!-- SEARCH -->
+
+                    <div class="input-group input-group-sm" style="width:300px;">
+
+                        <span class="input-group-text bg-white">
+
+                            <i class="fa-solid fa-magnifying-glass text-muted"></i>
+
+                        </span>
+
+                        <input type="text" id="userSearch" class="form-control" placeholder="Search users..." autocomplete="off" />
+
+                    </div>
+
+                    <!-- RECORD COUNT -->
+
+                    <span class="badge bg-primary-subtle text-primary" id="recordCount">
+
+                        @(Model?.Count() ?? 0) user(s)
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0" id="usersTable">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th> User </th>
+
+                            <th> Contact </th>
+
+                            <th> Account </th>
+
+                            <th> Created </th>
+
+                            <th class="text-end"> Actions </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="usersTableBody">
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var user in Model)
+                            {
+                                var fullName = $"{user.FirstName} {user.LastName}".Trim();
+
+                                var status = user.IsActive ? "Active" : "Inactive";
+
+                                var encodedFullName = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(fullName);
+
+                                var encodedEmail = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(user.Email ?? "");
+
+                                var encodedPhone = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(user.PhoneNumber ?? "");
+
+                                var encodedStatus = System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(status);
+
+                                <tr class="user-row" data-name="@fullName" data-email="@user.Email" data-phone="@user.PhoneNumber" data-status="@status">
+
+                                    <!-- ================================================= USER ================================================= -->
+
+                                    <td>
+
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style="width:42px;height:42px;">
+
+                                                <i class="fa-solid fa-user"></i>
+
+                                            </div>
+
+                                            <div>
+
+                                                <div class="fw-semibold">
+
+                                                    @fullName
+
+                                                </div>
+
+                                                <small class="text-muted">
+
+                                                    @user.UserName
+
+                                                </small>
+
+                                            </div>
+
+                                        </div>
+
+                                    </td>
+
+                                    <!-- ================================================= CONTACT ================================================= -->
+
+                                    <td>
+
+                                        <div>
+
+                                            <i class="fa-solid fa-envelope text-muted me-1"></i>
+
+                                            <span> @user.Email </span>
+
+                                        </div>
+
+                                        @if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
+                                        {
+                                            <div class="small text-muted mt-1">
+
+                                                <i class="fa-solid fa-phone me-1"></i>
+
+                                                @user.PhoneNumber
+
+                                            </div>
+                                        }
+
+                                    </td>
+
+                                    <!-- ================================================= ACCOUNT STATUS ================================================= -->
+
+                                    <td>
+
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+
+                                                <i class="fa-solid fa-check me-1"></i>
+
+                                                Active
+
+                                            </span>
+                                        }
+                                        else
+                                        {
+
+                                            <span class="badge bg-secondary">
+
+                                                <i class="fa-solid fa-ban me-1"></i>
+
+                                                Inactive
+
+                                            </span>
+                                        }
+
+                                        @if (user.MustChangePassword)
+                                        {
+                                            <div class="small text-warning mt-1">
+
+                                                <i class="fa-solid fa-key me-1"></i>
+
+                                                Password change required
+
+                                            </div>
+                                        }
+
+                                    </td>
+
+                                    <!-- ================================================= CREATED ================================================= -->
+
+                                    <td>
+
+                                        <span class="text-muted">
+
+                                            @user.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")
+
+                                        </span>
+
+                                    </td>
+
+                                    <!-- ================================================= ACTIONS ================================================= -->
+
+                                    <td class="text-end">
+
+                                        <div class="btn-group btn-group-sm" role="group">
+
+                                            <!-- VIEW -->
+
+                                            <button type="button" class="btn btn-outline-info" title="View user" onclick="viewUser( '@user.Id', '@Html.Raw(encodedFullName)', '@Html.Raw(encodedEmail)', '@Html.Raw(encodedPhone)', '@Html.Raw(encodedStatus)' )">
+
+                                                <i class="fa-solid fa-eye"></i>
+
+                                            </button>
+
+                                            <!-- DEACTIVATE -->
+                                            @if (user.IsActive)
+                                            {
+                                                <button type="button" class="btn btn-outline-danger" title="Deactivate user" onclick="deleteUser( '@user.Id', '@Html.Raw(encodedFullName)' )">
+
+                                                    <i class="fa-solid fa-user-slash"></i>
+
+                                                </button>
+                                            }
+
+                                            <!-- REACTIVATE -->
+                                            @if (!user.IsActive)
+                                            {
+                                                <button type="button" class="btn btn-outline-success" title="Activate user" onclick="activateUser( '@user.Id', '@Html.Raw(encodedFullName)' )">
+
+                                                    <i class="fa-solid fa-user-check"></i>
+
+                                                </button>
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="5" class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="fa-solid fa-users fa-2x mb-3"></i>
+
+                                        <div class="fw-semibold">
+
+                                            No users found
+
+                                        </div>
+
+                                        <small>
+
+                                            Add a doctor or laboratory technician to begin managing users.
+
+                                        </small>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        <!-- ================================================= SEARCH EMPTY ================================================= -->
+
+                        <tr id="noSearchResultsRow" style="display:none;">
+
+                            <td colspan="5" class="text-center py-5">
+
+                                <div class="text-muted">
+
+                                    <i class="fa-solid fa-magnifying-glass fa-2x mb-3"></i>
+
+                                    <div class="fw-semibold">
+
+                                        No matching users found
+
+                                    </div>
+
+                                    <small>
+
+                                        Try a different name, e-mail, phone number or status.
+
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================================= CREATE USER MODAL ============================================================= -->
+
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <form id="userForm" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title fw-bold" id="userModalTitle">
+
+                        <i class="fa-solid fa-user-plus text-primary me-2"></i>
+
+                        Add User
+
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- ================================================= ROLE ================================================= -->
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+
+                            User Type
+
+                        </label>
+
+                        <div class="row g-3">
+
+                            <div class="col-md-6">
+
+                                <div class="form-check border rounded p-3 h-100">
+
+                                    <input class="form-check-input ms-0 me-2" type="radio" name="userType" id="doctorRole" value="Doctor" checked onchange="changeUserType()" />
+
+                                    <label class="form-check-label" for="doctorRole">
+
+                                        <span class="fw-semibold">
+
+                                            <i class="fa-solid fa-user-doctor text-primary me-1"></i>
+
+                                            Doctor
+
+                                        </span>
+
+                                        <small class="d-block text-muted mt-1">
+
+                                            Create a laboratory doctor account.
+
+                                        </small>
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6">
+
+                                <div class="form-check border rounded p-3 h-100">
+
+                                    <input class="form-check-input ms-0 me-2" type="radio" name="userType" id="technicianRole" value="Lab Technician" onchange="changeUserType()" />
+
+                                    <label class="form-check-label" for="technicianRole">
+
+                                        <span class="fw-semibold">
+
+                                            <i class="fa-solid fa-flask-vial text-success me-1"></i>
+
+                                            Lab Technician
+
+                                        </span>
+
+                                        <small class="d-block text-muted mt-1">
+
+                                            Create a laboratory technician account.
+
+                                        </small>
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= PERSONAL DETAILS ================================================= -->
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <label for="FirstName" class="form-label fw-semibold">
+
+                                First Name
+
+                            </label>
+
+                            <input type="text" id="FirstName" name="FirstName" class="form-control" maxlength="100" required autocomplete="given-name" />
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label for="LastName" class="form-label fw-semibold">
+
+                                Last Name
+
+                            </label>
+
+                            <input type="text" id="LastName" name="LastName" class="form-control" maxlength="100" required autocomplete="family-name" />
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label for="Email" class="form-label fw-semibold">
+
+                                E-mail Address
+
+                            </label>
+
+                            <input type="email" id="Email" name="Email" class="form-control" maxlength="256" required autocomplete="email" />
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label for="PhoneNumber" class="form-label fw-semibold">
+
+                                Contact Number
+
+                            </label>
+
+                            <input type="tel" id="PhoneNumber" name="PhoneNumber" class="form-control" maxlength="30" required autocomplete="tel" />
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= DOCTOR DETAILS ================================================= -->
+
+                    <div id="doctorFields" class="mt-4">
+
+                        <div class="border-top pt-4">
+
+                            <h6 class="fw-bold mb-3">
+
+                                <i class="fa-solid fa-user-doctor text-primary me-2"></i>
+
+                                Doctor Details
+
+                            </h6>
+
+                            <div>
+
+                                <label for="HPCSANumber" class="form-label fw-semibold">
+
+                                    HPCSA Number
+
+                                </label>
+
+                                <input type="text" id="HPCSANumber" name="HPCSANumber" class="form-control" maxlength="50" autocomplete="off" />
+
+                                <div class="form-text">
+
+                                    Enter the doctor's HPCSA registration number.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= TECHNICIAN DETAILS ================================================= -->
+
+                    <div id="technicianFields" class="mt-4" style="display:none;">
+
+                        <div class="border-top pt-4">
+
+                            <h6 class="fw-bold mb-3">
+
+                                <i class="fa-solid fa-flask-vial text-success me-2"></i>
+
+                                Technician Details
+
+                            </h6>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+
+                                    <label for="IdNumber" class="form-label fw-semibold">
+
+                                        South African ID Number
+
+                                    </label>
+
+                                    <input type="text" id="IdNumber" name="IdNumber" class="form-control" maxlength="13" minlength="13" inputmode="numeric" autocomplete="off" />
+
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <label for="EmployeeNumber" class="form-label fw-semibold">
+
+                                        Employee Number
+
+                                    </label>
+
+                                    <input type="text" id="EmployeeNumber" name="EmployeeNumber" class="form-control" maxlength="50" autocomplete="off" />
+
+                                </div>
+
+                            </div>
+
+                            <!-- ================================================= TEST TYPES ================================================= -->
+
+                            <div class="mt-3">
+
+                                <label for="TestTypeIds" class="form-label fw-semibold">
+
+                                    Assigned Test Types
+
+                                </label>
+
+                                <select id="TestTypeIds" name="TestTypeIds" class="form-select" multiple size="6">
+
+                                    @foreach (var testType in testTypes)
+                                    {
+                                        var isActive = testType.IsActive == NMB_HLabSys.Areas.Manager.Models.TestTypeModel.RecordStatus.Active;
+
+                                        if (isActive)
+                                        {
+                                            <option value="@testType.TestTypeId">
+
+                                                @testType.Name
+
+                                            </option>
+                                        }
+                                    }
+
+                                </select>
+
+                                <div class="form-text">
+
+                                    Hold Ctrl (Windows) or Command (Mac) to select multiple test types.
+
+                                    At least one test type is required.
+
+                                </div>
+
+                                @if (!testTypes.Any())
+                                {
+                                    <div class="alert alert-warning mt-2 mb-0">
+
+                                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                                        No active test types are currently available for assignment.
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= PASSWORD INFORMATION ================================================= -->
+
+                    <div class="alert alert-warning border-0 mt-4 mb-0">
+
+                        <div class="d-flex">
+
+                            <i class="fa-solid fa-key mt-1 me-2"></i>
+
+                            <div>
+
+                                <div class="fw-semibold">
+
+                                    Temporary password
+
+                                </div>
+
+                                <div class="small">
+
+                                    A temporary password will be generated automatically. The user will be required to change it after signing in.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+
+                        <i class="fa-solid fa-check me-1"></i>
+
+                        <span id="saveUserButtonText"> Create User </span>
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================================= VIEW USER MODAL ============================================================= -->
+
+<div class="modal fade" id="viewUserModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title fw-bold">
+
+                    <i class="fa-solid fa-circle-info text-info me-2"></i>
+
+                    User Details
+
+                </h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
+
+            </div>
+
+            <div class="modal-body">
+
+                <div id="userDetailsLoading" class="text-center py-4">
+
+                    <div class="spinner-border text-primary" role="status">
+                    </div>
+
+                    <div class="small text-muted mt-2">
+
+                        Loading user details...
+
+                    </div>
+
+                </div>
+
+                <div id="userDetailsContent" style="display:none;">
+
+                    <!-- ================================================= USER HEADER ================================================= -->
+
+                    <div class="d-flex align-items-center mb-4">
+
+                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center me-3" style="width:60px;height:60px;">
+
+                            <i class="fa-solid fa-user fa-lg"></i>
+
+                        </div>
+
+                        <div>
+
+                            <h5 class="fw-bold mb-1" id="viewUserName"> </h5>
+
+                            <div class="text-muted" id="viewUserEmail"> </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= BASIC INFORMATION ================================================= -->
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block"> Role </small>
+
+                                <div class="fw-semibold mt-1" id="viewUserRole"> </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block"> Status </small>
+
+                                <div class="mt-1" id="viewUserStatus"> </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block"> Contact Number </small>
+
+                                <div class="fw-semibold mt-1" id="viewUserPhone"> </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block"> Created </small>
+
+                                <div class="fw-semibold mt-1" id="viewUserCreated"> </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block"> Last Login </small>
+
+                                <div class="fw-semibold mt-1" id="viewUserLastLogin"> </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <div class="border rounded p-3 h-100">
+
+                                <small class="text-muted d-block"> Account Security </small>
+
+                                <div class="mt-1" id="viewUserPasswordStatus"> </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= DOCTOR DETAILS ================================================= -->
+
+                    <div id="viewDoctorDetails" class="mt-4" style="display:none;">
+
+                        <div class="border-top pt-4">
+
+                            <h6 class="fw-bold mb-3">
+
+                                <i class="fa-solid fa-user-doctor text-primary me-2"></i>
+
+                                Doctor Details
+
+                            </h6>
+
+                            <div class="border rounded p-3">
+
+                                <small class="text-muted d-block"> HPCSA Number </small>
+
+                                <div class="fw-semibold" id="viewHPCSANumber"> </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- ================================================= TECHNICIAN DETAILS ================================================= -->
+
+                    <div id="viewTechnicianDetails" class="mt-4" style="display:none;">
+
+                        <div class="border-top pt-4">
+
+                            <h6 class="fw-bold mb-3">
+
+                                <i class="fa-solid fa-flask-vial text-success me-2"></i>
+
+                                Technician Details
+
+                            </h6>
+
+                            <div class="row g-3">
+
+                                <div class="col-md-6">
+
+                                    <div class="border rounded p-3">
+
+                                        <small class="text-muted d-block"> ID Number </small>
+
+                                        <div class="fw-semibold" id="viewIdNumber"> </div>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-6">
+
+                                    <div class="border rounded p-3">
+
+                                        <small class="text-muted d-block"> Employee Number </small>
+
+                                        <div class="fw-semibold" id="viewEmployeeNumber"> </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <!-- ================================================= ASSIGNED TEST TYPES ================================================= -->
+
+                            <div class="mt-3">
+
+                                <small class="text-muted d-block mb-2">
+
+                                    Assigned Test Types
+
+                                </small>
+
+                                <div id="viewTestTypes">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div id="userDetailsError" class="alert alert-danger" style="display:none;">
+
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+                    <span id="userDetailsErrorMessage"> Unable to load user details. </span>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+
+                    Close
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================================= DEACTIVATE USER MODAL ============================================================= -->
+
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <form id="deleteUserForm" method="post" action="@Url.Action("Delete", "User", new { area = "Manager" })">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" id="deleteUserId" name="id" value="" />
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-danger">
+
+                        <i class="fa-solid fa-user-slash me-2"></i>
+
+                        Deactivate User
+
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <p>
+
+                        Are you sure you want to deactivate this user?
+
+                    </p>
+
+                    <div class="alert alert-warning mb-0">
+
+                        <i class="fa-solid fa-circle-info me-2"></i>
+
+                        <strong id="deleteUserName"></strong>
+
+                        <div class="small mt-1">
+
+                            The user will no longer be active. Their account and technician assignments will be retained.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0">
+
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit" class="btn btn-danger">
+
+                        <i class="fa-solid fa-user-slash me-1"></i>
+
+                        Deactivate User
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================================= ACTIVATE USER MODAL ============================================================= -->
+
+<div class="modal fade" id="activateUserModal" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content border-0 shadow">
+
+            <form id="activateUserForm" method="post" action="@Url.Action("Activate", "User", new { area = "Manager" })">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden" id="activateUserId" name="id" value="" />
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-success">
+
+                        <i class="fa-solid fa-user-check me-2"></i>
+
+                        Activate User
+
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <p>
+
+                        Are you sure you want to activate this user?
+
+                    </p>
+
+                    <div class="alert alert-success mb-0">
+
+                        <i class="fa-solid fa-circle-info me-2"></i>
+
+                        <strong id="activateUserName"></strong>
+
+                        <div class="small mt-1">
+
+                            The user account will be marked as active.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer border-0">
+
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit" class="btn btn-success">
+
+                        <i class="fa-solid fa-user-check me-1"></i>
+
+                        Activate User
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header border-0">
+
+                    <h5 class="modal-title fw-bold text-success">
+
+                        <i class="fa-solid fa-circle-check me-2"></i>
+
+                        Success
+
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"> </button>
+
+                </div>
+
+                <div class="modal-body text-center py-4">
+
+                    <div class="mb-3">
+
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-success-subtle text-success" style="width:70px;height:70px;">
+
+                            <i class="fa-solid fa-check fa-2x"></i>
+
+                        </div>
+
+                    </div>
+
+                    <h6 class="fw-semibold mb-2">
+
+                        Operation Successful
+
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        @TempData["SuccessMessage"]
+
+                    </p>
+
+                </div>
+
+                <div class="modal-footer border-0 justify-content-center">
+
+                    <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">
+
+                        <i class="fa-solid fa-check me-1"></i>
+
+                        OK
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
+@section Scripts {
+
+    <script>
+
+        /* ========================================================= SUCCESS MESSAGE ========================================================= */
+
+        document.addEventListener( "DOMContentLoaded", function () {
+
+        const successModal = document.getElementById( "successMessageModal" );
+
+        if (successModal) {
+
+        const modal = new bootstrap.Modal( successModal );
+
+        modal.show();
+
+        }
+
+        } );
+
+        /* ========================================================= CREATE USER ========================================================= */
+
+        function openCreateUserModal() {
+
+        const form = document.getElementById( "userForm" );
+
+        form.reset();
+
+        document.getElementById( "doctorRole" ).checked = true;
+
+        document.getElementById( "userModalTitle" ).innerHTML = '<i class="fa-solid fa-user-plus text-primary me-2"></i>' + 'Add User';
+
+        document.getElementById( "saveUserButtonText" ).innerText = "Create User";
+
+        changeUserType();
+
+        }
+
+        /* ========================================================= CHANGE USER TYPE ========================================================= */
+
+        function changeUserType() {
+
+        const isDoctor = document.getElementById( "doctorRole" ).checked;
+
+        const doctorFields = document.getElementById( "doctorFields" );
+
+        const technicianFields = document.getElementById( "technicianFields" );
+
+        const hpcsa = document.getElementById( "HPCSANumber" );
+
+        const idNumber = document.getElementById( "IdNumber" );
+
+        const employeeNumber = document.getElementById( "EmployeeNumber" );
+
+        const testTypeIds = document.getElementById( "TestTypeIds" );
+
+        if (isDoctor) {
+
+        doctorFields.style.display = "";
+
+        technicianFields.style.display = "none";
+
+        hpcsa.required = true;
+
+        idNumber.required = false;
+
+        employeeNumber.required = false;
+
+        testTypeIds.required = false;
+
+        } else {
+
+        doctorFields.style.display = "none";
+
+        technicianFields.style.display = "";
+
+        hpcsa.required = false;
+
+        idNumber.required = true;
+
+        employeeNumber.required = true;
+
+        }
+
+        }
+
+        /* ========================================================= VIEW USER ========================================================= */
+
+        async function viewUser( id, name, email, phone, status) {
+
+        const loading = document.getElementById( "userDetailsLoading" );
+
+        const content = document.getElementById( "userDetailsContent" );
+
+        const error = document.getElementById( "userDetailsError" );
+
+        loading.style.display = "";
+
+        content.style.display = "none";
+
+        error.style.display = "none";
+
+        document.getElementById( "viewUserName" ).innerText = name;
+
+        document.getElementById( "viewUserEmail" ).innerText = email;
+
+        new bootstrap.Modal( document.getElementById( "viewUserModal" ) ).show();
+
+        try {
+
+        const response = await fetch( "@Url.Action("Details", "User", new { area = "Manager" })?id=" + encodeURIComponent(id) );
+
+        if (!response.ok) {
+
+        throw new Error( "Unable to retrieve user details." );
+
+        }
+
+        const result = await response.json();
+
+        if (!result.success) {
+
+        throw new Error( "The server could not retrieve the user." );
+
+        }
+
+        const user = result.user;
+
+        /* ================================================= BASIC INFORMATION ================================================= */
+
+        document.getElementById( "viewUserName" ).innerText = ${user.firstName ?? ""} ${user.lastName ?? ""}.trim();
+
+        document.getElementById( "viewUserEmail" ).innerText = user.email || "Not provided";
+
+        document.getElementById( "viewUserPhone" ).innerText = user.phoneNumber || "Not provided";
+
+        document.getElementById( "viewUserRole" ).innerText = user.role || "Not assigned";
+
+        /* ================================================= STATUS ================================================= */
+
+        const statusElement = document.getElementById( "viewUserStatus" );
+
+        if (user.isActive) {
+
+        statusElement.innerHTML = '<span class="badge bg-success">' + '<i class="fa-solid fa-check me-1"></i>' + 'Active' + '</span>';
+
+        } else {
+
+        statusElement.innerHTML = '<span class="badge bg-secondary">' + '<i class="fa-solid fa-ban me-1"></i>' + 'Inactive' + '</span>';
+
+        }
+
+        /* ================================================= CREATED ================================================= */
+
+        document.getElementById( "viewUserCreated" ).innerText = formatDate(user.createdDate);
+
+        /* ================================================= LAST LOGIN ================================================= */
+
+        document.getElementById( "viewUserLastLogin" ).innerText = user.lastLoginDate ? formatDate(user.lastLoginDate) : "Never";
+
+        /* ================================================= PASSWORD STATUS ================================================= */
+
+        const passwordStatus = document.getElementById( "viewUserPasswordStatus" );
+
+        if (user.mustChangePassword) {
+
+        passwordStatus.innerHTML = '<span class="badge bg-warning text-dark">' + '<i class="fa-solid fa-key me-1"></i>' + 'Password change required' + '</span>';
+
+        } else {
+
+        passwordStatus.innerHTML = '<span class="badge bg-success">' + '<i class="fa-solid fa-check me-1"></i>' + 'Password up to date' + '</span>';
+
+        }
+
+        /* ================================================= DOCTOR ================================================= */
+
+        const doctorDetails = document.getElementById( "viewDoctorDetails" );
+
+        if (user.role === "Doctor") {
+
+        doctorDetails.style.display = "";
+
+        document.getElementById( "viewHPCSANumber" ).innerText = user.hpcsaNumber || "Not provided";
+
+        } else {
+
+        doctorDetails.style.display = "none";
+
+        }
+
+        /* ================================================= TECHNICIAN ================================================= */
+
+        const technicianDetails = document.getElementById( "viewTechnicianDetails" );
+
+        if (user.role === "Lab Technician") {
+
+        technicianDetails.style.display = "";
+
+        document.getElementById( "viewIdNumber" ).innerText = user.idNumber || "Not provided";
+
+        document.getElementById( "viewEmployeeNumber" ).innerText = user.employeeNumber || "Not provided";
+
+        renderTestTypes( user.testTypes );
+
+        } else {
+
+        technicianDetails.style.display = "none";
+
+        }
+
+        loading.style.display = "none";
+
+        content.style.display = "";
+
+        } catch (err) {
+
+        loading.style.display = "none";
+
+        error.style.display = "";
+
+        document.getElementById( "userDetailsErrorMessage" ).innerText = err.message || "Unable to load user details.";
+
+        }
+
+        }
+
+        /* ========================================================= RENDER TEST TYPES ========================================================= */
+
+        function renderTestTypes( testTypes) {
+
+        const container = document.getElementById( "viewTestTypes" );
+
+        container.innerHTML = "";
+
+        if (!testTypes || testTypes.length === 0) {
+
+        container.innerHTML = '<span class="text-muted">' + 'No test types assigned.' + '</span>';
+
+        return;
+
+        }
+
+        testTypes.forEach( function (item) {
+
+        const badge = document.createElement( "span" );
+
+        badge.className = "badge bg-primary-subtle text-primary me-1 mb-1";
+
+        /* * The controller returns: * * { * testTypeId, * testType * } */
+
+        badge.innerText = item.testType || "Unknown test type";
+
+        container.appendChild( badge );
+
+        } );
+
+        }
+
+        /* ========================================================= DATE FORMATTING ========================================================= */
+
+        function formatDate( value) {
+
+        if (!value) {
+
+        return "Not available";
+
+        }
+
+        const date = new Date(value);
+
+        if (Number.isNaN( date.getTime() )) {
+
+        return value;
+
+        }
+
+        return date.toLocaleDateString( undefined, { day: "2-digit", month: "short", year: "numeric" } );
+
+        }
+
+        /* ========================================================= DEACTIVATE USER ========================================================= */
+
+        function deleteUser( id, name) {
+
+        document.getElementById( "deleteUserId" ).value = id;
+
+        document.getElementById( "deleteUserName" ).innerText = name;
+
+        const modal = new bootstrap.Modal( document.getElementById( "deleteUserModal" ) );
+
+        modal.show();
+
+        }
+
+        /* ========================================================= ACTIVATE USER ========================================================= */
+
+        function activateUser( id, name) {
+
+        document.getElementById( "activateUserId" ).value = id;
+
+        document.getElementById( "activateUserName" ).innerText = name;
+
+        const modal = new bootstrap.Modal( document.getElementById( "activateUserModal" ) );
+
+        modal.show();
+
+        }
+
+        /* ========================================================= SEARCH ========================================================= */
+
+        const searchInput = document.getElementById( "userSearch" );
+
+        if (searchInput) {
+
+        searchInput.addEventListener( "input", function () {
+
+        const search = this.value .toLowerCase() .trim();
+
+        const rows = document.querySelectorAll( "#usersTableBody .user-row" );
+
+        let visibleCount = 0;
+
+        rows.forEach( function (row) {
+
+        const name = ( row.dataset.name || "" ).toLowerCase();
+
+        const email = ( row.dataset.email || "" ).toLowerCase();
+
+        const phone = ( row.dataset.phone || "" ).toLowerCase();
+
+        const status = ( row.dataset.status || "" ).toLowerCase();
+
+        const matches = name.includes(search) || email.includes(search) || phone.includes(search) || status.includes(search);
+
+        row.style.display = matches ? "" : "none";
+
+        if (matches) {
+
+        visibleCount++;
+
+        }
+
+        } );
+
+        document.getElementById( "recordCount" ).innerText = visibleCount + " user(s)";
+
+        const noSearchResultsRow = document.getElementById( "noSearchResultsRow" );
+
+        if (noSearchResultsRow) {
+
+        noSearchResultsRow.style.display = rows.length > 0 && visibleCount === 0 ? "" : "none";
+
+        }
+
+        } );
+
+        }
+
+        /* ========================================================= INITIALIZE ========================================================= */
+
+        document.addEventListener( "DOMContentLoaded", function () {
+
+        changeUserType();
+
+        } );
+
+    </script>
+
+}

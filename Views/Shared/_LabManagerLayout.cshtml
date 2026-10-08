@@ -891,22 +891,22 @@
                 </div>
 
                 <a asp-area="Manager"
-                   asp-controller="Doctors"
+                   asp-controller="User"
                    asp-action="Index"
-                   title="Doctors"
-                   class="sidebar-link @(controller == "Doctors" ? "active" : "")">
+                   title="Users"
+                   class="sidebar-link @(controller == "User" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
                         <i class="fa-solid fa-user-doctor"></i>
                     </span>
 
                     <span class="sidebar-link-text">
-                        Doctors
+                        Manage User
                     </span>
 
                 </a>
 
-                <a asp-area="Manager"
+                @* <a asp-area="Manager"
                    asp-controller="Technicians"
                    asp-action="Index"
                    title="Lab Technicians"
@@ -920,7 +920,7 @@
                         Lab Technicians
                     </span>
 
-                </a>
+                </a> *@
 
                 <!-- =================================================
              REPORTS
