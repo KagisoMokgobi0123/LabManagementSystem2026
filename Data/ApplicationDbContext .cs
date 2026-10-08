@@ -6,6 +6,7 @@ using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Models.Users;
 
 namespace NMB_HLabSys.Data
 {
@@ -23,6 +24,15 @@ namespace NMB_HLabSys.Data
         // ============================================================
 
         public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
+
+
+        // ============================================================
+        // USER PROFILES
+        // ============================================================
+
+        public DbSet<DoctorProfile> DoctorProfiles { get; set; }
+
+        public DbSet<TechnicianProfile> TechnicianProfiles { get; set; }
 
 
         // ============================================================
@@ -105,13 +115,73 @@ namespace NMB_HLabSys.Data
 
 
             // ============================================================
+            // USER PROFILE RELATIONSHIPS
+            // ============================================================
+
+            // ------------------------------------------------------------
+            // APPLICATION USER -> DOCTOR PROFILE
+            // ------------------------------------------------------------
+
+            builder.Entity<DoctorProfile>()
+                .HasOne(x => x.User)
+                .WithOne()
+                .HasForeignKey<DoctorProfile>(
+                    x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // ------------------------------------------------------------
+            // APPLICATION USER -> TECHNICIAN PROFILE
+            // ------------------------------------------------------------
+
+            builder.Entity<TechnicianProfile>()
+                .HasOne(x => x.User)
+                .WithOne()
+                .HasForeignKey<TechnicianProfile>(
+                    x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+
+            // ============================================================
+            // USER PROFILE UNIQUE CONSTRAINTS
+            // ============================================================
+
+            // ------------------------------------------------------------
+            // HPCSA NUMBER
+            // ------------------------------------------------------------
+
+            builder.Entity<DoctorProfile>()
+                .HasIndex(x => x.HPCSANumber)
+                .IsUnique();
+
+
+            // ------------------------------------------------------------
+            // SOUTH AFRICAN ID NUMBER
+            // ------------------------------------------------------------
+
+            builder.Entity<TechnicianProfile>()
+                .HasIndex(x => x.IdNumber)
+                .IsUnique();
+
+
+            // ------------------------------------------------------------
+            // EMPLOYEE NUMBER
+            // ------------------------------------------------------------
+
+            builder.Entity<TechnicianProfile>()
+                .HasIndex(x => x.EmployeeNumber)
+                .IsUnique();
+
+
+            // ============================================================
             // TEST CATEGORY STATUS
             // ============================================================
 
             builder.Entity<TestCategoryModel>()
                 .Property(x => x.IsActive)
                 .HasConversion<int>()
-                .HasDefaultValue(TestCategoryModel.RecordStatus.Active);
+                .HasDefaultValue(
+                    TestCategoryModel.RecordStatus.Active);
 
 
             // ============================================================
@@ -312,10 +382,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000001",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 20, 9, 0, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 20, 9, 0, 0),
                     Urgency = Urgency.Routine,
-                    ClinicalNotes = "Routine blood test - annual checkup.",
-                    Status = TestRequestStatus.Submitted.ToString()
+                    ClinicalNotes =
+                        "Routine blood test - annual checkup.",
+                    Status =
+                        TestRequestStatus.Submitted.ToString()
                 },
 
                 new TestRequestsModel
@@ -324,10 +397,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000002",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 21, 10, 30, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 21, 10, 30, 0),
                     Urgency = Urgency.Urgent,
-                    ClinicalNotes = "Patient presenting with fever and chills. Suspected infection.",
-                    Status = TestRequestStatus.SamplesReceived.ToString()
+                    ClinicalNotes =
+                        "Patient presenting with fever and chills. Suspected infection.",
+                    Status =
+                        TestRequestStatus.SamplesReceived.ToString()
                 },
 
                 new TestRequestsModel
@@ -336,10 +412,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000003",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 22, 8, 15, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 22, 8, 15, 0),
                     Urgency = Urgency.Stat,
-                    ClinicalNotes = "Emergency request - patient collapsed. Suspected DVT.",
-                    Status = TestRequestStatus.InProgress.ToString()
+                    ClinicalNotes =
+                        "Emergency request - patient collapsed. Suspected DVT.",
+                    Status =
+                        TestRequestStatus.InProgress.ToString()
                 },
 
                 new TestRequestsModel
@@ -348,10 +427,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000004",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 22, 14, 0, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 22, 14, 0, 0),
                     Urgency = Urgency.Routine,
-                    ClinicalNotes = "Diabetes monitoring - HbA1c and glucose levels.",
-                    Status = TestRequestStatus.Completed.ToString()
+                    ClinicalNotes =
+                        "Diabetes monitoring - HbA1c and glucose levels.",
+                    Status =
+                        TestRequestStatus.Completed.ToString()
                 },
 
                 new TestRequestsModel
@@ -360,10 +442,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000005",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 23, 11, 20, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 23, 11, 20, 0),
                     Urgency = Urgency.Urgent,
-                    ClinicalNotes = "Chest pain - urgent laboratory investigation requested.",
-                    Status = TestRequestStatus.Submitted.ToString()
+                    ClinicalNotes =
+                        "Chest pain - urgent laboratory investigation requested.",
+                    Status =
+                        TestRequestStatus.Submitted.ToString()
                 },
 
                 new TestRequestsModel
@@ -372,22 +457,28 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000006",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 24, 9, 45, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 24, 9, 45, 0),
                     Urgency = Urgency.Routine,
-                    ClinicalNotes = "Routine liver function test for patient on medication.",
-                    Status = TestRequestStatus.SamplesReceived.ToString()
+                    ClinicalNotes =
+                        "Routine liver function test for patient on medication.",
+                    Status =
+                        TestRequestStatus.SamplesReceived.ToString()
                 },
 
                 new TestRequestsModel
                 {
                     TestRequestId = 7,
                     RequestNumber = "NMB-REQ-000007",
-                    PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
+                    PatientId = "953f333d-2e68-46f6-ad26-0412fe75d908",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 25, 7, 30, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 25, 7, 30, 0),
                     Urgency = Urgency.Stat,
-                    ClinicalNotes = "Pre-surgery coagulation screen - STAT request.",
-                    Status = TestRequestStatus.Submitted.ToString()
+                    ClinicalNotes =
+                        "Pre-surgery coagulation screen - STAT request.",
+                    Status =
+                        TestRequestStatus.Submitted.ToString()
                 },
 
                 new TestRequestsModel
@@ -396,10 +487,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000008",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 25, 13, 0, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 25, 13, 0, 0),
                     Urgency = Urgency.Routine,
-                    ClinicalNotes = "Routine urinalysis - suspected UTI.",
-                    Status = TestRequestStatus.Completed.ToString()
+                    ClinicalNotes =
+                        "Routine urinalysis - suspected UTI.",
+                    Status =
+                        TestRequestStatus.Completed.ToString()
                 },
 
                 new TestRequestsModel
@@ -408,10 +502,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000009",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 26, 8, 45, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 26, 8, 45, 0),
                     Urgency = Urgency.Urgent,
-                    ClinicalNotes = "Suspected bloodstream infection - blood culture requested.",
-                    Status = TestRequestStatus.InProgress.ToString()
+                    ClinicalNotes =
+                        "Suspected bloodstream infection - blood culture requested.",
+                    Status =
+                        TestRequestStatus.InProgress.ToString()
                 },
 
                 new TestRequestsModel
@@ -420,10 +517,13 @@ namespace NMB_HLabSys.Data
                     RequestNumber = "NMB-REQ-000010",
                     PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                     DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                    RequestDate = new DateTime(2026, 9, 26, 14, 30, 0),
+                    RequestDate = new DateTime(
+                        2026, 9, 26, 14, 30, 0),
                     Urgency = Urgency.Routine,
-                    ClinicalNotes = "Annual physical examination - full blood count and chemistry panel.",
-                    Status = TestRequestStatus.Submitted.ToString()
+                    ClinicalNotes =
+                        "Annual physical examination - full blood count and chemistry panel.",
+                    Status =
+                        TestRequestStatus.Submitted.ToString()
                 }
             );
 
@@ -531,8 +631,10 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 2,
                     Barcode = "SMP-2026-000002",
                     SampleTypeId = 1,
-                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
-                    DateReceived = new DateTime(2026, 9, 21, 11, 0, 0),
+                    TechnicianId =
+                        "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    DateReceived =
+                        new DateTime(2026, 9, 21, 11, 0, 0),
                     Status = "Samples Received",
                     IsReceived = true,
                     IsDeleted = false
@@ -544,8 +646,10 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 3,
                     Barcode = "SMP-2026-000003",
                     SampleTypeId = 4,
-                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
-                    DateReceived = new DateTime(2026, 9, 22, 8, 30, 0),
+                    TechnicianId =
+                        "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    DateReceived =
+                        new DateTime(2026, 9, 22, 8, 30, 0),
                     Status = "Samples Received",
                     IsReceived = true,
                     IsDeleted = false
@@ -570,8 +674,10 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 6,
                     Barcode = "SMP-2026-000006",
                     SampleTypeId = 4,
-                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
-                    DateReceived = new DateTime(2026, 9, 24, 10, 15, 0),
+                    TechnicianId =
+                        "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    DateReceived =
+                        new DateTime(2026, 9, 24, 10, 15, 0),
                     Status = "Samples Received",
                     IsReceived = true,
                     IsDeleted = false
@@ -615,35 +721,40 @@ namespace NMB_HLabSys.Data
                 {
                     TestCategoryId = 1,
                     Description = "Hematology",
-                    IsActive = TestCategoryModel.RecordStatus.Active
+                    IsActive =
+                        TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 2,
                     Description = "Coagulation",
-                    IsActive = TestCategoryModel.RecordStatus.Active
+                    IsActive =
+                        TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 3,
                     Description = "Clinical Chemistry",
-                    IsActive = TestCategoryModel.RecordStatus.Active
+                    IsActive =
+                        TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 4,
                     Description = "Urinalysis",
-                    IsActive = TestCategoryModel.RecordStatus.Active
+                    IsActive =
+                        TestCategoryModel.RecordStatus.Active
                 },
 
                 new TestCategoryModel
                 {
                     TestCategoryId = 5,
                     Description = "Microbiology",
-                    IsActive = TestCategoryModel.RecordStatus.Active
+                    IsActive =
+                        TestCategoryModel.RecordStatus.Active
                 }
             );
 
@@ -658,7 +769,8 @@ namespace NMB_HLabSys.Data
                 {
                     MeasurementUnitId = 1,
                     Unit = "x10³/μL",
-                    Description = "Thousand cells per microliter"
+                    Description =
+                        "Thousand cells per microliter"
                 },
 
                 new MeasurementUnitModel
@@ -679,7 +791,8 @@ namespace NMB_HLabSys.Data
                 {
                     MeasurementUnitId = 4,
                     Unit = "mm/hr",
-                    Description = "Millimeters per hour"
+                    Description =
+                        "Millimeters per hour"
                 },
 
                 new MeasurementUnitModel
@@ -700,21 +813,24 @@ namespace NMB_HLabSys.Data
                 {
                     MeasurementUnitId = 7,
                     Unit = "ng/mL",
-                    Description = "Nanograms per milliliter"
+                    Description =
+                        "Nanograms per milliliter"
                 },
 
                 new MeasurementUnitModel
                 {
                     MeasurementUnitId = 8,
                     Unit = "mg/dL",
-                    Description = "Milligrams per deciliter"
+                    Description =
+                        "Milligrams per deciliter"
                 },
 
                 new MeasurementUnitModel
                 {
                     MeasurementUnitId = 9,
                     Unit = "mmol/L",
-                    Description = "Millimoles per liter"
+                    Description =
+                        "Millimoles per liter"
                 },
 
                 new MeasurementUnitModel
@@ -728,14 +844,16 @@ namespace NMB_HLabSys.Data
                 {
                     MeasurementUnitId = 11,
                     Unit = "CFU/mL",
-                    Description = "Colony forming units per milliliter"
+                    Description =
+                        "Colony forming units per milliliter"
                 },
 
                 new MeasurementUnitModel
                 {
                     MeasurementUnitId = 12,
                     Unit = "g/dL",
-                    Description = "Grams per deciliter"
+                    Description =
+                        "Grams per deciliter"
                 },
 
                 new MeasurementUnitModel
@@ -756,14 +874,16 @@ namespace NMB_HLabSys.Data
                 {
                     MeasurementUnitId = 15,
                     Unit = "x10⁶/μL",
-                    Description = "Million cells per microliter"
+                    Description =
+                        "Million cells per microliter"
                 },
 
                 new MeasurementUnitModel
                 {
                     MeasurementUnitId = 16,
                     Unit = "μmol/L",
-                    Description = "Micromoles per liter"
+                    Description =
+                        "Micromoles per liter"
                 }
             );
 
@@ -778,26 +898,34 @@ namespace NMB_HLabSys.Data
                 {
                     SupplierId = 1,
                     SupplierName = "MedLab Supplies",
-                    ContactPerson = "Laboratory Supplies Department",
-                    Email = "supplies@medlabsupplies.example",
+                    ContactPerson =
+                        "Laboratory Supplies Department",
+                    Email =
+                        "supplies@medlabsupplies.example",
                     IsDeleted = false
                 },
 
                 new SupplierModel
                 {
                     SupplierId = 2,
-                    SupplierName = "BioMedical Distributors",
-                    ContactPerson = "Sales Department",
-                    Email = "sales@biomedical.example",
+                    SupplierName =
+                        "BioMedical Distributors",
+                    ContactPerson =
+                        "Sales Department",
+                    Email =
+                        "sales@biomedical.example",
                     IsDeleted = false
                 },
 
                 new SupplierModel
                 {
                     SupplierId = 3,
-                    SupplierName = "Clinical Diagnostics Ltd",
-                    ContactPerson = "Diagnostics Sales",
-                    Email = "orders@clinicaldiagnostics.example",
+                    SupplierName =
+                        "Clinical Diagnostics Ltd",
+                    ContactPerson =
+                        "Diagnostics Sales",
+                    Email =
+                        "orders@clinicaldiagnostics.example",
                     IsDeleted = false
                 }
             );
@@ -946,15 +1074,6 @@ namespace NMB_HLabSys.Data
             // ============================================================
             // TEST TYPES
             // ============================================================
-            // ConsumableId has intentionally been removed.
-            //
-            // Consumables are now assigned through:
-            //
-            // TestType -> TestTypeConsumable -> Consumable
-            //
-            // TurnAroundTimeHours property remains for compatibility,
-            // but the stored value represents MINUTES.
-            // ============================================================
 
             builder.Entity<TestTypeModel>().HasData(
 
@@ -968,7 +1087,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 4.5m,
                     NormalMax = 11.0m,
                     TurnAroundTimeHours = 120,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -981,7 +1101,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 0m,
                     NormalMax = 0m,
                     TurnAroundTimeHours = 180,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -994,7 +1115,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 0m,
                     NormalMax = 0m,
                     TurnAroundTimeHours = 240,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1007,7 +1129,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 11.0m,
                     NormalMax = 13.5m,
                     TurnAroundTimeHours = 120,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1020,7 +1143,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 25m,
                     NormalMax = 35m,
                     TurnAroundTimeHours = 120,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1033,7 +1157,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 0.8m,
                     NormalMax = 1.2m,
                     TurnAroundTimeHours = 120,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1046,7 +1171,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 3.9m,
                     NormalMax = 5.5m,
                     TurnAroundTimeHours = 60,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1059,7 +1185,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 4.0m,
                     NormalMax = 5.6m,
                     TurnAroundTimeHours = 120,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1072,7 +1199,8 @@ namespace NMB_HLabSys.Data
                     NormalMin = 0m,
                     NormalMax = 0m,
                     TurnAroundTimeHours = 60,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1085,19 +1213,14 @@ namespace NMB_HLabSys.Data
                     NormalMin = 0m,
                     NormalMax = 0m,
                     TurnAroundTimeHours = 4320,
-                    IsActive = TestTypeModel.RecordStatus.Active
+                    IsActive =
+                        TestTypeModel.RecordStatus.Active
                 }
             );
 
 
             // ============================================================
             // TEST TYPE / CONSUMABLE SEED DATA
-            // ============================================================
-            // TestTypeConsumableId is now the identifier for the
-            // relationship between a test type and its consumable.
-            //
-            // ConsumableId remains REQUIRED HERE because this table
-            // identifies which consumable is required.
             // ============================================================
 
             builder.Entity<TestTypeConsumableModel>().HasData(
