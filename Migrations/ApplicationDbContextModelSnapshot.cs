@@ -429,7 +429,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestId = 7,
                             ClinicalNotes = "Pre-surgery coagulation screen - STAT request.",
                             DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
-                            PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
+                            PatientId = "953f333d-2e68-46f6-ad26-0412fe75d908",
                             RequestDate = new DateTime(2026, 9, 25, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             RequestNumber = "NMB-REQ-000007",
                             Status = "Submitted",
@@ -968,6 +968,9 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("TechnicianProfileId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TestTypeId")
                         .HasColumnType("int");
 
@@ -976,6 +979,8 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("ManagerId");
 
                     b.HasIndex("TechnicianId");
+
+                    b.HasIndex("TechnicianProfileId");
 
                     b.HasIndex("TestTypeId");
 
@@ -1956,6 +1961,70 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Models.Users.DoctorProfile", b =>
+                {
+                    b.Property<int>("DoctorProfileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DoctorProfileId"));
+
+                    b.Property<string>("HPCSANumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("DoctorProfileId");
+
+                    b.HasIndex("HPCSANumber")
+                        .IsUnique();
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("DoctorProfiles");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Models.Users.TechnicianProfile", b =>
+                {
+                    b.Property<int>("TechnicianProfileId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TechnicianProfileId"));
+
+                    b.Property<string>("EmployeeNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("IdNumber")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("TechnicianProfileId");
+
+                    b.HasIndex("EmployeeNumber")
+                        .IsUnique();
+
+                    b.HasIndex("IdNumber")
+                        .IsUnique();
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("TechnicianProfiles");
+                });
+
             modelBuilder.Entity("TestRequestTestTypeModel", b =>
                 {
                     b.Property<int>("TestRequestTestTypeId")
@@ -2177,6 +2246,10 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("TechnicianId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Models.Users.TechnicianProfile", null)
+                        .WithMany("TestTypeAssignments")
+                        .HasForeignKey("TechnicianProfileId");
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", "TestType")
                         .WithMany("TechnicianTestTypes")
@@ -2422,6 +2495,28 @@ namespace NMBHLabSys.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Models.Users.DoctorProfile", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "User")
+                        .WithOne("DoctorProfile")
+                        .HasForeignKey("NMB_HLabSys.Models.Users.DoctorProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Models.Users.TechnicianProfile", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "User")
+                        .WithOne("TechnicianProfile")
+                        .HasForeignKey("NMB_HLabSys.Models.Users.TechnicianProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("TestRequestTestTypeModel", b =>
                 {
                     b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "Technician")
@@ -2549,7 +2644,16 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Models.Identity.ApplicationUser", b =>
                 {
+                    b.Navigation("DoctorProfile");
+
                     b.Navigation("PasswordResetOtps");
+
+                    b.Navigation("TechnicianProfile");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Models.Users.TechnicianProfile", b =>
+                {
+                    b.Navigation("TestTypeAssignments");
                 });
 #pragma warning restore 612, 618
         }

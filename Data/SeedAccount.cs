@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Models.Users;
 
 namespace NMB_HLabSys.Data
 {
@@ -20,17 +21,24 @@ namespace NMB_HLabSys.Data
         // SEED
         // ============================================================
 
-        public static async Task SeedAsync(IServiceProvider services)
+        public static async Task SeedAsync(
+            IServiceProvider services)
         {
             var roleManager =
-                services.GetRequiredService<RoleManager<IdentityRole>>();
+                services.GetRequiredService<
+                    RoleManager<IdentityRole>>();
 
             var userManager =
-                services.GetRequiredService<UserManager<ApplicationUser>>();
+                services.GetRequiredService<
+                    UserManager<ApplicationUser>>();
 
 
-            // Create roles
+            // ========================================================
+            // CREATE ROLES
+            // ========================================================
+
             await CreateRolesAsync(roleManager);
+
 
             // ========================================================
             // ADMINISTRATOR
@@ -44,30 +52,32 @@ namespace NMB_HLabSys.Data
                 lastName: "Administrator",
                 role: AdministratorRole);
 
+
             // ========================================================
             // DOCTOR
             // ========================================================
 
-            await CreateUserAsync(
+            await CreateDoctorAsync(
                 userManager,
                 email: "doctor@nmbhlab.co.za",
                 password: "Doctor@123",
                 firstName: "John",
                 lastName: "Doctor",
-                role: DoctorRole);
+                hpcsaNumber: "MP0000000");
 
 
             // ========================================================
             // LAB TECHNICIAN
             // ========================================================
 
-            await CreateUserAsync(
+            await CreateTechnicianAsync(
                 userManager,
                 email: "technician@nmbhlab.co.za",
                 password: "Tech@1234",
                 firstName: "Thabo",
                 lastName: "Technician",
-                role: LabTechnicianRole);
+                idNumber: "8001015009087",
+                employeeNumber: "TECH001");
 
 
             // ========================================================
@@ -82,13 +92,14 @@ namespace NMB_HLabSys.Data
                 lastName: "Manager",
                 role: ManagerRole);
 
+
             await CreateUserAsync(
-               userManager,
-               email: "manager@nmbhlab.co.za",
-               password: "Manager@123",
-               firstName: "Frank",
-               lastName: "Smith",
-               role: ManagerRole);
+                userManager,
+                email: "manager@nmbhlab.co.za",
+                password: "Manager@123",
+                firstName: "Frank",
+                lastName: "Smith",
+                role: ManagerRole);
 
 
             // ========================================================
@@ -137,10 +148,11 @@ namespace NMB_HLabSys.Data
 
                 if (!result.Succeeded)
                 {
-                    var errors = string.Join(
-                        ", ",
-                        result.Errors.Select(
-                            e => e.Description));
+                    var errors =
+                        string.Join(
+                            ", ",
+                            result.Errors.Select(
+                                e => e.Description));
 
 
                     throw new InvalidOperationException(
@@ -152,16 +164,17 @@ namespace NMB_HLabSys.Data
 
 
         // ============================================================
-        // CREATE USER
+        // CREATE GENERAL USER
         // ============================================================
 
-        private static async Task CreateUserAsync(
-            UserManager<ApplicationUser> userManager,
-            string email,
-            string password,
-            string firstName,
-            string lastName,
-            string role)
+        private static async Task<ApplicationUser>
+            CreateUserAsync(
+                UserManager<ApplicationUser> userManager,
+                string email,
+                string password,
+                string firstName,
+                string lastName,
+                string role)
         {
             var user =
                 await userManager.FindByEmailAsync(email);
@@ -203,10 +216,11 @@ namespace NMB_HLabSys.Data
 
                 if (!createResult.Succeeded)
                 {
-                    var errors = string.Join(
-                        ", ",
-                        createResult.Errors.Select(
-                            e => e.Description));
+                    var errors =
+                        string.Join(
+                            ", ",
+                            createResult.Errors.Select(
+                                e => e.Description));
 
 
                     throw new InvalidOperationException(
@@ -230,17 +244,123 @@ namespace NMB_HLabSys.Data
 
                 if (!roleResult.Succeeded)
                 {
-                    var errors = string.Join(
-                        ", ",
-                        roleResult.Errors.Select(
-                            e => e.Description));
+                    var errors =
+                        string.Join(
+                            ", ",
+                            roleResult.Errors.Select(
+                                e => e.Description));
 
 
                     throw new InvalidOperationException(
                         $"Could not assign role '{role}' " +
-                        $"to '{email}'. Errors: {errors}");
+                        $"to '{email}'. " +
+                        $"Errors: {errors}");
                 }
             }
+
+
+            return user;
+        }
+
+
+        // ============================================================
+        // CREATE DOCTOR
+        // ============================================================
+
+        private static async Task CreateDoctorAsync(
+            UserManager<ApplicationUser> userManager,
+            string email,
+            string password,
+            string firstName,
+            string lastName,
+            string hpcsaNumber)
+        {
+            var user =
+                await CreateUserAsync(
+                    userManager,
+                    email,
+                    password,
+                    firstName,
+                    lastName,
+                    DoctorRole);
+
+
+            // ========================================================
+            // EXISTING PROFILE
+            // ========================================================
+
+            if (user.DoctorProfile != null)
+            {
+                return;
+            }
+
+
+            // ========================================================
+            // CREATE DOCTOR PROFILE
+            // ========================================================
+
+            user.DoctorProfile =
+                new DoctorProfile
+                {
+                    UserId = user.Id,
+
+                    HPCSANumber = hpcsaNumber
+                };
+
+
+            await userManager.UpdateAsync(user);
+        }
+
+
+        // ============================================================
+        // CREATE LAB TECHNICIAN
+        // ============================================================
+
+        private static async Task CreateTechnicianAsync(
+            UserManager<ApplicationUser> userManager,
+            string email,
+            string password,
+            string firstName,
+            string lastName,
+            string idNumber,
+            string employeeNumber)
+        {
+            var user =
+                await CreateUserAsync(
+                    userManager,
+                    email,
+                    password,
+                    firstName,
+                    lastName,
+                    LabTechnicianRole);
+
+
+            // ========================================================
+            // EXISTING PROFILE
+            // ========================================================
+
+            if (user.TechnicianProfile != null)
+            {
+                return;
+            }
+
+
+            // ========================================================
+            // CREATE TECHNICIAN PROFILE
+            // ========================================================
+
+            user.TechnicianProfile =
+                new TechnicianProfile
+                {
+                    UserId = user.Id,
+
+                    IdNumber = idNumber,
+
+                    EmployeeNumber = employeeNumber
+                };
+
+
+            await userManager.UpdateAsync(user);
         }
     }
 }

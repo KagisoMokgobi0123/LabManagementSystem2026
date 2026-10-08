@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +72,25 @@ builder.Services
 
 
 // ============================================================
+// EMAIL SENDER
+// ============================================================
+//
+// Required by UserController:
+//
+//     IEmailSender
+//
+// The implementation is:
+//
+//     EmailSender
+//
+// This allows the application to send temporary passwords
+// when managers create doctors and laboratory technicians.
+// ============================================================
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+
+// ============================================================
 // AUTHENTICATION COOKIE
 // ============================================================
 
@@ -85,7 +106,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
     options.Cookie.HttpOnly = true;
 
-    options.ExpireTimeSpan = TimeSpan.FromHours(2);
+    options.ExpireTimeSpan =
+        TimeSpan.FromHours(2);
 
     options.SlidingExpiration = true;
 });
@@ -106,7 +128,8 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout =
+        TimeSpan.FromMinutes(30);
 
     options.Cookie.HttpOnly = true;
 

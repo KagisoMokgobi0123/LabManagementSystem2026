@@ -124,7 +124,7 @@ namespace NMB_HLabSys.Data
 
             builder.Entity<DoctorProfile>()
                 .HasOne(x => x.User)
-                .WithOne()
+                .WithOne(x => x.DoctorProfile)
                 .HasForeignKey<DoctorProfile>(
                     x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -136,7 +136,7 @@ namespace NMB_HLabSys.Data
 
             builder.Entity<TechnicianProfile>()
                 .HasOne(x => x.User)
-                .WithOne()
+                .WithOne(x => x.TechnicianProfile)
                 .HasForeignKey<TechnicianProfile>(
                     x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
