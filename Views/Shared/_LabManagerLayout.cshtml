@@ -1002,7 +1002,7 @@
 
                 </a>
 
-                <a asp-area="Manager"
+                <a 
                    asp-controller="Profile"
                    asp-action="ChangePhoneNumber"
                    title="Change Phone Number"
@@ -1018,21 +1018,21 @@
 
                 </a>
 
-                <a asp-area="Manager"
-                   asp-controller="Profile"
-                   asp-action="ChangePassword"
-                   title="Change Password"
-                   class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
+<a asp-area=""
+   asp-controller="Account"
+   asp-action="ChangePassword"
+   title="Change Password"
+   class="sidebar-link @(controller == "Account" && action == "ChangePassword" ? "active" : "")">
 
-                    <span class="sidebar-link-icon">
-                        <i class="fa-solid fa-key"></i>
-                    </span>
+    <span class="sidebar-link-icon">
+        <i class="fa-solid fa-key"></i>
+    </span>
 
-                    <span class="sidebar-link-text">
-                        Change Password
-                    </span>
+    <span class="sidebar-link-text">
+        Change Password
+    </span>
 
-                </a>
+</a>
 
             </nav>
 
