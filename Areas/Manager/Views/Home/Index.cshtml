@@ -19,19 +19,12 @@
 
 <style>
 
-    /* =========================================================
-       PAGE
-       ========================================================= */
 
     .manager-dashboard {
         min-height: 100vh;
         background: #f4f7fb;
     }
 
-
-    /* =========================================================
-       HERO
-       ========================================================= */
 
     .manager-hero {
         position: relative;
@@ -160,10 +153,6 @@
     }
 
 
-    /* =========================================================
-       PAGE INNER
-       ========================================================= */
-
     .manager-page-inner {
         position: relative;
         z-index: 5;
@@ -173,9 +162,6 @@
     }
 
 
-    /* =========================================================
-       STAT CARDS
-       ========================================================= */
 
     .stat-card-link {
         display: block;
@@ -332,10 +318,6 @@
     }
 
 
-    /* =========================================================
-       GENERAL DASHBOARD CARD
-       ========================================================= */
-
     .dashboard-card {
         margin-bottom: 24px;
 
@@ -378,9 +360,6 @@
     }
 
 
-    /* =========================================================
-       QUICK ACTION
-       ========================================================= */
 
     .quick-action {
         display: flex;
@@ -453,11 +432,6 @@
         color: #cbd5e1;
     }
 
-
-    /* =========================================================
-       ATTENTION
-       ========================================================= */
-
     .attention-item {
         display: flex;
 
@@ -505,11 +479,6 @@
         font-size: 11px;
     }
 
-
-    /* =========================================================
-       STOCK TABLE
-       ========================================================= */
-
     .manager-table {
         margin-bottom: 0;
     }
@@ -543,10 +512,6 @@
     }
 
 
-    /* =========================================================
-       STATUS
-       ========================================================= */
-
     .status-badge {
         display: inline-block;
 
@@ -573,10 +538,6 @@
         color: #b91c1c;
     }
 
-
-    /* =========================================================
-       MANAGEMENT MODULE
-       ========================================================= */
 
     .management-module {
         display: block;
@@ -641,10 +602,6 @@
     }
 
 
-    /* =========================================================
-       PROFILE
-       ========================================================= */
-
     .profile-summary {
         display: flex;
         align-items: center;
@@ -689,10 +646,6 @@
     }
 
 
-    /* =========================================================
-       RESPONSIVE
-       ========================================================= */
-
     @@media(max-width: 768px) {
 
         .manager-hero {
@@ -713,10 +666,6 @@
 
 <div class="manager-dashboard">
 
-
-    <!-- =========================================================
-         HERO
-         ========================================================= -->
 
     <div class="manager-hero">
 
@@ -758,21 +707,8 @@
                         <div class="hero-actions justify-content-md-end">
 
 
-                            <a asp-area="Manager"
-                               asp-controller="TestTypes"
-                               asp-action="Index"
-                               class="hero-btn hero-btn-primary">
-
-                                <i class="fas fa-vials"></i>
-
-                                Test Catalogue
-
-                            </a>
-
-
-                            <a asp-area="Manager"
-                               asp-controller="Consumables"
-                               asp-action="LowStock"
+                            <a
+                               href="/Manager/Order/Index"
                                class="hero-btn hero-btn-outline">
 
                                 <i class="fas fa-triangle-exclamation"></i>
@@ -796,16 +732,10 @@
     </div>
 
 
-    <!-- =========================================================
-         MAIN CONTENT
-         ========================================================= -->
+
 
     <div class="container-fluid manager-page-inner">
 
-
-        <!-- =====================================================
-             DASHBOARD STATISTICS
-             ===================================================== -->
 
         <div class="row">
 
@@ -814,9 +744,8 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="TestTypes"
-                   asp-action="Index"
+                <a 
+                   href="/Manager/TestType/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -859,9 +788,8 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="Technicians"
-                   asp-action="Index"
+                <a 
+                   href="/Manager/User/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -904,9 +832,8 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="Doctors"
-                   asp-action="Index"
+                <a 
+                   href="/Manager/User/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -949,9 +876,8 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="Consumables"
-                   asp-action="Index"
+                <a 
+                   href="/Manager/Consumable/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -1002,9 +928,8 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="Consumables"
-                   asp-action="LowStock"
+                <a 
+                   href="/Manager/Consumable/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -1047,9 +972,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="Orders"
-                   asp-action="Index"
+                <a href="/Manager/StockAdjustment/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -1092,9 +1015,8 @@
 
             <div class="col-xl-4 col-md-12 mb-4">
 
-                <a asp-area="Manager"
-                   asp-controller="Suppliers"
-                   asp-action="Index"
+                <a
+                   href="/Manager/Supplier/Index"
                    class="stat-card-link">
 
                     <div class="stat-card">
@@ -1136,9 +1058,7 @@
         </div>
 
 
-        <!-- =====================================================
-             MANAGEMENT MODULES
-             ===================================================== -->
+
 
         <div class="dashboard-card">
 
@@ -1159,250 +1079,134 @@
             <div class="card-body">
 
                 <div class="row">
+                    <div class="col-md-6">
 
+                        <a href="/Manager/User/Index"
+                           class="quick-action">
 
-                    <!-- TEST CATEGORIES -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="TestCategories"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
-
-                                <i class="fas fa-layer-group"></i>
-
-                            </div>
-
-                            <div class="module-title">
-                                Test Categories
-                            </div>
-
-                            <div class="module-description">
-                                Maintain laboratory test
-                                categories and descriptions.
-                            </div>
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- TEST TYPES -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="TestTypes"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
-
-                                <i class="fas fa-vial"></i>
-
-                            </div>
-
-                            <div class="module-title">
-                                Test Types
-                            </div>
-
-                            <div class="module-description">
-                                Manage test names, normal ranges,
-                                sample requirements and turnaround times.
-                            </div>
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- SAMPLE TYPES -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="SampleTypes"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
-
-                                <i class="fas fa-droplet"></i>
-
-                            </div>
-
-                            <div class="module-title">
-                                Sample Types
-                            </div>
-
-                            <div class="module-description">
-                                Maintain blood, plasma and other
-                                laboratory sample types.
-                            </div>
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- CONSUMABLES -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="Consumables"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
-
-                                <i class="fas fa-boxes-stacked"></i>
-
-                            </div>
-
-                            <div class="module-title">
-                                Consumables
-                            </div>
-
-                            <div class="module-description">
-                                Monitor quantities, reorder levels
-                                and laboratory stock.
-                            </div>
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- SUPPLIERS -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="Suppliers"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
-
-                                <i class="fas fa-truck"></i>
-
-                            </div>
-
-                            <div class="module-title">
-                                Suppliers
-                            </div>
-
-                            <div class="module-description">
-                                Manage laboratory suppliers and
-                                contact information.
-                            </div>
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- ORDERS -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="Orders"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
-
-                                <i class="fas fa-cart-shopping"></i>
-
-                            </div>
-
-                            <div class="module-title">
-                                Consumable Orders
-                            </div>
-
-                            <div class="module-description">
-                                Create, receive and track
-                                laboratory stock orders.
-                            </div>
-
-                        </a>
-
-                    </div>
-
-
-                    <!-- DOCTORS -->
-
-                    <div class="col-xl-3 col-md-6 mb-4">
-
-                        <a asp-area="Manager"
-                           asp-controller="Doctors"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
+                            <div class="quick-action-icon">
 
                                 <i class="fas fa-user-doctor"></i>
 
                             </div>
 
-                            <div class="module-title">
-                                Doctor Users
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Manage Doctors
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Register and maintain
+                                    healthcare provider accounts.
+                                </div>
+
                             </div>
 
-                            <div class="module-description">
-                                Register and manage doctors and
-                                healthcare providers.
-                            </div>
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
 
                         </a>
 
                     </div>
 
 
-                    <!-- TECHNICIANS -->
+                    <div class="col-md-6">
 
-                    <div class="col-xl-3 col-md-6 mb-4">
+                        <a href="/Manager/User/Index"
+                           class="quick-action">
 
-                        <a asp-area="Manager"
-                           asp-controller="Technicians"
-                           asp-action="Index"
-                           class="management-module">
-
-                            <div class="module-icon">
+                            <div class="quick-action-icon">
 
                                 <i class="fas fa-user-gear"></i>
 
                             </div>
 
-                            <div class="module-title">
-                                Lab Technicians
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Manage Technicians
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Register and maintain
+                                    laboratory technician accounts.
+                                </div>
+
                             </div>
 
-                            <div class="module-description">
-                                Manage technicians and their
-                                laboratory test assignments.
-                            </div>
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
 
                         </a>
 
                     </div>
 
 
-                </div>
+                    <div class="col-md-6">
 
-            </div>
+                        <a href="/Manager/TechnicianAssignments/Index"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fas fa-list-check"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Test Assignments
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Assign test types that each
+                                    technician is permitted to perform.
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <a href="/Manager/Reports/Index"
+                           class="quick-action">
+
+                            <div class="quick-action-icon">
+
+                                <i class="fas fa-chart-column"></i>
+
+                            </div>
+
+                            <div>
+
+                                <div class="quick-action-title">
+                                    Management Reports
+                                </div>
+
+                                <div class="quick-action-text">
+                                    Review laboratory test
+                                    activity by category.
+                                </div>
+
+                            </div>
+
+                            <i class="fas fa-chevron-right quick-action-arrow"></i>
+
+                        </a>
+
+                    </div>
+
+                  </div>
 
         </div>
 
 
-        <!-- =====================================================
-             STAFF + STOCK ATTENTION
-             ===================================================== -->
 
         <div class="row">
 
@@ -1416,12 +1220,11 @@
                     <div class="card-header">
 
                         <h4 class="dashboard-title">
-                            Staff Management
+                            Test Type vs Category
                         </h4>
 
                         <p class="dashboard-subtitle">
-                            Manage laboratory personnel and
-                            test-type assignments
+                            
                         </p>
 
                     </div>
@@ -1432,136 +1235,7 @@
                         <div class="row">
 
 
-                            <div class="col-md-6">
-
-                                <a asp-area="Manager"
-                                   asp-controller="Doctors"
-                                   asp-action="Index"
-                                   class="quick-action">
-
-                                    <div class="quick-action-icon">
-
-                                        <i class="fas fa-user-doctor"></i>
-
-                                    </div>
-
-                                    <div>
-
-                                        <div class="quick-action-title">
-                                            Manage Doctors
-                                        </div>
-
-                                        <div class="quick-action-text">
-                                            Register and maintain
-                                            healthcare provider accounts.
-                                        </div>
-
-                                    </div>
-
-                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
-
-                                </a>
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <a asp-area="Manager"
-                                   asp-controller="Technicians"
-                                   asp-action="Index"
-                                   class="quick-action">
-
-                                    <div class="quick-action-icon">
-
-                                        <i class="fas fa-user-gear"></i>
-
-                                    </div>
-
-                                    <div>
-
-                                        <div class="quick-action-title">
-                                            Manage Technicians
-                                        </div>
-
-                                        <div class="quick-action-text">
-                                            Register and maintain
-                                            laboratory technician accounts.
-                                        </div>
-
-                                    </div>
-
-                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
-
-                                </a>
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <a asp-area="Manager"
-                                   asp-controller="TechnicianAssignments"
-                                   asp-action="Index"
-                                   class="quick-action">
-
-                                    <div class="quick-action-icon">
-
-                                        <i class="fas fa-list-check"></i>
-
-                                    </div>
-
-                                    <div>
-
-                                        <div class="quick-action-title">
-                                            Test Assignments
-                                        </div>
-
-                                        <div class="quick-action-text">
-                                            Assign test types that each
-                                            technician is permitted to perform.
-                                        </div>
-
-                                    </div>
-
-                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
-
-                                </a>
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <a asp-area="Manager"
-                                   asp-controller="Reports"
-                                   asp-action="Index"
-                                   class="quick-action">
-
-                                    <div class="quick-action-icon">
-
-                                        <i class="fas fa-chart-column"></i>
-
-                                    </div>
-
-                                    <div>
-
-                                        <div class="quick-action-title">
-                                            Management Reports
-                                        </div>
-
-                                        <div class="quick-action-text">
-                                            Review laboratory test
-                                            activity by category.
-                                        </div>
-
-                                    </div>
-
-                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
-
-                                </a>
-
-                            </div>
+                            <!--Add a grouph here comparing test type by category -->
 
 
                         </div>
@@ -1595,9 +1269,8 @@
                     <div class="card-body">
 
 
-                        <a asp-area="Manager"
-                           asp-controller="Consumables"
-                           asp-action="LowStock"
+                        <a 
+                           href="/Manager/Consumable/Index"
                            class="attention-item">
 
                             <div class="attention-icon icon-red">
@@ -1622,9 +1295,7 @@
                         </a>
 
 
-                        <a asp-area="Manager"
-                           asp-controller="Orders"
-                           asp-action="Index"
+                        <a href="/Manager/StockAdjustment/Index"
                            class="attention-item">
 
                             <div class="attention-icon icon-orange">
@@ -1649,9 +1320,8 @@
                         </a>
 
 
-                        <a asp-area="Manager"
-                           asp-controller="TechnicianAssignments"
-                           asp-action="Index"
+                        <a
+                           href="/Manager/TechnicianAssignments/Index"
                            class="attention-item">
 
                             <div class="attention-icon icon-purple">
@@ -1676,9 +1346,8 @@
                         </a>
 
 
-                        <a asp-area="Manager"
-                           asp-controller="Orders"
-                           asp-action="Create"
+                        <a 
+                           href="/Manager/Order/Index"
                            class="attention-item">
 
                             <div class="attention-icon icon-green">
@@ -1740,9 +1409,8 @@
 
                     <div class="col-md-4 text-md-right mt-2 mt-md-0">
 
-                        <a asp-area="Manager"
-                           asp-controller="Consumables"
-                           asp-action="Index"
+                        <a 
+                           href="/Manager/Consumable/Index"
                            class="btn btn-outline-primary btn-sm">
 
                             <i class="fas fa-boxes-stacked mr-1"></i>
@@ -1811,9 +1479,8 @@
 
                                     <div class="mt-3">
 
-                                        <a asp-area="Manager"
-                                           asp-controller="Consumables"
-                                           asp-action="Index"
+                                        <a 
+                                           href="/Manager/Consumable/Index"
                                            class="btn btn-primary btn-sm">
 
                                             <i class="fas fa-eye mr-1"></i>
@@ -1865,9 +1532,8 @@
 
                     <div class="col-md-4">
 
-                        <a asp-area="Manager"
-                           asp-controller="Orders"
-                           asp-action="Create"
+                        <a 
+                           href="/Manager/Order/Index"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1898,9 +1564,8 @@
 
                     <div class="col-md-4">
 
-                        <a asp-area="Manager"
-                           asp-controller="Orders"
-                           asp-action="Index"
+                        <a
+                           href="/Manager/StockAdjustment/Index"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1931,9 +1596,8 @@
 
                     <div class="col-md-4">
 
-                        <a asp-area="Manager"
-                           asp-controller="Suppliers"
-                           asp-action="Index"
+                        <a
+                           href="/Manager/Supplier/Index"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1967,202 +1631,6 @@
             </div>
 
         </div>
-
-
-        <!-- =====================================================
-             REPORTING
-             ===================================================== -->
-
-        <div class="dashboard-card">
-
-            <div class="card-header">
-
-                <h4 class="dashboard-title">
-                    Management Reports
-                </h4>
-
-                <p class="dashboard-subtitle">
-                    Generate laboratory management reports
-                    within a selected date range
-                </p>
-
-            </div>
-
-
-            <div class="card-body">
-
-                <div class="row align-items-center">
-
-
-                    <div class="col-md-8">
-
-                        <div class="d-flex align-items-center">
-
-                            <div class="quick-action-icon mr-3">
-
-                                <i class="fas fa-file-pdf"></i>
-
-                            </div>
-
-
-                            <div>
-
-                                <div class="quick-action-title">
-                                    Tests Performed by Category
-                                </div>
-
-                                <div class="quick-action-text">
-                                    Generate a PDF report showing
-                                    total tests performed grouped
-                                    by laboratory test category.
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-4 text-md-right mt-3 mt-md-0">
-
-                        <a asp-area="Manager"
-                           asp-controller="Reports"
-                           asp-action="Index"
-                           class="btn btn-primary btn-sm">
-
-                            <i class="fas fa-file-pdf mr-1"></i>
-
-                            Generate Report
-
-                        </a>
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =====================================================
-             ACCOUNT & SECURITY
-             ===================================================== -->
-
-        <div class="dashboard-card">
-
-            <div class="card-header">
-
-                <h4 class="dashboard-title">
-                    My Account & Security
-                </h4>
-
-                <p class="dashboard-subtitle">
-                    Manage your Laboratory Manager profile
-                    and account security
-                </p>
-
-            </div>
-
-
-            <div class="card-body">
-
-                <div class="row align-items-center">
-
-
-                    <div class="col-md-6">
-
-                        <div class="profile-summary">
-
-
-                            <div class="profile-avatar">
-
-                                @managerInitial
-
-                            </div>
-
-
-                            <div>
-
-                                <div class="profile-name">
-                                    @managerName
-                                </div>
-
-                                <div class="profile-role">
-                                    Laboratory Manager
-                                </div>
-
-                                <div class="profile-email">
-                                    @managerEmail
-                                </div>
-
-                            </div>
-
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="col-md-6 text-md-right mt-3 mt-md-0">
-
-
-                        <a asp-area="Manager"
-                           asp-controller="Profile"
-                           asp-action="Index"
-                           class="btn btn-outline-primary btn-sm mr-2">
-
-                            <i class="fas fa-user mr-1"></i>
-
-                            My Profile
-
-                        </a>
-
-
-                        <a asp-area="Manager"
-                           asp-controller="Profile"
-                           asp-action="ChangePassword"
-                           class="btn btn-outline-secondary btn-sm mr-2">
-
-                            <i class="fas fa-key mr-1"></i>
-
-                            Change Password
-
-                        </a>
-
-
-                        <form asp-area=""
-                              asp-controller="Account"
-                              asp-action="Logout"
-                              method="post"
-                              class="d-inline">
-
-                            @Html.AntiForgeryToken()
-
-                            <button type="submit"
-                                    class="btn btn-outline-danger btn-sm">
-
-                                <i class="fas fa-sign-out-alt mr-1"></i>
-
-                                Secure Logout
-
-                            </button>
-
-                        </form>
-
-
-                    </div>
-
-
-                </div>
-
-            </div>
-
-        </div>
-
-
     </div>
 
 </div>
