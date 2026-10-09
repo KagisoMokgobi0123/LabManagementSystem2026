@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@model NMB_HLabSys.Areas.Manager.Models.LabManagerDashboardViewModel
+@using Microsoft.AspNetCore.Identity
 @using NMB_HLabSys.Models.Identity
 @inject UserManager<ApplicationUser> UserManager
 
@@ -8,8 +9,8 @@
 
     var currentUser = await UserManager.GetUserAsync(User);
 
-    var managerName = currentUser?.FullName ?? "Laboratory Manager";
-    var managerEmail = currentUser?.Email ?? "";
+    var managerName = Model.ManagerName ?? "Laboratory Manager";
+    var managerEmail = Model.ManagerEmail ?? string.Empty;
 
     var managerInitial =
         !string.IsNullOrWhiteSpace(currentUser?.FirstName)
@@ -18,54 +19,39 @@
 }
 
 <style>
-
-
     .manager-dashboard {
         min-height: 100vh;
         background: #f4f7fb;
     }
 
-
     .manager-hero {
         position: relative;
         overflow: hidden;
         padding: 38px 0 82px;
-
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 45%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
     }
 
-    .manager-hero::before {
-        content: "";
-        position: absolute;
+        .manager-hero::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: 220px;
+            bottom: -190px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
 
-        width: 260px;
-        height: 260px;
-
-        right: 220px;
-        bottom: -190px;
-
-        border-radius: 50%;
-        background: rgba(255,255,255,.05);
-    }
-
-    .manager-hero::after {
-        content: "";
-        position: absolute;
-
-        width: 380px;
-        height: 380px;
-
-        right: -100px;
-        top: -210px;
-
-        border-radius: 50%;
-        background: rgba(255,255,255,.06);
-    }
+        .manager-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
 
     .manager-hero-content {
         position: relative;
@@ -75,39 +61,28 @@
     .manager-badge {
         display: inline-flex;
         align-items: center;
-
         gap: 7px;
-
         padding: 7px 13px;
         margin-bottom: 14px;
-
         border: 1px solid rgba(255,255,255,.20);
         border-radius: 50px;
-
         background: rgba(255,255,255,.13);
-
         color: #fff;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .manager-hero h1 {
         margin-bottom: 7px;
-
         color: #fff;
-
         font-size: 30px;
         font-weight: 700;
     }
 
     .manager-hero p {
         max-width: 750px;
-
         margin: 0;
-
         color: rgba(255,255,255,.82);
-
         font-size: 14px;
     }
 
@@ -120,24 +95,18 @@
     .hero-btn {
         display: inline-flex;
         align-items: center;
-
         gap: 7px;
-
         padding: 10px 17px;
-
         border-radius: 8px;
-
         font-size: 13px;
         font-weight: 600;
-
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .hero-btn:hover {
-        transform: translateY(-2px);
-    }
+        .hero-btn:hover {
+            transform: translateY(-2px);
+        }
 
     .hero-btn-primary {
         background: #fff;
@@ -146,83 +115,54 @@
 
     .hero-btn-outline {
         border: 1px solid rgba(255,255,255,.50);
-
         background: rgba(255,255,255,.08);
-
         color: #fff !important;
     }
-
 
     .manager-page-inner {
         position: relative;
         z-index: 5;
-
         margin-top: -48px;
         padding-bottom: 50px;
     }
 
-
-
     .stat-card-link {
         display: block;
-
         height: 100%;
-
         color: inherit !important;
         text-decoration: none !important;
     }
 
     .stat-card {
         position: relative;
-
         height: 100%;
-
         padding: 20px;
-
         overflow: hidden;
-
         border: 1px solid transparent;
         border-radius: 13px;
-
         background: #fff;
-
         box-shadow: 0 4px 18px rgba(15,23,42,.07);
-
         cursor: pointer;
-
-        transition:
-            transform .2s ease,
-            box-shadow .2s ease,
-            border-color .2s ease;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
     .stat-card-link:hover .stat-card {
         transform: translateY(-4px);
-
         border-color: #bae6fd;
-
         box-shadow: 0 12px 30px rgba(15,23,42,.13);
     }
 
     .stat-card::after {
         content: "\f054";
-
         position: absolute;
-
         right: 20px;
         bottom: 17px;
-
         font-family: "Font Awesome 5 Free";
-
         font-size: 10px;
         font-weight: 900;
-
         color: #cbd5e1;
-
         opacity: 0;
-
         transform: translateX(-5px);
-
         transition: .2s ease;
     }
 
@@ -233,27 +173,21 @@
 
     .stat-top {
         display: flex;
-
         justify-content: space-between;
         align-items: flex-start;
-
         gap: 15px;
     }
 
     .stat-title {
         margin-bottom: 7px;
-
         color: #64748b;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .stat-number {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 28px;
         font-weight: 700;
     }
@@ -261,24 +195,18 @@
     .stat-note {
         margin-top: 7px;
         padding-right: 10px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
     .stat-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 44px;
         height: 44px;
         min-width: 44px;
-
         border-radius: 11px;
-
         font-size: 17px;
     }
 
@@ -317,35 +245,27 @@
         color: #d97706;
     }
 
-
     .dashboard-card {
         margin-bottom: 24px;
-
         border: 0;
         border-radius: 13px;
-
         background: #fff;
-
         box-shadow: 0 4px 18px rgba(15,23,42,.06);
     }
 
-    .dashboard-card .card-header {
-        padding: 18px 20px;
+        .dashboard-card .card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f7;
+            background: transparent;
+        }
 
-        border-bottom: 1px solid #eef2f7;
-
-        background: transparent;
-    }
-
-    .dashboard-card .card-body {
-        padding: 20px;
-    }
+        .dashboard-card .card-body {
+            padding: 20px;
+        }
 
     .dashboard-title {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 15px;
         font-weight: 700;
     }
@@ -353,129 +273,95 @@
     .dashboard-subtitle {
         margin-top: 4px;
         margin-bottom: 0;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
-
-
 
     .quick-action {
         display: flex;
         align-items: center;
-
         min-height: 78px;
-
         margin-bottom: 12px;
         padding: 15px;
-
         border: 1px solid #e8edf3;
         border-radius: 10px;
-
         background: #fff;
-
         color: inherit !important;
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .quick-action:hover {
-        transform: translateY(-2px);
-
-        border-color: #0284c7;
-
-        background: #f8fcff;
-
-        box-shadow: 0 6px 18px rgba(15,23,42,.06);
-    }
+        .quick-action:hover {
+            transform: translateY(-2px);
+            border-color: #0284c7;
+            background: #f8fcff;
+            box-shadow: 0 6px 18px rgba(15,23,42,.06);
+        }
 
     .quick-action-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 42px;
         height: 42px;
         min-width: 42px;
-
         margin-right: 12px;
-
         border-radius: 10px;
-
         background: #e0f2fe;
-
         color: #0284c7;
     }
 
     .quick-action-title {
         color: #0f172a;
-
         font-size: 13px;
         font-weight: 700;
     }
 
     .quick-action-text {
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
     .quick-action-arrow {
         margin-left: auto;
         padding-left: 10px;
-
         color: #cbd5e1;
     }
 
     .attention-item {
         display: flex;
-
         align-items: flex-start;
-
         padding: 13px 0;
-
         border-bottom: 1px solid #f1f5f9;
-
         color: inherit !important;
         text-decoration: none !important;
     }
 
-    .attention-item:last-child {
-        border-bottom: 0;
-    }
+        .attention-item:last-child {
+            border-bottom: 0;
+        }
 
     .attention-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 37px;
         height: 37px;
         min-width: 37px;
-
         margin-right: 11px;
-
         border-radius: 9px;
     }
 
     .attention-title {
         color: #334155;
-
         font-size: 12px;
         font-weight: 700;
     }
 
     .attention-text {
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
@@ -483,42 +369,29 @@
         margin-bottom: 0;
     }
 
-    .manager-table thead th {
-        padding: 12px 10px;
+        .manager-table thead th {
+            padding: 12px 10px;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
 
-        border-top: 0;
-        border-bottom: 1px solid #e2e8f0;
-
-        color: #64748b;
-
-        font-size: 10px;
-        font-weight: 700;
-
-        text-transform: uppercase;
-
-        letter-spacing: .4px;
-    }
-
-    .manager-table tbody td {
-        padding: 13px 10px;
-
-        vertical-align: middle;
-
-        border-color: #f1f5f9;
-
-        color: #334155;
-
-        font-size: 12px;
-    }
-
+        .manager-table tbody td {
+            padding: 13px 10px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
 
     .status-badge {
         display: inline-block;
-
         padding: 5px 9px;
-
         border-radius: 50px;
-
         font-size: 10px;
         font-weight: 700;
     }
@@ -538,69 +411,49 @@
         color: #b91c1c;
     }
 
-
     .management-module {
         display: block;
-
         height: 100%;
-
         padding: 20px;
-
         border: 1px solid #e8edf3;
         border-radius: 12px;
-
         background: #fff;
-
         color: inherit !important;
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .management-module:hover {
-        transform: translateY(-3px);
-
-        border-color: #0284c7;
-
-        box-shadow: 0 8px 20px rgba(15,23,42,.08);
-    }
+        .management-module:hover {
+            transform: translateY(-3px);
+            border-color: #0284c7;
+            box-shadow: 0 8px 20px rgba(15,23,42,.08);
+        }
 
     .module-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 45px;
         height: 45px;
-
         margin-bottom: 13px;
-
         border-radius: 11px;
-
         background: #e0f2fe;
-
         color: #0284c7;
-
         font-size: 17px;
     }
 
     .module-title {
         margin-bottom: 5px;
-
         color: #0f172a;
-
         font-size: 13px;
         font-weight: 700;
     }
 
     .module-description {
         color: #94a3b8;
-
         font-size: 11px;
         line-height: 1.6;
     }
-
 
     .profile-summary {
         display: flex;
@@ -609,31 +462,19 @@
 
     .profile-avatar {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 46px;
         height: 46px;
-
         margin-right: 12px;
-
         border-radius: 50%;
-
-        background: linear-gradient(
-            135deg,
-            #075985,
-            #0284c7
-        );
-
+        background: linear-gradient(135deg, #075985, #0284c7);
         color: #fff;
-
         font-weight: 700;
     }
 
     .profile-name {
         color: #0f172a;
-
         font-size: 13px;
         font-weight: 700;
     }
@@ -641,56 +482,40 @@
     .profile-role,
     .profile-email {
         color: #64748b;
-
         font-size: 11px;
     }
 
-
     @@media(max-width: 768px) {
-
         .manager-hero {
             padding-top: 25px;
         }
 
-        .manager-hero h1 {
-            font-size: 24px;
-        }
+            .manager-hero h1 {
+                font-size: 24px;
+            }
 
         .hero-actions {
             margin-top: 20px;
         }
     }
-
 </style>
-
 
 <div class="manager-dashboard">
 
+    <!-- DASHBOARD HEADER -->
 
     <div class="manager-hero">
-
         <div class="container-fluid">
-
             <div class="manager-hero-content">
-
                 <div class="row align-items-center">
 
-
                     <div class="col-md-8">
-
                         <div class="manager-badge">
-
                             <i class="fas fa-user-tie"></i>
-
                             Laboratory Manager Subsystem
-
                         </div>
 
-
-                        <h1>
-                            Welcome, @managerName
-                        </h1>
-
+                        <h1>Welcome, @managerName</h1>
 
                         <p>
                             Manage the laboratory test catalogue,
@@ -698,939 +523,524 @@
                             suppliers and orders while monitoring
                             laboratory operations.
                         </p>
-
                     </div>
-
 
                     <div class="col-md-4">
-
                         <div class="hero-actions justify-content-md-end">
-
-
-                            <a
-                               href="/Manager/Order/Index"
+                            <a href="/Manager/Order/Index"
                                class="hero-btn hero-btn-outline">
-
                                 <i class="fas fa-triangle-exclamation"></i>
-
                                 Stock Alerts
-
                             </a>
-
-
                         </div>
-
                     </div>
 
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
-
 
     <div class="container-fluid manager-page-inner">
 
+        <!-- PRIMARY STATISTICS -->
 
         <div class="row">
 
-
-            <!-- TEST TYPES -->
-
             <div class="col-xl-3 col-md-6 mb-4">
-
-                <a 
-                   href="/Manager/TestType/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/TestType/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Test Types
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Test Types</div>
+                                <h2 class="stat-number">@Model.TestTypeCount</h2>
                                 <div class="stat-note">
-                                    Laboratory tests in the catalogue
+                                    Active laboratory tests in the catalogue
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-blue">
-
                                 <i class="fas fa-vial"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
 
-
-            <!-- TECHNICIANS -->
-
             <div class="col-xl-3 col-md-6 mb-4">
-
-                <a 
-                   href="/Manager/User/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/User/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Lab Technicians
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Lab Technicians</div>
+                                <h2 class="stat-number">@Model.TechnicianCount</h2>
                                 <div class="stat-note">
                                     Registered laboratory technicians
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-cyan">
-
                                 <i class="fas fa-user-gear"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
 
-
-            <!-- DOCTORS -->
-
             <div class="col-xl-3 col-md-6 mb-4">
-
-                <a 
-                   href="/Manager/User/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/User/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Doctors
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Doctors</div>
+                                <h2 class="stat-number">@Model.DoctorCount</h2>
                                 <div class="stat-note">
                                     Registered healthcare providers
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-purple">
-
                                 <i class="fas fa-user-doctor"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
 
-
-            <!-- CONSUMABLES -->
-
             <div class="col-xl-3 col-md-6 mb-4">
-
-                <a 
-                   href="/Manager/Consumable/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/Consumable/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Consumables
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Consumables</div>
+                                <h2 class="stat-number">@Model.ConsumableCount</h2>
                                 <div class="stat-note">
                                     Consumable stock items
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-green">
-
                                 <i class="fas fa-boxes-stacked"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
 
-
         </div>
-
 
         <!-- SECOND STAT ROW -->
 
         <div class="row">
 
-
-            <!-- LOW STOCK -->
-
             <div class="col-xl-4 col-md-6 mb-4">
-
-                <a 
-                   href="/Manager/Consumable/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/Consumable/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Low Stock
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Low Stock</div>
+                                <h2 class="stat-number">@Model.LowStockCount</h2>
                                 <div class="stat-note">
-                                    Items near or below reorder level
+                                    Items at or below reorder level
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-red">
-
                                 <i class="fas fa-triangle-exclamation"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
 
-
-            <!-- OPEN ORDERS -->
-
             <div class="col-xl-4 col-md-6 mb-4">
-
-                <a href="/Manager/StockAdjustment/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/StockAdjustment/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Open Orders
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Open Orders</div>
+                                <h2 class="stat-number">@Model.OpenOrderCount</h2>
                                 <div class="stat-note">
                                     Orders awaiting completion
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-orange">
-
                                 <i class="fas fa-cart-shopping"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
 
-
-            <!-- SUPPLIERS -->
-
             <div class="col-xl-4 col-md-12 mb-4">
-
-                <a
-                   href="/Manager/Supplier/Index"
-                   class="stat-card-link">
-
+                <a href="/Manager/Supplier/Index" class="stat-card-link">
                     <div class="stat-card">
-
                         <div class="stat-top">
-
                             <div>
-
-                                <div class="stat-title">
-                                    Suppliers
-                                </div>
-
-                                <h2 class="stat-number">
-                                    0
-                                </h2>
-
+                                <div class="stat-title">Suppliers</div>
+                                <h2 class="stat-number">@Model.SupplierCount</h2>
                                 <div class="stat-note">
                                     Registered laboratory suppliers
                                 </div>
-
                             </div>
-
-
                             <div class="stat-icon icon-yellow">
-
                                 <i class="fas fa-truck"></i>
-
                             </div>
-
                         </div>
-
                     </div>
-
                 </a>
-
             </div>
-
 
         </div>
 
-
-
+        <!-- LABORATORY MANAGEMENT -->
 
         <div class="dashboard-card">
-
             <div class="card-header">
-
-                <h4 class="dashboard-title">
-                    Laboratory Management
-                </h4>
-
+                <h4 class="dashboard-title">Laboratory Management</h4>
                 <p class="dashboard-subtitle">
                     Manage laboratory configuration, staff,
                     catalogue and stock
                 </p>
-
             </div>
 
-
             <div class="card-body">
-
                 <div class="row">
+
                     <div class="col-md-6">
-
-                        <a href="/Manager/User/Index"
-                           class="quick-action">
-
+                        <a href="/Manager/User/Index" class="quick-action">
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-user-doctor"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Manage Doctors
-                                </div>
-
+                                <div class="quick-action-title">Manage Doctors</div>
                                 <div class="quick-action-text">
-                                    Register and maintain
-                                    healthcare provider accounts.
+                                    Register and maintain healthcare provider accounts.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
 
-
                     <div class="col-md-6">
-
-                        <a href="/Manager/User/Index"
-                           class="quick-action">
-
+                        <a href="/Manager/User/Index" class="quick-action">
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-user-gear"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Manage Technicians
-                                </div>
-
+                                <div class="quick-action-title">Manage Technicians</div>
                                 <div class="quick-action-text">
-                                    Register and maintain
-                                    laboratory technician accounts.
+                                    Register and maintain laboratory technician accounts.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
 
-
                     <div class="col-md-6">
-
                         <a href="/Manager/TechnicianAssignments/Index"
                            class="quick-action">
-
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-list-check"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Test Assignments
-                                </div>
-
+                                <div class="quick-action-title">Test Assignments</div>
                                 <div class="quick-action-text">
-                                    Assign test types that each
-                                    technician is permitted to perform.
+                                    Assign test types that each technician is permitted to perform.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
-
 
                     <div class="col-md-6">
-
-                        <a href="/Manager/Reports/Index"
-                           class="quick-action">
-
+                        <a href="/Manager/Reports/Index" class="quick-action">
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-chart-column"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Management Reports
-                                </div>
-
+                                <div class="quick-action-title">Management Reports</div>
                                 <div class="quick-action-text">
-                                    Review laboratory test
-                                    activity by category.
+                                    Review laboratory test activity by category.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
 
-                  </div>
-
+                </div>
+            </div>
         </div>
 
-
+        <!-- TEST TYPE CATEGORY SUMMARY AND ATTENTION -->
 
         <div class="row">
 
-
-            <!-- STAFF MANAGEMENT -->
-
             <div class="col-lg-7">
-
                 <div class="dashboard-card">
-
                     <div class="card-header">
-
-                        <h4 class="dashboard-title">
-                            Test Type vs Category
-                        </h4>
-
+                        <h4 class="dashboard-title">Test Type vs Category</h4>
                         <p class="dashboard-subtitle">
-                            
+                            Distribution of active laboratory tests by category
                         </p>
-
                     </div>
-
 
                     <div class="card-body">
-
-                        <div class="row">
-
-
-                            <!--Add a grouph here comparing test type by category -->
-
-
-                        </div>
-
+                        @if (Model.TestCategorySummaries != null &&
+                             Model.TestCategorySummaries.Any())
+                        {
+                            <div class="table-responsive">
+                                <table class="table manager-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th class="text-right">Test Types</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var category in Model.TestCategorySummaries)
+                                        {
+                                            <tr>
+                                                <td>@category.CategoryName</td>
+                                                <td class="text-right font-weight-bold">
+                                                    @category.TestCount
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-5">
+                                <i class="fas fa-chart-column fa-2x mb-3 d-block"></i>
+                                No test category data is available.
+                            </div>
+                        }
                     </div>
-
                 </div>
-
             </div>
 
-
-            <!-- ATTENTION -->
-
             <div class="col-lg-5">
-
                 <div class="dashboard-card">
-
                     <div class="card-header">
-
-                        <h4 class="dashboard-title">
-                            Requires Attention
-                        </h4>
-
+                        <h4 class="dashboard-title">Requires Attention</h4>
                         <p class="dashboard-subtitle">
                             Laboratory stock and order alerts
                         </p>
-
                     </div>
-
 
                     <div class="card-body">
 
-
-                        <a 
-                           href="/Manager/Consumable/Index"
-                           class="attention-item">
-
+                        <a href="/Manager/Consumable/Index" class="attention-item">
                             <div class="attention-icon icon-red">
-
                                 <i class="fas fa-box-open"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="attention-title">
-                                    Low Stock Items
-                                </div>
-
+                                <div class="attention-title">Low Stock Items</div>
                                 <div class="attention-text">
-                                    Review consumables near or
-                                    below their reorder level.
+                                    @Model.LowStockCount consumable items require stock-level review.
                                 </div>
-
                             </div>
-
                         </a>
 
-
-                        <a href="/Manager/StockAdjustment/Index"
-                           class="attention-item">
-
+                        <a href="/Manager/StockAdjustment/Index" class="attention-item">
                             <div class="attention-icon icon-orange">
-
                                 <i class="fas fa-cart-shopping"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="attention-title">
-                                    Outstanding Orders
-                                </div>
-
+                                <div class="attention-title">Outstanding Orders</div>
                                 <div class="attention-text">
-                                    Review ordered and partially
-                                    completed stock orders.
+                                    @Model.OpenOrderCount orders are awaiting completion.
                                 </div>
-
                             </div>
-
                         </a>
 
-
-                        <a
-                           href="/Manager/TechnicianAssignments/Index"
+                        <a href="/Manager/TechnicianAssignments/Index"
                            class="attention-item">
-
                             <div class="attention-icon icon-purple">
-
                                 <i class="fas fa-user-check"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="attention-title">
-                                    Technician Assignments
-                                </div>
-
+                                <div class="attention-title">Technician Assignments</div>
                                 <div class="attention-text">
-                                    Review technician test-type
-                                    permissions and assignments.
+                                    Review technician test-type permissions and assignments.
                                 </div>
-
                             </div>
-
                         </a>
 
-
-                        <a 
-                           href="/Manager/Order/Index"
-                           class="attention-item">
-
+                        <a href="/Manager/Order/Index" class="attention-item">
                             <div class="attention-icon icon-green">
-
                                 <i class="fas fa-plus"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="attention-title">
-                                    Create Stock Order
-                                </div>
-
+                                <div class="attention-title">Create Stock Order</div>
                                 <div class="attention-text">
-                                    Create supplier orders for
-                                    required consumable stock.
+                                    Create supplier orders for required consumable stock.
                                 </div>
-
                             </div>
-
                         </a>
-
 
                     </div>
-
                 </div>
-
             </div>
 
-
         </div>
-
 
         <!-- =====================================================
              STOCK OVERVIEW
              ===================================================== -->
 
         <div class="dashboard-card">
-
             <div class="card-header">
-
                 <div class="row align-items-center">
 
-
                     <div class="col-md-8">
-
-                        <h4 class="dashboard-title">
-                            Consumable Stock Overview
-                        </h4>
-
+                        <h4 class="dashboard-title">Consumable Stock Overview</h4>
                         <p class="dashboard-subtitle">
-                            Monitor laboratory consumables and
-                            reorder levels
+                            Monitor laboratory consumables and reorder levels
                         </p>
-
                     </div>
-
 
                     <div class="col-md-4 text-md-right mt-2 mt-md-0">
-
-                        <a 
-                           href="/Manager/Consumable/Index"
+                        <a href="/Manager/Consumable/Index"
                            class="btn btn-outline-primary btn-sm">
-
                             <i class="fas fa-boxes-stacked mr-1"></i>
-
                             Manage Stock
-
                         </a>
-
                     </div>
 
-
                 </div>
-
             </div>
-
 
             <div class="card-body p-0">
-
                 <div class="table-responsive">
-
                     <table class="table manager-table">
-
                         <thead>
-
                             <tr>
-
-                                <th>
-                                    Consumable
-                                </th>
-
-                                <th>
-                                    Supplier
-                                </th>
-
-                                <th>
-                                    Quantity
-                                </th>
-
-                                <th>
-                                    Reorder Level
-                                </th>
-
-                                <th>
-                                    Status
-                                </th>
-
-                                <th>
-                                    Action
-                                </th>
-
+                                <th>Consumable</th>
+                                <th>Supplier</th>
+                                <th>Quantity</th>
+                                <th>Reorder Level</th>
+                                <th>Status</th>
+                                <th>Action</th>
                             </tr>
-
                         </thead>
 
-
                         <tbody>
+                            @if (Model.Consumables != null &&
+                                 Model.Consumables.Any())
+                            {
+                                @foreach (var item in Model.Consumables)
+                                {
+                                    var statusClass = item.Status switch
+                                    {
+                                        "Out of Stock" => "status-danger",
+                                        "Low Stock" => "status-danger",
+                                        "Reorder Soon" => "status-warning",
+                                        _ => "status-good"
+                                    };
 
-                            <tr>
+                                    <tr>
+                                        <td>@item.ConsumableName</td>
+                                        <td>@item.SupplierName</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.ReorderLevel</td>
+                                        <td>
+                                            <span class="status-badge @statusClass">
+                                                @item.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="/Manager/Consumable/Index"
+                                               class="btn btn-outline-primary btn-sm">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="fas fa-boxes-stacked fa-2x mb-3 d-block"></i>
+                                        No consumable stock records are available.
 
-                                <td colspan="6"
-                                    class="text-center py-5 text-muted">
-
-                                    <i class="fas fa-boxes-stacked fa-2x mb-3 d-block"></i>
-
-                                    Stock information will appear here.
-
-                                    <div class="mt-3">
-
-                                        <a 
-                                           href="/Manager/Consumable/Index"
-                                           class="btn btn-primary btn-sm">
-
-                                            <i class="fas fa-eye mr-1"></i>
-
-                                            View Consumables
-
-                                        </a>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
+                                        <div class="mt-3">
+                                            <a href="/Manager/Consumable/Index"
+                                               class="btn btn-primary btn-sm">
+                                                <i class="fas fa-eye mr-1"></i>
+                                                View Consumables
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
                         </tbody>
-
                     </table>
-
                 </div>
-
             </div>
-
         </div>
-
 
         <!-- =====================================================
              STOCK ORDER MANAGEMENT
              ===================================================== -->
 
         <div class="dashboard-card">
-
             <div class="card-header">
-
-                <h4 class="dashboard-title">
-                    Consumable Order Management
-                </h4>
-
+                <h4 class="dashboard-title">Consumable Order Management</h4>
                 <p class="dashboard-subtitle">
                     Create and track supplier stock orders
                 </p>
-
             </div>
-
 
             <div class="card-body">
-
                 <div class="row">
 
-
                     <div class="col-md-4">
-
-                        <a 
-                           href="/Manager/Order/Index"
-                           class="quick-action">
-
+                        <a href="/Manager/Order/Index" class="quick-action">
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-cart-plus"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Create Order
-                                </div>
-
+                                <div class="quick-action-title">Create Order</div>
                                 <div class="quick-action-text">
-                                    Create a new consumable
-                                    stock order.
+                                    Create a new consumable stock order.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
 
-
                     <div class="col-md-4">
-
-                        <a
-                           href="/Manager/StockAdjustment/Index"
-                           class="quick-action">
-
+                        <a href="/Manager/StockAdjustment/Index" class="quick-action">
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-truck-ramp-box"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Track Orders
-                                </div>
-
+                                <div class="quick-action-title">Track Orders</div>
                                 <div class="quick-action-text">
-                                    View ordered, partial and
-                                    completed orders.
+                                    View ordered, partial and completed orders.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
-
 
                     <div class="col-md-4">
-
-                        <a
-                           href="/Manager/Supplier/Index"
-                           class="quick-action">
-
+                        <a href="/Manager/Supplier/Index" class="quick-action">
                             <div class="quick-action-icon">
-
                                 <i class="fas fa-truck"></i>
-
                             </div>
-
                             <div>
-
-                                <div class="quick-action-title">
-                                    Suppliers
-                                </div>
-
+                                <div class="quick-action-title">Suppliers</div>
                                 <div class="quick-action-text">
-                                    Manage supplier details and
-                                    contact information.
+                                    Manage supplier details and contact information.
                                 </div>
-
                             </div>
-
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
-
                         </a>
-
                     </div>
-
 
                 </div>
-
             </div>
-
         </div>
-    </div>
 
+    </div>
 </div>
