@@ -1,6 +1,7 @@
 ﻿@model NMB_HLabSys.Areas.Manager.Models.LabManagerDashboardViewModel
 @using Microsoft.AspNetCore.Identity
 @using NMB_HLabSys.Models.Identity
+@using System.Text.Json
 @inject UserManager<ApplicationUser> UserManager
 
 @{
@@ -8,14 +9,18 @@
     Layout = "_LabManagerLayout";
 
     var currentUser = await UserManager.GetUserAsync(User);
+    var managerName = Model.ManagerName ?? currentUser?.FullName ?? "Laboratory Manager";
+    var managerEmail = Model.ManagerEmail ?? currentUser?.Email ?? "";
 
-    var managerName = Model.ManagerName ?? "Laboratory Manager";
-    var managerEmail = Model.ManagerEmail ?? string.Empty;
+    var managerInitial = !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+        ? currentUser.FirstName.Substring(0, 1).ToUpper()
+        : "M";
 
-    var managerInitial =
-        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
-            ? currentUser.FirstName.Substring(0, 1).ToUpper()
-            : "M";
+    var categoryLabels = JsonSerializer.Serialize(
+        Model.TestCategorySummaries.Select(x => x.CategoryName));
+
+    var categoryCounts = JsonSerializer.Serialize(
+        Model.TestCategorySummaries.Select(x => x.TestCount));
 }
 
 <style>
@@ -28,7 +33,7 @@
         position: relative;
         overflow: hidden;
         padding: 38px 0 82px;
-        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
+        background: linear-gradient(135deg, #073b5c 0%, #075985 45%, #0284c7 100%);
     }
 
         .manager-hero::before {
@@ -107,11 +112,6 @@
         .hero-btn:hover {
             transform: translateY(-2px);
         }
-
-    .hero-btn-primary {
-        background: #fff;
-        color: #075985 !important;
-    }
 
     .hero-btn-outline {
         border: 1px solid rgba(255,255,255,.50);
@@ -411,79 +411,25 @@
         color: #b91c1c;
     }
 
-    .management-module {
-        display: block;
-        height: 100%;
-        padding: 20px;
-        border: 1px solid #e8edf3;
-        border-radius: 12px;
-        background: #fff;
-        color: inherit !important;
-        text-decoration: none !important;
-        transition: .2s ease;
+    .chart-container {
+        position: relative;
+        width: 100%;
+        min-height: 300px;
+        height: 340px;
     }
 
-        .management-module:hover {
-            transform: translateY(-3px);
-            border-color: #0284c7;
-            box-shadow: 0 8px 20px rgba(15,23,42,.08);
-        }
-
-    .module-icon {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 45px;
-        height: 45px;
-        margin-bottom: 13px;
-        border-radius: 11px;
-        background: #e0f2fe;
-        color: #0284c7;
-        font-size: 17px;
-    }
-
-    .module-title {
-        margin-bottom: 5px;
-        color: #0f172a;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .module-description {
+    .empty-state {
+        padding: 45px 15px;
+        text-align: center;
         color: #94a3b8;
-        font-size: 11px;
-        line-height: 1.6;
+        font-size: 12px;
     }
 
-    .profile-summary {
-        display: flex;
-        align-items: center;
-    }
-
-    .profile-avatar {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 46px;
-        height: 46px;
-        margin-right: 12px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #075985, #0284c7);
-        color: #fff;
-        font-weight: 700;
-    }
-
-    .profile-name {
-        color: #0f172a;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .profile-role,
-    .profile-email {
-        color: #64748b;
-        font-size: 11px;
-    }
+        .empty-state i {
+            display: block;
+            margin-bottom: 14px;
+            color: #cbd5e1;
+        }
 
     @@media(max-width: 768px) {
         .manager-hero {
@@ -497,18 +443,20 @@
         .hero-actions {
             margin-top: 20px;
         }
+
+        .chart-container {
+            height: 280px;
+        }
     }
 </style>
 
 <div class="manager-dashboard">
 
     <!-- DASHBOARD HEADER -->
-
     <div class="manager-hero">
         <div class="container-fluid">
             <div class="manager-hero-content">
                 <div class="row align-items-center">
-
                     <div class="col-md-8">
                         <div class="manager-badge">
                             <i class="fas fa-user-tie"></i>
@@ -518,10 +466,9 @@
                         <h1>Welcome, @managerName</h1>
 
                         <p>
-                            Manage the laboratory test catalogue,
-                            technicians, doctors, consumable stock,
-                            suppliers and orders while monitoring
-                            laboratory operations.
+                            Manage the laboratory test catalogue, technicians,
+                            doctors, consumable stock, suppliers and orders
+                            while monitoring laboratory operations.
                         </p>
                     </div>
 
@@ -534,7 +481,6 @@
                             </a>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -543,7 +489,6 @@
     <div class="container-fluid manager-page-inner">
 
         <!-- PRIMARY STATISTICS -->
-
         <div class="row">
 
             <div class="col-xl-3 col-md-6 mb-4">
@@ -553,9 +498,7 @@
                             <div>
                                 <div class="stat-title">Test Types</div>
                                 <h2 class="stat-number">@Model.TestTypeCount</h2>
-                                <div class="stat-note">
-                                    Active laboratory tests in the catalogue
-                                </div>
+                                <div class="stat-note">Laboratory tests in the catalogue</div>
                             </div>
                             <div class="stat-icon icon-blue">
                                 <i class="fas fa-vial"></i>
@@ -572,9 +515,7 @@
                             <div>
                                 <div class="stat-title">Lab Technicians</div>
                                 <h2 class="stat-number">@Model.TechnicianCount</h2>
-                                <div class="stat-note">
-                                    Registered laboratory technicians
-                                </div>
+                                <div class="stat-note">Registered laboratory technicians</div>
                             </div>
                             <div class="stat-icon icon-cyan">
                                 <i class="fas fa-user-gear"></i>
@@ -591,9 +532,7 @@
                             <div>
                                 <div class="stat-title">Doctors</div>
                                 <h2 class="stat-number">@Model.DoctorCount</h2>
-                                <div class="stat-note">
-                                    Registered healthcare providers
-                                </div>
+                                <div class="stat-note">Registered healthcare providers</div>
                             </div>
                             <div class="stat-icon icon-purple">
                                 <i class="fas fa-user-doctor"></i>
@@ -610,9 +549,7 @@
                             <div>
                                 <div class="stat-title">Consumables</div>
                                 <h2 class="stat-number">@Model.ConsumableCount</h2>
-                                <div class="stat-note">
-                                    Consumable stock items
-                                </div>
+                                <div class="stat-note">Consumable stock items</div>
                             </div>
                             <div class="stat-icon icon-green">
                                 <i class="fas fa-boxes-stacked"></i>
@@ -624,8 +561,7 @@
 
         </div>
 
-        <!-- SECOND STAT ROW -->
-
+        <!-- INVENTORY AND ORDER STATISTICS -->
         <div class="row">
 
             <div class="col-xl-4 col-md-6 mb-4">
@@ -635,9 +571,7 @@
                             <div>
                                 <div class="stat-title">Low Stock</div>
                                 <h2 class="stat-number">@Model.LowStockCount</h2>
-                                <div class="stat-note">
-                                    Items at or below reorder level
-                                </div>
+                                <div class="stat-note">Items near or below reorder level</div>
                             </div>
                             <div class="stat-icon icon-red">
                                 <i class="fas fa-triangle-exclamation"></i>
@@ -654,9 +588,7 @@
                             <div>
                                 <div class="stat-title">Open Orders</div>
                                 <h2 class="stat-number">@Model.OpenOrderCount</h2>
-                                <div class="stat-note">
-                                    Orders awaiting completion
-                                </div>
+                                <div class="stat-note">Orders awaiting completion</div>
                             </div>
                             <div class="stat-icon icon-orange">
                                 <i class="fas fa-cart-shopping"></i>
@@ -673,9 +605,7 @@
                             <div>
                                 <div class="stat-title">Suppliers</div>
                                 <h2 class="stat-number">@Model.SupplierCount</h2>
-                                <div class="stat-note">
-                                    Registered laboratory suppliers
-                                </div>
+                                <div class="stat-note">Registered laboratory suppliers</div>
                             </div>
                             <div class="stat-icon icon-yellow">
                                 <i class="fas fa-truck"></i>
@@ -688,13 +618,11 @@
         </div>
 
         <!-- LABORATORY MANAGEMENT -->
-
         <div class="dashboard-card">
             <div class="card-header">
                 <h4 class="dashboard-title">Laboratory Management</h4>
                 <p class="dashboard-subtitle">
-                    Manage laboratory configuration, staff,
-                    catalogue and stock
+                    Manage laboratory configuration, staff, catalogue and stock.
                 </p>
             </div>
 
@@ -732,8 +660,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <a href="/Manager/TechnicianAssignments/Index"
-                           class="quick-action">
+                        <a href="/Manager/TechnicianAssignments/Index" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-list-check"></i>
                             </div>
@@ -755,7 +682,7 @@
                             <div>
                                 <div class="quick-action-title">Management Reports</div>
                                 <div class="quick-action-text">
-                                    Review laboratory test activity by category.
+                                    Review laboratory activity and test categories.
                                 </div>
                             </div>
                             <i class="fas fa-chevron-right quick-action-arrow"></i>
@@ -766,8 +693,7 @@
             </div>
         </div>
 
-        <!-- TEST TYPE CATEGORY SUMMARY AND ATTENTION -->
-
+        <!-- CATEGORY GRAPH AND ATTENTION -->
         <div class="row">
 
             <div class="col-lg-7">
@@ -783,33 +709,17 @@
                         @if (Model.TestCategorySummaries != null &&
                              Model.TestCategorySummaries.Any())
                         {
-                            <div class="table-responsive">
-                                <table class="table manager-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Category</th>
-                                            <th class="text-right">Test Types</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var category in Model.TestCategorySummaries)
-                                        {
-                                            <tr>
-                                                <td>@category.CategoryName</td>
-                                                <td class="text-right font-weight-bold">
-                                                    @category.TestCount
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                            <div class="chart-container">
+                                <canvas id="testCategoryChart"
+                                        aria-label="Bar chart showing active test types by category"
+                                        role="img"></canvas>
                             </div>
                         }
                         else
                         {
-                            <div class="text-center text-muted py-5">
-                                <i class="fas fa-chart-column fa-2x mb-3 d-block"></i>
-                                No test category data is available.
+                            <div class="empty-state">
+                                <i class="fas fa-chart-column fa-2x"></i>
+                                No active test category data is available to display.
                             </div>
                         }
                     </div>
@@ -820,9 +730,7 @@
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h4 class="dashboard-title">Requires Attention</h4>
-                        <p class="dashboard-subtitle">
-                            Laboratory stock and order alerts
-                        </p>
+                        <p class="dashboard-subtitle">Laboratory stock and order alerts</p>
                     </div>
 
                     <div class="card-body">
@@ -851,8 +759,7 @@
                             </div>
                         </a>
 
-                        <a href="/Manager/TechnicianAssignments/Index"
-                           class="attention-item">
+                        <a href="/Manager/TechnicianAssignments/Index" class="attention-item">
                             <div class="attention-icon icon-purple">
                                 <i class="fas fa-user-check"></i>
                             </div>
@@ -871,7 +778,7 @@
                             <div>
                                 <div class="attention-title">Create Stock Order</div>
                                 <div class="attention-text">
-                                    Create supplier orders for required consumable stock.
+                                    Create supplier orders for required consumables.
                                 </div>
                             </div>
                         </a>
@@ -882,18 +789,14 @@
 
         </div>
 
-        <!-- =====================================================
-             STOCK OVERVIEW
-             ===================================================== -->
-
+        <!-- CONSUMABLE STOCK OVERVIEW -->
         <div class="dashboard-card">
             <div class="card-header">
                 <div class="row align-items-center">
-
                     <div class="col-md-8">
                         <h4 class="dashboard-title">Consumable Stock Overview</h4>
                         <p class="dashboard-subtitle">
-                            Monitor laboratory consumables and reorder levels
+                            Monitor laboratory consumables and reorder levels.
                         </p>
                     </div>
 
@@ -904,7 +807,6 @@
                             Manage Stock
                         </a>
                     </div>
-
                 </div>
             </div>
 
@@ -923,34 +825,36 @@
                         </thead>
 
                         <tbody>
-                            @if (Model.Consumables != null &&
-                                 Model.Consumables.Any())
+                            @if (Model.Consumables != null && Model.Consumables.Any())
                             {
                                 @foreach (var item in Model.Consumables)
                                 {
-                                    var statusClass = item.Status switch
-                                    {
-                                        "Out of Stock" => "status-danger",
-                                        "Low Stock" => "status-danger",
-                                        "Reorder Soon" => "status-warning",
-                                        _ => "status-good"
-                                    };
-
                                     <tr>
                                         <td>@item.ConsumableName</td>
                                         <td>@item.SupplierName</td>
                                         <td>@item.Quantity</td>
                                         <td>@item.ReorderLevel</td>
                                         <td>
-                                            <span class="status-badge @statusClass">
-                                                @item.Status
-                                            </span>
+                                            @if (item.Quantity == 0)
+                                            {
+                                                <span class="status-badge status-danger">Out of Stock</span>
+                                            }
+                                            else if (item.Quantity <= item.ReorderLevel)
+                                            {
+                                                <span class="status-badge status-danger">Low Stock</span>
+                                            }
+                                            else if (item.Status == "Reorder Soon")
+                                            {
+                                                <span class="status-badge status-warning">Reorder Soon</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="status-badge status-good">Sufficient</span>
+                                            }
                                         </td>
                                         <td>
                                             <a href="/Manager/Consumable/Index"
-                                               class="btn btn-outline-primary btn-sm">
-                                                View
-                                            </a>
+                                               class="btn btn-outline-primary btn-sm">View</a>
                                         </td>
                                     </tr>
                                 }
@@ -961,7 +865,6 @@
                                     <td colspan="6" class="text-center py-5 text-muted">
                                         <i class="fas fa-boxes-stacked fa-2x mb-3 d-block"></i>
                                         No consumable stock records are available.
-
                                         <div class="mt-3">
                                             <a href="/Manager/Consumable/Index"
                                                class="btn btn-primary btn-sm">
@@ -978,16 +881,11 @@
             </div>
         </div>
 
-        <!-- =====================================================
-             STOCK ORDER MANAGEMENT
-             ===================================================== -->
-
+        <!-- CONSUMABLE ORDER MANAGEMENT -->
         <div class="dashboard-card">
             <div class="card-header">
                 <h4 class="dashboard-title">Consumable Order Management</h4>
-                <p class="dashboard-subtitle">
-                    Create and track supplier stock orders
-                </p>
+                <p class="dashboard-subtitle">Create and track supplier stock orders.</p>
             </div>
 
             <div class="card-body">
@@ -1044,3 +942,113 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("testCategoryChart");
+
+        if (!canvas) {
+        return;
+        }
+
+        const labels = @Html.Raw(categoryLabels);
+        const values = @Html.Raw(categoryCounts);
+
+        if (!labels.length || !values.length) {
+        return;
+        }
+
+        new Chart(canvas, {
+        type: "bar",
+
+        data: {
+        labels: labels,
+        datasets: [{
+        label: "Number of Active Test Types",
+        data: values,
+        backgroundColor: [
+        "rgba(2, 132, 199, 0.80)",
+        "rgba(8, 145, 178, 0.80)",
+        "rgba(22, 163, 74, 0.80)",
+        "rgba(147, 51, 234, 0.80)",
+        "rgba(234, 88, 12, 0.80)",
+        "rgba(217, 119, 6, 0.80)",
+        "rgba(220, 38, 38, 0.80)"
+        ],
+        borderColor: [
+        "#0284c7",
+        "#0891b2",
+        "#16a34a",
+        "#9333ea",
+        "#ea580c",
+        "#d97706",
+        "#dc2626"
+        ],
+        borderWidth: 1,
+        borderRadius: 6,
+        maxBarThickness: 55
+        }]
+        },
+
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+        legend: {
+        display: false
+        },
+        tooltip: {
+        callbacks: {
+        label: function (context) {
+        const count = context.parsed.y;
+        return count + (count === 1
+        ? " active test type"
+        : " active test types");
+        }
+        }
+        }
+        },
+
+        scales: {
+        x: {
+        title: {
+        display: true,
+        text: "Test Category",
+        color: "#64748b"
+        },
+        grid: {
+        display: false
+        },
+        ticks: {
+        color: "#64748b",
+        maxRotation: 45,
+        minRotation: 0
+        }
+        },
+
+        y: {
+        beginAtZero: true,
+        ticks: {
+        precision: 0,
+        stepSize: 1,
+        color: "#64748b"
+        },
+        title: {
+        display: true,
+        text: "Number of Test Types",
+        color: "#64748b"
+        },
+        grid: {
+        color: "#eef2f7"
+        }
+        }
+        }
+        }
+        });
+        });
+    </script>
+}
