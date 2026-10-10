@@ -1,5 +1,502 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+@using NMB_HLabSys.Areas.Doctor.Models
+@using NMB_HLabSys.Areas.Manager.Models
 @{
+    ViewData["Title"] = "Available Tests";
+    Layout = "_TechnicianLayout";
+
+    var tests = Model?.ToList() ?? new List<TestRequestTestTypeModel>();
+    var total = tests.Count;
+    var routine = tests.Count(x => x.TestRequest?.Urgency == Urgency.Routine);
+    var urgent = tests.Count(x => x.TestRequest?.Urgency == Urgency.Urgent);
+    var stat = tests.Count(x => x.TestRequest?.Urgency == Urgency.Stat);
+}
+
+<style>
+    .available-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+    }
+
+    .available-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 38px 0 82px;
+        background: linear-gradient(135deg,#073b5c 0%,#075985 45%,#0284c7 100%);
+    }
+
+        .available-hero::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: 200px;
+            bottom: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
+
+        .available-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
+
+        .available-hero .hero-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .available-hero h1 {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .available-hero p {
+            color: rgba(255,255,255,.82);
+            font-size: 14px;
+            margin: 0;
+            max-width: 720px;
+        }
+
+        .available-hero .eyebrow {
+            display: inline-flex;
+            gap: 7px;
+            align-items: center;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(255,255,255,.13);
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 30px;
+            padding: 7px 13px;
+            margin-bottom: 14px;
+        }
+
+        .available-hero .hero-actions {
+            display: flex;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .available-hero .hero-link {
+            padding: 10px 16px;
+            border-radius: 8px;
+            text-decoration: none !important;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            gap: 7px;
+            align-items: center;
+        }
+
+            .available-hero .hero-link.primary {
+                background: #fff;
+                color: #075985 !important;
+            }
+
+            .available-hero .hero-link.outline {
+                background: rgba(255,255,255,.08);
+                border: 1px solid rgba(255,255,255,.5);
+                color: #fff !important;
+            }
+
+    .available-content {
+        position: relative;
+        z-index: 2;
+        margin-top: -48px;
+        padding-bottom: 50px;
+    }
+
+    .available-summary {
+        background: #fff;
+        border-radius: 13px;
+        padding: 20px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+        height: 100%;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+        .available-summary .label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .available-summary .number {
+            color: #0f172a;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .available-summary .note {
+            color: #94a3b8;
+            font-size: 11px;
+            margin-top: 7px;
+        }
+
+        .available-summary .iconbox {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+    .iconbox.blue {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .iconbox.cyan {
+        background: #cffafe;
+        color: #0891b2;
+    }
+
+    .iconbox.orange {
+        background: #ffedd5;
+        color: #ea580c;
+    }
+
+    .iconbox.red {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .available-card {
+        margin-top: 24px;
+        background: #fff;
+        border-radius: 13px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
+        overflow: hidden;
+    }
+
+    .available-card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .available-card-title {
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .available-card-subtitle {
+        color: #94a3b8;
+        font-size: 11px;
+        margin: 4px 0 0;
+    }
+
+    .available-filter {
+        height: 37px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 11px;
+        color: #334155;
+    }
+
+    .available-table {
+        margin: 0;
+    }
+
+        .available-table thead th {
+            background: #f8fafc;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 13px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
+
+        .available-table tbody td {
+            padding: 14px 13px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
+
+        .available-table tbody tr:hover {
+            background: #f8fcff;
+        }
+
+    .available-main {
+        display: block;
+        color: #075985;
+        font-weight: 700;
+    }
+
+    .available-sub {
+        display: block;
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 3px;
+    }
+
+    .available-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 30px;
+        padding: 5px 9px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+        .available-pill.routine {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .available-pill.urgent {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .available-pill.stat {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .available-pill.status {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+    .available-select {
+        background: #0284c7;
+        color: #fff;
+        border: 0;
+        border-radius: 7px;
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+        .available-select:hover {
+            background: #0369a1;
+            color: #fff;
+        }
+
+        .available-select:disabled {
+            opacity: .6;
+            cursor: wait;
+        }
+
+    .available-empty {
+        text-align: center;
+        padding: 65px 20px;
+    }
+
+        .available-empty .empty-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            background: #e0f2fe;
+            color: #0284c7;
+            font-size: 24px;
+        }
+
+        .available-empty h5 {
+            font-size: 15px;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .available-empty p {
+            font-size: 12px;
+            color: #94a3b8;
+            max-width: 470px;
+            margin: 0 auto;
+        }
+
+    @@media(max-width:768px) {
+        .available-hero {
+            padding-top: 25px;
+        }
+
+            .available-hero h1 {
+                font-size: 24px;
+            }
+
+            .available-hero .hero-actions {
+                justify-content: flex-start;
+                margin-top: 20px;
+            }
+    }
+</style>
+
+<div class="available-page">
+    <section class="available-hero">
+        <div class="container-fluid hero-inner">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="eyebrow"><i class="fas fa-microscope"></i> Test Processing</div>
+                    <h1>Available Laboratory Tests</h1>
+                    <p>Select a test to begin processing. Only submitted tests matching your active manager-assigned test types, from requests with received samples, are listed.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="hero-actions">
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" class="hero-link primary"><i class="fas fa-flask"></i> My Tests</a>
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="AssignedTestTypes" class="hero-link outline"><i class="fas fa-list-check"></i> Assigned Types</a>
+                        <a asp-area="Technician" asp-controller="Home" asp-action="Index" class="hero-link outline"><i class="fas fa-gauge-high"></i> Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container-fluid available-content">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div>
+        }
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4"><div class="available-summary"><div><div class="label">Available Tests</div><h2 class="number">@total</h2><div class="note">Ready for technician selection</div></div><div class="iconbox blue"><i class="fas fa-microscope"></i></div></div></div>
+            <div class="col-xl-3 col-md-6 mb-4"><div class="available-summary"><div><div class="label">Routine</div><h2 class="number">@routine</h2><div class="note">Standard priority</div></div><div class="iconbox cyan"><i class="fas fa-flask"></i></div></div></div>
+            <div class="col-xl-3 col-md-6 mb-4"><div class="available-summary"><div><div class="label">Urgent</div><h2 class="number">@urgent</h2><div class="note">High priority</div></div><div class="iconbox orange"><i class="fas fa-triangle-exclamation"></i></div></div></div>
+            <div class="col-xl-3 col-md-6 mb-4"><div class="available-summary"><div><div class="label">STAT</div><h2 class="number">@stat</h2><div class="note">Immediate priority</div></div><div class="iconbox red"><i class="fas fa-bolt"></i></div></div></div>
+        </div>
+
+        <div class="available-card">
+            <div class="available-card-header">
+                <div class="row align-items-center">
+                    <div class="col-lg-5">
+                        <h4 class="available-card-title"><i class="fas fa-vials text-primary mr-2"></i> Tests Ready for Processing</h4>
+                        <p class="available-card-subtitle">Select a test to record your assignment and processing start time</p>
+                    </div>
+                    <div class="col-lg-7 mt-3 mt-lg-0">
+                        <div class="row">
+                            <div class="col-md-4 mb-2 mb-md-0">
+                                <select id="availableUrgencyFilter" class="form-control available-filter" aria-label="Filter by urgency">
+                                    <option value="">All Urgencies</option>
+                                    <option value="Routine">Routine</option>
+                                    <option value="Urgent">Urgent</option>
+                                    <option value="Stat">STAT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <input id="availableSearch" type="search" class="form-control available-filter" placeholder="Search request, test, patient or doctor..." aria-label="Search available tests" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (tests.Any())
+            {
+                <div class="table-responsive">
+                    <table id="availableTestsTable" class="table available-table">
+                        <thead><tr><th>Request #</th><th>Test Type</th><th>Patient</th><th>Doctor</th><th>Sample Type</th><th>Urgency</th><th>Request Status</th><th class="text-right">Action</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in tests)
+                            {
+                                var request = item.TestRequest;
+                                var urgency = request?.Urgency.ToString() ?? "Routine";
+                                var urgencyClass = urgency == "Stat" ? "stat" : urgency == "Urgent" ? "urgent" : "routine";
+                                <tr>
+                                    <td><span class="available-main">@(request?.RequestNumber ?? "N/A")</span><span class="available-sub">@(request?.RequestDate.ToString("dd MMM yyyy HH:mm") ?? "")</span></td>
+                                    <td><span class="available-main">@(item.TestType?.Name ?? "N/A")</span><span class="available-sub">Test type #@item.TestTypeId</span></td>
+                                    <td>@(request?.Patient?.FullName ?? "N/A")</td>
+                                    <td>@(request?.Doctor?.FullName ?? "N/A")</td>
+                                    <td>@(item.TestType?.SampleType?.Name ?? "N/A")</td>
+                                    <td><span class="available-pill @urgencyClass" data-urgency="@urgency"><i class="fas @(urgency == "Stat" ? "fa-bolt" : urgency == "Urgent" ? "fa-triangle-exclamation" : "fa-circle")"></i>@urgency</span></td>
+                                    <td><span class="available-pill status"><i class="fas fa-clock"></i>@(request?.Status ?? "N/A")</span></td>
+                                    <td class="text-right">
+                                        <form asp-area="Technician" asp-controller="Tests" asp-action="Select" method="post" class="js-select-test d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="testRequestTestTypeId" value="@item.TestRequestTestTypeId" />
+                                            <button type="submit" class="available-select"><i class="fas fa-play mr-1"></i> Select Test</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="available-empty">
+                    <div class="empty-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <h5>No Available Tests</h5>
+                    <p>There are no submitted tests ready for you to process. Tests appear here when their samples have been received and their test types match your active manager assignments.</p>
+                    <div class="mt-4"><a asp-area="Technician" asp-controller="Tests" asp-action="AssignedTestTypes" class="btn btn-outline-primary btn-sm"><i class="fas fa-list-check mr-1"></i> View Assigned Test Types</a></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(function() {
+            var $table = $('#availableTestsTable');
+            if ($table.length && $.fn.DataTable) {
+                var table = $table.DataTable({
+                    pageLength: 10,
+                    autoWidth: false,
+                    scrollX: true,
+                    order: [[0, 'desc']],
+                    columnDefs: [{ targets: 7, orderable: false, searchable: false }],
+                    language: { emptyTable: 'No available tests found.', zeroRecords: 'No tests match your filters.' }
+                });
+                $('#availableSearch').on('input', function() { table.search(this.value).draw(); });
+                $('#availableUrgencyFilter').on('change', function() {
+                    var urgency = this.value;
+                    table.column(5).search(urgency ? '^' + urgency + '$' : '', true, false).draw();
+                });
+            } else {
+                // Basic filtering if DataTables is not loaded by the layout.
+                function filterRows() {
+                    var search = ($('#availableSearch').val() || '').toLowerCase();
+                    var urgency = $('#availableUrgencyFilter').val();
+                    $table.find('tbody tr').each(function() {
+                        var matchesText = $(this).text().toLowerCase().indexOf(search) !== -1;
+                        var matchesUrgency = !urgency || $(this).find('[data-urgency]').attr('data-urgency') === urgency;
+                        $(this).toggle(matchesText && matchesUrgency);
+                    });
+                }
+                $('#availableSearch').on('input', filterRows);
+                $('#availableUrgencyFilter').on('change', filterRows);
+            }
+            $('.js-select-test').on('submit', function(event) {
+                if (!window.confirm('Select this test and begin processing?')) {
+                    event.preventDefault();
+                    return;
+                }
+                $(this).find('button[type=submit]').prop('disabled', true).text('Selecting...');
+            });
+        });
+    </script>
 }

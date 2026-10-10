@@ -37,5 +37,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         [Display(Name = "Active")]
         public bool IsActive { get; set; } = true;
+        public string Notes { get; set; } = string.Empty;
     }
 }

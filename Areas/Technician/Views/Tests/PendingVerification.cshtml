@@ -1,0 +1,322 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+
+@{
+    ViewData["Title"] = "Pending Verification";
+    Layout = "_TechnicianLayout";
+
+    var tests = Model?.ToList()
+        ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+}
+
+<style>
+    .tv-hero {
+        background: linear-gradient(120deg, #103a76, #1976c9);
+        color: white;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+
+    .tv-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(18,49,85,.08);
+        padding: 22px;
+        margin-bottom: 22px;
+    }
+
+    .tv-table th {
+        background: #eff5fb;
+        color: #29486a;
+        font-weight: 700;
+        border-top: 0;
+    }
+
+    .tv-table td {
+        vertical-align: middle;
+    }
+
+    .tv-pill {
+        display: inline-block;
+        border-radius: 30px;
+        padding: 5px 11px;
+        background: #fff3d6;
+        color: #895b00;
+        font-weight: 600;
+        font-size: .82rem;
+    }
+
+    .tv-btn {
+        background: #1769b2;
+        color: white;
+        border: 0;
+        border-radius: 9px;
+        padding: 9px 15px;
+        display: inline-block;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background .2s ease;
+    }
+
+        .tv-btn:hover {
+            background: #104e88;
+            color: white;
+            text-decoration: none;
+        }
+
+    .tv-empty {
+        text-align: center;
+        padding: 35px 20px;
+        color: #728398;
+    }
+
+        .tv-empty i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: #1976c9;
+        }
+
+    .tv-search {
+        max-width: 450px;
+    }
+
+    .tv-count {
+        background: #1769b2;
+        color: white;
+        padding: 8px 13px;
+        border-radius: 9px;
+        font-size: .85rem;
+        font-weight: 700;
+    }
+
+    @@media (max-width: 768px) {
+        .tv-hero {
+            padding: 20px;
+        }
+
+        .tv-card {
+            padding: 15px;
+        }
+
+        .tv-btn {
+            white-space: nowrap;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4">
+
+    <!-- ==========================================
+         PAGE HEADER
+         ========================================== -->
+
+    <div class="tv-hero">
+        <h2 class="mb-2">
+            <i class="fas fa-clipboard-check mr-2"></i>
+            Pending Test Verification
+        </h2>
+
+        <p class="mb-0">
+            Review completed laboratory tests submitted
+            by other authorized technicians.
+        </p>
+    </div>
+
+    <!-- ==========================================
+         FEEDBACK MESSAGES
+         ========================================== -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="status">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- ==========================================
+         VERIFICATION QUEUE
+         ========================================== -->
+
+    <div class="tv-card">
+
+        <div class="d-flex justify-content-between
+            align-items-center flex-wrap mb-3">
+
+            <h4 class="mb-2">
+                <i class="fas fa-list-alt mr-2 text-primary"></i>
+                Tests Awaiting Verification
+            </h4>
+
+            <span class="tv-count">
+                @tests.Count test(s)
+            </span>
+        </div>
+
+        <!-- SEARCH -->
+
+        <div class="form-group tv-search">
+            <label for="verificationSearch">
+                Search tests
+            </label>
+
+            <input id="verificationSearch"
+                   class="form-control"
+                   placeholder="Search request number or test name"
+                   type="search"
+                   autocomplete="off"
+                   aria-controls="pendingVerificationTable" />
+        </div>
+
+        <!-- TABLE -->
+
+        <div class="table-responsive">
+            <table class="table table-hover tv-table"
+                   id="pendingVerificationTable">
+
+                <thead>
+                    <tr>
+                        <th>Request Number</th>
+                        <th>Test Type</th>
+                        <th>Completed At</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in tests)
+                    {
+                        <tr class="verification-row">
+
+                            <td>
+                                <strong>
+                                    @(item.TestRequest?.RequestNumber ?? "—")
+                                </strong>
+                            </td>
+
+                            <td>
+                                @(item.TestType?.Name ?? "Unknown test")
+                            </td>
+
+                            <td>
+                                @(item.CompletionDateTime?.ToString(
+                                    "dd MMM yyyy, HH:mm") ?? "—")
+                            </td>
+
+                            <td>
+                                <span class="tv-pill">
+                                    Awaiting Verification
+                                </span>
+                            </td>
+
+                            <td>
+                                <a class="tv-btn"
+                                   asp-area="Technician"
+                                   asp-controller="Tests"
+                                   asp-action="Details"
+                                   asp-route-id="@item.TestRequestTestTypeId">
+
+                                    <i class="fas fa-eye mr-1"></i>
+                                    Review Results
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        </div>
+
+        <!-- NO PENDING TESTS -->
+        @if (!tests.Any())
+        {
+            <div class="tv-empty" id="noPendingTests">
+                <i class="fas fa-check-circle d-block"></i>
+
+                <h5>No Pending Verifications</h5>
+
+                <p class="mb-0">
+                    There are currently no completed tests
+                    awaiting your independent verification.
+                </p>
+            </div>
+        }
+
+        <!-- NO SEARCH MATCHES -->
+
+        <div class="tv-empty"
+             id="noSearchResults"
+             style="display:none;">
+
+            <i class="fas fa-search d-block"></i>
+
+            <h5>No Matching Tests</h5>
+
+            <p class="mb-0">
+                No tests match your search.
+            </p>
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        (function() {
+            "use strict";
+
+            const search =
+                document.getElementById("verificationSearch");
+
+            const rows =
+                document.querySelectorAll(
+                    "#pendingVerificationTable tbody .verification-row"
+                );
+
+            const noSearchResults =
+                document.getElementById("noSearchResults");
+
+            if (!search || !noSearchResults) {
+                return;
+            }
+
+            search.addEventListener("input", function() {
+
+                const term = this.value
+                    .trim()
+                    .toLowerCase();
+
+                let visibleCount = 0;
+
+                rows.forEach(function(row) {
+
+                    const matches = row.textContent
+                        .toLowerCase()
+                        .includes(term);
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+                        visibleCount++;
+                    }
+                });
+
+                noSearchResults.style.display =
+                    rows.length > 0 && visibleCount === 0
+                        ? "block"
+                        : "none";
+            });
+        })();
+    </script>
+}

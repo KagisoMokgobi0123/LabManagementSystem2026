@@ -1,5 +1,353 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel
+@using NMB_HLabSys.Areas.Doctor.Models
 @{
+    ViewData["Title"] = "Select Test";
+    Layout = "_TechnicianLayout";
+    var request = Model.TestRequest;
+    // Set ViewData["PatientNotes"] in the GET Select action from the actual notes property.
+    var patientNotes = ViewData["PatientNotes"]?.ToString();
+    var urgency = request?.Urgency.ToString() ?? "Routine";
+    var urgencyCss = urgency == "Stat" ? "stat" : urgency == "Urgent" ? "urgent" : "routine";
+}
+
+<style>
+    .select-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+        padding-bottom: 55px;
+    }
+
+    .select-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 38px 0 82px;
+        background: linear-gradient(135deg,#073b5c 0%,#075985 45%,#0284c7 100%);
+    }
+
+        .select-hero:before {
+            content: "";
+            position: absolute;
+            width: 330px;
+            height: 330px;
+            right: -90px;
+            top: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
+
+        .select-hero h1 {
+            color: white;
+            font-size: 30px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .select-hero p {
+            color: rgba(255,255,255,.82);
+            font-size: 14px;
+            margin: 0;
+        }
+
+    .select-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 13px;
+        margin-bottom: 14px;
+        color: white;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 50px;
+        background: rgba(255,255,255,.12);
+    }
+
+    .select-hero-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        background: white;
+        color: #075985 !important;
+        border-radius: 8px;
+        text-decoration: none !important;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .select-content {
+        position: relative;
+        margin-top: -48px;
+        z-index: 2;
+    }
+
+    .select-card {
+        background: #fff;
+        border: 0;
+        border-radius: 13px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+        overflow: hidden;
+        margin-bottom: 22px;
+    }
+
+    .select-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .select-card-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .select-card-subtitle {
+        font-size: 12px;
+        color: #94a3b8;
+        margin: 5px 0 0;
+    }
+
+    .select-card-body {
+        padding: 22px;
+    }
+
+    .select-field {
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .select-field:last-child {
+            border-bottom: 0;
+        }
+
+    .select-label {
+        display: block;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        margin-bottom: 5px;
+    }
+
+    .select-value {
+        display: block;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+    }
+
+    .select-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .select-pill.routine {
+            color: #0369a1;
+            background: #e0f2fe;
+        }
+
+        .select-pill.urgent {
+            color: #c2410c;
+            background: #ffedd5;
+        }
+
+        .select-pill.stat {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .select-pill.status {
+            color: #0369a1;
+            background: #e0f2fe;
+        }
+
+    .select-notes {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        padding: 17px 19px;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        background: #f0f9ff;
+        color: #334155;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .select-notes-empty {
+        padding: 15px 18px;
+        border-radius: 9px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .select-notice {
+        padding: 16px 18px;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        background: #f0f9ff;
+        color: #075985;
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .select-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+        padding-top: 20px;
+    }
+
+    .select-submit {
+        background: #0284c7;
+        color: white;
+        border: 0;
+        border-radius: 8px;
+        padding: 11px 20px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+        .select-submit:hover {
+            background: #0369a1;
+        }
+
+    .select-cancel {
+        display: inline-flex;
+        align-items: center;
+        padding: 11px 20px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none !important;
+    }
+
+    @@media(max-width:768px) {
+        .select-hero {
+            padding-top: 26px;
+        }
+
+            .select-hero h1 {
+                font-size: 24px;
+            }
+
+        .select-actions > * {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="select-page">
+    <div class="select-hero">
+        <div class="container-fluid">
+            <div class="row align-items-center" style="position:relative;z-index:1;">
+                <div class="col-md-8">
+                    <span class="select-eyebrow"><i class="fas fa-microscope"></i> Laboratory Test Processing</span>
+                    <h1>Select Test for Processing</h1>
+                    <p>Review the request and test information before claiming this test.</p>
+                </div>
+                <div class="col-md-4 text-md-right mt-3 mt-md-0">
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="select-hero-link"><i class="fas fa-arrow-left"></i> Available Tests</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid select-content">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+        }
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="select-card">
+                    <div class="select-card-header">
+                        <h2 class="select-card-title"><i class="fas fa-vial text-primary mr-2"></i>Test Details</h2>
+                        <p class="select-card-subtitle">Information associated with the selected request test</p>
+                    </div>
+                    <div class="select-card-body">
+                        <div class="row">
+                            <div class="col-md-6 select-field"><span class="select-label">Test Type</span><span class="select-value">@(Model.TestType?.Name ?? "N/A")</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Test Type ID</span><span class="select-value">@Model.TestTypeId</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Sample Type</span><span class="select-value">@(Model.TestType?.SampleType?.Name ?? "N/A")</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Current Test Status</span><span class="select-pill status"><i class="fas fa-clock"></i> @Model.Status</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="select-card">
+                    <div class="select-card-header"><h2 class="select-card-title"><i class="fas fa-clipboard-list text-primary mr-2"></i>Request Information</h2></div>
+                    <div class="select-card-body">
+                        <div class="row">
+                            <div class="col-md-6 select-field"><span class="select-label">Request Number</span><span class="select-value">@(request?.RequestNumber ?? "N/A")</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Request Date</span><span class="select-value">@(request?.RequestDate.ToString("dd MMM yyyy HH:mm") ?? "N/A")</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Patient</span><span class="select-value">@(request?.Patient?.FullName ?? "N/A")</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Requesting Doctor</span><span class="select-value">@(request?.Doctor?.FullName ?? "N/A")</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Urgency</span><span class="select-pill @urgencyCss">@urgency</span></div>
+                            <div class="col-md-6 select-field"><span class="select-label">Request Status</span><span class="select-value">@(request?.Status ?? "N/A")</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="select-card">
+                    <div class="select-card-header">
+                        <h2 class="select-card-title"><i class="fas fa-notes-medical text-primary mr-2"></i>Patient Notes</h2>
+                        <p class="select-card-subtitle">Notes supplied with the laboratory request</p>
+                    </div>
+                    <div class="select-card-body">
+                        @if (!string.IsNullOrWhiteSpace(patientNotes))
+                        {
+                            <div class="select-notes">@patientNotes</div>
+                        }
+                        else
+                        {
+                            <div class="select-notes-empty"><i class="fas fa-info-circle mr-1"></i>No patient notes were provided for this request.</div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="select-card">
+                    <div class="select-card-header"><h2 class="select-card-title"><i class="fas fa-check-circle text-primary mr-2"></i>Confirm Selection</h2></div>
+                    <div class="select-card-body">
+                        <div class="select-notice">
+                            <i class="fas fa-circle-info mr-1"></i>
+                            By selecting this test, the system will assign it to your technician account, record the start date and time, and set its status to <strong>In Progress</strong>. The request status will also update when applicable.
+                        </div>
+                        <form asp-area="Technician" asp-controller="Tests" asp-action="Select" method="post" id="selectTestForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
+                            <div class="select-actions">
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="select-cancel">Cancel</a>
+                                <button type="submit" id="confirmSelectButton" class="select-submit"><i class="fas fa-play mr-1"></i> Confirm &amp; Start</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('selectTestForm')?.addEventListener('submit', function(event) {
+            if (!window.confirm('Assign this test to yourself and start processing?')) {
+                event.preventDefault();
+                return;
+            }
+            document.getElementById('confirmSelectButton').disabled = true;
+        });
+    </script>
 }

@@ -1,0 +1,634 @@
+﻿@{
+    ViewData["Title"] = "Technician Reports";
+    Layout = "_TechnicianLayout";
+}
+
+<style>
+    .reports-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+        padding-bottom: 60px;
+    }
+
+    .reports-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 40px 0 85px;
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
+        color: #fff;
+    }
+
+        .reports-hero::after {
+            content: "";
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            right: -100px;
+            top: -200px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+            pointer-events: none;
+        }
+
+    .reports-hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .reports-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255,255,255,.25);
+        border-radius: 50px;
+        background: rgba(255,255,255,.12);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .reports-hero h1 {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .reports-hero p {
+        color: rgba(255,255,255,.85);
+        font-size: 14px;
+        max-width: 650px;
+        margin-bottom: 0;
+    }
+
+    .reports-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border: 1px solid rgba(255,255,255,.45);
+        border-radius: 8px;
+        color: #fff !important;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: .2s ease;
+    }
+
+        .reports-back:hover {
+            background: rgba(255,255,255,.15);
+            transform: translateY(-2px);
+        }
+
+    .reports-content {
+        position: relative;
+        z-index: 2;
+        margin-top: -48px;
+    }
+
+    .reports-card {
+        background: #fff;
+        border: 1px solid #eef2f7;
+        border-radius: 14px;
+        box-shadow: 0 5px 22px rgba(15,23,42,.07);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .reports-card-header {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        padding: 22px 25px;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .reports-card-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        flex-shrink: 0;
+        border-radius: 11px;
+        background: #e0f2fe;
+        color: #0284c7;
+        font-size: 18px;
+    }
+
+    .reports-card-title {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .reports-card-subtitle {
+        margin: 4px 0 0;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .reports-card-body {
+        padding: 28px 25px;
+    }
+
+    .reports-label {
+        display: block;
+        margin-bottom: 9px;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .reports-input {
+        width: 100%;
+        height: 46px;
+        padding: 10px 14px;
+        border: 1px solid #dbe4ee;
+        border-radius: 9px;
+        background: #fff;
+        color: #334155;
+        font-size: 13px;
+        transition: .2s ease;
+    }
+
+        .reports-input:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2,132,199,.12);
+        }
+
+    .reports-help {
+        margin-top: 7px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .reports-generate {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 46px;
+        padding: 12px 22px;
+        border: none;
+        border-radius: 9px;
+        background: #0284c7;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+        .reports-generate:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(2,132,199,.2);
+        }
+
+        .reports-generate:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .reports-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 17px;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        background: #f0f9ff;
+    }
+
+    .reports-info-icon {
+        color: #0284c7;
+        font-size: 18px;
+    }
+
+    .reports-info-title {
+        margin-bottom: 5px;
+        color: #075985;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .reports-info-text {
+        color: #475569;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .reports-feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+        .reports-feature:last-child {
+            border-bottom: none;
+        }
+
+    .reports-feature-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        border-radius: 9px;
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .reports-feature-title {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .reports-feature-description {
+        margin-top: 3px;
+        color: #94a3b8;
+        font-size: 11px;
+    }
+
+    .reports-error {
+        display: none;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        border: 1px solid #fecaca;
+        border-radius: 9px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 13px;
+    }
+
+    @@media (max-width: 768px) {
+        .reports-hero {
+            padding: 28px 0 85px;
+        }
+
+            .reports-hero h1 {
+                font-size: 24px;
+            }
+
+        .reports-back {
+            margin-top: 20px;
+        }
+
+        .reports-card-body {
+            padding: 20px;
+        }
+
+        .reports-generate {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="reports-page">
+
+    <!-- HERO -->
+    <div class="reports-hero">
+        <div class="container-fluid">
+            <div class="reports-hero-content">
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+                        <div class="reports-badge">
+                            <i class="fas fa-file-pdf"></i>
+                            Lab Technician Reporting
+                        </div>
+
+                        <h1>Technician Reports</h1>
+
+                        <p>
+                            Generate professional PDF reports of laboratory
+                            tests completed by you, grouped by test category
+                            within your selected reporting period.
+                        </p>
+                    </div>
+
+                    <div class="col-md-4 text-md-right">
+                        <a asp-area="Technician"
+                           asp-controller="Dashboard"
+                           asp-action="Index"
+                           class="reports-back">
+
+                            <i class="fas fa-arrow-left"></i>
+                            Back to Dashboard
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <div class="container-fluid reports-content">
+
+        <div class="row">
+
+            <!-- REPORT GENERATOR -->
+            <div class="col-lg-8">
+
+                <div class="reports-card">
+
+                    <div class="reports-card-header">
+
+                        <div class="reports-card-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+
+                        <div>
+                            <h4 class="reports-card-title">
+                                Completed Tests Report
+                            </h4>
+
+                            <p class="reports-card-subtitle">
+                                Select a reporting period to generate your PDF.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="reports-card-body">
+
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                @TempData["ErrorMessage"]
+                            </div>
+                        }
+
+                        <div id="dateError"
+                             class="reports-error"
+                             role="alert">
+                        </div>
+
+                        <form id="reportForm"
+                              asp-area="Technician"
+                              asp-controller="Reports"
+                              asp-action="DownloadPdf"
+                              method="get">
+
+                            <div class="row">
+
+                                <div class="col-md-6 mb-4">
+
+                                    <label for="startDate"
+                                           class="reports-label">
+                                        <i class="far fa-calendar-alt mr-1"></i>
+                                        Start Date
+                                    </label>
+
+                                    <input type="date"
+                                           id="startDate"
+                                           name="startDate"
+                                           class="reports-input"
+                                           required />
+
+                                    <div class="reports-help">
+                                        First day of the reporting period.
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+
+                                    <label for="endDate"
+                                           class="reports-label">
+                                        <i class="far fa-calendar-check mr-1"></i>
+                                        End Date
+                                    </label>
+
+                                    <input type="date"
+                                           id="endDate"
+                                           name="endDate"
+                                           class="reports-input"
+                                           required />
+
+                                    <div class="reports-help">
+                                        Last day of the reporting period,
+                                        inclusive.
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="reports-info mb-4">
+
+                                <div class="reports-info-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+
+                                <div>
+                                    <div class="reports-info-title">
+                                        About this report
+                                    </div>
+
+                                    <div class="reports-info-text">
+                                        The PDF includes only your laboratory
+                                        tests currently marked Completed or
+                                        Verified, with completion dates within
+                                        the selected range. Results are grouped
+                                        by test category and include request
+                                        numbers, test names, completion dates,
+                                        statuses and category totals.
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+
+                                <button type="submit"
+                                        id="generateButton"
+                                        class="reports-generate">
+
+                                    <i class="fas fa-file-pdf"></i>
+                                    Generate PDF Report
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- REPORT INFORMATION -->
+            <div class="col-lg-4">
+
+                <div class="reports-card">
+
+                    <div class="reports-card-header">
+
+                        <div class="reports-card-icon">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
+
+                        <div>
+                            <h4 class="reports-card-title">
+                                Report Contents
+                            </h4>
+
+                            <p class="reports-card-subtitle">
+                                Information included in the PDF
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="reports-card-body">
+
+                        <div class="reports-feature">
+                            <div class="reports-feature-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="reports-feature-title">
+                                    Technician Information
+                                </div>
+                                <div class="reports-feature-description">
+                                    Your name and reporting period.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reports-feature">
+                            <div class="reports-feature-icon">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <div class="reports-feature-title">
+                                    Test Categories
+                                </div>
+                                <div class="reports-feature-description">
+                                    Completed tests organized by category.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reports-feature">
+                            <div class="reports-feature-icon">
+                                <i class="fas fa-microscope"></i>
+                            </div>
+                            <div>
+                                <div class="reports-feature-title">
+                                    Completed Test Details
+                                </div>
+                                <div class="reports-feature-description">
+                                    Test names, request numbers, dates
+                                    and verification statuses.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reports-feature">
+                            <div class="reports-feature-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div>
+                                <div class="reports-feature-title">
+                                    Workload Totals
+                                </div>
+                                <div class="reports-feature-description">
+                                    Overall completed tests and totals
+                                    for each category.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="reports-feature">
+                            <div class="reports-feature-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div>
+                                <div class="reports-feature-title">
+                                    PDF Format
+                                </div>
+                                <div class="reports-feature-description">
+                                    A4 report with a professional layout
+                                    and automatic page numbering.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        const form = document.getElementById("reportForm");
+        const startDate = document.getElementById("startDate");
+        const endDate = document.getElementById("endDate");
+        const errorBox = document.getElementById("dateError");
+
+        function showError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = "block";
+        }
+
+        function clearError() {
+            errorBox.textContent = "";
+            errorBox.style.display = "none";
+        }
+
+        startDate.addEventListener("change", function() {
+            endDate.min = startDate.value;
+
+            if (endDate.value && endDate.value < startDate.value) {
+                endDate.value = startDate.value;
+            }
+
+            clearError();
+        });
+
+        endDate.addEventListener("change", clearError);
+
+        form.addEventListener("submit", function(event) {
+
+            clearError();
+
+            if (!startDate.value || !endDate.value) {
+                event.preventDefault();
+                showError("Please select both start and end dates.");
+                return;
+            }
+
+            if (endDate.value < startDate.value) {
+                event.preventDefault();
+                showError(
+                    "The end date cannot be earlier than the start date."
+                );
+            }
+        });
+
+    });
+</script>

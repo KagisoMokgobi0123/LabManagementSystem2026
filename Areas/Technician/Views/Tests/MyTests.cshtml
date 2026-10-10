@@ -1,5 +1,449 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+@using NMB_HLabSys.Areas.Doctor.Models
+@using System.Linq
 @{
+    ViewData["Title"] = "My Tests";
+    Layout = "_TechnicianLayout";
+
+    var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+    var now = DateTime.Now;
+    var inProgress = tests.Count(x => x.Status == "In Progress");
+    var completed = tests.Count(x => x.Status == "Completed");
+    var toReview = tests.Count(x => x.Status == "To Be Reviewed");
+    var overdue = tests.Count(x => x.Status == "In Progress" && x.StartDateTime.HasValue &&
+        x.TestType != null && x.StartDateTime.Value.AddHours(x.TestType.TurnAroundTimeHours) < now);
 }
+
+<style>
+    .mytests-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+        padding-bottom: 55px
+    }
+
+    .mytests-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 38px 0 82px;
+        background: linear-gradient(135deg,#073b5c 0%,#075985 45%,#0284c7 100%)
+    }
+
+        .mytests-hero:before {
+            content: "";
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            right: -90px;
+            top: -220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.07)
+        }
+
+        .mytests-hero h1 {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 700;
+            margin: 0 0 8px
+        }
+
+        .mytests-hero p {
+            color: rgba(255,255,255,.83);
+            font-size: 14px;
+            margin: 0
+        }
+
+    .mytests-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(255,255,255,.13);
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 30px;
+        padding: 7px 13px;
+        margin-bottom: 14px
+    }
+
+    .mytests-hero-link {
+        display: inline-flex;
+        gap: 7px;
+        align-items: center;
+        padding: 10px 16px;
+        border-radius: 8px;
+        background: #fff;
+        color: #075985 !important;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none !important
+    }
+
+    .mytests-content {
+        position: relative;
+        z-index: 2;
+        margin-top: -48px
+    }
+
+    .mytests-summary {
+        background: #fff;
+        border-radius: 13px;
+        padding: 20px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between
+    }
+
+        .mytests-summary .label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px
+        }
+
+        .mytests-summary .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0
+        }
+
+        .mytests-summary .symbol {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            background: #e0f2fe;
+            color: #0284c7;
+            font-size: 19px
+        }
+
+            .mytests-summary .symbol.green {
+                background: #dcfce7;
+                color: #15803d
+            }
+
+            .mytests-summary .symbol.orange {
+                background: #ffedd5;
+                color: #c2410c
+            }
+
+            .mytests-summary .symbol.red {
+                background: #fee2e2;
+                color: #b91c1c
+            }
+
+    .mytests-card {
+        background: #fff;
+        border-radius: 13px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
+        margin-top: 24px;
+        overflow: hidden
+    }
+
+    .mytests-card-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid #eef2f7
+    }
+
+    .mytests-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0
+    }
+
+    .mytests-card-subtitle {
+        font-size: 11px;
+        color: #94a3b8;
+        margin: 4px 0 0
+    }
+
+    .mytests-filter {
+        height: 37px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 12px;
+        color: #334155
+    }
+
+    .mytests-table {
+        margin: 0
+    }
+
+        .mytests-table thead th {
+            background: #f8fafc;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 13px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap
+        }
+
+        .mytests-table tbody td {
+            padding: 14px 13px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px
+        }
+
+        .mytests-table tbody tr:hover {
+            background: #f8fcff
+        }
+
+    .mytests-main {
+        display: block;
+        color: #075985;
+        font-weight: 700
+    }
+
+    .mytests-sub {
+        display: block;
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 4px
+    }
+
+    .mytests-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 30px;
+        padding: 5px 9px;
+        font-size: 10px;
+        font-weight: 700;
+        white-space: nowrap
+    }
+
+        .mytests-pill.progress {
+            background: #e0f2fe;
+            color: #0369a1
+        }
+
+        .mytests-pill.completed {
+            background: #dcfce7;
+            color: #166534
+        }
+
+        .mytests-pill.review {
+            background: #ffedd5;
+            color: #9a3412
+        }
+
+        .mytests-pill.verified {
+            background: #f1f5f9;
+            color: #475569
+        }
+
+        .mytests-pill.overdue {
+            background: #fee2e2;
+            color: #b91c1c
+        }
+
+        .mytests-pill.ontime {
+            background: #ecfdf5;
+            color: #047857
+        }
+
+        .mytests-pill.urgent {
+            background: #ffedd5;
+            color: #c2410c
+        }
+
+        .mytests-pill.stat {
+            background: #fee2e2;
+            color: #b91c1c
+        }
+
+        .mytests-pill.routine {
+            background: #e0f2fe;
+            color: #0369a1
+        }
+
+    .mytests-detail {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 7px;
+        background: #0284c7;
+        color: #fff !important;
+        text-decoration: none !important;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: nowrap
+    }
+
+        .mytests-detail:hover {
+            background: #0369a1
+        }
+
+    .mytests-empty {
+        text-align: center;
+        padding: 65px 20px
+    }
+
+        .mytests-empty i {
+            font-size: 28px;
+            color: #0284c7;
+            margin-bottom: 16px
+        }
+
+        .mytests-empty h5 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #334155
+        }
+
+        .mytests-empty p {
+            font-size: 12px;
+            color: #94a3b8
+        }
+
+    @@media(max-width:768px) {
+        .mytests-hero h1 {
+            font-size: 24px
+        }
+
+        .mytests-hero-link {
+            margin-top: 16px
+        }
+    }
+</style>
+
+<div class="mytests-page">
+    <section class="mytests-hero">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="mytests-eyebrow"><i class="fas fa-flask"></i> Technician Workspace</div>
+                    <h1>My Laboratory Tests</h1>
+                    <p>Monitor your selected tests, turnaround deadlines, and results awaiting attention.</p>
+                </div>
+                <div class="col-md-4 text-md-right">
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="mytests-hero-link"><i class="fas fa-plus-circle"></i> Available Tests</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container-fluid mytests-content">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" role="alert">@TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+        }
+
+        <div class="row">
+            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">In Progress</div><p class="number">@inProgress</p></div><div class="symbol"><i class="fas fa-spinner"></i></div></div></div>
+            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">Completed</div><p class="number">@completed</p></div><div class="symbol green"><i class="fas fa-check-circle"></i></div></div></div>
+            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">To Be Reviewed</div><p class="number">@toReview</p></div><div class="symbol orange"><i class="fas fa-clipboard-check"></i></div></div></div>
+            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">Overdue</div><p class="number">@overdue</p></div><div class="symbol red"><i class="fas fa-exclamation-triangle"></i></div></div></div>
+        </div>
+
+        <div class="mytests-card">
+            <div class="mytests-card-header">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-2 mb-lg-0">
+                        <h2 class="mytests-card-title">Assigned Workload</h2>
+                        <p class="mytests-card-subtitle">@tests.Count test(s) assigned to you</p>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="row">
+                            <div class="col-sm-7 mb-2 mb-sm-0"><input id="myTestsSearch" class="form-control mytests-filter" type="search" placeholder="Search request, patient, or test..." aria-label="Search my tests" /></div>
+                            <div class="col-sm-5"><select id="myTestsStatus" class="form-control mytests-filter" aria-label="Filter by status"><option value="">All statuses</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option><option value="To Be Reviewed">To Be Reviewed</option><option value="Verified">Verified</option></select></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @if (tests.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table mytests-table" id="myTestsTable">
+                        <thead><tr><th>Request #</th><th>Test / Patient</th><th>Urgency</th><th>Started</th><th>Expected Completion</th><th>Progress</th><th class="text-right">Action</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in tests)
+                            {
+                                var urgency = item.TestRequest?.Urgency.ToString() ?? "Routine";
+                                var urgencyClass = urgency == "Stat" ? "stat" : urgency == "Urgent" ? "urgent" : "routine";
+                                DateTime? due = item.StartDateTime.HasValue && item.TestType != null
+                                    ? item.StartDateTime.Value.AddHours(item.TestType.TurnAroundTimeHours)
+                                    : (DateTime?)null;
+                                var isOverdue = item.Status == "In Progress" && due.HasValue && due.Value < now;
+                                var statusClass = item.Status == "In Progress" ? "progress" : item.Status == "Completed" ? "completed" : item.Status == "To Be Reviewed" ? "review" : "verified";
+                                <tr data-status="@item.Status">
+                                    <td><span class="mytests-main">@(item.TestRequest?.RequestNumber ?? "N/A")</span><span class="mytests-sub">Test #@item.TestRequestTestTypeId</span></td>
+                                    <td><span class="mytests-main">@(item.TestType?.Name ?? "Unknown test")</span><span class="mytests-sub">@(item.TestRequest?.Patient?.FullName ?? "Patient unavailable")</span></td>
+                                    <td><span class="mytests-pill @urgencyClass">@urgency</span></td>
+                                    <td>@(item.StartDateTime?.ToString("dd MMM yyyy HH:mm") ?? "Not started")</td>
+                                    <td>
+                                        @if (due.HasValue)
+                                        {
+                                            <span class="mytests-main">@due.Value.ToString("dd MMM yyyy HH:mm")</span>
+                                            <span class="mytests-sub">TAT: @item.TestType!.TurnAroundTimeHours hour(s)</span>
+                                            @if (isOverdue)
+                                            {
+                                                <span class="mytests-pill overdue mt-1"><i class="fas fa-exclamation-triangle"></i> Overdue</span>
+                                            }
+                                            else if (item.Status == "In Progress")
+                                            {
+                                                <span class="mytests-pill ontime mt-1">Within deadline</span>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not available</span>
+                                        }
+                                    </td>
+                                    <td><span class="mytests-pill @statusClass">@item.Status</span></td>
+                                    <td class="text-right"><a class="mytests-detail" asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@item.TestRequestTestTypeId"><i class="fas fa-eye"></i> View Details</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div id="myTestsNoMatches" class="mytests-empty" style="display:none"><i class="fas fa-search"></i><h5>No matching tests</h5><p>Try a different search or status filter.</p></div>
+            }
+            else
+            {
+                <div class="mytests-empty"><i class="fas fa-flask"></i><h5>No Tests Selected Yet</h5><p>Choose a test from Available Tests to begin processing.</p><a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="mytests-detail mt-3">Browse Available Tests</a></div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var search = document.getElementById('myTestsSearch');
+        var status = document.getElementById('myTestsStatus');
+        var table = document.getElementById('myTestsTable');
+        var noMatches = document.getElementById('myTestsNoMatches');
+        if (!search || !status || !table) return;
+        function filterTests() {
+            var query = search.value.toLowerCase().trim();
+            var chosenStatus = status.value;
+            var visible = 0;
+            table.querySelectorAll('tbody tr').forEach(function(row) {
+                var matches = row.textContent.toLowerCase().includes(query) &&
+                    (!chosenStatus || row.getAttribute('data-status') === chosenStatus);
+                row.style.display = matches ? '' : 'none';
+                if (matches) visible++;
+            });
+            if (noMatches) noMatches.style.display = visible ? 'none' : 'block';
+        }
+        search.addEventListener('input', filterTests);
+        status.addEventListener('change', filterTests);
+    });
+</script>

@@ -11,6 +11,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 {
     [Area("Technician")]
     [Authorize(Roles = "LabTechnician")]
+    //Receive Sample controller handles the receiving of samples for test requests.
+    //It allows lab technicians to view pending samples, receive them, and view
+    //verified/received samples.
     public class ReceiveSamplesController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -23,16 +26,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _context = context;
             _userManager = userManager;
         }
-
-
         // =========================================================
         // INDEX
         // Display requests that still have samples to be received
         // GET: /Technician/ReceiveSamples/Index
         // =========================================================
-
         [HttpGet]
-      
         public async Task<IActionResult> Index()
         {
             var requests = await _context.TestRequests
@@ -57,13 +56,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return View(requests);
         }
-
-       
-
             // ============================================================
              // GET - LOAD RECEIVE MODAL
              // ============================================================
-
             [HttpGet]
             public async Task<IActionResult> Receive(
                 int testRequestId,
@@ -498,67 +493,5 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // =========================================================
-        // PRIVATE HELPER
-        // Reload trusted display values when validation fails
-        // =========================================================
-
-        private async Task ReloadReceiveModel(
-            ReceiveSampleViewModel model)
-        {
-            var currentUser =
-                await _userManager.GetUserAsync(User);
-
-
-            var sample = await _context.Samples
-                .AsNoTracking()
-
-                .Include(s => s.SampleType)
-
-                .Include(s => s.TestRequest)
-                    .ThenInclude(r => r!.Patient)
-
-                .Include(s => s.TestRequest)
-                    .ThenInclude(r => r!.Doctor)
-
-                .FirstOrDefaultAsync(s =>
-                    s.SampleId == model.SampleID &&
-                    s.TestRequestId == model.TestRequestId &&
-                    !s.IsDeleted);
-
-
-            if (sample == null ||
-                sample.TestRequest == null)
-            {
-                return;
-            }
-
-
-            model.RequestNumber =
-                sample.TestRequest.RequestNumber;
-
-            model.PatientName =
-                sample.TestRequest.Patient?.FullName ?? "N/A";
-
-            model.DoctorName =
-                sample.TestRequest.Doctor?.FullName ?? "N/A";
-
-            model.Barcode =
-                sample.Barcode;
-
-            model.SampleTypeId =
-                sample.SampleTypeId;
-
-            model.SampleTypeName =
-                sample.SampleType?.Name ?? "N/A";
-
-            model.TechnicianName =
-                currentUser?.FullName ??
-                currentUser?.Email ??
-                "Lab Technician";
-
-            model.DateTimeReceived =
-                DateTime.Now;
-        }
     }
 }

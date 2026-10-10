@@ -1,0 +1,82 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>
+@using NMB_HLabSys.Areas.Manager.Models
+@{
+    ViewData["Title"] = "Verification History";
+    Layout = "_TechnicianLayout";
+    var test = ViewData["Test"] as TestRequestTestTypeModel;
+    var events = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>();
+}
+<style>
+    .tv-hero {
+        background: linear-gradient(120deg,#103a76,#1976c9);
+        color: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px
+    }
+
+    .tv-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(18,49,85,.08);
+        padding: 22px;
+        margin-bottom: 22px
+    }
+
+    .tv-event {
+        border-left: 4px solid #2377c0;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        background: #f5f9fe;
+        border-radius: 0 12px 12px 0
+    }
+
+    .tv-action {
+        color: #174e86;
+        font-weight: 700
+    }
+</style>
+<div class="container-fluid py-4">
+    <div class="tv-hero">
+        <h2><i class="fas fa-history mr-2"></i>Verification History</h2>
+        <p class="mb-0">Review the recorded decisions, notes and result corrections.</p>
+    </div>
+    <div class="tv-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <div>
+                <h4 class="mb-1">@(test?.TestType?.Name ?? "Test")</h4>
+                <p class="text-muted mb-0">Test ID: @(test?.TestRequestTestTypeId.ToString() ?? "—") · Current status: @(test?.Status ?? "—")</p>
+            </div>
+            <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" class="btn btn-outline-primary mt-2">Back to My Tests</a>
+        </div>
+    </div>
+    <div class="tv-card">
+        <h4 class="mb-3">Activity timeline (@events.Count)</h4>
+        @if (!events.Any())
+        {
+            <p class="text-muted mb-0">No verification history has been recorded for this test yet.</p>
+        }
+        else
+        {
+            @foreach (var entry in events)
+            {
+                <div class="tv-event">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <span class="tv-action">@entry.Action</span>
+                        <small class="text-muted">@entry.ActionDateTime.ToString("dd MMM yyyy, HH:mm") UTC</small>
+                    </div>
+                    <div class="mt-2"><strong>Technician ID:</strong> @entry.ActionByTechnicianId</div>
+                    @if (!string.IsNullOrWhiteSpace(entry.Notes))
+                    {
+                        <div class="mt-2"><strong>Notes:</strong><div style="white-space:pre-wrap">@entry.Notes</div></div>
+                    }
+                    @if (entry.PreviousResultValue != null || entry.NewResultValue != null)
+                    {
+                        <div class="mt-2"><strong>Result change:</strong> @(entry.PreviousResultValue ?? "—") → @(entry.NewResultValue ?? "—")</div>
+                    }
+                    <small class="text-muted d-block mt-2">Result record: #@entry.TestResultId</small>
+                </div>
+            }
+        }
+    </div>
+</div>

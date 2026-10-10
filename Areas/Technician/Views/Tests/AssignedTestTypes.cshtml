@@ -1,0 +1,144 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel>
+
+@{
+    ViewData["Title"] = "My Assigned Test Types";
+    Layout = "_TechnicianLayout";
+
+    var assignments = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TechnicianTestTypeModel>();
+    var total = assignments.Count;
+    var distinctTypes = assignments.Select(x => x.TestTypeId).Distinct().Count();
+    var latest = assignments.OrderByDescending(x => x.AssignedDate).FirstOrDefault();
+}
+
+<style>
+    .assigned-page { min-height: 100vh; background: #f4f7fb; }
+    .assigned-hero { position: relative; overflow: hidden; padding: 38px 0 82px; background: linear-gradient(135deg,#073b5c 0%,#075985 45%,#0284c7 100%); }
+    .assigned-hero::before { content: ""; position: absolute; width: 280px; height: 280px; right: 200px; bottom: -210px; border-radius: 50%; background: rgba(255,255,255,.05); }
+    .assigned-hero::after { content: ""; position: absolute; width: 380px; height: 380px; right: -100px; top: -220px; border-radius: 50%; background: rgba(255,255,255,.06); }
+    .assigned-hero-content { position: relative; z-index: 1; }
+    .assigned-hero h1 { margin-bottom: 7px; color: #fff; font-size: 30px; font-weight: 700; }
+    .assigned-hero p { max-width: 720px; margin: 0; color: rgba(255,255,255,.82); font-size: 14px; }
+    .assigned-hero-badge { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; margin-bottom: 14px; border: 1px solid rgba(255,255,255,.20); border-radius: 50px; background: rgba(255,255,255,.13); color: #fff; font-size: 12px; font-weight: 600; }
+    .assigned-hero-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; }
+    .assigned-hero-btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 17px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none !important; transition: .2s ease; }
+    .assigned-hero-btn:hover { transform: translateY(-2px); }
+    .assigned-hero-btn-primary { background: #fff; color: #075985 !important; }
+    .assigned-hero-btn-outline { border: 1px solid rgba(255,255,255,.50); background: rgba(255,255,255,.08); color: #fff !important; }
+    .assigned-content { position: relative; z-index: 2; margin-top: -48px; padding-bottom: 50px; }
+    .assigned-summary-card { height: 100%; padding: 20px; border: 1px solid transparent; border-radius: 13px; background: #fff; box-shadow: 0 4px 18px rgba(15,23,42,.07); transition: .2s ease; }
+    .assigned-summary-card:hover { transform: translateY(-3px); border-color: #bae6fd; }
+    .assigned-summary-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+    .assigned-summary-title { margin-bottom: 7px; color: #64748b; font-size: 12px; font-weight: 600; }
+    .assigned-summary-number { margin: 0; color: #0f172a; font-size: 28px; font-weight: 700; }
+    .assigned-summary-note { margin-top: 7px; color: #94a3b8; font-size: 11px; }
+    .assigned-summary-icon { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; min-width: 44px; border-radius: 11px; font-size: 17px; background: #e0f2fe; color: #0284c7; }
+    .assigned-summary-icon.cyan { background: #cffafe; color: #0891b2; }
+    .assigned-summary-icon.green { background: #dcfce7; color: #16a34a; }
+    .assigned-table-card { margin-top: 24px; overflow: hidden; border-radius: 13px; background: #fff; box-shadow: 0 4px 18px rgba(15,23,42,.06); }
+    .assigned-card-header { padding: 18px 20px; border-bottom: 1px solid #eef2f7; }
+    .assigned-card-title { margin: 0; color: #0f172a; font-size: 15px; font-weight: 700; }
+    .assigned-card-subtitle { margin: 4px 0 0; color: #94a3b8; font-size: 11px; }
+    .assigned-filter { height: 37px; border: 1px solid #e2e8f0; border-radius: 8px; color: #334155; font-size: 12px; }
+    .assigned-table { margin-bottom: 0; }
+    .assigned-table thead th { padding: 12px 13px; border-top: 0; border-bottom: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; }
+    .assigned-table tbody td { padding: 14px 13px; vertical-align: middle; border-color: #f1f5f9; color: #334155; font-size: 12px; }
+    .assigned-table tbody tr:hover { background: #f8fcff; }
+    .assigned-name { display: block; color: #075985; font-size: 12px; font-weight: 700; }
+    .assigned-muted { display: block; margin-top: 3px; color: #94a3b8; font-size: 10px; }
+    .assigned-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 50px; background: #dcfce7; color: #15803d; font-size: 10px; font-weight: 700; }
+    .assigned-date { color: #475569; font-size: 11px; }
+    .assigned-empty { padding: 65px 20px; text-align: center; }
+    .assigned-empty-icon { display: flex; align-items: center; justify-content: center; width: 65px; height: 65px; margin: 0 auto 16px; border-radius: 50%; background: #e0f2fe; color: #0284c7; font-size: 24px; }
+    .assigned-empty h5 { margin-bottom: 7px; color: #334155; font-size: 15px; font-weight: 700; }
+    .assigned-empty p { max-width: 450px; margin: auto; color: #94a3b8; font-size: 12px; }
+    @@media (max-width: 768px) { .assigned-hero { padding-top: 25px; } .assigned-hero h1 { font-size: 24px; } .assigned-hero-actions { justify-content: flex-start; margin-top: 20px; } }
+</style>
+
+<div class="assigned-page">
+    <div class="assigned-hero">
+        <div class="container-fluid assigned-hero-content">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="assigned-hero-badge"><i class="fas fa-microscope"></i> Technician Authorisations</div>
+                    <h1>My Assigned Test Types</h1>
+                    <p>View laboratory test types assigned to you by the laboratory manager. Only these test types are eligible for selection from received requests.</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="assigned-hero-actions">
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="assigned-hero-btn assigned-hero-btn-primary"><i class="fas fa-flask"></i> Available Tests</a>
+                        <a asp-area="Technician" asp-controller="Home" asp-action="Index" class="assigned-hero-btn assigned-hero-btn-outline"><i class="fas fa-gauge-high"></i> Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid assigned-content">
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="assigned-summary-card"><div class="assigned-summary-top"><div><div class="assigned-summary-title">Active Assignments</div><h2 class="assigned-summary-number">@total</h2><div class="assigned-summary-note">Authorised laboratory test assignments</div></div><div class="assigned-summary-icon"><i class="fas fa-list-check"></i></div></div></div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="assigned-summary-card"><div class="assigned-summary-top"><div><div class="assigned-summary-title">Distinct Test Types</div><h2 class="assigned-summary-number">@distinctTypes</h2><div class="assigned-summary-note">Unique types you can perform</div></div><div class="assigned-summary-icon cyan"><i class="fas fa-vials"></i></div></div></div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="assigned-summary-card"><div class="assigned-summary-top"><div><div class="assigned-summary-title">Authorisation Status</div><h2 class="assigned-summary-number" style="font-size:22px">@(total > 0 ? "Assigned" : "Pending")</h2><div class="assigned-summary-note">@(latest == null ? "Awaiting manager assignment" : "Latest assignment: " + latest.AssignedDate.ToString("dd MMM yyyy"))</div></div><div class="assigned-summary-icon green"><i class="fas fa-user-check"></i></div></div></div>
+            </div>
+        </div>
+
+        <div class="assigned-table-card">
+            <div class="assigned-card-header">
+                <div class="row align-items-center">
+                    <div class="col-lg-6"><h4 class="assigned-card-title"><i class="fas fa-microscope text-primary mr-2"></i> Authorised Laboratory Test Types</h4><p class="assigned-card-subtitle">Active test-type assignments recorded by the laboratory manager</p></div>
+                    <div class="col-lg-6 mt-3 mt-lg-0"><input type="search" id="assignedSearch" class="form-control assigned-filter" placeholder="Search test type, category or sample type..." aria-label="Search assigned test types" /></div>
+                </div>
+            </div>
+
+            @if (assignments.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table assigned-table" id="assignedTable">
+                        <thead><tr><th>Test Type</th><th>Category</th><th>Sample Type</th><th>Assigned Date</th><th>Status</th></tr></thead>
+                        <tbody>
+                            @foreach (var item in assignments)
+                            {
+                                <tr>
+                                    <td><span class="assigned-name"><i class="fas fa-flask mr-1"></i> @(item.TestType?.Name ?? "Unknown test type")</span><span class="assigned-muted">Test Type #@item.TestTypeId</span></td>
+                                    <td>@(item.TestType?.TestCategory?.Description ?? "N/A")</td>
+                                    <td>@(item.TestType?.SampleType?.Name ?? "N/A")</td>
+                                    <td><span class="assigned-date"><i class="far fa-calendar mr-1"></i> @item.AssignedDate.ToString("dd MMM yyyy HH:mm")</span></td>
+                                    <td><span class="assigned-status"><i class="fas fa-circle-check"></i> Active</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="assigned-empty">
+                    <div class="assigned-empty-icon"><i class="fas fa-flask"></i></div>
+                    <h5>No Test Types Assigned Yet</h5>
+                    <p>The laboratory manager has not assigned any active test types to your account. Contact your manager to receive at least one assignment.</p>
+                    <a asp-area="Technician" asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-sm mt-4">Return to Dashboard</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const search = document.getElementById('assignedSearch');
+            const rows = document.querySelectorAll('#assignedTable tbody tr');
+            if (!search || !rows.length) return;
+            search.addEventListener('input', function () {
+                const term = this.value.toLocaleLowerCase().trim();
+                rows.forEach(function (row) {
+                    row.style.display = row.textContent.toLocaleLowerCase().includes(term) ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+}
