@@ -1,6 +1,7 @@
 ﻿@model NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel
 @using NMB_HLabSys.Areas.Patient.Models
 @using System.Reflection
+@using NMB_HLabSys.Areas.Manager.Models
 @{
     ViewData["Title"] = "Capture Test Results";
     Layout = "_TechnicianLayout";
@@ -11,8 +12,10 @@
     var allergies = patientRecord?.PatientAllergies;
     var medications = patientRecord?.PatientMedications;
     var clinicalNotes = ViewData["ClinicalNotes"]?.ToString();
+    var measurements = ViewData["ConfiguredMeasurements"] as List<TestTypeMeasurementModel>
+        ?? new List<TestTypeMeasurementModel>();
     var deadline = Model.StartDateTime.HasValue && Model.TestType != null
-        ? Model.StartDateTime.Value.AddHours(Model.TestType.TurnAroundTimeHours)
+        ? Model.StartDateTime.Value.AddMinutes(Model.TestType.TurnAroundTimeHours)
         : (DateTime?)null;
     var overdue = Model.Status == "In Progress" && deadline.HasValue && DateTime.Now > deadline.Value;
     var testName = Model.TestType?.Name ?? "Laboratory Test";
@@ -41,217 +44,57 @@
 }
 
 <style>
-    .capture-shell {
-        max-width: 1250px;
-        margin: 0 auto;
-        padding: 24px 14px 48px;
-    }
+    .capture-shell { max-width: 1250px; margin: 0 auto; padding: 24px 14px 48px; }
+    .capture-hero { background: linear-gradient(120deg, #123b73, #2375bd); border-radius: 18px; padding: 28px 30px; color: white; margin-bottom: 22px; box-shadow: 0 12px 28px rgba(21, 72, 131, .17); }
+    .capture-hero h1 { font-size: 1.65rem; font-weight: 750; margin: 0 0 8px; }
+    .capture-hero p { margin: 0; color: #e0edfb; }
+    .capture-hero .hero-back { color: #fff; text-decoration: none; display: inline-block; margin-bottom: 12px; }
+    .capture-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(290px, 1fr); gap: 20px; }
+    .capture-card { background: #fff; border: 1px solid #e3eaf3; border-radius: 14px; overflow: hidden; box-shadow: 0 5px 18px rgba(31, 62, 104, .055); margin-bottom: 20px; }
+    .capture-card h2 { font-size: 1.05rem; font-weight: 750; color: #1c477a; margin: 0; padding: 18px 22px; border-bottom: 1px solid #eaf0f6; }
+    .capture-card .capture-body { padding: 22px; }
+    .capture-card h2 i { margin-right: 9px; }
+    .capture-pairs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+    .capture-label { font-size: .79rem; color: #6a7c92; font-weight: 650; margin-bottom: 5px; }
+    .capture-value { color: #24354b; font-weight: 600; overflow-wrap: anywhere; }
+    .capture-field { margin-bottom: 17px; }
+    .capture-field label { display: block; font-weight: 700; color: #294767; margin-bottom: 7px; }
+    .capture-field .form-control { border-radius: 9px; min-height: 43px; border-color: #cfdae8; }
+    .capture-field textarea.form-control { min-height: 110px; }
+    .capture-hint { color: #728398; font-size: .81rem; margin-top: 5px; }
+    .capture-tag { display: inline-block; padding: 6px 11px; border-radius: 999px; font-size: .78rem; font-weight: 750; background: #e6f1fd; color: #175ca2; }
+    .capture-tag.danger { background: #fce8e8; color: #ad2630; }
+    .capture-tag.warning { background: #fff1d6; color: #875900; }
+    .capture-list { margin: 0; padding-left: 20px; }
+    .capture-list li { margin: 0 0 10px; color: #354963; overflow-wrap: anywhere; }
+    .capture-muted { color: #75869a; font-size: .91rem; margin: 0; }
+    .capture-alert { border-radius: 10px; padding: 13px 15px; margin-bottom: 16px; }
+    .capture-preview { background: #f2f6fb; border: 1px solid #dbe5f0; border-radius: 10px; padding: 14px; color: #39516d; }
+    .capture-preview.low, .capture-preview.high { background: #fff0f0; border-color: #e8aaaa; color: #a12c33; }
+    .capture-preview.normal { background: #edf9f1; border-color: #abd7b8; color: #28633d; }
+    .capture-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .capture-actions .btn { padding: 11px 18px; border-radius: 9px; font-weight: 700; }
+    @@media (max-width: 850px) { .capture-grid { grid-template-columns: 1fr; } }
+    @@media (max-width: 520px) { .capture-pairs { grid-template-columns: 1fr; } .capture-hero { padding: 22px; } }
 
-    .capture-hero {
-        background: linear-gradient(120deg, #123b73, #2375bd);
-        border-radius: 18px;
-        padding: 28px 30px;
-        color: white;
-        margin-bottom: 22px;
-        box-shadow: 0 12px 28px rgba(21, 72, 131, .17);
-    }
-
-        .capture-hero h1 {
-            font-size: 1.65rem;
-            font-weight: 750;
-            margin: 0 0 8px;
-        }
-
-        .capture-hero p {
-            margin: 0;
-            color: #e0edfb;
-        }
-
-        .capture-hero .hero-back {
-            color: #fff;
-            text-decoration: none;
-            display: inline-block;
-            margin-bottom: 12px;
-        }
-
-    .capture-grid {
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(290px, 1fr);
-        gap: 20px;
-    }
-
-    .capture-card {
-        background: #fff;
-        border: 1px solid #e3eaf3;
-        border-radius: 14px;
-        overflow: hidden;
-        box-shadow: 0 5px 18px rgba(31, 62, 104, .055);
-        margin-bottom: 20px;
-    }
-
-        .capture-card h2 {
-            font-size: 1.05rem;
-            font-weight: 750;
-            color: #1c477a;
-            margin: 0;
-            padding: 18px 22px;
-            border-bottom: 1px solid #eaf0f6;
-        }
-
-        .capture-card .capture-body {
-            padding: 22px;
-        }
-
-        .capture-card h2 i {
-            margin-right: 9px;
-        }
-
-    .capture-pairs {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-    }
-
-    .capture-label {
-        font-size: .79rem;
-        color: #6a7c92;
-        font-weight: 650;
-        margin-bottom: 5px;
-    }
-
-    .capture-value {
-        color: #24354b;
-        font-weight: 600;
-        overflow-wrap: anywhere;
-    }
-
-    .capture-field {
-        margin-bottom: 17px;
-    }
-
-        .capture-field label {
-            display: block;
-            font-weight: 700;
-            color: #294767;
-            margin-bottom: 7px;
-        }
-
-        .capture-field .form-control {
-            border-radius: 9px;
-            min-height: 43px;
-            border-color: #cfdae8;
-        }
-
-        .capture-field textarea.form-control {
-            min-height: 110px;
-        }
-
-    .capture-hint {
-        color: #728398;
-        font-size: .81rem;
-        margin-top: 5px;
-    }
-
-    .capture-tag {
-        display: inline-block;
-        padding: 6px 11px;
-        border-radius: 999px;
-        font-size: .78rem;
-        font-weight: 750;
-        background: #e6f1fd;
-        color: #175ca2;
-    }
-
-        .capture-tag.danger {
-            background: #fce8e8;
-            color: #ad2630;
-        }
-
-        .capture-tag.warning {
-            background: #fff1d6;
-            color: #875900;
-        }
-
-    .capture-list {
-        margin: 0;
-        padding-left: 20px;
-    }
-
-        .capture-list li {
-            margin: 0 0 10px;
-            color: #354963;
-            overflow-wrap: anywhere;
-        }
-
-    .capture-muted {
-        color: #75869a;
-        font-size: .91rem;
-        margin: 0;
-    }
-
-    .capture-alert {
-        border-radius: 10px;
-        padding: 13px 15px;
-        margin-bottom: 16px;
-    }
-
-    .capture-preview {
-        background: #f2f6fb;
-        border: 1px solid #dbe5f0;
-        border-radius: 10px;
-        padding: 14px;
-        color: #39516d;
-    }
-
-        .capture-preview.low, .capture-preview.high {
-            background: #fff0f0;
-            border-color: #e8aaaa;
-            color: #a12c33;
-        }
-
-        .capture-preview.normal {
-            background: #edf9f1;
-            border-color: #abd7b8;
-            color: #28633d;
-        }
-
-    .capture-actions {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-
-        .capture-actions .btn {
-            padding: 11px 18px;
-            border-radius: 9px;
-            font-weight: 700;
-        }
-
-    @@media (max-width: 850px) {
-        .capture-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    @@media (max-width: 520px) {
-        .capture-pairs {
-            grid-template-columns: 1fr;
-        }
-
-        .capture-hero {
-            padding: 22px;
-        }
-    }
+    /* Card icons */
+    .capture-card h2 { display: flex; align-items: center; gap: 11px; }
+    .capture-card h2 .card-heading-icon { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; flex: 0 0 38px; border-radius: 11px; background: #e6f1fd; color: #1768ad; }
+    .capture-card h2 .card-heading-icon i { margin: 0; font-size: 16px; }
+    .capture-info-item { display: flex; align-items: flex-start; gap: 11px; }
+    .capture-info-icon { width: 34px; height: 34px; flex: 0 0 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px; color: #2375bd; background: #eef6ff; }
+    .capture-medical-label { display: flex; align-items: center; gap: 8px; }
+    .capture-medical-label i { color: #2375bd; width: 18px; text-align: center; }
+    .capture-field label i { color: #2375bd; margin-right: 6px; }
 </style>
 
 <div class="capture-shell">
     <div class="capture-hero">
-        <a class="hero-back" asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@Model.TestRequestTestTypeId">
-            <i class="fas fa-arrow-left mr-1"></i> Back to Test Details
+        <a class="hero-back" asp-area="Technician" asp-controller="Tests" asp-action="CaptureResultsList">
+            <i class="fas fa-arrow-left mr-1"></i> Back to Capture Results List
         </a>
         <h1><i class="fas fa-flask mr-2"></i> Capture Test Results</h1>
-        <p>@testName · Enter the measurement and notes to complete this test.</p>
+        <p>@testName · Enter measurements and notes, then submit the test for verification.</p>
     </div>
 
     @if (TempData["ErrorMessage"] != null)
@@ -266,15 +109,15 @@
     <div class="capture-grid">
         <div>
             <section class="capture-card">
-                <h2><i class="fas fa-clipboard-list"></i> Test Information</h2>
+                <h2><span class="card-heading-icon"><i class="fas fa-clipboard-list"></i></span> Test Information</h2>
                 <div class="capture-body">
                     <div class="capture-pairs">
-                        <div><div class="capture-label">Test</div><div class="capture-value">@testName</div></div>
-                        <div><div class="capture-label">Request Number</div><div class="capture-value">@(request?.RequestNumber ?? "Not available")</div></div>
-                        <div><div class="capture-label">Status</div><span class="capture-tag">@Model.Status</span></div>
-                        <div><div class="capture-label">Started</div><div class="capture-value">@(Model.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not recorded")</div></div>
-                        <div><div class="capture-label">Turnaround Time</div><div class="capture-value">@(Model.TestType != null ? $"{Model.TestType.TurnAroundTimeHours} hours" : "Not available")</div></div>
-                        <div><div class="capture-label">Expected Completion</div><div class="capture-value">@(deadline?.ToString("dd MMM yyyy, HH:mm") ?? "Not available")</div></div>
+                        <div class="capture-info-item"><span class="capture-info-icon"><i class="fas fa-flask"></i></span><div><div class="capture-label">Test</div><div class="capture-value">@testName</div></div></div>
+                        <div class="capture-info-item"><span class="capture-info-icon"><i class="fas fa-hashtag"></i></span><div><div class="capture-label">Request Number</div><div class="capture-value">@(request?.RequestNumber ?? "Not available")</div></div></div>
+                        <div class="capture-info-item"><span class="capture-info-icon"><i class="fas fa-tasks"></i></span><div><div class="capture-label">Status</div><span class="capture-tag">@Model.Status</span></div></div>
+                        <div class="capture-info-item"><span class="capture-info-icon"><i class="fas fa-calendar-alt"></i></span><div><div class="capture-label">Started</div><div class="capture-value">@(Model.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not recorded")</div></div></div>
+                        <div class="capture-info-item"><span class="capture-info-icon"><i class="fas fa-stopwatch"></i></span><div><div class="capture-label">Turnaround Time</div><div class="capture-value">@(Model.TestType != null ? $"{Model.TestType.TurnAroundTimeHours} minutes" : "Not available")</div></div></div>
+                        <div class="capture-info-item"><span class="capture-info-icon"><i class="fas fa-clock"></i></span><div><div class="capture-label">Expected Completion</div><div class="capture-value">@(deadline?.ToString("dd MMM yyyy, HH:mm") ?? "Not available")</div></div></div>
                     </div>
                     @if (overdue)
                     {
@@ -284,161 +127,167 @@
             </section>
 
             <section class="capture-card">
-                <h2><i class="fas fa-edit"></i> Result Entry</h2>
+                <h2><span class="card-heading-icon"><i class="fas fa-vials"></i></span> Result Entry</h2>
                 <div class="capture-body">
-                    <form asp-area="Technician" asp-controller="Tests" asp-action="CaptureResults" method="post" id="captureResultForm">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
+                    @if (!measurements.Any())
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            No configured measurements were found for this test.
+                            Ask the Laboratory Manager to configure its measurements.
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-area="Technician" asp-controller="Tests"
+                              asp-action="CaptureResults" method="post" id="captureResultForm">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="testRequestTestTypeId"
+                                   value="@Model.TestRequestTestTypeId" />
 
-                        <div class="capture-field">
-                            <label for="resultName">Result Name <span class="text-danger">*</span></label>
-                            <input class="form-control" id="resultName" name="resultName" maxlength="200" required placeholder="e.g. Glucose" />
-                        </div>
-                        <div class="capture-field">
-                            <label for="resultValue">Result Value <span class="text-danger">*</span></label>
-                            <input class="form-control" id="resultValue" name="resultValue" maxlength="200" required placeholder="e.g. 5.6 or Negative" />
-                        </div>
-                        <div class="capture-field">
-                            <label for="measurementUnit">Measurement Unit</label>
-                            <input class="form-control" id="measurementUnit" name="measurementUnit" maxlength="100" placeholder="e.g. mmol/L" />
-                        </div>
-                        <div class="capture-pairs">
                             <div class="capture-field">
-                                <label for="referenceMin">Reference Minimum</label>
-                                <input class="form-control" type="number" step="any" id="referenceMin" name="referenceMin" placeholder="Optional" />
+                                <label for="testTypeMeasurementId"><i class="fas fa-list-ul"></i> Measurement <span class="text-danger">*</span></label>
+                                <select class="form-control" id="testTypeMeasurementId"
+                                        name="testTypeMeasurementId" required>
+                                    <option value="">Select a configured measurement</option>
+                                    @foreach (var measurement in measurements.OrderBy(m => m.DisplayOrder))
+                                    {
+                                        <option value="@measurement.TestTypeMeasurementId">
+                                            @measurement.MeasurementName
+                                            (@(measurement.MeasurementUnit?.Unit ?? "No unit"))
+                                            @(measurement.IsRequired ? "- Required" : "")
+                                        </option>
+                                    }
+                                </select>
+                                <p class="capture-hint">Measurement names, units and reference ranges are set by the laboratory manager.</p>
                             </div>
                             <div class="capture-field">
-                                <label for="referenceMax">Reference Maximum</label>
-                                <input class="form-control" type="number" step="any" id="referenceMax" name="referenceMax" placeholder="Optional" />
+                                <label for="resultValue"><i class="fas fa-microscope"></i> Result Value <span class="text-danger">*</span></label>
+                                <input class="form-control" id="resultValue" name="resultValue"
+                                       maxlength="200" required placeholder="e.g. 5.6 or Negative" />
                             </div>
-                        </div>
-                        <p class="capture-hint">Reference limits must be checked against your laboratory's approved test definitions. The browser preview is informational only.</p>
-                        <div class="capture-preview mb-3" id="resultPreview" aria-live="polite">
-                            <i class="fas fa-info-circle mr-1"></i> Abnormal-result preview: Not evaluated
-                        </div>
-                        <div class="capture-field">
-                            <label for="notes">Technician Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" maxlength="2000" placeholder="Add observations or relevant comments..."></textarea>
-                        </div>
-                        <div class="capture-alert alert alert-warning">
-                            <i class="fas fa-exclamation-circle mr-1"></i>
-                            Submitting this form will mark the test as <strong>Completed</strong> and record its completion time.
-                        </div>
-                        <div class="capture-actions">
-                            <button type="submit" class="btn btn-primary" id="saveResultsBtn"><i class="fas fa-save mr-2"></i> Save Results &amp; Complete Test</button>
-                            <a class="btn btn-outline-secondary" asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@Model.TestRequestTestTypeId">Cancel</a>
-                        </div>
-                    </form>
+                            <div class="capture-preview mb-3" id="resultPreview" aria-live="polite">
+                                Select a measurement to see its reference range.
+                            </div>
+                            <div class="capture-field">
+                                <label for="notes"><i class="fas fa-sticky-note"></i> Technician Notes</label>
+                                <textarea class="form-control" id="notes" name="notes"
+                                          maxlength="2000" placeholder="Add observations or relevant comments..."></textarea>
+                            </div>
+                            <div class="capture-alert alert alert-info">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Saving a measurement does not complete the test.
+                                Use <strong>Finish Test</strong> after capturing all required measurements.
+                            </div>
+                            <div class="capture-actions">
+                                <button type="submit" class="btn btn-primary" id="saveResultsBtn">
+                                    <i class="fas fa-save mr-2"></i> Save Measurement
+                                </button>
+                                <a class="btn btn-outline-secondary" asp-area="Technician"
+                                   asp-controller="Tests" asp-action="Details"
+                                   asp-route-id="@Model.TestRequestTestTypeId">Back to Test Details</a>
+                            </div>
+                        </form>
+                    }
                 </div>
             </section>
         </div>
 
         <aside>
             <section class="capture-card">
-                <h2><i class="fas fa-user-injured"></i> Patient Medical Information</h2>
+                <h2><span class="card-heading-icon"><i class="fas fa-user-injured"></i></span> Patient Medical Information</h2>
                 <div class="capture-body">
-                    <div class="capture-label">Medical Conditions</div>
+                    <div class="capture-label capture-medical-label"><i class="fas fa-heartbeat"></i> Medical Conditions</div>
                     @if (conditions?.Any() == true)
                     {
-                        <ul class="capture-list">@foreach (var item in conditions) {
-                            <li>@DescribeEntry(item)</li>
-                        }
-                    </ul>
-                }
-                    else
-                {
-
-                    <p class="capture-muted mb-3">No medical conditions on record.</p>
-                }
-                <hr />
-                <div class="capture-label">Allergies</div>
-                @if (allergies?.Any() == true)
-                {
-                    <ul class="capture-list">@foreach (var item in allergies) {
-                        <li>@DescribeEntry(item)</li>
+                        <ul class="capture-list">@foreach (var item in conditions) { <li>@DescribeEntry(item)</li> }</ul>
                     }
-                </ul>
-            }
+                    else { <p class="capture-muted mb-3">No medical conditions on record.</p> }
+                    <hr />
+                    <div class="capture-label capture-medical-label"><i class="fas fa-allergies"></i> Allergies</div>
+                    @if (allergies?.Any() == true)
+                    {
+                        <ul class="capture-list">@foreach (var item in allergies) { <li>@DescribeEntry(item)</li> }</ul>
+                    }
+                    else { <p class="capture-muted mb-3">No allergies on record.</p> }
+                    <hr />
+                    <div class="capture-label capture-medical-label"><i class="fas fa-pills"></i> Medications</div>
+                    @if (medications?.Any() == true)
+                    {
+                        <ul class="capture-list">@foreach (var item in medications) { <li>@DescribeEntry(item)</li> }</ul>
+                    }
+                    else { <p class="capture-muted">No medications on record.</p> }
+                </div>
+            </section>
+            <section class="capture-card">
+                <h2><span class="card-heading-icon"><i class="fas fa-notes-medical"></i></span> Doctor's Clinical Notes</h2>
+                <div class="capture-body">
+                    @if (!string.IsNullOrWhiteSpace(clinicalNotes))
+                    {
+                        <div style="white-space:pre-wrap;overflow-wrap:anywhere">@clinicalNotes</div>
+                    }
                     else
-            {
-
-                <p class="capture-muted mb-3">No allergies on record.</p>
-            }
-            <hr />
-            <div class="capture-label">Medications</div>
-            @if (medications?.Any() == true)
-            {
-                <ul class="capture-list">@foreach (var item in medications) {
-                    <li>@DescribeEntry(item)</li>
-                }
-            </ul>
-        }
-                    else
-        {
-
-            <p class="capture-muted">No medications on record.</p>
-        }
+                    {
+                        <p class="capture-muted">Clinical notes are not available. The controller must populate <code>ViewData["ClinicalNotes"]</code> from the test request's actual notes field.</p>
+                    }
+                </div>
+            </section>
+        </aside>
     </div>
-</section>
-<section class="capture-card">
-    <h2><i class="fas fa-notes-medical"></i> Doctor's Clinical Notes</h2>
-    <div class="capture-body">
-        @if (!string.IsNullOrWhiteSpace(clinicalNotes))
-        {
-            <div style="white-space:pre-wrap;overflow-wrap:anywhere">@clinicalNotes</div>
-        }
-        else
-        {
-            <p class="capture-muted">Clinical notes are not available. The controller must populate <code>ViewData["ClinicalNotes"]</code> from the test request's actual notes field.</p>
-        }
-    </div>
-</section>
-</aside>
-</div>
 </div>
 
 <script>
-    (function() {
-        'use strict';
-        var value = document.getElementById('resultValue');
-        var min = document.getElementById('referenceMin');
-        var max = document.getElementById('referenceMax');
-        var preview = document.getElementById('resultPreview');
-        var form = document.getElementById('captureResultForm');
-        var button = document.getElementById('saveResultsBtn');
+(function () {
+    'use strict';
+    const select = document.getElementById('testTypeMeasurementId');
+    const value = document.getElementById('resultValue');
+    const preview = document.getElementById('resultPreview');
+    const form = document.getElementById('captureResultForm');
+    const button = document.getElementById('saveResultsBtn');
+    if (!select || !value || !preview || !form) return;
 
-        function refresh() {
-            var raw = value.value.trim();
-            var number = Number(raw);
-            var hasMin = min.value.trim() !== '';
-            var hasMax = max.value.trim() !== '';
-            var low = hasMin ? Number(min.value) : null;
-            var high = hasMax ? Number(max.value) : null;
-            var label = 'Not evaluated';
-            var cls = '';
-            if (hasMin && hasMax && low > high) {
-                label = 'Invalid reference range: minimum exceeds maximum';
-                cls = 'high';
-            } else if (raw !== '' && Number.isFinite(number) && (hasMin || hasMax)) {
-                if (hasMin && number < low) { label = 'Low — Abnormal'; cls = 'low'; }
-                else if (hasMax && number > high) { label = 'High — Abnormal'; cls = 'high'; }
-                else { label = 'Normal (within entered range)'; cls = 'normal'; }
-            }
-            preview.className = 'capture-preview mb-3 ' + cls;
-            preview.textContent = 'Abnormal-result preview: ' + label;
+    const ranges = {
+        @foreach (var m in measurements)
+        {
+            <text>"@m.TestTypeMeasurementId": {
+                min: @(m.NormalMin.HasValue ? m.NormalMin.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null"),
+                max: @(m.NormalMax.HasValue ? m.NormalMax.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "null")
+            },</text>
         }
-        [value, min, max].forEach(function(el) { el.addEventListener('input', refresh); });
-        form.addEventListener('submit', function(event) {
-            if (min.value.trim() !== '' && max.value.trim() !== '' && Number(min.value) > Number(max.value)) {
-                event.preventDefault();
-                refresh();
-                return;
-            }
-            if (form.checkValidity()) {
-                button.disabled = true;
-                button.textContent = 'Saving results...';
-            }
-        });
-        refresh();
-    })();
+    };
+
+    function refresh() {
+        const range = ranges[select.value];
+        const raw = value.value.trim();
+        preview.className = 'capture-preview mb-3';
+        if (!range) {
+            preview.textContent = 'Select a measurement to see its reference range.';
+            return;
+        }
+        const min = range.min;
+        const max = range.max;
+        const rangeText = `Approved reference: ${min ?? '—'} to ${max ?? '—'}`;
+        const numeric = Number(raw);
+        if (raw === '' || !Number.isFinite(numeric) || (min === null && max === null)) {
+            preview.textContent = rangeText + ' | Abnormal-result preview: Not evaluated';
+        } else if (min !== null && numeric < min) {
+            preview.classList.add('low');
+            preview.textContent = rangeText + ' | Low — Abnormal';
+        } else if (max !== null && numeric > max) {
+            preview.classList.add('high');
+            preview.textContent = rangeText + ' | High — Abnormal';
+        } else {
+            preview.classList.add('normal');
+            preview.textContent = rangeText + ' | Normal';
+        }
+    }
+    select.addEventListener('change', refresh);
+    value.addEventListener('input', refresh);
+    form.addEventListener('submit', function () {
+        if (form.checkValidity()) {
+            button.disabled = true;
+            button.textContent = 'Saving measurement...';
+        }
+    });
+    refresh();
+})();
 </script>

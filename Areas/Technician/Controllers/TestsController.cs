@@ -1291,6 +1291,30 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // =====================================================
 
 
+        [HttpGet]
+        public async Task<IActionResult> CaptureResultsList()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(technicianId))
+                return Challenge();
+
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.TestCategory)
+                .Include(x => x.TestRequest)
+                .Where(x =>
+                    x.TechnicianId == technicianId &&
+                    (x.Status == "In Progress" ||
+                     x.Status == "To Be Reviewed"))
+                .OrderBy(x => x.StartDateTime)
+                .ThenBy(x => x.TestRequestTestTypeId)
+                .ToListAsync();
+
+            return View(tests);
+        }
+
 
 
         [HttpGet]
