@@ -1308,10 +1308,7 @@ namespace NMB_HLabSys.Data
                         TestTypeModel.RecordStatus.Active
                 }
             );
-            //=====
-
-            //
-
+           
 
             builder.Entity<TechnicianTestTypeModel>().HasData(
                 new TechnicianTestTypeModel

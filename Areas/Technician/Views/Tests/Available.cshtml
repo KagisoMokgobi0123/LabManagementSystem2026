@@ -10,6 +10,15 @@
     var selectedTests = ViewBag.SelectedTests as List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianDeadlineRowViewModel>
         ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianDeadlineRowViewModel>();
     var nowUtc = DateTime.UtcNow;
+    var totalSelected = selectedTests.Count;
+    var inProgressCount = selectedTests.Count(x =>
+        string.Equals(x.Status, "In Progress", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(x.Status, "InProgress", StringComparison.OrdinalIgnoreCase));
+    var overdueCount = selectedTests.Count(x =>
+        !string.Equals(x.Status, "Completed", StringComparison.OrdinalIgnoreCase) &&
+        !string.Equals(x.Status, "Verified", StringComparison.OrdinalIgnoreCase) &&
+        x.StartDateTimeUtc.HasValue && x.TurnaroundHours.HasValue &&
+        x.StartDateTimeUtc.Value.AddHours(x.TurnaroundHours.Value) < nowUtc);
 }
 <style>
     .available-page {
@@ -581,6 +590,35 @@
                 </a>
             </div>
 
+            <!-- IN PROGRESS / TOTAL SELECTED -->
+            <div class="col-xl-6 col-md-6 mb-4">
+                <a href="/Technician/Tests/MyTests" class="summary-card-link"
+                   title="View selected patient tests">
+                    <div class="available-summary">
+                        <div>
+                            <div class="label">In Progress (Total Selected)</div>
+                            <h2 class="number">@inProgressCount <small style="font-size:16px;color:#64748b">/ @totalSelected</small></h2>
+                            <div class="note">@inProgressCount currently in progress out of @totalSelected selected patient test(s)</div>
+                        </div>
+                        <div class="iconbox blue"><i class="fas fa-flask"></i></div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- OVERDUE PATIENT TESTS -->
+            <div class="col-xl-6 col-md-6 mb-4">
+                <a href="#assignedTestTypesTable" class="summary-card-link"
+                   title="View overdue selected patient tests">
+                    <div class="available-summary">
+                        <div>
+                            <div class="label">Overdue Tests</div>
+                            <h2 class="number">@overdueCount</h2>
+                            <div class="note">Unfinished selected tests past their expected completion time</div>
+                        </div>
+                        <div class="iconbox red"><i class="fas fa-exclamation-triangle"></i></div>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <!-- ONE UNIFIED TABLE: manager assignments and selected patient tests -->
@@ -618,7 +656,7 @@
                                 <td><span class="available-pill status">Manager Assignment</span></td>
                                 <td><span class="available-main">@test.Name</span></td>
                                 <td>@(test.Category ?? "Uncategorised")<span class="available-sub">Sample: @(test.SampleType ?? "Not specified")</span></td>
-                                <td><span class="text-muted">Not applicable</span></td>
+                                <td><span class="text-muted">Not yet performed</span></td>
                                 <td>
                                     @if (test.IsActive)
                                     {
@@ -629,9 +667,9 @@
                                         <span class="available-pill revoked"><i class="fas fa-ban"></i> Revoked by Manager</span>
                                     }
                                 </td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>—</td>
+                                <td><span class="text-muted">Not yet performed</span></td>
+                                <td><span class="text-muted">Not yet performed</span></td>
+                                <td><span class="text-muted">Not yet performed</span></td>
                                 <td>
                                     <a href="@Url.Action("AssignmentDetails", "Tests", new { area = "Technician", id = test.TestTypeId })"
                                        class="assignment-view-btn" title="View assignment details" aria-label="View assignment details for @test.Name">
@@ -642,6 +680,7 @@
                         }
                         @foreach (var item in selectedTests)
                         {
+                            var matchingAssignment = testTypes.FirstOrDefault(t => string.Equals(t.Name, item.TestTypeName, StringComparison.OrdinalIgnoreCase));
                             var deadlineUtc = item.StartDateTimeUtc.HasValue && item.TurnaroundHours.HasValue
                                 ? item.StartDateTimeUtc.Value.AddHours(item.TurnaroundHours.Value)
                                 : (DateTime?)null;
@@ -652,7 +691,7 @@
                             <tr class="@(overdue ? "deadline-overdue" : "")">
                                 <td><span class="available-pill status">Selected Patient Test</span></td>
                                 <td><span class="available-main">@item.TestTypeName</span></td>
-                                <td>—</td>
+                                <td>@(matchingAssignment?.Category ?? "Not specified")<span class="available-sub">Sample: @(matchingAssignment?.SampleType ?? "Not specified")</span></td>
                                 <td>@item.PatientName<span class="available-sub">@item.RequestReference</span></td>
                                 <td>
                                     <span class="available-main">@item.Status</span>
@@ -676,10 +715,18 @@
                                         <span class="deadline-pill ontime">On track</span>
                                     }
                                 </td>
-                                <td>@(startedLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not started")</td>
+                                <td>@(startedLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not yet performed")</td>
                                 <td>@(item.TurnaroundHours.HasValue ? $"{item.TurnaroundHours.Value:g} hours" : "Not set")</td>
-                                <td>@(deadlineLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not available")</td>
-                                <td><a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" class="assignment-view-btn" title="View my selected tests" aria-label="View my selected tests"><i class="fas fa-flask"></i></a></td>
+                                <td>@(deadlineLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not yet performed")</td>
+
+                                <td class="text-center">
+                                    <a href="/Technician/Tests/MyTests"
+                                       class="assignment-view-btn"
+                                       title="View my selected tests"
+                                       aria-label="View my selected tests">
+                                        <i class="fas fa-flask" aria-hidden="true"></i>
+                                    </a>
+                                </td>
                             </tr>
                         }
                         @if (!testTypes.Any() && !selectedTests.Any())

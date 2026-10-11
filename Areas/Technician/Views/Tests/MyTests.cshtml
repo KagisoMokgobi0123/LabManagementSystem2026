@@ -5,7 +5,11 @@
     ViewData["Title"] = "My Tests";
     Layout = "_TechnicianLayout";
 
-    var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+    var tests = Model?
+        .GroupBy(x => x.TestRequestTestTypeId)
+        .Select(group => group.First())
+        .ToList()
+        ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
     var now = DateTime.Now;
     var inProgress = tests.Count(x => x.Status == "In Progress");
     var completed = tests.Count(x => x.Status == "Completed");
@@ -283,6 +287,11 @@
         white-space: nowrap
     }
 
+    .mytests-detail {
+        border: 0;
+        cursor: pointer;
+    }
+
         .mytests-detail:hover {
             background: #0369a1
         }
@@ -318,6 +327,48 @@
             margin-top: 16px
         }
     }
+
+    /* Clickable summary cards: no underlines in any state */
+    a.mytests-card-link,
+    a.mytests-card-link:link,
+    a.mytests-card-link:visited,
+    a.mytests-card-link:hover,
+    a.mytests-card-link:active,
+    a.mytests-card-link:focus {
+        display: block;
+        height: 100%;
+        color: inherit !important;
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+        a.mytests-card-link *,
+        a.mytests-card-link:hover *,
+        a.mytests-card-link:focus * {
+            text-decoration: none !important;
+        }
+
+        a.mytests-card-link .mytests-summary {
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+
+        a.mytests-card-link:hover .mytests-summary {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(2,132,199,.18);
+        }
+
+        a.mytests-card-link:focus-visible {
+            outline: 3px solid #0284c7;
+            outline-offset: 3px;
+            border-radius: 13px;
+        }
+
+    /* Table actions */
+    .mytests-actions { display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-wrap:wrap; }
+    .mytests-perform { display:inline-flex; align-items:center; gap:6px; padding:8px 12px;
+        border-radius:7px; background:#15803d; color:#fff !important; font-size:11px;
+        font-weight:600; text-decoration:none !important; white-space:nowrap; }
+    .mytests-perform:hover, .mytests-perform:focus { background:#166534; color:#fff !important; text-decoration:none !important; }
 </style>
 
 <div class="mytests-page">
@@ -330,7 +381,7 @@
                     <p>Monitor your selected tests, turnaround deadlines, and results awaiting attention.</p>
                 </div>
                 <div class="col-md-4 text-md-right">
-                    <a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="mytests-hero-link"><i class="fas fa-plus-circle"></i> Available Tests</a>
+                    <a href="/Technician/Tests/Available" class="mytests-hero-link"><i class="fas fa-plus-circle"></i> Available Tests</a>
                 </div>
             </div>
         </div>
@@ -346,12 +397,75 @@
             <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
         }
 
+      
         <div class="row">
-            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">In Progress</div><p class="number">@inProgress</p></div><div class="symbol"><i class="fas fa-spinner"></i></div></div></div>
-            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">Completed</div><p class="number">@completed</p></div><div class="symbol green"><i class="fas fa-check-circle"></i></div></div></div>
-            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">To Be Reviewed</div><p class="number">@toReview</p></div><div class="symbol orange"><i class="fas fa-clipboard-check"></i></div></div></div>
-            <div class="col-lg-3 col-sm-6 mb-3"><div class="mytests-summary"><div><div class="label">Overdue</div><p class="number">@overdue</p></div><div class="symbol red"><i class="fas fa-exclamation-triangle"></i></div></div></div>
+
+            <!-- IN PROGRESS -->
+            <div class="col-lg-3 col-sm-6 mb-3">
+                <a href="/Technician/Tests/InProgress"
+                   class="mytests-card-link">
+                    <div class="mytests-summary">
+                        <div>
+                            <div class="label">In Progress</div>
+                            <p class="number">@inProgress</p>
+                        </div>
+                        <div class="symbol">
+                            <i class="fas fa-spinner"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- COMPLETED -->
+            <div class="col-lg-3 col-sm-6 mb-3">
+                <a href="/Technician/Tests/Completed"
+                   class="mytests-card-link">
+                    <div class="mytests-summary">
+                        <div>
+                            <div class="label">Completed</div>
+                            <p class="number">@completed</p>
+                        </div>
+                        <div class="symbol green">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- TO BE REVIEWED -->
+            <div class="col-lg-3 col-sm-6 mb-3">
+                <a href="/Technician/Tests/ToBeReviewed"
+                   class="mytests-card-link">
+                    <div class="mytests-summary">
+                        <div>
+                            <div class="label">To Be Reviewed</div>
+                            <p class="number">@toReview</p>
+                        </div>
+                        <div class="symbol orange">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- OVERDUE -->
+            <div class="col-lg-3 col-sm-6 mb-3">
+                <a href="/Technician/Tests/Overdue"
+                   class="mytests-card-link">
+                    <div class="mytests-summary">
+                        <div>
+                            <div class="label">Overdue</div>
+                            <p class="number">@overdue</p>
+                        </div>
+                        <div class="symbol red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
         </div>
+
 
         <div class="mytests-card">
             <div class="mytests-card-header">
@@ -408,7 +522,33 @@
                                         }
                                     </td>
                                     <td><span class="mytests-pill @statusClass">@item.Status</span></td>
-                                    <td class="text-right"><a class="mytests-detail" asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@item.TestRequestTestTypeId"><i class="fas fa-eye"></i> View Details</a></td>
+                                    <td class="text-right">
+                                        <div class="mytests-actions">
+                                            @if (item.Status == "In Progress" || item.Status == "To Be Reviewed")
+                                            {
+                                                <a href="/Technician/Tests/CaptureResults/@item.TestRequestTestTypeId"
+                                                   class="mytests-perform"
+                                                   aria-label="Perform test @item.TestRequestTestTypeId">
+                                                    <i class="fas fa-flask" aria-hidden="true"></i> Perform Test
+                                                </a>
+                                            }
+                                        <button type="button"
+                                                class="mytests-detail js-test-details"
+                                                data-request="@(item.TestRequest?.RequestNumber ?? "N/A")"
+                                                data-testid="@item.TestRequestTestTypeId"
+                                                data-patient="@(item.TestRequest?.Patient?.FullName ?? "Patient unavailable")"
+                                                data-testtype="@(item.TestType?.Name ?? "Unknown test")"
+                                                data-urgency="@urgency"
+                                                data-status="@item.Status"
+                                                data-started="@(item.StartDateTime?.ToString("dd MMM yyyy HH:mm") ?? "Not started")"
+                                                data-tat="@(item.TestType != null ? $"{item.TestType.TurnAroundTimeHours} hours" : "Not set")"
+                                                data-due="@(due?.ToString("dd MMM yyyy HH:mm") ?? "Not available")"
+                                                data-deadline="@(isOverdue ? "Overdue" : item.Status == "Completed" || item.Status == "Verified" ? "Finished" : due.HasValue ? "Within deadline" : "Not available")"
+                                                 data-clinicalnotes="@(item.TestRequest?.GetType().GetProperty("ClinicalNotes")?.GetValue(item.TestRequest)?.ToString() ?? "No clinical notes available.")">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </button>
+                                        </div>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -418,30 +558,180 @@
             }
             else
             {
-                <div class="mytests-empty"><i class="fas fa-flask"></i><h5>No Tests Selected Yet</h5><p>Choose a test from Available Tests to begin processing.</p><a asp-area="Technician" asp-controller="Tests" asp-action="Available" class="mytests-detail mt-3">Browse Available Tests</a></div>
+                <div class="mytests-empty"><i class="fas fa-flask"></i><h5>No Tests Selected Yet</h5><p>Choose a test from Available Tests to begin processing.</p><a href="/Technician/Tests/Available" class="mytests-detail mt-3">Browse Available Tests</a></div>
             }
         </div>
     </div>
 </div>
 
+
+@* Reusable read-only modal. Populate fields using the data attributes on MyTests buttons. *@
+<div class="modal fade" id="myTestDetailsModal" tabindex="-1" role="dialog"
+     aria-labelledby="myTestDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="myTestDetailsModalLabel"><i class="fas fa-flask mr-2" aria-hidden="true"></i> Laboratory Test Details</h5>
+                    <small>Selected patient test information</small>
+                </div>
+                <button type="button" class="close js-close-test-modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-file-medical" aria-hidden="true"></i> Request Number</div><div class="mtd-info-value" id="mtdRequest">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-hashtag" aria-hidden="true"></i> Test Number</div><div class="mtd-info-value" id="mtdTestId">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-user-injured" aria-hidden="true"></i> Patient</div><div class="mtd-info-value" id="mtdPatient">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-vials" aria-hidden="true"></i> Test Type</div><div class="mtd-info-value" id="mtdTestType">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-exclamation-circle" aria-hidden="true"></i> Urgency</div><div class="mtd-info-value" id="mtdUrgency">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-tasks" aria-hidden="true"></i> Status</div><div class="mtd-info-value" id="mtdStatus">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-play-circle" aria-hidden="true"></i> Started</div><div class="mtd-info-value" id="mtdStarted">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-hourglass-half" aria-hidden="true"></i> Turnaround Time</div><div class="mtd-info-value" id="mtdTat">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-calendar-check" aria-hidden="true"></i> Expected Completion</div><div class="mtd-info-value" id="mtdDue">Not available</div></div></div>
+                    <div class="col-md-6 mb-3"><div class="mtd-info"><div class="mtd-info-label"><i class="fas fa-clock" aria-hidden="true"></i> Deadline Status</div><div class="mtd-info-value" id="mtdDeadline">Not available</div></div></div>
+                </div>
+                <section class="mtd-clinical-notes" aria-labelledby="mtdClinicalNotesHeading">
+                    <h6 id="mtdClinicalNotesHeading"><i class="fas fa-notes-medical mr-2" aria-hidden="true"></i> Patient Clinical Notes</h6>
+                    <p id="mtdClinicalNotes">No clinical notes available.</p>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary js-close-test-modal"><i class="fas fa-times mr-1" aria-hidden="true"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+
+    #myTestDetailsModal .modal-header { background: linear-gradient(135deg,#073b5c,#0284c7); color: #fff; padding: 22px 26px; border-bottom: 0; display:flex; justify-content:space-between; align-items:flex-start; }
+    #myTestDetailsModal .modal-title { font-size:20px; font-weight:700; }
+    #myTestDetailsModal .modal-body { background:#f8fafc; padding:25px; }
+    #myTestDetailsModal .modal-footer { background:#fff; border-top:1px solid #e2e8f0; padding:15px 25px; }
+    #myTestDetailsModal .mtd-info { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:15px; height:100%; }
+    #myTestDetailsModal .mtd-info-label { color:#64748b; font-size:12px; font-weight:700; margin-bottom:8px; }
+    #myTestDetailsModal .mtd-info-label i { color:#0284c7; margin-right:7px; width:16px; }
+    #myTestDetailsModal .mtd-info-value { color:#0f172a; font-size:14px; font-weight:600; overflow-wrap:anywhere; }
+    #myTestDetailsModal .mtd-clinical-notes { background:#eff6ff; border-left:4px solid #0284c7; border-radius:10px; padding:20px; margin-top:10px; }
+    #myTestDetailsModal .mtd-clinical-notes h6 { color:#075985; font-weight:700; margin-bottom:12px; }
+    #myTestDetailsModal .mtd-clinical-notes p { color:#334155; font-size:13px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; margin:0; }
+
+    /* Standalone modal: does not depend on Bootstrap JavaScript. */
+    #myTestDetailsModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10550;
+        overflow-y: auto;
+        padding: 24px 12px;
+        background: rgba(15,23,42,.62);
+        opacity: 1;
+    }
+
+        #myTestDetailsModal.mytests-modal-open {
+            display: block !important;
+        }
+
+        #myTestDetailsModal .modal-dialog {
+            margin: 30px auto;
+            max-width: 800px;
+            transform: none;
+            pointer-events: auto;
+        }
+
+        #myTestDetailsModal .modal-content {
+            background: #fff;
+            box-shadow: 0 24px 65px rgba(0,0,0,.25);
+        }
+
+        #myTestDetailsModal .modal-header .close {
+            color: #fff;
+            opacity: 1;
+            font-size: 28px;
+        }
+
+        #myTestDetailsModal .modal-body strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #334155;
+            font-size: 12px;
+        }
+
+        #myTestDetailsModal .modal-body .text-muted {
+            overflow-wrap: anywhere;
+        }
+</style>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var search = document.getElementById('myTestsSearch');
-        var status = document.getElementById('myTestsStatus');
-        var table = document.getElementById('myTestsTable');
-        var noMatches = document.getElementById('myTestsNoMatches');
+        const modal = document.getElementById('myTestDetailsModal');
+        if (!modal) return;
+        let previousFocus = null;
+        const fields = {
+            mtdRequest: 'request', mtdTestId: 'testid', mtdPatient: 'patient',
+            mtdTestType: 'testtype', mtdUrgency: 'urgency', mtdStatus: 'status',
+            mtdStarted: 'started', mtdTat: 'tat', mtdDue: 'due', mtdDeadline: 'deadline',
+            mtdClinicalNotes: 'clinicalnotes'
+        };
+        function closeModal() {
+            modal.classList.remove('mytests-modal-open');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (previousFocus) previousFocus.focus();
+        }
+        document.querySelectorAll('.js-test-details').forEach(function(button) {
+            button.addEventListener('click', function() {
+                Object.entries(fields).forEach(function(entry) {
+                    const el = document.getElementById(entry[0]);
+                    if (el) el.textContent = button.dataset[entry[1]] || 'Not available';
+                });
+                previousFocus = button;
+                modal.classList.add('mytests-modal-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+                const close = modal.querySelector('.js-close-test-modal');
+                if (close) close.focus();
+            });
+        });
+        modal.querySelectorAll('.js-close-test-modal').forEach(function(button) {
+            button.addEventListener('click', closeModal);
+        });
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) closeModal();
+        });
+        document.addEventListener('keydown', function(event) {
+            if (!modal.classList.contains('mytests-modal-open')) return;
+            if (event.key === 'Escape') closeModal();
+            if (event.key === 'Tab') {
+                const focusable = Array.from(modal.querySelectorAll('button:not([disabled]), a[href], input:not([disabled])'));
+                if (!focusable.length) return;
+                const first = focusable[0], last = focusable[focusable.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const search = document.getElementById('myTestsSearch');
+        const status = document.getElementById('myTestsStatus');
+        const table = document.getElementById('myTestsTable');
+        const empty = document.getElementById('myTestsNoMatches');
         if (!search || !status || !table) return;
         function filterTests() {
-            var query = search.value.toLowerCase().trim();
-            var chosenStatus = status.value;
-            var visible = 0;
+            const query = search.value.trim().toLowerCase();
+            const selected = status.value;
+            let count = 0;
             table.querySelectorAll('tbody tr').forEach(function(row) {
-                var matches = row.textContent.toLowerCase().includes(query) &&
-                    (!chosenStatus || row.getAttribute('data-status') === chosenStatus);
-                row.style.display = matches ? '' : 'none';
-                if (matches) visible++;
+                const visible = row.textContent.toLowerCase().includes(query) &&
+                    (!selected || row.dataset.status === selected);
+                row.style.display = visible ? '' : 'none';
+                if (visible) count++;
             });
-            if (noMatches) noMatches.style.display = visible ? 'none' : 'block';
+            if (empty) empty.style.display = count ? 'none' : 'block';
         }
         search.addEventListener('input', filterTests);
         status.addEventListener('change', filterTests);

@@ -69,7 +69,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 return Challenge();
 
             // STEP 2: Retrieve Laboratory Manager assignments
-            // Keep both active and revoked assignments for audit visibility.
+            // Include active and revoked assignments.
             var assignmentRecords = await (
                 from assignment in _context.TechnicianTestTypes
                     .AsNoTracking()
@@ -81,18 +81,20 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 {
                     TestTypeId = test.TestTypeId,
                     Name = test.Name,
+
                     Category = test.TestCategory != null
                         ? test.TestCategory.Description
                         : null,
+
                     SampleType = test.SampleType != null
                         ? test.SampleType.Name
                         : null,
+
                     IsActive = assignment.IsActive
                 }
             ).ToListAsync();
 
-            // STEP 3: Keep one row per assigned test type.
-            // If historical duplicates exist, prefer an active assignment.
+            // STEP 3: Keep one display row per assigned test type
             var assignments = assignmentRecords
                 .GroupBy(x => x.TestTypeId)
                 .Select(g => g
@@ -101,39 +103,32 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .OrderBy(x => x.Name)
                 .ToList();
 
-            // STEP 4: Retrieve patient tests selected by technician
+            // STEP 4: Retrieve selected tests
+            // Include the ApplicationUser patient and doctor.
             var selectedTests = await _context.TestRequestTestTypes
                 .AsNoTracking()
                 .Include(x => x.TestType)
                 .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Doctor)
                 .Where(x => x.TechnicianId == technicianId)
                 .OrderByDescending(x => x.StartDateTime)
                 .ThenBy(x => x.TestRequestTestTypeId)
                 .ToListAsync();
 
-            // STEP 5: Retrieve associated patients
-            var patientIds = selectedTests
-                .Where(x => x.TestRequest != null)
-                .Select(x => x.TestRequest!.PatientId)
-                .Distinct()
-                .ToList();
-
-            var patients = await _context.Patients
-                .AsNoTracking()
-                .Where(x => patientIds.Contains(x.PatientId))
-                .ToDictionaryAsync(x => x.PatientId);
-
-            // STEP 6: Map selected tests and deadlines
+            // STEP 5: Map selected tests and deadlines
             var deadlineRows = selectedTests.Select(x =>
             {
                 var request = x.TestRequest;
 
-                var patient = request != null &&
-                              patients.TryGetValue(
-                                  request.PatientId,
-                                  out var matchedPatient)
-                    ? matchedPatient
-                    : null;
+                // Patient is an ApplicationUser
+                var patient = request?.Patient;
+
+                var patientName =
+                    !string.IsNullOrWhiteSpace(patient?.FullName)
+                        ? patient.FullName
+                        : "Patient not found";
 
                 return new TechnicianDeadlineRowViewModel
                 {
@@ -141,9 +136,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         request?.RequestNumber
                         ?? x.TestRequestId.ToString(),
 
-                    PatientName =
-                        patient?.FullName
-                        ?? "Patient not found",
+                    PatientName = patientName,
 
                     TestTypeName =
                         x.TestType?.Name
@@ -151,22 +144,23 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                     Status = x.Status,
 
-                    // Stored as UTC when test is selected
+                    // StartDateTime is stored in UTC
                     StartDateTimeUtc = x.StartDateTime,
 
-                    TurnaroundHours = x.TestType == null
-                        ? null
-                        : (double?)x.TestType.TurnAroundTimeHours
+                    TurnaroundHours =
+                        x.TestType == null
+                            ? null
+                            : (double?)x.TestType.TurnAroundTimeHours
                 };
             }).ToList();
 
-            // STEP 7: Pass deadline information to the unified view
+            // STEP 6: Pass selected tests to the unified table
             ViewBag.SelectedTests = deadlineRows;
 
-            // STEP 8: Return Manager assignments
-            // The view combines both collections into ONE table.
+            // STEP 7: Return the existing single-table view
             return View("Available", assignments);
         }
+
 
 
         [HttpGet]
