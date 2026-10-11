@@ -6,6 +6,10 @@
 
     var testTypes = Model?.ToList()
         ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianAssignmentRowViewModel>();
+
+    var selectedTests = ViewBag.SelectedTests as List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianDeadlineRowViewModel>
+        ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianDeadlineRowViewModel>();
+    var nowUtc = DateTime.UtcNow;
 }
 <style>
     .available-page {
@@ -369,6 +373,43 @@
             margin: 0 auto;
         }
 
+    .deadline-overdue {
+        background: #fff1f2 !important;
+    }
+
+    .deadline-pill {
+        display: inline-block;
+        border-radius: 20px;
+        padding: 5px 10px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .deadline-pill.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .deadline-pill.ontime {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .deadline-pill.done {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .deadline-pill.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+    .deadline-meta {
+        font-size: 11px;
+        color: #64748b;
+    }
+
     @@media(max-width:768px) {
         .available-hero {
             padding-top: 25px;
@@ -458,25 +499,41 @@
 
         <div class="row">
 
-            <!-- MY ASSIGNED TEST TYPES -->
+
+            <!-- SELECT TEST -->
+            <!-- SELECT TEST CARD -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <a href="/Technician/Tests/Available"
-                   class="summary-card-link">
+                <div class="available-summary">
+                    <div>
+                        <div class="label">Select Test</div>
 
-                    <div class="available-summary">
-                        <div>
-                            <div class="label">My Assigned Test Types</div>
-                            <h2 class="number">@testTypes.Count(x => x.IsActive)</h2>
-                            <div class="note">View your active manager assignments</div>
+                        <h2 class="number">
+                            @testTypes.Count(x => x.IsActive)
+                        </h2>
+
+                        <div class="note mb-3">
+                            Select a patient test matching your active
+                            manager assignments.
                         </div>
 
-                        <div class="iconbox blue">
-                            <i class="fas fa-microscope"></i>
-                        </div>
+                        <!-- SELECT TEST BUTTON -->
+                        <a href="/Technician/Tests/Select"
+                           class="btn btn-primary btn-sm">
+
+                            <i class="fas fa-vial mr-1"></i>
+                            Test To Select
+                            <i class="fas fa-arrow-right ml-1"></i>
+
+                        </a>
                     </div>
 
-                </a>
+                    <div class="iconbox blue">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                </div>
             </div>
+
+
 
             <!-- AUTHORIZED TEST TYPES -->
             <div class="col-xl-4 col-md-6 mb-4">
@@ -526,78 +583,113 @@
 
         </div>
 
+        <!-- ONE UNIFIED TABLE: manager assignments and selected patient tests -->
         <div class="available-card">
             <div class="available-card-header">
                 <div class="row align-items-center">
                     <div class="col-lg-7">
-                        <h4 class="available-card-title"><i class="fas fa-list-check text-primary mr-2"></i> Manager-Assigned Test Types</h4>
-                        <p class="available-card-subtitle">Your current and revoked manager assignments are listed. Revoked assignments are retained for audit purposes.</p>
+                        <h4 class="available-card-title"><i class="fas fa-list-check text-primary mr-2"></i> Manager-Assigned Test Types &amp; Selected Tests</h4>
+                        <p class="available-card-subtitle">Manager authorizations and your selected patient-test deadlines, in one table. All times shown in SAST.</p>
                     </div>
                     <div class="col-lg-5 mt-3 mt-lg-0">
-                        <input id="availableSearch" type="search" class="form-control available-filter" placeholder="Search test name, category, sample type or status..." aria-label="Search assigned test types" />
+                        <input id="availableSearch" type="search" class="form-control available-filter" placeholder="Search assignments, patients, requests or status..." aria-label="Search records" />
                     </div>
                 </div>
             </div>
+            <div class="table-responsive">
+                <table id="assignedTestTypesTable" class="table available-table">
+                    <thead>
+                        <tr>
+                            <th>Record</th>
+                            <th>Test Type</th>
+                            <th>Category / Sample</th>
+                            <th>Patient / Request</th>
+                            <th>Authorization / Test Status</th>
+                            <th>Started (SAST)</th>
+                            <th>Turnaround</th>
+                            <th>Deadline (SAST)</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var test in testTypes)
+                        {
+                            <tr>
+                                <td><span class="available-pill status">Manager Assignment</span></td>
+                                <td><span class="available-main">@test.Name</span></td>
+                                <td>@(test.Category ?? "Uncategorised")<span class="available-sub">Sample: @(test.SampleType ?? "Not specified")</span></td>
+                                <td><span class="text-muted">Not applicable</span></td>
+                                <td>
+                                    @if (test.IsActive)
+                                    {
+                                        <span class="available-pill assigned"><i class="fas fa-check-circle"></i> Manager Assigned</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="available-pill revoked"><i class="fas fa-ban"></i> Revoked by Manager</span>
+                                    }
+                                </td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>—</td>
+                                <td>
+                                    <a href="@Url.Action("AssignmentDetails", "Tests", new { area = "Technician", id = test.TestTypeId })"
+                                       class="assignment-view-btn" title="View assignment details" aria-label="View assignment details for @test.Name">
+                                        <i class="fas fa-eye" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var item in selectedTests)
+                        {
+                            var deadlineUtc = item.StartDateTimeUtc.HasValue && item.TurnaroundHours.HasValue
+                                ? item.StartDateTimeUtc.Value.AddHours(item.TurnaroundHours.Value)
+                                : (DateTime?)null;
+                            var finished = item.Status == "Completed" || item.Status == "Verified";
+                            var overdue = !finished && deadlineUtc.HasValue && nowUtc > deadlineUtc.Value;
+                            var startedLocal = item.StartDateTimeUtc?.AddHours(2);
+                            var deadlineLocal = deadlineUtc?.AddHours(2);
+                            <tr class="@(overdue ? "deadline-overdue" : "")">
+                                <td><span class="available-pill status">Selected Patient Test</span></td>
+                                <td><span class="available-main">@item.TestTypeName</span></td>
+                                <td>—</td>
+                                <td>@item.PatientName<span class="available-sub">@item.RequestReference</span></td>
+                                <td>
+                                    <span class="available-main">@item.Status</span>
+                                    @if (overdue)
+                                    {
+                                        <span class="deadline-pill overdue">Overdue</span>
+                                    }
+                                    else if (finished)
+                                    {
 
-            @if (testTypes.Any())
-            {
-                <div class="table-responsive">
-                    <table id="assignedTestTypesTable" class="table available-table">
-                        <thead>
-                            <tr><th>Test Type</th><th>Category</th><th>Sample Type</th><th>Active</th><th>Authorization</th><th class="text-center">Action</th></tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var test in testTypes)
-                            {
-                                <tr>
-                                    @*                                     <td><span class="available-main">#@test.TestTypeId</span></td>
- *@
-                                    <td><span class="available-main">@test.Name</span></td>
-                                    <td>@(test.Category ?? "Uncategorised")</td>
-                                    <td>@(test.SampleType ?? "Not specified")</td>
-                                    <td>
-                                        @if (test.IsActive)
-                                        {
-                                            <span class="available-pill assigned"><i class="fas fa-check-circle"></i> Yes</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="available-pill revoked"><i class="fas fa-ban"></i> No</span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (test.IsActive)
-                                        {
-                                            <span class="available-pill assigned">Manager Assigned</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="available-pill revoked">Revoked by Manager</span>
-                                        }
-                                    </td>
-                                    <td class="text-center">
-                                        <a href="@Url.Action("AssignmentDetails", "Tests", new { area = "Technician", id = test.TestTypeId })"
-                                           class="assignment-view-btn"
-                                           title="View assignment details for @test.Name"
-                                           aria-label="View assignment details for @test.Name">
-                                            <i class="fas fa-eye" aria-hidden="true"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="px-3 py-3 assigned-count-note" id="assignedVisibleCount" aria-live="polite">Showing @testTypes.Count assignment record(s).</div>
-            }
-            else
-            {
-                <div class="available-empty">
-                    <div class="empty-icon"><i class="fas fa-clipboard-check"></i></div>
-                    <h5>No Assigned Test Types</h5>
-                    <p>There are no assignment records for your account. Please contact your Laboratory Manager if you expect an assignment.</p>
-                </div>
-            }
+                                        <span class="deadline-pill done">Finished</span>
+                                    }
+                                    else if (!deadlineUtc.HasValue)
+                                    {
+
+                                        <span class="deadline-pill pending">Deadline unavailable</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="deadline-pill ontime">On track</span>
+                                    }
+                                </td>
+                                <td>@(startedLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not started")</td>
+                                <td>@(item.TurnaroundHours.HasValue ? $"{item.TurnaroundHours.Value:g} hours" : "Not set")</td>
+                                <td>@(deadlineLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not available")</td>
+                                <td><a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" class="assignment-view-btn" title="View my selected tests" aria-label="View my selected tests"><i class="fas fa-flask"></i></a></td>
+                            </tr>
+                        }
+                        @if (!testTypes.Any() && !selectedTests.Any())
+                        {
+                            <tr class="empty-row"><td colspan="9" class="text-center py-5">No manager assignments or selected patient tests found.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-3 py-3 assigned-count-note" id="assignedVisibleCount" aria-live="polite">Showing @(testTypes.Count + selectedTests.Count) record(s).</div>
         </div>
     </div>
 </div>
@@ -605,34 +697,17 @@
 @section Scripts {
     <script>
         $(function() {
-            var $table = $('#assignedTestTypesTable');
-            var $search = $('#availableSearch');
-            if (!$table.length) return;
-
-            if ($.fn.DataTable) {
-                var table = $table.DataTable({
-                    pageLength: 10,
-                    autoWidth: false,
-                    order: [[0, 'asc']],
-                    columnDefs: [{ targets: 5, orderable: false, searchable: false }],
-                    language: { emptyTable: 'No assigned test types found.', zeroRecords: 'No assigned test types match your search.' }
+            var $rows = $('#assignedTestTypesTable tbody tr').not('.empty-row');
+            $('#availableSearch').on('input', function() {
+                var query = (this.value || '').trim().toLowerCase();
+                var visible = 0;
+                $rows.each(function() {
+                    var match = $(this).text().toLowerCase().includes(query);
+                    $(this).toggle(match);
+                    if (match) visible++;
                 });
-                $search.on('input', function() { table.search(this.value).draw(); });
-                table.on('draw', function() {
-                    $('#assignedVisibleCount').text('Matching assigned test types: ' + table.rows({ search: 'applied' }).count());
-                });
-            } else {
-                $search.on('input', function() {
-                    var query = (this.value || '').toLowerCase();
-                    var visible = 0;
-                    $table.find('tbody tr').each(function() {
-                        var match = $(this).text().toLowerCase().indexOf(query) !== -1;
-                        $(this).toggle(match);
-                        if (match) visible++;
-                    });
-                    $('#assignedVisibleCount').text('Matching assigned test types: ' + visible);
-                });
-            }
+                $('#assignedVisibleCount').text('Showing ' + visible + ' matching record(s).');
+            });
         });
     </script>
 }

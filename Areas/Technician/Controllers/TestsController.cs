@@ -58,35 +58,116 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
+
         [HttpGet]
         public async Task<IActionResult> Available()
         {
+            // STEP 1: Identify logged-in technician
             var technicianId = _userManager.GetUserId(User);
 
-            if (string.IsNullOrEmpty(technicianId))
+            if (string.IsNullOrWhiteSpace(technicianId))
                 return Challenge();
 
-            var assignments = await (
-                from assignment in _context.TechnicianTestTypes.AsNoTracking()
-                join test in _context.TestTypes.AsNoTracking()
+            // STEP 2: Retrieve Laboratory Manager assignments
+            // Keep both active and revoked assignments for audit visibility.
+            var assignmentRecords = await (
+                from assignment in _context.TechnicianTestTypes
+                    .AsNoTracking()
+                join test in _context.TestTypes
+                    .AsNoTracking()
                     on assignment.TestTypeId equals test.TestTypeId
                 where assignment.TechnicianId == technicianId
-
-
                 select new TechnicianAssignmentRowViewModel
                 {
                     TestTypeId = test.TestTypeId,
                     Name = test.Name,
                     Category = test.TestCategory != null
-                        ? test.TestCategory.Description : null,
+                        ? test.TestCategory.Description
+                        : null,
                     SampleType = test.SampleType != null
-                        ? test.SampleType.Name : null,
+                        ? test.SampleType.Name
+                        : null,
                     IsActive = assignment.IsActive
                 }
-            ).OrderBy(x => x.Name).ToListAsync();
+            ).ToListAsync();
 
-            return View(assignments);
+            // STEP 3: Keep one row per assigned test type.
+            // If historical duplicates exist, prefer an active assignment.
+            var assignments = assignmentRecords
+                .GroupBy(x => x.TestTypeId)
+                .Select(g => g
+                    .OrderByDescending(x => x.IsActive)
+                    .First())
+                .OrderBy(x => x.Name)
+                .ToList();
+
+            // STEP 4: Retrieve patient tests selected by technician
+            var selectedTests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                .Include(x => x.TestRequest)
+                .Where(x => x.TechnicianId == technicianId)
+                .OrderByDescending(x => x.StartDateTime)
+                .ThenBy(x => x.TestRequestTestTypeId)
+                .ToListAsync();
+
+            // STEP 5: Retrieve associated patients
+            var patientIds = selectedTests
+                .Where(x => x.TestRequest != null)
+                .Select(x => x.TestRequest!.PatientId)
+                .Distinct()
+                .ToList();
+
+            var patients = await _context.Patients
+                .AsNoTracking()
+                .Where(x => patientIds.Contains(x.PatientId))
+                .ToDictionaryAsync(x => x.PatientId);
+
+            // STEP 6: Map selected tests and deadlines
+            var deadlineRows = selectedTests.Select(x =>
+            {
+                var request = x.TestRequest;
+
+                var patient = request != null &&
+                              patients.TryGetValue(
+                                  request.PatientId,
+                                  out var matchedPatient)
+                    ? matchedPatient
+                    : null;
+
+                return new TechnicianDeadlineRowViewModel
+                {
+                    RequestReference =
+                        request?.RequestNumber
+                        ?? x.TestRequestId.ToString(),
+
+                    PatientName =
+                        patient?.FullName
+                        ?? "Patient not found",
+
+                    TestTypeName =
+                        x.TestType?.Name
+                        ?? "Unknown Test",
+
+                    Status = x.Status,
+
+                    // Stored as UTC when test is selected
+                    StartDateTimeUtc = x.StartDateTime,
+
+                    TurnaroundHours = x.TestType == null
+                        ? null
+                        : (double?)x.TestType.TurnAroundTimeHours
+                };
+            }).ToList();
+
+            // STEP 7: Pass deadline information to the unified view
+            ViewBag.SelectedTests = deadlineRows;
+
+            // STEP 8: Return Manager assignments
+            // The view combines both collections into ONE table.
+            return View("Available", assignments);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> AssignmentDetails(int id)
@@ -119,19 +200,164 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return View(assignment);
         }
+
+
+        // Replace the existing GET and POST Select actions in TestsController with these methods.
+        // StartDateTime is stored in UTC; convert to local time only when displaying it.
+
+        [HttpGet]
+        public async Task<IActionResult> Select()
+        {
+            // STEP 1: Get logged-in technician
+            var technician = await _userManager.GetUserAsync(User);
+
+            if (technician == null)
+                return Challenge();
+
+            // STEP 2: Get active test types assigned to this technician
+            var assignedTestTypeIds = await _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(x =>
+                    x.TechnicianId == technician.Id &&
+                    x.IsActive)
+                .Select(x => x.TestTypeId)
+                .Distinct()
+                .ToListAsync();
+
+            // STEP 3: Get available patient tests
+            var availableTests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                .Include(x => x.TestRequest)
+                .Where(x =>
+                    assignedTestTypeIds.Contains(x.TestTypeId) &&
+
+                    x.Status == "SamplesReceived" &&
+
+                    (x.TechnicianId == null ||
+                     x.TechnicianId == "") &&
+
+                    x.TestRequest != null &&
+
+                    (
+                        x.TestRequest.Status ==
+                            TestRequestStatus.SamplesReceived.ToString() ||
+
+                        x.TestRequest.Status ==
+                            TestRequestStatus.InProgress.ToString()
+                    ))
+                .OrderBy(x => x.TestRequestId)
+                .ThenBy(x => x.TestRequestTestTypeId)
+                .ToListAsync();
+
+            // STEP 4: Collect patient and doctor IDs
+            var patientIds = availableTests
+                .Where(x => x.TestRequest != null)
+                .Select(x => x.TestRequest!.PatientId)
+                .Distinct()
+                .ToList();
+
+            var doctorIds = availableTests
+                .Where(x => x.TestRequest != null)
+                .Select(x => x.TestRequest!.DoctorId)
+                .Distinct()
+                .ToList();
+
+            // STEP 5: Retrieve matching patient records
+            var patients = await _context.Patients
+                .AsNoTracking()
+                .Where(x => patientIds.Contains(x.PatientId))
+                .ToDictionaryAsync(x => x.PatientId);
+
+            // STEP 6: Retrieve matching doctor Identity accounts
+            var doctorUsers = await _userManager.Users
+                .AsNoTracking()
+                .Where(x => doctorIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id);
+
+            // STEP 7: Map results to the view model
+            var model = availableTests.Select(x =>
+            {
+                var request = x.TestRequest;
+
+                var patient = request != null &&
+                              patients.TryGetValue(
+                                  request.PatientId,
+                                  out var matchedPatient)
+                    ? matchedPatient
+                    : null;
+
+                var doctor = request != null &&
+                             doctorUsers.TryGetValue(
+                                 request.DoctorId,
+                                 out var matchedDoctor)
+                    ? matchedDoctor
+                    : null;
+
+                return new SelectPatientTestViewModel
+                {
+                    RequestedTestId =
+                        x.TestRequestTestTypeId,
+
+                    RequestReference =
+                        request?.RequestNumber
+                        ?? x.TestRequestId.ToString(),
+
+                    PatientName =
+                        patient?.FullName
+                        ?? "Patient not found",
+
+                    PatientIdNumber =
+                        patient?.IDNumber
+                        ?? "Not available",
+
+                    DoctorFullName =
+                        doctor?.FullName
+                        ?? "Doctor not found",
+
+                    DoctorUsername =
+                        doctor?.UserName
+                        ?? "Not available",
+
+                    ClinicalNotes =
+                        request?.ClinicalNotes
+                        ?? "No clinical notes provided",
+
+                    TestTypeName =
+                        x.TestType?.Name
+                        ?? "Unknown Test",
+
+                    Priority =
+                        request?.Urgency.ToString()
+                        ?? "Not specified",
+
+                    TurnaroundDisplay =
+                        x.TestType == null
+                            ? "Not specified"
+                            : $"{x.TestType.TurnAroundTimeHours} hours",
+
+                    RequestStatus =
+                        request?.Status
+                        ?? "Unknown",
+
+                    TestStatus = x.Status
+                };
+            }).ToList();
+
+            // STEP 8: Return your existing Select.cshtml
+            return View("Select", model);
+        }
+
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-
-
         public async Task<IActionResult> Select(int testRequestTestTypeId)
         {
             var technician = await _userManager.GetUserAsync(User);
 
             if (technician == null)
-                return Unauthorized();
+                return Challenge();
 
-            // Use a serializable transaction to protect test selection
-            // and stock deduction from concurrent requests.
             await using var transaction =
                 await _context.Database.BeginTransactionAsync(
                     System.Data.IsolationLevel.Serializable);
@@ -139,7 +365,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             try
             {
                 // -----------------------------------------------------
-                // Find requested test
+                // 1. Find the requested patient test
                 // -----------------------------------------------------
                 var requestTest = await _context.TestRequestTestTypes
                     .Include(x => x.TestRequest)
@@ -150,27 +376,38 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 if (requestTest == null)
                 {
                     TempData["ErrorMessage"] =
-                        "The selected test could not be found.";
+                        "The selected patient test could not be found.";
 
-                    return RedirectToAction(nameof(Available));
+                    return RedirectToAction(nameof(Select));
                 }
 
                 // -----------------------------------------------------
-                // Check current status
+                // 2. Ensure the sample has been received and test is available
                 // -----------------------------------------------------
                 if (!string.Equals(
                         requestTest.Status,
-                        "Submitted",
+                        "SamplesReceived",
                         StringComparison.OrdinalIgnoreCase))
                 {
                     TempData["ErrorMessage"] =
-                        "This test is no longer available for selection.";
+                        "This test is no longer available for selection. Its sample must be received and it must not already be in progress.";
 
-                    return RedirectToAction(nameof(Available));
+                    return RedirectToAction(nameof(Select));
                 }
 
                 // -----------------------------------------------------
-                // Verify technician assignment
+                // 3. Ensure the test has not been claimed
+                // -----------------------------------------------------
+                if (!string.IsNullOrEmpty(requestTest.TechnicianId))
+                {
+                    TempData["ErrorMessage"] =
+                        "Another technician has already selected this test.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                // -----------------------------------------------------
+                // 4. Verify active manager authorization
                 // -----------------------------------------------------
                 var technicianCanPerformTest =
                     await _context.TechnicianTestTypes
@@ -182,48 +419,51 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 if (!technicianCanPerformTest)
                 {
                     TempData["ErrorMessage"] =
-                        "You are not assigned to perform this test type.";
+                        "You are not authorized to perform this test type. " +
+                        "Your assignment may have been deactivated.";
 
-                    return RedirectToAction(nameof(Available));
+                    return RedirectToAction(nameof(Select));
                 }
 
                 // -----------------------------------------------------
-                // Check samples received
+                // 5. Check the parent test request
                 // -----------------------------------------------------
-                if (requestTest.TestRequest == null)
-                {
-                    TempData["ErrorMessage"] =
-                        "The test request could not be found.";
-
-                    return RedirectToAction(nameof(Available));
-                }
-
                 var request = requestTest.TestRequest;
 
-                if (request.Status !=
-                        TestRequestStatus.SamplesReceived.ToString()
-                    &&
-                    request.Status !=
-                        TestRequestStatus.InProgress.ToString())
+                if (request == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The parent test request could not be found.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                var samplesReceived =
+                    TestRequestStatus.SamplesReceived.ToString();
+
+                var inProgress =
+                    TestRequestStatus.InProgress.ToString();
+
+                if (request.Status != samplesReceived &&
+                    request.Status != inProgress)
                 {
                     TempData["ErrorMessage"] =
                         "Samples must be received before this test can be selected.";
 
-                    return RedirectToAction(nameof(Available));
+                    return RedirectToAction(nameof(Select));
                 }
 
                 // -----------------------------------------------------
-                // Retrieve required consumables
+                // 6. Retrieve required consumables
                 // -----------------------------------------------------
-                var consumables =
-                    await _context.TestTypeConsumables
-                        .Include(x => x.Consumable)
-                        .Where(x =>
-                            x.TestTypeId == requestTest.TestTypeId)
-                        .ToListAsync();
+                var consumables = await _context.TestTypeConsumables
+                    .Include(x => x.Consumable)
+                    .Where(x =>
+                        x.TestTypeId == requestTest.TestTypeId)
+                    .ToListAsync();
 
                 // -----------------------------------------------------
-                // Validate stock
+                // 7. Validate consumable availability
                 // -----------------------------------------------------
                 foreach (var item in consumables)
                 {
@@ -232,7 +472,15 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         TempData["ErrorMessage"] =
                             "A required consumable could not be found.";
 
-                        return RedirectToAction(nameof(Available));
+                        return RedirectToAction(nameof(Select));
+                    }
+
+                    if (item.QuantityRequired <= 0)
+                    {
+                        TempData["ErrorMessage"] =
+                            "Invalid consumable quantity configuration.";
+
+                        return RedirectToAction(nameof(Select));
                     }
 
                     if (item.Consumable.QuantityOnHand <
@@ -241,30 +489,28 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         TempData["ErrorMessage"] =
                             $"Insufficient stock for {item.Consumable.Name}.";
 
-                        return RedirectToAction(nameof(Available));
+                        return RedirectToAction(nameof(Select));
                     }
                 }
 
                 // -----------------------------------------------------
-                // Select test
+                // 8. Record selection and update test progress
                 // -----------------------------------------------------
                 requestTest.TechnicianId = technician.Id;
-                requestTest.StartDateTime = DateTime.Now;
+                requestTest.StartDateTime = DateTime.UtcNow;
                 requestTest.CompletionDateTime = null;
                 requestTest.Status = "In Progress";
 
                 // -----------------------------------------------------
-                // Update overall request status
+                // 9. Update the parent request when testing starts
                 // -----------------------------------------------------
-                if (request.Status ==
-                    TestRequestStatus.SamplesReceived.ToString())
+                if (request.Status == samplesReceived)
                 {
-                    request.Status =
-                        TestRequestStatus.InProgress.ToString();
+                    request.Status = inProgress;
                 }
 
                 // -----------------------------------------------------
-                // Deduct consumables
+                // 10. Deduct required consumables
                 // -----------------------------------------------------
                 foreach (var item in consumables)
                 {
@@ -273,14 +519,15 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 }
 
                 // -----------------------------------------------------
-                // Save everything together
+                // 11. Save and commit all changes
                 // -----------------------------------------------------
                 await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
                 TempData["SuccessMessage"] =
                     $"{requestTest.TestType?.Name ?? "Test"} " +
-                    "was selected successfully.";
+                    "has been selected successfully and is now In Progress.";
 
                 return RedirectToAction(nameof(MyTests));
             }
@@ -289,10 +536,10 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 await transaction.RollbackAsync();
 
                 TempData["ErrorMessage"] =
-                    "This test or its stock was updated by another user. " +
-                    "Please refresh and try again.";
+                    "Another user modified this test or its stock. " +
+                    "Please refresh the page and try again.";
 
-                return RedirectToAction(nameof(Available));
+                return RedirectToAction(nameof(Select));
             }
             catch (Exception)
             {
@@ -301,9 +548,10 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 TempData["ErrorMessage"] =
                     "The test could not be selected. Please try again.";
 
-                return RedirectToAction(nameof(Available));
+                return RedirectToAction(nameof(Select));
             }
         }
+
 
 
         // =========================================================

@@ -1134,6 +1134,64 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("TestTypeId");
 
                     b.ToTable("TestRequestTestTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            TestRequestTestTypeId = 1,
+                            Status = "Submitted",
+                            TestRequestId = 1,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 2,
+                            Status = "SamplesReceived",
+                            TestRequestId = 2,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 3,
+                            Status = "SamplesReceived",
+                            TestRequestId = 2,
+                            TestTypeId = 2
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 4,
+                            Status = "SamplesReceived",
+                            TestRequestId = 3,
+                            TestTypeId = 3
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 5,
+                            Status = "Submitted",
+                            TestRequestId = 5,
+                            TestTypeId = 6
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 6,
+                            Status = "SamplesReceived",
+                            TestRequestId = 6,
+                            TestTypeId = 3
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 7,
+                            Status = "SamplesReceived",
+                            TestRequestId = 9,
+                            TestTypeId = 3
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 8,
+                            Status = "Submitted",
+                            TestRequestId = 10,
+                            TestTypeId = 1
+                        });
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeConsumableModel", b =>

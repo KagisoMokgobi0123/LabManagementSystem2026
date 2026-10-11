@@ -342,7 +342,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         true;
 
                     sample.Status =
-                        "Samples Received";
+                        "SamplesReceived";
 
 
                     // ========================================================

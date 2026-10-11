@@ -112,8 +112,13 @@ namespace NMB_HLabSys.Data
 
         public DbSet<Allergy> Allergies { get; set; }
 
-        public DbSet<TestResultVerificationHistoryModel>
-    TestResultVerificationHistories
+
+        // ============================================================
+        // TECHNICIAN
+        // ============================================================
+
+
+        public DbSet<TestResultVerificationHistoryModel>TestResultVerificationHistories
         { get; set; }
 
         public DbSet<MedicationCategory> MedicationCategories { get; set; }
@@ -1303,7 +1308,9 @@ namespace NMB_HLabSys.Data
                         TestTypeModel.RecordStatus.Active
                 }
             );
+            //=====
 
+            //
 
 
             builder.Entity<TechnicianTestTypeModel>().HasData(
@@ -1359,6 +1366,110 @@ namespace NMB_HLabSys.Data
                 }
             );
 
+
+            // ============================================================
+            // TEST REQUEST TEST TYPES SEED DATA
+            // Individual tests requested by doctors
+            // ============================================================
+
+
+            builder.Entity<TestRequestTestTypeModel>().HasData(
+
+                // Request 1 - Awaiting samples
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 1,
+                    TestRequestId = 1,
+                    TestTypeId = 1,
+                    TechnicianId = null,
+                    Status = "Submitted",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 2 - Samples received
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 2,
+                    TestRequestId = 2,
+                    TestTypeId = 1,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 3,
+                    TestRequestId = 2,
+                    TestTypeId = 2,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 3 - Samples received, request in progress
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 4,
+                    TestRequestId = 3,
+                    TestTypeId = 3,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 5 - Awaiting samples
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 5,
+                    TestRequestId = 5,
+                    TestTypeId = 6,
+                    TechnicianId = null,
+                    Status = "Submitted",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 6 - Samples received
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 6,
+                    TestRequestId = 6,
+                    TestTypeId = 3,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 9 - Samples received, request in progress
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 7,
+                    TestRequestId = 9,
+                    TestTypeId = 3,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 10 - Awaiting samples
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 8,
+                    TestRequestId = 10,
+                    TestTypeId = 1,
+                    TechnicianId = null,
+                    Status = "Submitted",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                }
+            );
 
 
             // ============================================================
