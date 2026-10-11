@@ -8,6 +8,7 @@ using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
 using System.Data;
 using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Areas.Technician.ViewModels;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
@@ -55,76 +56,69 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // =========================================================
-        // AVAILABLE TESTS
-        //
-        // Tests that:
-        // 1. Belong to received requests
-        // 2. Are still Submitted
-        // 3. Match test types assigned to logged-in technician
-        //
-        // GET: /Technician/Tests/Available
-        // =========================================================
+
 
         [HttpGet]
-
         public async Task<IActionResult> Available()
         {
             var technicianId = _userManager.GetUserId(User);
 
             if (string.IsNullOrEmpty(technicianId))
-            {
                 return Challenge();
-            }
 
-            // Get test types assigned by the laboratory manager
-            var assignedTestTypeIds = await _context.TechnicianTestTypes
-                .AsNoTracking()
-                .Where(x =>
-                    x.TechnicianId == technicianId &&
-                    x.IsActive)
-                .Select(x => x.TestTypeId)
-                .ToListAsync();
+            var assignments = await (
+                from assignment in _context.TechnicianTestTypes.AsNoTracking()
+                join test in _context.TestTypes.AsNoTracking()
+                    on assignment.TestTypeId equals test.TestTypeId
+                where assignment.TechnicianId == technicianId
 
-            if (assignedTestTypeIds.Count == 0)
-            {
-                return View(new List<TestRequestTestTypeModel>());
-            }
 
-            // Get request tests the technician is authorised to perform
-            var tests = await _context.TestRequestTestTypes
-                .AsNoTracking()
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Patient)
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Doctor)
-                .Include(x => x.TestType)
-                    .ThenInclude(t => t!.TestCategory)
-                .Include(x => x.TestType)
-                    .ThenInclude(t => t!.SampleType)
-                .Where(x =>
-                    assignedTestTypeIds.Contains(x.TestTypeId) &&
+                select new TechnicianAssignmentRowViewModel
+                {
+                    TestTypeId = test.TestTypeId,
+                    Name = test.Name,
+                    Category = test.TestCategory != null
+                        ? test.TestCategory.Description : null,
+                    SampleType = test.SampleType != null
+                        ? test.SampleType.Name : null,
+                    IsActive = assignment.IsActive
+                }
+            ).OrderBy(x => x.Name).ToListAsync();
 
-                    x.Status == "Submitted" &&
-
-                    x.TestRequest != null &&
-
-                    (
-                        x.TestRequest.Status ==
-                            TestRequestStatus.SamplesReceived.ToString()
-                        ||
-                        x.TestRequest.Status ==
-                            TestRequestStatus.InProgress.ToString()
-                    ))
-                .OrderByDescending(x => x.TestRequest!.Urgency)
-                .ThenBy(x => x.TestRequest!.RequestDate)
-                .ToListAsync();
-
-            return View(tests);
+            return View(assignments);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> AssignmentDetails(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
 
+            if (string.IsNullOrEmpty(technicianId))
+                return Challenge();
 
+            var assignment = await (
+                from a in _context.TechnicianTestTypes.AsNoTracking()
+                join t in _context.TestTypes.AsNoTracking()
+                    on a.TestTypeId equals t.TestTypeId
+                where a.TechnicianId == technicianId
+                      && a.TestTypeId == id
+                select new TechnicianAssignmentRowViewModel
+                {
+                    TestTypeId = t.TestTypeId,
+                    Name = t.Name,
+                    Category = t.TestCategory != null
+                        ? t.TestCategory.Description : null,
+                    SampleType = t.SampleType != null
+                        ? t.SampleType.Name : null,
+                    IsActive = a.IsActive
+                }
+            ).FirstOrDefaultAsync();
+
+            if (assignment == null)
+                return NotFound();
+
+            return View(assignment);
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
 

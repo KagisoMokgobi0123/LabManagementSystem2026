@@ -1,0 +1,383 @@
+﻿@model NMB_HLabSys.Areas.Technician.ViewModels.TechnicianAssignmentRowViewModel
+
+@{
+    ViewData["Title"] = "Assignment Details";
+    Layout = "_TechnicianLayout";
+}
+
+<style>
+    .assignment-details-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+        padding-bottom: 48px;
+    }
+
+    .assignment-details-hero {
+        background: linear-gradient(135deg, #073b5c 0%, #075985 48%, #0284c7 100%);
+        padding: 36px 0 76px;
+        color: #fff;
+    }
+
+        .assignment-details-hero h1 {
+            font-size: 29px;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+
+        .assignment-details-hero p {
+            color: rgba(255,255,255,.84);
+            margin: 0;
+            font-size: 14px;
+        }
+
+    .assignment-details-content {
+        position: relative;
+        margin-top: -42px;
+    }
+
+    .assignment-details-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 6px 24px rgba(15,23,42,.08);
+        overflow: hidden;
+    }
+
+    .assignment-details-card-header {
+        padding: 22px 26px;
+        border-bottom: 1px solid #e8eef5;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+        .assignment-details-card-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+    .assignment-details-card-body {
+        padding: 25px 26px;
+    }
+
+    .assignment-details-field {
+        background: #f8fafc;
+        border: 1px solid #e8eef5;
+        border-radius: 10px;
+        padding: 17px 19px;
+        height: 100%;
+    }
+
+    .assignment-details-label {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .assignment-details-value {
+        display: block;
+        color: #0f172a;
+        font-size: 15px;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+    .assignment-details-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: #dcfce7;
+        color: #166534;
+        border-radius: 30px;
+        padding: 7px 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+        .assignment-details-status.inactive {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+    .assignment-details-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #075985;
+        background: #fff;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none !important;
+    }
+
+        .assignment-details-back:hover {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+    .assignment-details-note {
+        margin-top: 22px;
+        padding: 16px 18px;
+        background: #eff6ff;
+        border-left: 4px solid #0284c7;
+        border-radius: 8px;
+        color: #334155;
+        font-size: 13px;
+    }
+
+        .assignment-details-note.inactive {
+            background: #fef2f2;
+            border-left-color: #dc2626;
+            color: #991b1b;
+        }
+
+    @@media (max-width: 768px) {
+        .assignment-details-hero h1 {
+            font-size: 23px;
+        }
+
+        .assignment-details-card-header,
+        .assignment-details-card-body {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="assignment-details-page">
+
+    <!-- HERO SECTION -->
+    <section class="assignment-details-hero">
+        <div class="container-fluid">
+            <div class="d-flex flex-wrap align-items-center justify-content-between"
+                 style="gap:16px;">
+
+                <div>
+                    <h1>
+                        <i class="fas fa-clipboard-check mr-2"
+                           aria-hidden="true"></i>
+                        Assignment Details
+                    </h1>
+
+                    <p>
+                        View laboratory test type assignment information
+                        and authorization status.
+                    </p>
+                </div>
+
+                <a href="@Url.Action("Available", "Tests", new { area = "Technician" })"
+                   class="assignment-details-back">
+
+                    <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                    Back to Assigned Tests
+                </a>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- DETAILS CONTENT -->
+    <div class="container-fluid assignment-details-content">
+
+        <div class="assignment-details-card">
+
+            <!-- CARD HEADER -->
+            <div class="assignment-details-card-header">
+
+                <h2>
+                    <i class="fas fa-microscope text-primary mr-2"
+                       aria-hidden="true"></i>
+                    @Model.Name
+                </h2>
+
+                @if (Model.IsActive)
+                {
+                    <span class="assignment-details-status">
+                        <i class="fas fa-check-circle"
+                           aria-hidden="true"></i>
+                        Manager Assigned
+                    </span>
+                }
+                else
+                {
+                    <span class="assignment-details-status inactive">
+                        <i class="fas fa-ban"
+                           aria-hidden="true"></i>
+                        Assignment Revoked
+                    </span>
+                }
+
+            </div>
+
+            <!-- CARD BODY -->
+            <div class="assignment-details-card-body">
+
+                <div class="row">
+
+                    <!-- TEST TYPE NAME -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="assignment-details-field">
+
+                            <span class="assignment-details-label">
+                                Test Type Name
+                            </span>
+
+                            <span class="assignment-details-value">
+                                @Model.Name
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <!-- CATEGORY -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="assignment-details-field">
+
+                            <span class="assignment-details-label">
+                                Category
+                            </span>
+
+                            <span class="assignment-details-value">
+                                @(Model.Category ?? "Uncategorised")
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <!-- SAMPLE TYPE -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="assignment-details-field">
+
+                            <span class="assignment-details-label">
+                                Sample Type
+                            </span>
+
+                            <span class="assignment-details-value">
+                                @(Model.SampleType ?? "Not specified")
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <!-- ASSIGNMENT SOURCE -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="assignment-details-field">
+
+                            <span class="assignment-details-label">
+                                Assignment Source
+                            </span>
+
+                            <span class="assignment-details-value">
+                                Laboratory Manager
+                            </span>
+
+                        </div>
+                    </div>
+
+                    <!-- AUTHORIZATION -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="assignment-details-field">
+
+                            <span class="assignment-details-label">
+                                Authorization
+                            </span>
+
+                            @if (Model.IsActive)
+                            {
+                                <span class="assignment-details-value"
+                                      style="color:#166534;">
+
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    Active technician assignment
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="assignment-details-value"
+                                      style="color:#b91c1c;">
+
+                                    <i class="fas fa-ban mr-1"></i>
+                                    Authorization Revoked
+
+                                </span>
+                            }
+
+                        </div>
+                    </div>
+
+                    <!-- ACTIVE STATUS -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="assignment-details-field">
+
+                            <span class="assignment-details-label">
+                                Active
+                            </span>
+
+                            @if (Model.IsActive)
+                            {
+                                <span class="assignment-details-status">
+
+                                    <i class="fas fa-check-circle"
+                                       aria-hidden="true"></i>
+
+                                    Yes - Active
+
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="assignment-details-status inactive">
+
+                                    <i class="fas fa-times-circle"
+                                       aria-hidden="true"></i>
+
+                                    No - Inactive
+
+                                </span>
+                            }
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- INFORMATION MESSAGE -->
+                @if (Model.IsActive)
+                {
+                    <div class="assignment-details-note">
+
+                        <i class="fas fa-info-circle mr-2"
+                           aria-hidden="true"></i>
+
+                        This assignment authorizes you to perform this test type.
+                        A patient test request must exist separately before
+                        you can select and process a patient test.
+
+                    </div>
+                }
+                else
+                {
+                    <div class="assignment-details-note inactive">
+
+                        <i class="fas fa-exclamation-triangle mr-2"
+                           aria-hidden="true"></i>
+
+                        <strong>Assignment Deactivated:</strong>
+                        This assignment has been deactivated by the
+                        Laboratory Manager. You are no longer authorized
+                        to select or process new tests under this assignment.
+
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
