@@ -88,12 +88,19 @@
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             }
 
+
+            /* =====================================================
+                                   APPLICATION
+                                   ===================================================== */
+
             .technician-app {
                 min-height: 100vh;
             }
 
 
-            /*sidebar*/
+            /* =====================================================
+                                   SIDEBAR
+                                   ===================================================== */
 
             .technician-sidebar {
                 position: fixed;
@@ -105,7 +112,6 @@
                 display: flex;
                 flex-direction: column;
                 overflow-y: auto;
-                scrollbar-width: none;
                 overflow-x: hidden;
                 background: linear-gradient( 180deg, var(--sidebar-dark) 0%, var(--sidebar-blue) 50%, var(--sidebar-light) 100% );
                 box-shadow: 5px 0 25px rgba(15, 23, 42, .13);
@@ -113,7 +119,9 @@
             }
 
 
-            /* logo */
+            /* =====================================================
+                                   LOGO
+                                   ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -157,7 +165,9 @@
             }
 
 
-            /*sidebar controls*/
+            /* =====================================================
+                                   SIDEBAR CONTROLS
+                                   ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -192,6 +202,9 @@
                 }
 
 
+            /* =====================================================
+                                   TECHNICIAN USER
+                                   ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -243,7 +256,9 @@
             }
 
 
-            /*navigation */
+            /* =====================================================
+                                   NAVIGATION
+                                   ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
@@ -318,6 +333,11 @@
                 white-space: nowrap;
             }
 
+
+            /* =====================================================
+                                   PRIORITY BADGE
+                                   ===================================================== */
+
             .sidebar-count {
                 min-width: 20px;
                 padding: 2px 6px;
@@ -328,6 +348,11 @@
                 font-weight: 700;
                 text-align: center;
             }
+
+
+            /* =====================================================
+                                   SIDEBAR BOTTOM
+                                   ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
@@ -362,13 +387,20 @@
                 }
 
 
-            /*  main content */
+            /* =====================================================
+                                   MAIN CONTENT
+                                   ===================================================== */
 
             .technician-main {
                 min-height: 100vh;
                 margin-left: var(--sidebar-width);
                 transition: margin-left .25s ease, width .25s ease;
             }
+
+
+            /* =====================================================
+                                   COLLAPSED DESKTOP SIDEBAR
+                                   ===================================================== */
 
             body.sidebar-collapsed
             .technician-sidebar {
@@ -410,6 +442,11 @@
                 padding: 8px 5px;
             }
 
+
+            /*
+                                 * Hide full-screen button while sidebar is collapsed.
+                                 * The arrow remains visible.
+                                 */
             body.sidebar-collapsed
             #fullScreenToggle {
                 display: none;
@@ -513,6 +550,13 @@
                     display: none;
                 }
 
+
+            /* =====================================================
+                                   FULL WIDTH MODE
+
+                                   Completely removes sidebar from view.
+                                   ===================================================== */
+
             body.sidebar-hidden
             .technician-sidebar {
                 transform: translateX(-100%) !important;
@@ -525,6 +569,10 @@
                 width: 100% !important;
             }
 
+
+            /* =====================================================
+                                   FLOATING RESTORE BUTTON
+                                   ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -559,6 +607,10 @@
                 display: flex;
             }
 
+
+            /* =====================================================
+                                   MOBILE TOP BAR
+                                   ===================================================== */
 
             .technician-mobile-header {
                 display: none;
@@ -598,6 +650,11 @@
                 cursor: pointer;
             }
 
+
+            /* =====================================================
+                                   MOBILE BACKDROP
+                                   ===================================================== */
+
             .sidebar-backdrop {
                 position: fixed;
                 inset: 0;
@@ -607,7 +664,9 @@
             }
 
 
-            /*Responsiveness*/
+            /* =====================================================
+                                   RESPONSIVE
+                                   ===================================================== */
 
             @@media(max-width: 991.98px) {
 
@@ -637,12 +696,17 @@
                 .technician-mobile-header {
                     display: flex;
                 }
-     
+                /*
+                                     * Desktop control buttons are unnecessary
+                                     * on mobile.
+                                     */
                 .sidebar-controls {
                     display: none;
                 }
-     
-
+                /*
+                                     * Cancel desktop collapsed styling
+                                     * when switching to mobile.
+                                     */
                 body.sidebar-collapsed
                 .technician-sidebar {
                     width: 265px;
@@ -765,6 +829,10 @@
                     .sidebar-link-text {
                         display: block;
                     }
+                /*
+                                     * The desktop floating restore button
+                                     * isn't needed on mobile.
+                                     */
                 .sidebar-restore-btn {
                     display: none !important;
                 }
@@ -809,13 +877,17 @@
     <div class="technician-app">
 
 
-        <!-- sidebar-->
+        <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
 
         <aside class="technician-sidebar"
                id="technicianSidebar">
 
 
-            <!-- Logo-->
+            <!-- =================================================
+             LOGO
+             ================================================= -->
 
             <a href="/Technician/Home/Index"
                class="sidebar-brand"
@@ -843,12 +915,14 @@
 
 
 
-            <!--sidebar navigation-->
+            <!-- =================================================
+             SIDEBAR CONTROLS
+             ================================================= -->
 
             <div class="sidebar-controls">
 
 
-            
+                <!-- COLLAPSE -->
 
                 <button type="button"
                         class="sidebar-control-btn"
@@ -856,13 +930,14 @@
                         title="Collapse sidebar"
                         aria-label="Collapse sidebar">
 
-                  <i class="fa-solid fa-chevron-left"
-   id="desktopSidebarToggleIcon">
-</i>
+                    <i class="fa-solid fa-chevron-left"
+                       id="desktopSidebarToggleIcon">
+                    </i>
 
                 </button>
 
 
+                <!-- HIDE COMPLETELY -->
 
                 <button type="button"
                         class="sidebar-control-btn"
@@ -877,6 +952,11 @@
 
             </div>
 
+
+
+            <!-- =================================================
+             TECHNICIAN
+             ================================================= -->
 
             <div class="sidebar-user">
 
@@ -906,11 +986,14 @@
 
 
 
-            <!--Navigation-->
+            <!-- =================================================
+             NAVIGATION
+             ================================================= -->
 
             <nav class="sidebar-navigation">
 
 
+                <!-- ================= MAIN ================= -->
 
                 <div class="sidebar-section">
                     Main
@@ -950,10 +1033,24 @@
                     </span>
 
                 </a>
+                   <a href="/Technician/ReceiveSamples/Index"
+                   title="Receive Samples"
+                   class="sidebar-link @(controller == "Tests" && action == "Select" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+
+                        <i class="fas fa-plus-circle"></i>
+
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Select Test
+                    </span>
+
+                </a>
 
 
-
-                <!-- Test processing -->
+                <!-- ================= TEST PROCESSING ================= -->
 
                 <div class="sidebar-section">
                     Test Processing
@@ -1032,7 +1129,7 @@
 
 
 
-                <!-- verification -->
+                <!-- ================= VERIFICATION ================= -->
 
                 <div class="sidebar-section">
                     Verification
@@ -1093,7 +1190,7 @@
 
 
 
-                <!-- priorities -->
+                <!-- ================= PRIORITY ================= -->
 
                 <div class="sidebar-section">
                     Priority
@@ -1154,7 +1251,7 @@
 
 
 
-                <!-- Reports-->
+                <!-- ================= REPORTS / ACCOUNT ================= -->
 
                 <div class="sidebar-section">
                     Reports & Account
@@ -1236,7 +1333,9 @@
 
 
 
-            <!-- Logout -->
+            <!-- =================================================
+             LOGOUT
+             ================================================= -->
 
             <div class="sidebar-bottom">
 
@@ -1276,6 +1375,13 @@
         </aside>
 
 
+
+        <!-- =====================================================
+         RESTORE SIDEBAR
+
+         Only visible when desktop sidebar is completely hidden.
+         ===================================================== -->
+
         <button type="button"
                 class="sidebar-restore-btn"
                 id="sidebarRestoreButton"
@@ -1288,15 +1394,26 @@
 
 
 
+        <!-- =====================================================
+         MOBILE BACKDROP
+         ===================================================== -->
+
         <div class="sidebar-backdrop"
              id="sidebarBackdrop">
         </div>
 
 
 
-        <!-- Main content -->
+        <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
 
         <main class="technician-main">
+
+
+            <!-- =================================================
+             MOBILE HEADER
+             ================================================= -->
 
             <div class="technician-mobile-header">
 
@@ -1330,6 +1447,11 @@
 
             </div>
 
+
+
+            <!-- =================================================
+             PAGE CONTENT
+             ================================================= -->
             @RenderBody()
 
 
@@ -1338,6 +1460,11 @@
 
     </div>
 
+
+
+    <!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
@@ -1401,6 +1528,11 @@
                         document.getElementById(
                             "sidebarRestoreButton"
                         );
+
+
+                    /* =====================================================
+                       MOBILE SIDEBAR
+                       ===================================================== */
 
                     function openMobileSidebar() {
 
@@ -1496,6 +1628,10 @@
                     }
 
 
+                    /* =====================================================
+                       DESKTOP COLLAPSE
+                       ===================================================== */
+
                     function updateCollapseIcon() {
 
                         if (!desktopToggleIcon) {
@@ -1547,12 +1683,19 @@
                             "click",
                             function() {
 
+                                /*
+                                 * Desktop-only action.
+                                 */
                                 if (
                                     window.innerWidth <= 991
                                 ) {
                                     return;
                                 }
 
+
+                                /*
+                                 * If somehow hidden, restore it first.
+                                 */
                                 body.classList.remove(
                                     "sidebar-hidden"
                                 );
@@ -1568,6 +1711,10 @@
                                         "sidebar-collapsed"
                                     );
 
+
+                                /*
+                                 * Save the technician's preference.
+                                 */
                                 localStorage.setItem(
                                     "technicianSidebarCollapsed",
                                     collapsed
@@ -1584,6 +1731,10 @@
                     }
 
 
+                    /* =====================================================
+                       FULL WIDTH / HIDE SIDEBAR
+                       ===================================================== */
+
                     if (fullScreenToggle) {
 
                         fullScreenToggle.addEventListener(
@@ -1596,10 +1747,19 @@
                                     return;
                                 }
 
+
+                                /*
+                                 * Completely hide sidebar.
+                                 */
                                 body.classList.add(
                                     "sidebar-hidden"
                                 );
 
+
+                                /*
+                                 * Remove collapsed state while hidden.
+                                 * When restored it will return as full sidebar.
+                                 */
                                 body.classList.remove(
                                     "sidebar-collapsed"
                                 );
@@ -1612,6 +1772,11 @@
 
                     }
 
+
+                    /* =====================================================
+                       RESTORE SIDEBAR
+                       ===================================================== */
+
                     if (restoreButton) {
 
                         restoreButton.addEventListener(
@@ -1622,6 +1787,10 @@
                                     "sidebar-hidden"
                                 );
 
+
+                                /*
+                                 * Restore the user's saved collapse preference.
+                                 */
                                 const savedCollapsed =
                                     localStorage.getItem(
                                         "technicianSidebarCollapsed"
@@ -1655,6 +1824,10 @@
                     }
 
 
+                    /* =====================================================
+                       RESTORE SAVED DESKTOP STATE
+                       ===================================================== */
+
                     const savedCollapsed =
                         localStorage.getItem(
                             "technicianSidebarCollapsed"
@@ -1676,10 +1849,17 @@
                     updateCollapseIcon();
 
 
+                    /* =====================================================
+                       WINDOW RESIZE
+                       ===================================================== */
+
                     window.addEventListener(
                         "resize",
                         function() {
 
+                            /*
+                             * Desktop
+                             */
                             if (
                                 window.innerWidth > 991
                             ) {
@@ -1720,8 +1900,15 @@
 
                             }
 
+                            /*
+                             * Mobile
+                             */
                             else {
 
+                                /*
+                                 * Desktop full-width mode shouldn't
+                                 * interfere with mobile navigation.
+                                 */
                                 body.classList.remove(
                                     "sidebar-hidden"
                                 );
@@ -1734,6 +1921,15 @@
                         }
                     );
 
+
+                    /* =====================================================
+                       ESC KEY
+
+                       If the technician is in full-width mode,
+                       Escape restores the sidebar.
+
+                       On mobile Escape closes the sidebar.
+                       ===================================================== */
 
                     document.addEventListener(
                         "keydown",

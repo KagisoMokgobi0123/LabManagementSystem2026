@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Models.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace NMB_HLabSys.Data
 {
@@ -32,6 +33,9 @@ namespace NMB_HLabSys.Data
                 services.GetRequiredService<
                     UserManager<ApplicationUser>>();
 
+            // Database Context - FIX
+            var context = services.GetRequiredService<
+                ApplicationDbContext>();
 
             // ========================================================
             // CREATE ROLES
@@ -69,16 +73,30 @@ namespace NMB_HLabSys.Data
             // ========================================================
             // LAB TECHNICIAN
             // ========================================================
+await CreateTechnicianAsync(
+    userManager,
+    context,
+    email: "technician@nmbhlab.co.za",
+    password: "Tech@1234",
+    firstName: "Thabo",
+    lastName: "Technician",
+    idNumber: "8001015009087",
+    employeeNumber: "TECH001");
+
+            // ========================================================
+            // LAB TECHNICIAN
+            // ========================================================
+
 
             await CreateTechnicianAsync(
                 userManager,
-                email: "technician@nmbhlab.co.za",
+                context,
+                email: "technician2@nmbhlab.co.za",
                 password: "Tech@1234",
-                firstName: "Thabo",
-                lastName: "Technician",
-                idNumber: "8001015009087",
-                employeeNumber: "TECH001");
-
+                firstName: "Rudzani",
+                lastName: "Khauli",
+                idNumber: "0201015009087",
+                employeeNumber: "TECH002");
 
             // ========================================================
             // MANAGER
@@ -316,8 +334,10 @@ namespace NMB_HLabSys.Data
         // CREATE LAB TECHNICIAN
         // ============================================================
 
+
         private static async Task CreateTechnicianAsync(
             UserManager<ApplicationUser> userManager,
+            ApplicationDbContext context,
             string email,
             string password,
             string firstName,
@@ -325,42 +345,42 @@ namespace NMB_HLabSys.Data
             string idNumber,
             string employeeNumber)
         {
-            var user =
-                await CreateUserAsync(
-                    userManager,
-                    email,
-                    password,
-                    firstName,
-                    lastName,
-                    LabTechnicianRole);
+            // Create or retrieve the Identity account
+            var user = await CreateUserAsync(
+                userManager,
+                email,
+                password,
+                firstName,
+                lastName,
+                LabTechnicianRole);
 
+            // Check whether technician profile exists
+            var existingProfile = await context
+                .Set<TechnicianProfile>()
+                .FirstOrDefaultAsync(x => x.UserId == user.Id);
 
-            // ========================================================
-            // EXISTING PROFILE
-            // ========================================================
-
-            if (user.TechnicianProfile != null)
+            if (existingProfile != null)
             {
+                Console.WriteLine(
+                    $"Technician profile already exists: {email}");
                 return;
             }
 
+            // Create technician profile
+            var profile = new TechnicianProfile
+            {
+                UserId = user.Id,
+                IdNumber = idNumber,
+                EmployeeNumber = employeeNumber
+            };
 
-            // ========================================================
-            // CREATE TECHNICIAN PROFILE
-            // ========================================================
+            context.Set<TechnicianProfile>().Add(profile);
 
-            user.TechnicianProfile =
-                new TechnicianProfile
-                {
-                    UserId = user.Id,
+            await context.SaveChangesAsync();
 
-                    IdNumber = idNumber,
-
-                    EmployeeNumber = employeeNumber
-                };
-
-
-            await userManager.UpdateAsync(user);
+            Console.WriteLine(
+                $"Successfully seeded technician: {firstName} {lastName}");
         }
+
     }
 }

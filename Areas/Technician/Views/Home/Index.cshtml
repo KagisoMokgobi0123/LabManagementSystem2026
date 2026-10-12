@@ -767,35 +767,43 @@
                     </div>
 
 
-                    <div class="col-md-4">
 
-                        <div class="hero-actions justify-content-md-end">
+<div class="col-md-4">
 
-                            <a asp-area="Technician"
-                               asp-controller="ReceiveSamples"
-                               asp-action="Index"
-                               class="hero-btn hero-btn-primary">
+    <div class="hero-actions d-flex align-items-center justify-content-md-end"
+         style="flex-wrap: nowrap; gap: 10px;">
 
-                                <i class="fas fa-vials"></i>
+       @*Redirect the technician to the Select Test view*@
+        <a href="Technician/Tests/Select"
+           class="hero-btn hero-btn-primary"
+           style="white-space: nowrap;">
 
-                                Receive Samples
+            <i class="fas fa-clipboard-check"></i>
+            Select Test
 
-                            </a>
+        </a>
+         @*Redirect the technician to the Receive Samples view*@
+        <a href="Technician/Tests/ReceiveSamples"
+           class="hero-btn hero-btn-primary"
+           style="white-space: nowrap;">
 
-                            <a asp-area="Technician"
-                               asp-controller="ReceiveSamples"
-                               asp-action="VerifiedSamples"
-                               class="hero-btn hero-btn-outline">
+            <i class="fas fa-vials"></i>
+            Receive Samples
 
-                                <i class="fas fa-check-double"></i>
+        </a>
+        @*Redirect the technician to the verified samples results*@
+        <a href="Technician/Tests/Verified"
+           class="hero-btn hero-btn-outline"
+           style="white-space: nowrap;">
 
-                                Verify Results
+            <i class="fas fa-check-double"></i>
+            Verify Results
 
-                            </a>
+        </a>
 
-                        </div>
+    </div>
 
-                    </div>
+</div>
 
                 </div>
 
@@ -1299,7 +1307,7 @@
                                     <div>
 
                                         <div class="quick-action-title">
-                                            Select Test Type
+                                            Select Test 
                                         </div>
 
                                         <div class="quick-action-text">

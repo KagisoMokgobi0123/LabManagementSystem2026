@@ -1,0 +1,122 @@
+﻿@model NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel
+@using NMB_HLabSys.Areas.Technician.Models
+@{
+    ViewData["Title"] = "Verify Test Results";
+    Layout = "_TechnicianLayout";
+    var results = ViewData["TestResults"] as IEnumerable<TestResultModel> ?? Enumerable.Empty<TestResultModel>();
+    var resultList = results.ToList();
+}
+<style>
+    .tv-hero {
+        background: linear-gradient(120deg,#103a76,#1976c9);
+        color: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px
+    }
+
+    .tv-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(18,49,85,.08);
+        padding: 22px;
+        margin-bottom: 22px
+    }
+
+    .tv-table th {
+        background: #eff5fb;
+        color: #29486a;
+        border-top: 0
+    }
+
+    .tv-abnormal {
+        background: #fff0f0;
+        color: #a02020;
+        font-weight: 700;
+        border-radius: 20px;
+        padding: 5px 10px
+    }
+
+    .tv-normal {
+        background: #e6f5eb;
+        color: #167347;
+        border-radius: 20px;
+        padding: 5px 10px
+    }
+</style>
+<div class="container-fluid py-4">
+    <div class="tv-hero">
+        <h2><i class="fas fa-user-check mr-2"></i>Verify Test Results</h2>
+        <p class="mb-0">Independently review the captured measurements before approving or returning the test.</p>
+    </div>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    <div class="tv-card">
+        <h4 class="mb-3">Test details</h4>
+        <div class="row">
+            <div class="col-md-6 mb-2"><strong>Request:</strong> @(Model.TestRequest?.RequestNumber ?? "—")</div>
+            <div class="col-md-6 mb-2"><strong>Test:</strong> @(Model.TestType?.Name ?? "—")</div>
+            <div class="col-md-6 mb-2"><strong>Status:</strong> @Model.Status</div>
+            <div class="col-md-6 mb-2"><strong>Completed:</strong> @(Model.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</div>
+        </div>
+    </div>
+    <div class="tv-card">
+        <h4 class="mb-3">Captured results</h4>
+        <div class="table-responsive">
+            <table class="table table-hover tv-table">
+                <thead><tr><th>Measurement</th><th>Value</th><th>Unit</th><th>Reference range</th><th>Flag</th><th>Technician notes</th></tr></thead>
+                <tbody>
+                    @foreach (var result in resultList)
+                    {
+                        <tr>
+                            <td>@result.ResultName</td>
+                            <td><strong>@result.ResultValue</strong></td>
+                            <td>@(result.MeasurementUnit ?? "—")</td>
+                            <td>
+                                @(result.ReferenceMin?.ToString() ?? "—") to @(result.ReferenceMax?.ToString() ?? "—")
+                            </td>
+                            <td><span class="@(result.IsAbnormal ? "tv-abnormal" : "tv-normal")">@result.ResultFlag</span></td>
+                            <td style="white-space:pre-wrap">@(result.Notes ?? "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!resultList.Any())
+        {
+            <div class="alert alert-warning">No result measurements have been recorded for this test.</div>
+        }
+    </div>
+    <div class="tv-card">
+        <h4 class="mb-3">Verification decision</h4>
+        <form asp-area="Technician" asp-controller="Tests" asp-action="VerifyResult" method="post" id="verifyForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
+            <div class="form-group">
+                <label for="verificationNotes">Verification / review notes</label>
+                <textarea id="verificationNotes" name="notes" class="form-control" rows="4" maxlength="2000" placeholder="Record findings. Notes are required when returning results for review."></textarea>
+            </div>
+            <div class="d-flex flex-wrap" style="gap:10px">
+                <button type="submit" name="decision" value="Verify" class="btn btn-success" @(!resultList.Any() ? "disabled" : null) onclick="return confirm('Verify these results?');">
+                    <i class="fas fa-check-circle mr-1"></i> Verify Results
+                </button>
+                <button type="submit" name="decision" value="ReturnForReview" class="btn btn-warning" @(!resultList.Any() ? "disabled" : null) onclick="return checkReviewNotes();">
+                    <i class="fas fa-undo mr-1"></i> Return for Review
+                </button>
+                <a asp-action="PendingVerification" class="btn btn-outline-secondary">Cancel</a>
+                <a asp-action="VerificationHistory" asp-route-id="@Model.TestRequestTestTypeId" class="btn btn-outline-primary">View History</a>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        function checkReviewNotes() {
+            const notes = document.getElementById('verificationNotes');
+            if (!notes.value.trim()) { alert('Enter review notes before returning the test.'); notes.focus(); return false; }
+            return confirm('Return this test to the original technician for correction?');
+        }
+    </script>
+}

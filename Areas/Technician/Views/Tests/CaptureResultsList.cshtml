@@ -1,0 +1,296 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+@{
+    ViewData["Title"] = "Capture Results";
+    Layout = "_TechnicianLayout";
+
+    var tests = Model.ToList();
+    var readyCount = tests.Count(x => x.Status == "In Progress");
+    var reviewCount = tests.Count(x => x.Status == "To Be Reviewed");
+}
+
+<style>
+    .capture-list-page {
+        background: #f4f7fb;
+        min-height: 100vh;
+        padding: 25px 0 60px;
+    }
+
+    .capture-list-header {
+        background: linear-gradient(135deg, #073b5c, #0284c7);
+        border-radius: 14px;
+        color: white;
+        padding: 30px;
+        margin-bottom: 24px;
+    }
+
+        .capture-list-header h2 {
+            font-size: 25px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .capture-list-header p {
+            font-size: 13px;
+            color: #dbeafe;
+            margin: 0;
+        }
+
+    .capture-stat {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #e5edf5;
+        margin-bottom: 22px;
+    }
+
+    .capture-stat-label {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 7px;
+    }
+
+    .capture-stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #075985;
+    }
+
+    .capture-panel {
+        background: white;
+        border-radius: 13px;
+        border: 1px solid #e5edf5;
+        overflow: hidden;
+    }
+
+    .capture-panel-heading {
+        padding: 22px;
+        border-bottom: 1px solid #e5edf5;
+    }
+
+        .capture-panel-heading h4 {
+            font-size: 17px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+    .capture-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .capture-table th {
+            background: #f8fafc;
+            color: #64748b;
+            padding: 15px;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .capture-table td {
+            padding: 16px 15px;
+            border-top: 1px solid #edf2f7;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+    .capture-status {
+        display: inline-block;
+        padding: 6px 11px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .capture-status-progress {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .capture-status-review {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .capture-action {
+        display: inline-block;
+        background: #0284c7;
+        color: white !important;
+        padding: 9px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none !important;
+    }
+
+        .capture-action:hover {
+            background: #0369a1;
+        }
+
+    .capture-empty {
+        text-align: center;
+        padding: 55px 20px;
+        color: #64748b;
+    }
+
+        .capture-empty i {
+            font-size: 35px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+</style>
+
+<div class="capture-list-page">
+    <div class="container-fluid">
+
+        <div class="capture-list-header">
+            <h2>
+                <i class="fas fa-file-medical mr-2"></i>
+                Capture Results
+            </h2>
+            <p>
+                Select an assigned laboratory test to capture
+                or correct its measurement results.
+            </p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="capture-stat">
+                    <div class="capture-stat-label">
+                        Available for Capture
+                    </div>
+                    <div class="capture-stat-value">
+                        @tests.Count
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="capture-stat">
+                    <div class="capture-stat-label">
+                        In Progress
+                    </div>
+                    <div class="capture-stat-value">
+                        @readyCount
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="capture-stat">
+                    <div class="capture-stat-label">
+                        Returned for Review
+                    </div>
+                    <div class="capture-stat-value">
+                        @reviewCount
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="capture-panel">
+
+            <div class="capture-panel-heading">
+                <h4>
+                    <i class="fas fa-microscope mr-2"></i>
+                    Tests Awaiting Results
+                </h4>
+            </div>
+
+            <div class="table-responsive">
+                <table class="capture-table">
+                    <thead>
+                        <tr>
+                            <th>Request Number</th>
+                            <th>Test Type</th>
+                            <th>Category</th>
+                            <th>Started</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @if (tests.Any())
+                        {
+                            foreach (var test in tests)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            @(test.TestRequest?.RequestNumber ?? "N/A")
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @(test.TestType?.Name ?? "Unknown")
+                                    </td>
+
+                                    <td>
+                                        @(test.TestType?.TestCategory?.Description ?? "Uncategorized")
+                                    </td>
+
+                                    <td>
+                                        @(test.StartDateTime?.ToString("dd MMM yyyy HH:mm") ?? "Not recorded")
+                                    </td>
+
+                                    <td>
+                                        @if (test.Status == "To Be Reviewed")
+                                        {
+                                            <span class="capture-status capture-status-review">
+                                                To Be Reviewed
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="capture-status capture-status-progress">
+                                                In Progress
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        <a asp-area="Technician"
+                                           asp-controller="Tests"
+                                           asp-action="CaptureResults"
+                                           asp-route-id="@test.TestRequestTestTypeId"
+                                           class="capture-action">
+
+                                            <i class="fas fa-edit mr-1"></i>
+
+                                            @(test.Status == "To Be Reviewed"
+                                                ? "Correct Results"
+                                                : "Capture Results")
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6">
+                                    <div class="capture-empty">
+                                        <i class="fas fa-check-circle d-block"></i>
+
+                                        <h5>No Tests Awaiting Result Capture</h5>
+
+                                        <p>
+                                            You currently have no assigned
+                                            tests in progress or returned
+                                            for correction.
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
