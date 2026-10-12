@@ -317,7 +317,7 @@ namespace NMB_HLabSys.Controllers
                 new ChangeTemporaryPasswordViewModel());
         }
 
-
+         
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]

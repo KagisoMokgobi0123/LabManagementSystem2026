@@ -7,9 +7,8 @@ namespace NMB_HLabSys.Data
 {
     public static class SeedAccount
     {
-        // ============================================================
-        // ROLE NAMES
-        // ============================================================
+ 
+        // role names
 
         public const string DoctorRole = "Doctor";
         public const string LabTechnicianRole = "LabTechnician";
@@ -18,9 +17,7 @@ namespace NMB_HLabSys.Data
         public const string AdministratorRole = "Administrator";
 
 
-        // ============================================================
-        // SEED
-        // ============================================================
+        // seed
 
         public static async Task SeedAsync(
             IServiceProvider services)
@@ -37,17 +34,13 @@ namespace NMB_HLabSys.Data
             var context = services.GetRequiredService<
                 ApplicationDbContext>();
 
-            // ========================================================
-            // CREATE ROLES
-            // ========================================================
+
+            // Roles
 
             await CreateRolesAsync(roleManager);
 
 
-            // ========================================================
-            // ADMINISTRATOR
-            // ========================================================
-
+            // Admin
             await CreateUserAsync(
                 userManager,
                 email: "administrator@nmbhlab.co.za",
@@ -57,9 +50,7 @@ namespace NMB_HLabSys.Data
                 role: AdministratorRole);
 
 
-            // ========================================================
-            // DOCTOR
-            // ========================================================
+            // Doctor
 
             await CreateDoctorAsync(
                 userManager,
@@ -70,9 +61,8 @@ namespace NMB_HLabSys.Data
                 hpcsaNumber: "MP0000000");
 
 
-            // ========================================================
-            // LAB TECHNICIAN
-            // ========================================================
+
+            // lab technician
 await CreateTechnicianAsync(
     userManager,
     context,
@@ -83,9 +73,7 @@ await CreateTechnicianAsync(
     idNumber: "8001015009087",
     employeeNumber: "TECH001");
 
-            // ========================================================
-            // LAB TECHNICIAN
-            // ========================================================
+ 
 
 
             await CreateTechnicianAsync(
@@ -98,9 +86,8 @@ await CreateTechnicianAsync(
                 idNumber: "0201015009087",
                 employeeNumber: "TECH002");
 
-            // ========================================================
-            // MANAGER
-            // ========================================================
+
+            //manager
 
             await CreateUserAsync(
                 userManager,
@@ -120,9 +107,7 @@ await CreateTechnicianAsync(
                 role: ManagerRole);
 
 
-            // ========================================================
-            // PATIENT
-            // ========================================================
+            //Patient
 
             await CreateUserAsync(
                 userManager,
@@ -134,9 +119,7 @@ await CreateTechnicianAsync(
         }
 
 
-        // ============================================================
-        // CREATE ROLES
-        // ============================================================
+
 
         private static async Task CreateRolesAsync(
             RoleManager<IdentityRole> roleManager)
@@ -181,9 +164,7 @@ await CreateTechnicianAsync(
         }
 
 
-        // ============================================================
-        // CREATE GENERAL USER
-        // ============================================================
+
 
         private static async Task<ApplicationUser>
             CreateUserAsync(
@@ -198,9 +179,7 @@ await CreateTechnicianAsync(
                 await userManager.FindByEmailAsync(email);
 
 
-            // ========================================================
-            // CREATE USER IF NOT FOUND
-            // ========================================================
+            // create a user if email use doesn't exist
 
             if (user == null)
             {
@@ -248,9 +227,7 @@ await CreateTechnicianAsync(
             }
 
 
-            // ========================================================
-            // ASSIGN ROLE
-            // ========================================================
+            // assign role
 
             if (!await userManager.IsInRoleAsync(user, role))
             {
@@ -281,9 +258,7 @@ await CreateTechnicianAsync(
         }
 
 
-        // ============================================================
-        // CREATE DOCTOR
-        // ============================================================
+        //create a doctor
 
         private static async Task CreateDoctorAsync(
             UserManager<ApplicationUser> userManager,
@@ -303,9 +278,7 @@ await CreateTechnicianAsync(
                     DoctorRole);
 
 
-            // ========================================================
-            // EXISTING PROFILE
-            // ========================================================
+            // check if profile exits
 
             if (user.DoctorProfile != null)
             {
@@ -313,9 +286,7 @@ await CreateTechnicianAsync(
             }
 
 
-            // ========================================================
-            // CREATE DOCTOR PROFILE
-            // ========================================================
+            // if not, create a profile
 
             user.DoctorProfile =
                 new DoctorProfile
@@ -330,10 +301,7 @@ await CreateTechnicianAsync(
         }
 
 
-        // ============================================================
-        // CREATE LAB TECHNICIAN
-        // ============================================================
-
+        // create a lab technician
 
         private static async Task CreateTechnicianAsync(
             UserManager<ApplicationUser> userManager,
@@ -345,7 +313,7 @@ await CreateTechnicianAsync(
             string idNumber,
             string employeeNumber)
         {
-            // Create or retrieve the Identity account
+            
             var user = await CreateUserAsync(
                 userManager,
                 email,
