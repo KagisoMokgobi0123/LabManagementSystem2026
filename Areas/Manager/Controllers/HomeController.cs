@@ -7,7 +7,7 @@ using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
 using static NMB_HLabSys.Areas.Manager.Models.LabManagerDashboardViewModel;
 
-namespace NMBHLabSys.Areas.Manager.Controllers
+namespace NMB_HLabSys.Areas.Manager.Controllers
 {
     [Area("Manager")]
     [Authorize(Roles = "Manager")]
