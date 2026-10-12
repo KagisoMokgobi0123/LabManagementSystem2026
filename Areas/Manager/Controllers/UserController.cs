@@ -1,31 +1,42 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Models.Users;
 using NMB_HLabSys.Models.Users.ViewModel;
+using System.Security.Cryptography;
 
 namespace NMB_HLabSys.Areas.Manager.Controllers
 {
     [Area("Manager")]
-    [Authorize(Roles = "Manager")]
+    [Authorize(Roles = SeedAccount.ManagerRole)]
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+
+        private readonly UserManager<ApplicationUser>
+            _userManager;
+
+        private readonly RoleManager<IdentityRole>
+            _roleManager;
+
+        private readonly IEmailSender
+            _emailSender;
+
 
         public UserController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _emailSender = emailSender;
         }
 
 
@@ -36,93 +47,170 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var users = await GetActiveUsers();
+            await LoadUsers();
 
-            var testTypes = await _context.TestTypes
-                .Where(t =>
-                    t.IsActive ==
-                    TestTypeModel.RecordStatus.Active)
-                .OrderBy(t => t.Name)
-                .ToListAsync();
-
-            ViewBag.TestTypes = testTypes;
-
-            return View(users);
+            return View();
         }
 
 
         // ============================================================
-        // DETAILS
+        // GET EDIT DOCTOR
+        // ============================================================
+        // Editing is performed inside Index.cshtml using a modal.
+        // This action exists only to prevent a 404 if the URL is
+        // accessed directly.
         // ============================================================
 
         [HttpGet]
-        public async Task<IActionResult> Details(string id)
+        public IActionResult EditDoctor()
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        // ============================================================
+        // GET EDIT TECHNICIAN
+        // ============================================================
+        // Editing is performed inside Index.cshtml using a modal.
+        // This action exists only to prevent a 404 if the URL is
+        // accessed directly.
+        // ============================================================
+
+        [HttpGet]
+        public IActionResult EditTechnician()
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        // ============================================================
+        // DOCTOR DETAILS
+        // ============================================================
+
+        [HttpGet]
+        public async Task<IActionResult> DoctorDetails(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return NotFound();
-
-            var user = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
-                return NotFound();
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            var doctor = await _context.DoctorProfiles
-                .FirstOrDefaultAsync(d => d.UserId == user.Id);
-
-            var technician = await _context.TechnicianProfiles
-                .FirstOrDefaultAsync(t => t.UserId == user.Id);
-
-            var testTypes = new List<object>();
-
-            if (technician != null)
             {
-                testTypes = await _context.TechnicianTestTypes
-                    .Where(x =>
-                        x.TechnicianId == user.Id &&
-                        x.IsActive)
-                    .Include(x => x.TestType)
-                    .Select(x => new
-                    {
-                        x.TestTypeId,TestType = x.TestType != null? x.TestType.Name: string.Empty
-                    })
-                    .Cast<object>()
-                    .ToListAsync();
+                return BadRequest();
+            }
+
+            var doctor =
+                await _context.DoctorProfiles
+                    .AsNoTracking()
+                    .Include(d => d.User)
+                    .FirstOrDefaultAsync(d =>
+                        d.UserId == id);
+
+            if (doctor == null)
+            {
+                return NotFound();
             }
 
             return Json(new
             {
                 success = true,
 
-                user = new
+                doctor = new
                 {
-                    user.Id,
-                    user.FirstName,
-                    user.LastName,
-                    user.Email,
-                    user.PhoneNumber,
-                    user.IsActive,
-                    user.MustChangePassword,
-                    user.CreatedDate,
-                    user.LastLoginDate,
+                    doctor.UserId,
 
-                    Role = roles.FirstOrDefault(),
+                    FirstName =
+                        doctor.User?.FirstName,
 
-                    HPCSANumber = doctor != null
-                        ? doctor.HPCSANumber
-                        : null,
+                    LastName =
+                        doctor.User?.LastName,
 
-                    IdNumber = technician != null
-                        ? technician.IdNumber
-                        : null,
+                    HPCSANumber =
+                        doctor.HPCSANumber,
 
-                    EmployeeNumber = technician != null
-                        ? technician.EmployeeNumber
-                        : null,
+                    Email =
+                        doctor.User?.Email,
 
-                    TestTypes = testTypes
+                    PhoneNumber =
+                        doctor.User?.PhoneNumber,
+
+                    IsActive =
+                        doctor.User?.IsActive ?? false,
+
+                    MustChangePassword =
+                        doctor.User?.MustChangePassword ?? false,
+
+                    IsProfileCompleted =
+                        doctor.User?.IsProfileCompleted ?? false,
+
+                    CreatedDate =
+                        doctor.User?.CreatedDate,
+
+                    LastLoginDate =
+                        doctor.User?.LastLoginDate
+                }
+            });
+        }
+
+
+        // ============================================================
+        // TECHNICIAN DETAILS
+        // ============================================================
+
+        [HttpGet]
+        public async Task<IActionResult> TechnicianDetails(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest();
+            }
+
+            var technician =
+                await _context.TechnicianProfiles
+                    .AsNoTracking()
+                    .Include(t => t.User)
+                    .FirstOrDefaultAsync(t =>
+                        t.UserId == id);
+
+            if (technician == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new
+            {
+                success = true,
+
+                technician = new
+                {
+                    technician.UserId,
+
+                    FirstName =
+                        technician.User?.FirstName,
+
+                    LastName =
+                        technician.User?.LastName,
+
+                    technician.IdNumber,
+
+                    technician.EmployeeNumber,
+
+                    Email =
+                        technician.User?.Email,
+
+                    PhoneNumber =
+                        technician.User?.PhoneNumber,
+
+                    IsActive =
+                        technician.User?.IsActive ?? false,
+
+                    MustChangePassword =
+                        technician.User?.MustChangePassword ?? false,
+
+                    IsProfileCompleted =
+                        technician.User?.IsProfileCompleted ?? false,
+
+                    CreatedDate =
+                        technician.User?.CreatedDate,
+
+                    LastLoginDate =
+                        technician.User?.LastLoginDate
                 }
             });
         }
@@ -137,98 +225,60 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         public async Task<IActionResult> CreateDoctor(
             CreateDoctorViewModel model)
         {
-            // --------------------------------------------------------
-            // NORMALIZE INPUT
-            // --------------------------------------------------------
-
             model.FirstName =
                 model.FirstName?.Trim() ?? string.Empty;
 
             model.LastName =
                 model.LastName?.Trim() ?? string.Empty;
 
+            model.HPCSANumber =
+                model.HPCSANumber?.Trim() ?? string.Empty;
+
             model.Email =
-                model.Email?.Trim().ToLowerInvariant() ?? string.Empty;
+                model.Email?.Trim() ?? string.Empty;
 
             model.PhoneNumber =
                 model.PhoneNumber?.Trim() ?? string.Empty;
-
-            model.HPCSANumber =
-                model.HPCSANumber?.Trim() ?? string.Empty;
 
 
             await ValidateDoctor(model);
 
 
-            // --------------------------------------------------------
-            // DUPLICATE EMAIL CHECK
-            // --------------------------------------------------------
-
-            var existingEmail =
-                await _userManager.FindByEmailAsync(model.Email);
-
-            if (existingEmail != null)
-            {
-                ModelState.AddModelError(
-                    nameof(model.Email),
-                    "A user with this e-mail address already exists.");
-            }
-
-
-            // --------------------------------------------------------
-            // DUPLICATE HPCSA CHECK
-            // --------------------------------------------------------
-
-            bool duplicateHPCSA =
-                await _context.DoctorProfiles
-                    .AnyAsync(d =>
-                        d.HPCSANumber.ToLower() ==
-                        model.HPCSANumber.ToLower());
-
-            if (duplicateHPCSA)
-            {
-                ModelState.AddModelError(
-                    nameof(model.HPCSANumber),
-                    "A doctor with this HPCSA number already exists.");
-            }
-
-
             if (!ModelState.IsValid)
             {
-                var users = await GetActiveUsers();
+                await LoadUsers();
 
-                return View("Index", users);
+                return View("Index");
             }
 
-
-            // --------------------------------------------------------
-            // CREATE APPLICATION USER
-            // --------------------------------------------------------
-
-            var user = new ApplicationUser
-            {
-                UserName = model.Email,
-                Email = model.Email,
-
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-
-                PhoneNumber = model.PhoneNumber,
-
-                IsActive = true,
-                MustChangePassword = true,
-                IsProfileCompleted = true,
-
-                CreatedDate = DateTime.UtcNow
-            };
-
-
-            // --------------------------------------------------------
-            // GENERATE TEMPORARY PASSWORD
-            // --------------------------------------------------------
 
             string temporaryPassword =
                 GenerateTemporaryPassword();
+
+
+            var user =
+                new ApplicationUser
+                {
+                    UserName = model.Email,
+
+                    Email = model.Email,
+
+                    FirstName = model.FirstName,
+
+                    LastName = model.LastName,
+
+                    PhoneNumber = model.PhoneNumber,
+
+                    IsActive = true,
+
+                    MustChangePassword = true,
+
+                    IsProfileCompleted = true,
+
+                    EmailConfirmed = true,
+
+                    CreatedDate = DateTime.UtcNow
+                };
 
 
             var createResult =
@@ -239,43 +289,45 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             if (!createResult.Succeeded)
             {
-                foreach (var error in createResult.Errors)
+                AddIdentityErrors(createResult);
+
+                await LoadUsers();
+
+                return View("Index");
+            }
+
+
+            await EnsureRoleExists(
+                SeedAccount.DoctorRole);
+
+
+            var roleResult =
+                await _userManager.AddToRoleAsync(
+                    user,
+                    SeedAccount.DoctorRole);
+
+
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+
+                AddIdentityErrors(roleResult);
+
+                await LoadUsers();
+
+                return View("Index");
+            }
+
+
+            var doctorProfile =
+                new DoctorProfile
                 {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        error.Description);
-                }
+                    UserId = user.Id,
 
-                var users = await GetActiveUsers();
+                    HPCSANumber =
+                        model.HPCSANumber
+                };
 
-                return View("Index", users);
-            }
-
-
-            // --------------------------------------------------------
-            // ASSIGN DOCTOR ROLE
-            // --------------------------------------------------------
-
-            if (!await _roleManager.RoleExistsAsync("Doctor"))
-            {
-                await _roleManager.CreateAsync(
-                    new IdentityRole("Doctor"));
-            }
-
-            await _userManager.AddToRoleAsync(
-                user,
-                "Doctor");
-
-
-            // --------------------------------------------------------
-            // CREATE DOCTOR PROFILE
-            // --------------------------------------------------------
-
-            var doctorProfile = new DoctorProfile
-            {
-                UserId = user.Id,
-                HPCSANumber = model.HPCSANumber
-            };
 
             _context.DoctorProfiles.Add(
                 doctorProfile);
@@ -284,18 +336,15 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await _context.SaveChangesAsync();
 
 
-            // --------------------------------------------------------
-            // EMAIL PASSWORD
-            // --------------------------------------------------------
-
-            // TODO:
-            // Send temporaryPassword to the doctor's
-            // e-mail address using your email service.
+            await SendTemporaryPasswordEmail(
+                user,
+                temporaryPassword,
+                "Doctor");
 
 
             TempData["SuccessMessage"] =
                 $"Doctor '{user.FullName}' was created successfully. " +
-                "The temporary password has been generated.";
+                "The temporary password has been e-mailed to the doctor.";
 
 
             return RedirectToAction(
@@ -312,21 +361,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         public async Task<IActionResult> CreateTechnician(
             CreateTechnicianViewModel model)
         {
-            // --------------------------------------------------------
-            // NORMALIZE INPUT
-            // --------------------------------------------------------
-
             model.FirstName =
                 model.FirstName?.Trim() ?? string.Empty;
 
             model.LastName =
                 model.LastName?.Trim() ?? string.Empty;
-
-            model.Email =
-                model.Email?.Trim().ToLowerInvariant() ?? string.Empty;
-
-            model.PhoneNumber =
-                model.PhoneNumber?.Trim() ?? string.Empty;
 
             model.IdNumber =
                 model.IdNumber?.Trim() ?? string.Empty;
@@ -334,140 +373,51 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             model.EmployeeNumber =
                 model.EmployeeNumber?.Trim() ?? string.Empty;
 
+            model.Email =
+                model.Email?.Trim() ?? string.Empty;
+
+            model.PhoneNumber =
+                model.PhoneNumber?.Trim() ?? string.Empty;
+
 
             await ValidateTechnician(model);
 
 
-            // --------------------------------------------------------
-            // DUPLICATE EMAIL CHECK
-            // --------------------------------------------------------
-
-            var existingEmail =
-                await _userManager.FindByEmailAsync(model.Email);
-
-            if (existingEmail != null)
-            {
-                ModelState.AddModelError(
-                    nameof(model.Email),
-                    "A user with this e-mail address already exists.");
-            }
-
-
-            // --------------------------------------------------------
-            // DUPLICATE SA ID CHECK
-            // --------------------------------------------------------
-
-            bool duplicateIdNumber =
-                await _context.TechnicianProfiles
-                    .AnyAsync(t =>
-                        t.IdNumber == model.IdNumber);
-
-            if (duplicateIdNumber)
-            {
-                ModelState.AddModelError(
-                    nameof(model.IdNumber),
-                    "A technician with this South African ID number already exists.");
-            }
-
-
-            // --------------------------------------------------------
-            // DUPLICATE EMPLOYEE NUMBER CHECK
-            // --------------------------------------------------------
-
-            bool duplicateEmployeeNumber =
-                await _context.TechnicianProfiles
-                    .AnyAsync(t =>
-                        t.EmployeeNumber.ToLower() ==
-                        model.EmployeeNumber.ToLower());
-
-            if (duplicateEmployeeNumber)
-            {
-                ModelState.AddModelError(
-                    nameof(model.EmployeeNumber),
-                    "A technician with this employee number already exists.");
-            }
-
-
-            // --------------------------------------------------------
-            // TEST TYPE REQUIREMENT
-            // --------------------------------------------------------
-
-            if (model.TestTypeIds == null ||
-                !model.TestTypeIds.Any())
-            {
-                ModelState.AddModelError(
-                    nameof(model.TestTypeIds),
-                    "At least one test type must be assigned.");
-            }
-
-
-            // --------------------------------------------------------
-            // VERIFY TEST TYPES
-            // --------------------------------------------------------
-
-            if (model.TestTypeIds != null &&
-                model.TestTypeIds.Any())
-            {
-                var validTestTypeIds =
-                    await _context.TestTypes
-                        .Where(t =>
-                            model.TestTypeIds.Contains(
-                                t.TestTypeId))
-                        .Select(t => t.TestTypeId)
-                        .ToListAsync();
-
-
-                var invalidTestTypeIds =
-                    model.TestTypeIds
-                        .Except(validTestTypeIds)
-                        .ToList();
-
-
-                if (invalidTestTypeIds.Any())
-                {
-                    ModelState.AddModelError(
-                        nameof(model.TestTypeIds),
-                        "One or more selected test types are invalid.");
-                }
-            }
-
-
             if (!ModelState.IsValid)
             {
-                var users = await GetActiveUsers();
+                await LoadUsers();
 
-                return View("Index", users);
+                return View("Index");
             }
 
-
-            // --------------------------------------------------------
-            // CREATE APPLICATION USER
-            // --------------------------------------------------------
-
-            var user = new ApplicationUser
-            {
-                UserName = model.Email,
-                Email = model.Email,
-
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-
-                PhoneNumber = model.PhoneNumber,
-
-                IsActive = true,
-                MustChangePassword = true,
-                IsProfileCompleted = true,
-
-                CreatedDate = DateTime.UtcNow
-            };
-
-
-            // --------------------------------------------------------
-            // GENERATE TEMPORARY PASSWORD
-            // --------------------------------------------------------
 
             string temporaryPassword =
                 GenerateTemporaryPassword();
+
+
+            var user =
+                new ApplicationUser
+                {
+                    UserName = model.Email,
+
+                    Email = model.Email,
+
+                    FirstName = model.FirstName,
+
+                    LastName = model.LastName,
+
+                    PhoneNumber = model.PhoneNumber,
+
+                    IsActive = true,
+
+                    MustChangePassword = true,
+
+                    IsProfileCompleted = true,
+
+                    EmailConfirmed = true,
+
+                    CreatedDate = DateTime.UtcNow
+                };
 
 
             var createResult =
@@ -478,38 +428,35 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             if (!createResult.Succeeded)
             {
-                foreach (var error in createResult.Errors)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        error.Description);
-                }
+                AddIdentityErrors(createResult);
 
-                var users = await GetActiveUsers();
+                await LoadUsers();
 
-                return View("Index", users);
+                return View("Index");
             }
 
 
-            // --------------------------------------------------------
-            // ASSIGN TECHNICIAN ROLE
-            // --------------------------------------------------------
+            await EnsureRoleExists(
+                SeedAccount.LabTechnicianRole);
 
-            if (!await _roleManager.RoleExistsAsync(
-                "Lab Technician"))
+
+            var roleResult =
+                await _userManager.AddToRoleAsync(
+                    user,
+                    SeedAccount.LabTechnicianRole);
+
+
+            if (!roleResult.Succeeded)
             {
-                await _roleManager.CreateAsync(
-                    new IdentityRole("Lab Technician"));
+                await _userManager.DeleteAsync(user);
+
+                AddIdentityErrors(roleResult);
+
+                await LoadUsers();
+
+                return View("Index");
             }
 
-            await _userManager.AddToRoleAsync(
-                user,
-                "Lab Technician");
-
-
-            // --------------------------------------------------------
-            // CREATE TECHNICIAN PROFILE
-            // --------------------------------------------------------
 
             var technicianProfile =
                 new TechnicianProfile
@@ -528,54 +475,18 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 technicianProfile);
 
 
-            // --------------------------------------------------------
-            // CREATE TEST TYPE ASSIGNMENTS
-            // --------------------------------------------------------
-
-            var managerId =
-                _userManager.GetUserId(User);
-
-
-            foreach (var testTypeId in
-                     model.TestTypeIds.Distinct())
-            {
-                var assignment =
-                    new TechnicianTestTypeModel
-                    {
-                        TechnicianId = user.Id,
-
-                        TestTypeId = testTypeId,
-
-                        ManagerId =
-                            managerId ?? string.Empty,
-
-                        AssignedDate =
-                            DateTime.Now,
-
-                        IsActive = true
-                    };
-
-
-                _context.TechnicianTestTypes.Add(
-                    assignment);
-            }
-
-
             await _context.SaveChangesAsync();
 
 
-            // --------------------------------------------------------
-            // EMAIL PASSWORD
-            // --------------------------------------------------------
-
-            // TODO:
-            // Send temporaryPassword to the technician's
-            // e-mail address using your email service.
+            await SendTemporaryPasswordEmail(
+                user,
+                temporaryPassword,
+                "Lab Technician");
 
 
             TempData["SuccessMessage"] =
                 $"Lab technician '{user.FullName}' was created successfully. " +
-                "The temporary password has been generated.";
+                "The temporary password has been e-mailed to the technician.";
 
 
             return RedirectToAction(
@@ -584,7 +495,329 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
 
         // ============================================================
-        // DEACTIVATE USER
+        // EDIT DOCTOR
+        // ============================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditDoctor(
+            string UserId,
+            CreateDoctorViewModel model)
+        {
+            // IMPORTANT:
+            // The Index.cshtml form sends:
+            //
+            // <input type="hidden"
+            //        id="UserId"
+            //        name="UserId" />
+            //
+            // Therefore this action receives UserId directly.
+
+            UserId =
+                UserId?.Trim() ?? string.Empty;
+
+
+            model.FirstName =
+                model.FirstName?.Trim() ?? string.Empty;
+
+            model.LastName =
+                model.LastName?.Trim() ?? string.Empty;
+
+            model.HPCSANumber =
+                model.HPCSANumber?.Trim() ?? string.Empty;
+
+            model.Email =
+                model.Email?.Trim() ?? string.Empty;
+
+            model.PhoneNumber =
+                model.PhoneNumber?.Trim() ?? string.Empty;
+
+
+            // --------------------------------------------------------
+            // USER ID VALIDATION
+            // --------------------------------------------------------
+
+            if (string.IsNullOrWhiteSpace(UserId))
+            {
+                TempData["ErrorMessage"] =
+                    "The doctor account could not be identified.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+
+
+            // --------------------------------------------------------
+            // FIND DOCTOR
+            // --------------------------------------------------------
+
+            var doctor =
+                await _context.DoctorProfiles
+                    .Include(d => d.User)
+                    .FirstOrDefaultAsync(d =>
+                        d.UserId == UserId);
+
+
+            if (doctor == null ||
+                doctor.User == null)
+            {
+                TempData["ErrorMessage"] =
+                    "The doctor account could not be found.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+
+
+            // --------------------------------------------------------
+            // VALIDATION
+            // --------------------------------------------------------
+
+            await ValidateDoctor(
+                model,
+                UserId);
+
+
+            if (!ModelState.IsValid)
+            {
+                await LoadUsers();
+
+                return View("Index");
+            }
+
+
+            var user =
+                doctor.User;
+
+
+            // --------------------------------------------------------
+            // UPDATE APPLICATION USER
+            // --------------------------------------------------------
+
+            user.FirstName =
+                model.FirstName;
+
+            user.LastName =
+                model.LastName;
+
+            user.Email =
+                model.Email;
+
+            user.UserName =
+                model.Email;
+
+            user.PhoneNumber =
+                model.PhoneNumber;
+
+
+            // --------------------------------------------------------
+            // UPDATE DOCTOR PROFILE
+            // --------------------------------------------------------
+
+            doctor.HPCSANumber =
+                model.HPCSANumber;
+
+
+            // --------------------------------------------------------
+            // SAVE USER
+            // --------------------------------------------------------
+
+            var updateResult =
+                await _userManager.UpdateAsync(user);
+
+
+            if (!updateResult.Succeeded)
+            {
+                AddIdentityErrors(updateResult);
+
+                await LoadUsers();
+
+                return View("Index");
+            }
+
+
+            // --------------------------------------------------------
+            // SAVE PROFILE
+            // --------------------------------------------------------
+
+            await _context.SaveChangesAsync();
+
+
+            TempData["SuccessMessage"] =
+                $"Doctor '{user.FullName}' updated successfully.";
+
+
+            return RedirectToAction(
+                nameof(Index));
+        }
+
+
+        // ============================================================
+        // EDIT TECHNICIAN
+        // ============================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditTechnician(
+            string UserId,
+            CreateTechnicianViewModel model)
+        {
+            // IMPORTANT:
+            // The Index.cshtml form sends:
+            //
+            // <input type="hidden"
+            //        id="UserId"
+            //        name="UserId" />
+            //
+            // Therefore this action receives UserId directly.
+
+            UserId =
+                UserId?.Trim() ?? string.Empty;
+
+
+            model.FirstName =
+                model.FirstName?.Trim() ?? string.Empty;
+
+            model.LastName =
+                model.LastName?.Trim() ?? string.Empty;
+
+            model.IdNumber =
+                model.IdNumber?.Trim() ?? string.Empty;
+
+            model.EmployeeNumber =
+                model.EmployeeNumber?.Trim() ?? string.Empty;
+
+            model.Email =
+                model.Email?.Trim() ?? string.Empty;
+
+            model.PhoneNumber =
+                model.PhoneNumber?.Trim() ?? string.Empty;
+
+
+            // --------------------------------------------------------
+            // USER ID VALIDATION
+            // --------------------------------------------------------
+
+            if (string.IsNullOrWhiteSpace(UserId))
+            {
+                TempData["ErrorMessage"] =
+                    "The technician account could not be identified.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+
+
+            // --------------------------------------------------------
+            // FIND TECHNICIAN
+            // --------------------------------------------------------
+
+            var technician =
+                await _context.TechnicianProfiles
+                    .Include(t => t.User)
+                    .FirstOrDefaultAsync(t =>
+                        t.UserId == UserId);
+
+
+            if (technician == null ||
+                technician.User == null)
+            {
+                TempData["ErrorMessage"] =
+                    "The technician account could not be found.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
+
+
+            // --------------------------------------------------------
+            // VALIDATION
+            // --------------------------------------------------------
+
+            await ValidateTechnician(
+                model,
+                UserId);
+
+
+            if (!ModelState.IsValid)
+            {
+                await LoadUsers();
+
+                return View("Index");
+            }
+
+
+            var user =
+                technician.User;
+
+
+            // --------------------------------------------------------
+            // UPDATE APPLICATION USER
+            // --------------------------------------------------------
+
+            user.FirstName =
+                model.FirstName;
+
+            user.LastName =
+                model.LastName;
+
+            user.Email =
+                model.Email;
+
+            user.UserName =
+                model.Email;
+
+            user.PhoneNumber =
+                model.PhoneNumber;
+
+
+            // --------------------------------------------------------
+            // UPDATE TECHNICIAN PROFILE
+            // --------------------------------------------------------
+
+            technician.IdNumber =
+                model.IdNumber;
+
+            technician.EmployeeNumber =
+                model.EmployeeNumber;
+
+
+            // --------------------------------------------------------
+            // SAVE USER
+            // --------------------------------------------------------
+
+            var updateResult =
+                await _userManager.UpdateAsync(user);
+
+
+            if (!updateResult.Succeeded)
+            {
+                AddIdentityErrors(updateResult);
+
+                await LoadUsers();
+
+                return View("Index");
+            }
+
+
+            // --------------------------------------------------------
+            // SAVE PROFILE
+            // --------------------------------------------------------
+
+            await _context.SaveChangesAsync();
+
+
+            TempData["SuccessMessage"] =
+                $"Lab technician '{user.FullName}' updated successfully.";
+
+
+            return RedirectToAction(
+                nameof(Index));
+        }
+
+
+        // ============================================================
+        // DELETE / SOFT DELETE
         // ============================================================
 
         [HttpPost]
@@ -595,7 +828,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             if (string.IsNullOrWhiteSpace(id))
             {
                 TempData["ErrorMessage"] =
-                    "User could not be found.";
+                    "User could not be identified.";
 
                 return RedirectToAction(
                     nameof(Index));
@@ -603,9 +836,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
 
             var user =
-                await _userManager.Users
-                    .FirstOrDefaultAsync(u =>
-                        u.Id == id);
+                await _userManager.FindByIdAsync(id);
 
 
             if (user == null)
@@ -618,53 +849,26 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // PREVENT MANAGER DELETION
-            // --------------------------------------------------------
+            user.IsActive =
+                false;
 
-            if (await _userManager.IsInRoleAsync(
-                user,
-                "Manager"))
+
+            var result =
+                await _userManager.UpdateAsync(user);
+
+
+            if (!result.Succeeded)
             {
-                TempData["ErrorMessage"] =
-                    "Manager accounts cannot be deleted from this page.";
+                AddIdentityErrors(result);
 
-                return RedirectToAction(
-                    nameof(Index));
+                await LoadUsers();
+
+                return View("Index");
             }
-
-
-            // --------------------------------------------------------
-            // SOFT DELETE
-            // --------------------------------------------------------
-
-            user.IsActive = false;
-
-
-            // --------------------------------------------------------
-            // DEACTIVATE TECHNICIAN ASSIGNMENTS
-            // --------------------------------------------------------
-
-            var technicianAssignments =
-                await _context.TechnicianTestTypes
-                    .Where(t =>
-                        t.TechnicianId == user.Id &&
-                        t.IsActive)
-                    .ToListAsync();
-
-
-            foreach (var assignment in
-                     technicianAssignments)
-            {
-                assignment.IsActive = false;
-            }
-
-
-            await _context.SaveChangesAsync();
 
 
             TempData["SuccessMessage"] =
-                $"User '{user.FullName}' was deactivated successfully.";
+                $"User '{user.FullName}' deactivated successfully.";
 
 
             return RedirectToAction(
@@ -673,22 +877,26 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
 
         // ============================================================
-        // REACTIVATE USER
+        // REACTIVATE
         // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Activate(
+        public async Task<IActionResult> Reactivate(
             string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return RedirectToAction(nameof(Index));
+            {
+                TempData["ErrorMessage"] =
+                    "User could not be identified.";
+
+                return RedirectToAction(
+                    nameof(Index));
+            }
 
 
             var user =
-                await _userManager.Users
-                    .FirstOrDefaultAsync(u =>
-                        u.Id == id);
+                await _userManager.FindByIdAsync(id);
 
 
             if (user == null)
@@ -701,14 +909,26 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            user.IsActive = true;
+            user.IsActive =
+                true;
 
 
-            await _context.SaveChangesAsync();
+            var result =
+                await _userManager.UpdateAsync(user);
+
+
+            if (!result.Succeeded)
+            {
+                AddIdentityErrors(result);
+
+                await LoadUsers();
+
+                return View("Index");
+            }
 
 
             TempData["SuccessMessage"] =
-                $"User '{user.FullName}' was activated successfully.";
+                $"User '{user.FullName}' reactivated successfully.";
 
 
             return RedirectToAction(
@@ -721,10 +941,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         // ============================================================
 
         private async Task ValidateDoctor(
-            CreateDoctorViewModel model)
+            CreateDoctorViewModel model,
+            string? existingUserId = null)
         {
-            if (string.IsNullOrWhiteSpace(
-                model.FirstName))
+            if (string.IsNullOrWhiteSpace(model.FirstName))
             {
                 ModelState.AddModelError(
                     nameof(model.FirstName),
@@ -732,8 +952,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            if (string.IsNullOrWhiteSpace(
-                model.LastName))
+            if (string.IsNullOrWhiteSpace(model.LastName))
             {
                 ModelState.AddModelError(
                     nameof(model.LastName),
@@ -741,38 +960,61 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            if (string.IsNullOrWhiteSpace(
-                model.Email))
-            {
-                ModelState.AddModelError(
-                    nameof(model.Email),
-                    "E-mail address is required.");
-            }
-
-
-            if (string.IsNullOrWhiteSpace(
-                model.PhoneNumber))
-            {
-                ModelState.AddModelError(
-                    nameof(model.PhoneNumber),
-                    "Contact number is required.");
-            }
-
-
-            if (string.IsNullOrWhiteSpace(
-                model.HPCSANumber))
+            if (string.IsNullOrWhiteSpace(model.HPCSANumber))
             {
                 ModelState.AddModelError(
                     nameof(model.HPCSANumber),
                     "HPCSA number is required.");
             }
+            else
+            {
+                bool duplicateHPCSA =
+                    await _context.DoctorProfiles
+                        .AnyAsync(d =>
+                            d.HPCSANumber.ToLower() ==
+                            model.HPCSANumber.ToLower()
+                            &&
+                            (
+                                existingUserId == null ||
+                                d.UserId != existingUserId
+                            ));
+
+                if (duplicateHPCSA)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.HPCSANumber),
+                        "A doctor with this HPCSA number already exists.");
+                }
+            }
 
 
-            if (model.HPCSANumber.Length > 50)
+            if (string.IsNullOrWhiteSpace(model.Email))
             {
                 ModelState.AddModelError(
-                    nameof(model.HPCSANumber),
-                    "HPCSA number cannot exceed 50 characters.");
+                    nameof(model.Email),
+                    "E-mail address is required.");
+            }
+            else
+            {
+                var existingUser =
+                    await _userManager.FindByEmailAsync(
+                        model.Email);
+
+                if (existingUser != null &&
+                    existingUser.Id != existingUserId)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Email),
+                        "A user with this e-mail address already exists.");
+                }
+            }
+
+
+            if (string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                ModelState.AddModelError(
+                    nameof(model.PhoneNumber),
+                    "Contact number is required.");
             }
         }
 
@@ -782,10 +1024,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         // ============================================================
 
         private async Task ValidateTechnician(
-            CreateTechnicianViewModel model)
+            CreateTechnicianViewModel model,
+            string? existingUserId = null)
         {
-            if (string.IsNullOrWhiteSpace(
-                model.FirstName))
+            if (string.IsNullOrWhiteSpace(model.FirstName))
             {
                 ModelState.AddModelError(
                     nameof(model.FirstName),
@@ -793,8 +1035,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            if (string.IsNullOrWhiteSpace(
-                model.LastName))
+            if (string.IsNullOrWhiteSpace(model.LastName))
             {
                 ModelState.AddModelError(
                     nameof(model.LastName),
@@ -802,72 +1043,179 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            if (string.IsNullOrWhiteSpace(
-                model.Email))
-            {
-                ModelState.AddModelError(
-                    nameof(model.Email),
-                    "E-mail address is required.");
-            }
-
-
-            if (string.IsNullOrWhiteSpace(
-                model.PhoneNumber))
-            {
-                ModelState.AddModelError(
-                    nameof(model.PhoneNumber),
-                    "Contact number is required.");
-            }
-
-
-            if (string.IsNullOrWhiteSpace(
-                model.IdNumber))
+            if (string.IsNullOrWhiteSpace(model.IdNumber))
             {
                 ModelState.AddModelError(
                     nameof(model.IdNumber),
                     "South African ID number is required.");
             }
-
-
-            if (model.IdNumber.Length != 13 ||
-                !model.IdNumber.All(char.IsDigit))
+            else
             {
-                ModelState.AddModelError(
-                    nameof(model.IdNumber),
-                    "South African ID number must contain exactly 13 digits.");
+                bool duplicateIdNumber =
+                    await _context.TechnicianProfiles
+                        .AnyAsync(t =>
+                            t.IdNumber ==
+                            model.IdNumber
+                            &&
+                            (
+                                existingUserId == null ||
+                                t.UserId != existingUserId
+                            ));
+
+                if (duplicateIdNumber)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.IdNumber),
+                        "A technician with this South African ID number already exists.");
+                }
             }
 
 
-            if (string.IsNullOrWhiteSpace(
-                model.EmployeeNumber))
+            if (string.IsNullOrWhiteSpace(model.EmployeeNumber))
             {
                 ModelState.AddModelError(
                     nameof(model.EmployeeNumber),
                     "Employee number is required.");
             }
+            else
+            {
+                bool duplicateEmployeeNumber =
+                    await _context.TechnicianProfiles
+                        .AnyAsync(t =>
+                            t.EmployeeNumber.ToLower() ==
+                            model.EmployeeNumber.ToLower()
+                            &&
+                            (
+                                existingUserId == null ||
+                                t.UserId != existingUserId
+                            ));
+
+                if (duplicateEmployeeNumber)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.EmployeeNumber),
+                        "A technician with this employee number already exists.");
+                }
+            }
 
 
-            if (model.EmployeeNumber.Length > 50)
+            if (string.IsNullOrWhiteSpace(model.Email))
             {
                 ModelState.AddModelError(
-                    nameof(model.EmployeeNumber),
-                    "Employee number cannot exceed 50 characters.");
+                    nameof(model.Email),
+                    "E-mail address is required.");
+            }
+            else
+            {
+                var existingUser =
+                    await _userManager.FindByEmailAsync(
+                        model.Email);
+
+                if (existingUser != null &&
+                    existingUser.Id != existingUserId)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.Email),
+                        "A user with this e-mail address already exists.");
+                }
+            }
+
+
+            if (string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                ModelState.AddModelError(
+                    nameof(model.PhoneNumber),
+                    "Contact number is required.");
             }
         }
 
 
         // ============================================================
-        // LOAD ACTIVE USERS
+        // LOAD USERS
         // ============================================================
 
-        private async Task<List<ApplicationUser>>
-            GetActiveUsers()
+        private async Task LoadUsers()
         {
-            return await _userManager.Users
-                .Where(u => u.IsActive)
-                .OrderBy(u => u.LastName)
-                .ThenBy(u => u.FirstName)
+            ViewBag.Doctors =
+                await GetActiveDoctors();
+
+            ViewBag.Technicians =
+                await GetActiveTechnicians();
+        }
+
+
+        // ============================================================
+        // LOAD ACTIVE DOCTORS
+        // ============================================================
+
+        private async Task<List<DoctorProfile>>
+            GetActiveDoctors()
+        {
+            return await _context.DoctorProfiles
+                .AsNoTracking()
+                .Include(d => d.User)
+                .Where(d =>
+                    d.User != null &&
+                    d.User.IsActive)
+                .OrderBy(d =>
+                    d.User!.LastName)
+                .ThenBy(d =>
+                    d.User!.FirstName)
                 .ToListAsync();
+        }
+
+
+        // ============================================================
+        // LOAD ACTIVE TECHNICIANS
+        // ============================================================
+
+        private async Task<List<TechnicianProfile>>
+            GetActiveTechnicians()
+        {
+            return await _context.TechnicianProfiles
+                .AsNoTracking()
+                .Include(t => t.User)
+                .Where(t =>
+                    t.User != null &&
+                    t.User.IsActive)
+                .OrderBy(t =>
+                    t.User!.LastName)
+                .ThenBy(t =>
+                    t.User!.FirstName)
+                .ToListAsync();
+        }
+
+
+        // ============================================================
+        // ENSURE ROLE EXISTS
+        // ============================================================
+
+        private async Task EnsureRoleExists(
+            string roleName)
+        {
+            bool roleExists =
+                await _roleManager.RoleExistsAsync(
+                    roleName);
+
+            if (!roleExists)
+            {
+                var result =
+                    await _roleManager.CreateAsync(
+                        new IdentityRole(roleName));
+
+                if (!result.Succeeded)
+                {
+                    var errors =
+                        string.Join(
+                            ", ",
+                            result.Errors.Select(
+                                e => e.Description));
+
+                    throw new InvalidOperationException(
+                        $"Could not create role '{roleName}'. " +
+                        $"Errors: {errors}");
+                }
+            }
         }
 
 
@@ -877,7 +1225,145 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
         private string GenerateTemporaryPassword()
         {
-            return $"NMB@{Guid.NewGuid():N}".Substring(0, 14);
+            const string upper =
+                "ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+            const string lower =
+                "abcdefghijkmnopqrstuvwxyz";
+
+            const string numbers =
+                "23456789";
+
+            const string special =
+                "!@#$%&*";
+
+
+            var password =
+                new List<char>
+                {
+                    GetRandomCharacter(upper),
+                    GetRandomCharacter(lower),
+                    GetRandomCharacter(numbers),
+                    GetRandomCharacter(special)
+                };
+
+
+            const string all =
+                upper +
+                lower +
+                numbers +
+                special;
+
+
+            while (password.Count < 12)
+            {
+                password.Add(
+                    GetRandomCharacter(all));
+            }
+
+
+            return new string(
+                password
+                    .OrderBy(_ =>
+                        RandomNumberGenerator.GetInt32(
+                            int.MaxValue))
+                    .ToArray());
+        }
+
+
+        // ============================================================
+        // RANDOM CHARACTER
+        // ============================================================
+
+        private char GetRandomCharacter(
+            string characters)
+        {
+            int index =
+                RandomNumberGenerator.GetInt32(
+                    characters.Length);
+
+            return characters[index];
+        }
+
+
+        // ============================================================
+        // SEND TEMPORARY PASSWORD EMAIL
+        // ============================================================
+
+        private async Task SendTemporaryPasswordEmail(
+            ApplicationUser user,
+            string temporaryPassword,
+            string userType)
+        {
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot send temporary password email because " +
+                    $"the {userType} account does not have an e-mail address.");
+            }
+
+
+            string subject =
+                "NMB Health Laboratory System - Account Created";
+
+
+            string body =
+                $@"
+                <p>Dear {user.FirstName},</p>
+
+                <p>
+                    Your {userType} account for the
+                    <strong>NMB Health Laboratory System</strong>
+                    has been created.
+                </p>
+
+                <p>
+                    <strong>Username:</strong>
+                    {user.Email}
+                    <br />
+
+                    <strong>Temporary Password:</strong>
+                    {temporaryPassword}
+                </p>
+
+                <p>
+                    Please use these credentials to log in.
+                    You will be required to change your password
+                    when you log in for the first time.
+                </p>
+
+                <p>
+                    For security reasons, please do not share
+                    your password with anyone.
+                </p>
+
+                <p>
+                    Regards,<br />
+                    NMB Health Laboratory System
+                </p>
+                ";
+
+
+            await _emailSender.SendEmailAsync(
+                user.Email,
+                subject,
+                body);
+        }
+
+
+        // ============================================================
+        // ADD IDENTITY ERRORS
+        // ============================================================
+
+        private void AddIdentityErrors(
+            IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    error.Description);
+            }
         }
     }
 }

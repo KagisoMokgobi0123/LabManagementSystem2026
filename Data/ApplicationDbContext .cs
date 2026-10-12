@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Administrator.Models;
-using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
+using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Models.Users;
+using System.Reflection.Emit;
 
 namespace NMB_HLabSys.Data
 {
@@ -53,6 +54,12 @@ namespace NMB_HLabSys.Data
 
         public DbSet<MeasurementUnitModel> MeasurementUnits { get; set; }
 
+        // ============================================================
+        // AT LEAST ONE TEST TYPE SHOULD BE ASSIGNED TO EACH TECHNICIAN
+        // MULTIPLE TECHNICIANS COULD BE ASSIGNED THE SAME TEST TYPE
+        // TEST  TYPES THAT THE TECHNICIAN CAN PERFORM SHOULD BE INDICATED FOR EACH
+        // TECHNICIAN
+        // ============================================================
         public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
 
         public DbSet<TestTypeConsumableModel> TestTypeConsumables { get; set; }
@@ -63,6 +70,7 @@ namespace NMB_HLabSys.Data
         // ============================================================
 
         public DbSet<ConsumableModel> Consumables { get; set; }
+        public DbSet<TestResultModel> TestResults { get; set; }
 
         public DbSet<StockStatusHistoryModel> StockStatusHistories { get; set; }
 
@@ -104,8 +112,17 @@ namespace NMB_HLabSys.Data
 
         public DbSet<Allergy> Allergies { get; set; }
 
-        public DbSet<MedicationCategory> MedicationCategories { get; set; }
 
+        // ============================================================
+        // TECHNICIAN
+        // ============================================================
+
+
+        public DbSet<TestResultVerificationHistoryModel>TestResultVerificationHistories
+        { get; set; }
+
+        public DbSet<MedicationCategory> MedicationCategories { get; set; }
+        public DbSet<TestTypeMeasurementModel> TestTypeMeasurements { get; set; }
         public DbSet<Medication> Medications { get; set; }
 
 
@@ -113,6 +130,80 @@ namespace NMB_HLabSys.Data
         {
             base.OnModelCreating(builder);
 
+            builder.Entity<TestResultModel>(entity =>
+            {
+                entity.Property(x => x.ReferenceMin)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.ReferenceMax)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.PreviousReferenceMin)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.PreviousReferenceMax)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.NewReferenceMin)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.NewReferenceMax)
+                    .HasPrecision(18, 4);
+            });
+
+            builder.Entity<TestResultVerificationHistoryModel>(entity =>
+            {
+                entity.Property(x => x.PreviousReferenceMin)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.PreviousReferenceMax)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.NewReferenceMin)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.NewReferenceMax)
+                    .HasPrecision(18, 4);
+            });
+
+    
+
+            builder.Entity<TestResultVerificationHistoryModel>(entity =>
+            {
+
+                entity.HasOne(x => x.TestResult)
+                    .WithMany()
+                    .HasForeignKey(x => x.TestResultId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.ActionByTechnician)
+                    .WithMany()
+                    .HasForeignKey(x => x.ActionByTechnicianId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+            builder.Entity<TestResultModel>(entity =>
+            {
+                entity.HasOne(x => x.TestRequestTestType)
+                    .WithMany()
+                    .HasForeignKey(x => x.TestRequestTestTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.Technician)
+                    .WithMany()
+                    .HasForeignKey(x => x.TechnicianId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.VerifiedByTechnician)
+                    .WithMany()
+                    .HasForeignKey(x => x.VerifiedByTechnicianId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(x => x.ReferenceMin)
+                    .HasPrecision(18, 4);
+
+                entity.Property(x => x.ReferenceMax)
+                    .HasPrecision(18, 4);
+            });
 
             // ============================================================
             // USER PROFILE RELATIONSHIPS
@@ -124,7 +215,7 @@ namespace NMB_HLabSys.Data
 
             builder.Entity<DoctorProfile>()
                 .HasOne(x => x.User)
-                .WithOne()
+                .WithOne(x => x.DoctorProfile)
                 .HasForeignKey<DoctorProfile>(
                     x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -136,7 +227,7 @@ namespace NMB_HLabSys.Data
 
             builder.Entity<TechnicianProfile>()
                 .HasOne(x => x.User)
-                .WithOne()
+                .WithOne(x => x.TechnicianProfile)
                 .HasForeignKey<TechnicianProfile>(
                     x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -1215,6 +1306,165 @@ namespace NMB_HLabSys.Data
                     TurnAroundTimeHours = 4320,
                     IsActive =
                         TestTypeModel.RecordStatus.Active
+                }
+            );
+           
+
+            builder.Entity<TechnicianTestTypeModel>().HasData(
+                new TechnicianTestTypeModel
+                {
+                    TechnicianTestTypeId = 20,
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    TestTypeId = 1,
+                    ManagerId = "1f4afa33-baa8-4f46-8143-2e2740c68fe8",
+                    AssignedDate = new DateTime(2026, 1, 10),
+                    IsActive = true,
+                    Notes = "Assigned to perform routine laboratory tests."
+                },
+                new TechnicianTestTypeModel
+                {
+                    TechnicianTestTypeId = 30,
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    TestTypeId = 2,
+                    ManagerId = "1f4afa33-baa8-4f46-8143-2e2740c68fe8",
+                    AssignedDate = new DateTime(2026, 1, 11),
+                    IsActive = true,
+                    Notes = "Responsible for processing and analysing test samples."
+                },
+                new TechnicianTestTypeModel
+                {
+                    TechnicianTestTypeId = 40,
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    TestTypeId = 3,
+                    ManagerId = "1f4afa33-baa8-4f46-8143-2e2740c68fe8",
+                    AssignedDate = new DateTime(2026, 1, 12),
+                    IsActive = true,
+                    Notes = "Authorised to conduct specialised laboratory tests."
+                },
+                new TechnicianTestTypeModel
+                {
+                    TechnicianTestTypeId = 4,
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    TestTypeId = 1,
+                    ManagerId = "1f4afa33-baa8-4f46-8143-2e2740c68fe8",
+                    AssignedDate = new DateTime(2026, 1, 13),
+                    IsActive = false,
+                    Notes = "Assignment temporarily deactivated pending review."
+                },
+                new TechnicianTestTypeModel
+                {
+                    TechnicianTestTypeId = 5,
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    TestTypeId = 3,
+                    ManagerId = "1f4afa33-baa8-4f46-8143-2e2740c68fe8",
+                    AssignedDate = new DateTime(2026, 1, 14),
+                    IsActive = true,
+                    Notes = "Assigned additional testing responsibilities."
+                }
+            );
+
+
+            // ============================================================
+            // TEST REQUEST TEST TYPES SEED DATA
+            // Individual tests requested by doctors
+            // ============================================================
+
+
+            builder.Entity<TestRequestTestTypeModel>().HasData(
+
+                // Request 1 - Awaiting samples
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 1,
+                    TestRequestId = 1,
+                    TestTypeId = 1,
+                    TechnicianId = null,
+                    Status = "Submitted",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 2 - Samples received
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 2,
+                    TestRequestId = 2,
+                    TestTypeId = 1,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 3,
+                    TestRequestId = 2,
+                    TestTypeId = 2,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 3 - Samples received, request in progress
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 4,
+                    TestRequestId = 3,
+                    TestTypeId = 3,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 5 - Awaiting samples
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 5,
+                    TestRequestId = 5,
+                    TestTypeId = 6,
+                    TechnicianId = null,
+                    Status = "Submitted",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 6 - Samples received
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 6,
+                    TestRequestId = 6,
+                    TestTypeId = 3,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 9 - Samples received, request in progress
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 7,
+                    TestRequestId = 9,
+                    TestTypeId = 3,
+                    TechnicianId = null,
+                    Status = "SamplesReceived",
+                    StartDateTime = null,
+                    CompletionDateTime = null
+                },
+
+                // Request 10 - Awaiting samples
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 8,
+                    TestRequestId = 10,
+                    TestTypeId = 1,
+                    TechnicianId = null,
+                    Status = "Submitted",
+                    StartDateTime = null,
+                    CompletionDateTime = null
                 }
             );
 

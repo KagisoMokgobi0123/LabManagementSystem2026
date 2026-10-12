@@ -138,7 +138,14 @@ namespace NMB_HLabSys.Areas.Manager.Models
         // ConsumableId is intentionally NOT stored directly on
         // TestTypeModel.
         // ============================================================
+        // ==========================================
+        // TEST MEASUREMENTS
+        // ==========================================
 
+        public virtual ICollection<TestTypeMeasurementModel>
+            TestTypeMeasurements
+        { get; set; }
+                = new List<TestTypeMeasurementModel>();
         public virtual ICollection<TestTypeConsumableModel>
             TestTypeConsumables
         { get; set; }

@@ -21,12 +21,7 @@ namespace NMB_HLabSys.Controllers
             _signInManager = signInManager;
             _logger = logger;
         }
-
-
-        // ============================================================
-        // MAIN LOGIN / PORTAL SELECTION
-        // URL: /Account/Login
-        // ============================================================
+        // Login
 
         [AllowAnonymous]//Add this(KG)
         [HttpGet]
@@ -50,10 +45,8 @@ namespace NMB_HLabSys.Controllers
         }
 
 
-        // ============================================================
+  
         // ADMIN LOGIN
-        // URL: /Account/AdminLogin
-        // ============================================================
 
         [AllowAnonymous]
         [HttpGet]
@@ -63,10 +56,7 @@ namespace NMB_HLabSys.Controllers
         }
 
 
-        // ============================================================
-        // PATIENT LOGIN
-        // URL: /Account/PatientLogin
-        // ============================================================
+        // Patient login
 
         [AllowAnonymous]
         [HttpGet]
@@ -74,12 +64,8 @@ namespace NMB_HLabSys.Controllers
         {
             return View(new LoginViewModel());
         }
-
-
-        // ============================================================
-        // DOCTOR LOGIN
-        // URL: /Account/DoctorLogin
-        // ============================================================
+   
+        // Doc login
 
         [AllowAnonymous]
         [HttpGet]
@@ -88,11 +74,7 @@ namespace NMB_HLabSys.Controllers
             return View(new LoginViewModel());
         }
 
-
-        // ============================================================
-        // LAB TECHNICIAN LOGIN
-        // URL: /Account/TechnicianLogin
-        // ============================================================
+        // Lab technician login
 
         [AllowAnonymous]
         [HttpGet]
@@ -102,10 +84,7 @@ namespace NMB_HLabSys.Controllers
         }
 
 
-        // ============================================================
-        // LAB MANAGER LOGIN
-        // URL: /Account/ManagerLogin
-        // ============================================================
+        // Manager login
 
         [AllowAnonymous]
         [HttpGet]
@@ -114,10 +93,7 @@ namespace NMB_HLabSys.Controllers
             return View(new LoginViewModel());
         }
 
-
-        // ============================================================
-        // SHARED ROLE LOGIN
-        // ============================================================
+        // Shared  role login
 
         [AllowAnonymous]
         [HttpPost]
@@ -142,10 +118,7 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // --------------------------------------------------------
             // Find user
-            // --------------------------------------------------------
-
             var user = await _userManager.FindByEmailAsync(
                 model.Email.Trim());
 
@@ -159,11 +132,7 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
-
-            // --------------------------------------------------------
             // Verify role
-            // --------------------------------------------------------
-
             var belongsToRole =
                 await _userManager.IsInRoleAsync(
                     user,
@@ -180,12 +149,10 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // --------------------------------------------------------
+
             // Check account state
-            //
-            // Staff with a temporary password can still login so that
-            // they can change the temporary password.
-            // --------------------------------------------------------
+            // Staff with a temporary password can still login so that they can change the temporary password.
+    
 
             if (!user.IsActive &&
                 !user.MustChangePassword)
@@ -198,10 +165,8 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // Authenticate
-            // --------------------------------------------------------
 
+            // Authenticate
             var result =
                 await _signInManager.PasswordSignInAsync(
                     user,
@@ -210,10 +175,8 @@ namespace NMB_HLabSys.Controllers
                     lockoutOnFailure: true);
 
 
-            // --------------------------------------------------------
-            // Locked account
-            // --------------------------------------------------------
 
+            // Locked account
             if (result.IsLockedOut)
             {
                 ModelState.AddModelError(
@@ -225,9 +188,7 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // --------------------------------------------------------
             // Invalid password
-            // --------------------------------------------------------
 
             if (!result.Succeeded)
             {
@@ -239,10 +200,8 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // Temporary password
-            // --------------------------------------------------------
 
+            // Temporary password
             if (user.MustChangePassword)
             {
                 return RedirectToAction(
@@ -250,10 +209,7 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // --------------------------------------------------------
             // Account must be active
-            // --------------------------------------------------------
-
             if (!user.IsActive)
             {
                 await _signInManager.SignOutAsync();
@@ -265,11 +221,7 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
-
-            // --------------------------------------------------------
             // Update last login
-            // --------------------------------------------------------
-
             user.LastLoginDate = DateTime.UtcNow;
 
             await _userManager.UpdateAsync(user);
@@ -281,18 +233,11 @@ namespace NMB_HLabSys.Controllers
                 role);
 
 
-            // --------------------------------------------------------
-            // Dashboard
-            // --------------------------------------------------------
-
+            // Redirect to the Dashboard depending on the role
             return RedirectToDashboard(role);
         }
 
-
-        // ============================================================
-        // RETURN CORRECT LOGIN PAGE
-        // ============================================================
-
+        // Return the login page depending on the user.
         private IActionResult ReturnLoginView(
             string role,
             LoginViewModel model)
@@ -319,10 +264,7 @@ namespace NMB_HLabSys.Controllers
             };
         }
 
-
-        // ============================================================
-        // DASHBOARD REDIRECTION
-        // ============================================================
+        // This will redirect the user after entered correct login detials to their dahsboard
 
         private IActionResult RedirectToDashboard(string role)
         {
@@ -365,10 +307,8 @@ namespace NMB_HLabSys.Controllers
         }
 
 
-        // ============================================================
-        // CHANGE TEMPORARY PASSWORD
-        // ============================================================
 
+        // User will have to change their  temporary passwords
         [Authorize]
         [HttpGet]
         public IActionResult ChangeTemporaryPassword()
@@ -377,7 +317,7 @@ namespace NMB_HLabSys.Controllers
                 new ChangeTemporaryPasswordViewModel());
         }
 
-
+         
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -422,11 +362,7 @@ namespace NMB_HLabSys.Controllers
                 return View(model);
             }
 
-
-            // --------------------------------------------------------
-            // Activate account
-            // --------------------------------------------------------
-
+            // Retrieve an active account
             user.MustChangePassword = false;
 
             user.IsActive = true;
@@ -456,11 +392,7 @@ namespace NMB_HLabSys.Controllers
             TempData["Success"] =
                 "Your password has been changed successfully.";
 
-
-            // --------------------------------------------------------
             // Determine user's role
-            // --------------------------------------------------------
-
             var roles =
                 await _userManager.GetRolesAsync(user);
 
@@ -482,9 +414,8 @@ namespace NMB_HLabSys.Controllers
         }
 
 
-        // ============================================================
-        // LOGOUT
-        // ============================================================
+
+        // Safe logout
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -502,7 +433,7 @@ namespace NMB_HLabSys.Controllers
             }
 
 
-            // Get user's role BEFORE signing out
+            // Get user's role before signing out
             var roles =
                 await _userManager.GetRolesAsync(user);
 
@@ -559,9 +490,7 @@ namespace NMB_HLabSys.Controllers
             };
         }
 
-        // ============================================================
-        // ACCESS DENIED
-        // ============================================================
+        // For purpose of wrong login details access will be denied and this view will handle it.
 
         [AllowAnonymous]
         [HttpGet]

@@ -1,0 +1,286 @@
+﻿@model NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel
+@using NMB_HLabSys.Areas.Technician.Models
+@{
+    ViewData["Title"] = "Verify Test Results";
+    Layout = "_TechnicianLayout";
+
+    var results = (ViewData["TestResults"] as IEnumerable<TestResultModel>)?.ToList()
+                  ?? new List<TestResultModel>();
+    var result = results.Count == 1 ? results[0] : null;
+    var validResult = result != null && !string.IsNullOrWhiteSpace(result.ResultValue);
+    var canVerify = Model.Status == "Completed" && validResult && results.Count == 1;
+    var referenceRange = result == null || (result.ReferenceMin == null && result.ReferenceMax == null)
+        ? "Not configured"
+        : $"{result.ReferenceMin?.ToString() ?? "—"} to {result.ReferenceMax?.ToString() ?? "—"}";
+}
+<style>
+    .tv-shell {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 25px 15px 55px;
+    }
+
+    .tv-hero {
+        background: linear-gradient(120deg,#103a76,#1976c9);
+        color: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+
+        .tv-hero h1 {
+            font-size: 1.6rem;
+            font-weight: 750;
+            margin-bottom: 9px;
+        }
+
+        .tv-hero p {
+            margin-bottom: 0;
+            color: #e0edfb;
+        }
+
+    .tv-card {
+        background: #fff;
+        border: 1px solid #e4ebf4;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(18,49,85,.08);
+        padding: 23px;
+        margin-bottom: 22px;
+    }
+
+        .tv-card h2 {
+            font-size: 1.15rem;
+            font-weight: 750;
+            color: #1d4778;
+            margin-bottom: 20px;
+        }
+
+    .tv-grid {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 18px;
+    }
+
+    .tv-label {
+        color: #64748b;
+        font-size: .81rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .tv-value {
+        color: #23364d;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+    .tv-badge {
+        display: inline-block;
+        padding: 5px 11px;
+        border-radius: 20px;
+        background: #e5f1ff;
+        color: #185e9f;
+        font-weight: 750;
+        font-size: .8rem;
+    }
+
+    .tv-flag {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 750;
+    }
+
+        .tv-flag.abnormal {
+            background: #fff0f0;
+            color: #a02020;
+        }
+
+        .tv-flag.normal {
+            background: #e6f5eb;
+            color: #167347;
+        }
+
+        .tv-flag.unknown {
+            background: #edf1f5;
+            color: #566578;
+        }
+
+    .tv-result {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #153f70;
+    }
+
+    .tv-notes {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        padding: 12px 15px;
+        background: #f4f7fb;
+        border-radius: 9px;
+    }
+
+    .tv-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+
+        .tv-actions .btn {
+            padding: 10px 16px;
+            border-radius: 9px;
+            font-weight: 700;
+        }
+
+    .tv-help {
+        font-size: .88rem;
+        color: #697d92;
+    }
+
+    @@media (max-width:650px) {
+        .tv-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .tv-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="tv-shell">
+    <header class="tv-hero">
+        <h1><i class="fas fa-user-check mr-2"></i>Verify Test Results</h1>
+        <p>Independent verification of a completed test captured by another technician.</p>
+    </header>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div>
+    }
+
+    <section class="tv-card">
+        <h2><i class="fas fa-flask mr-2"></i>Test Details</h2>
+        <div class="tv-grid">
+            <div><div class="tv-label">Request Number</div><div class="tv-value">@(Model.TestRequest?.RequestNumber ?? "—")</div></div>
+            <div><div class="tv-label">Test Name</div><div class="tv-value">@(Model.TestType?.Name ?? "—")</div></div>
+            <div><div class="tv-label">Test ID</div><div class="tv-value">#@Model.TestRequestTestTypeId</div></div>
+            <div><div class="tv-label">Status</div><span class="tv-badge">@Model.Status</span></div>
+            <div><div class="tv-label">Started</div><div class="tv-value">@(Model.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</div></div>
+            <div><div class="tv-label">Completed</div><div class="tv-value">@(Model.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</div></div>
+        </div>
+    </section>
+
+    <section class="tv-card">
+        <h2><i class="fas fa-clipboard-check mr-2"></i>Captured Test Result</h2>
+        @if (results.Count != 1)
+        {
+            <div class="alert alert-warning" role="alert">
+                Expected exactly one captured result for this test, but found @results.Count.
+                Verification is unavailable until the original technician resolves this.
+            </div>
+        }
+        else if (!validResult)
+        {
+            <div class="alert alert-warning" role="alert">The saved result is empty. Verification is unavailable.</div>
+        }
+        else
+        {
+            <div class="tv-grid mb-3">
+                <div>
+                    <div class="tv-label">Test / Result Name</div>
+                    <div class="tv-value">@result!.ResultName</div>
+                </div>
+                <div>
+                    <div class="tv-label">Captured Result</div>
+                    <div class="tv-result">@result!.ResultValue <span style="font-size:1rem;font-weight:600">@result.MeasurementUnit</span></div>
+                </div>
+                <div>
+                    <div class="tv-label">Reference Range</div>
+                    <div class="tv-value">@referenceRange</div>
+                </div>
+                <div>
+                    <div class="tv-label">Classification</div>
+                    <span class="tv-flag @(result!.IsAbnormal ? "abnormal" : result.ResultFlag == "Normal" ? "normal" : "unknown")">
+                        @(result.ResultFlag ?? "Not Evaluated")
+                    </span>
+                </div>
+            </div>
+            <div class="tv-label">Original Technician Notes</div>
+            <div class="tv-notes">@(string.IsNullOrWhiteSpace(result!.Notes) ? "No notes provided." : result.Notes)</div>
+        }
+    </section>
+
+    <section class="tv-card">
+        <h2><i class="fas fa-check-double mr-2"></i>Verification Decision</h2>
+        <p class="tv-help">
+            Approve only after independently checking the result. To return the test for correction,
+            enter a reason in the notes field. All decisions are recorded in verification history.
+        </p>
+        <form asp-area="Technician" asp-controller="Tests" asp-action="VerifyResult"
+              method="post" id="verifyForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
+            <div class="form-group">
+                <label for="verificationNotes"><strong>Verification / Review Notes</strong></label>
+                <textarea id="verificationNotes" name="notes" class="form-control"
+                          rows="4" maxlength="2000"
+                          placeholder="Optional for approval; required when returning the test."></textarea>
+            </div>
+            <div class="tv-actions">
+                <button type="submit" name="decision" value="Verify" id="approveButton"
+                        class="btn btn-success" disabled="@(!canVerify)">
+                    <i class="fas fa-check-circle mr-1"></i> Approve &amp; Verify
+                </button>
+                <button type="submit" name="decision" value="ReturnForReview" id="returnButton"
+                        class="btn btn-warning" disabled="@(!canVerify)">
+                    <i class="fas fa-undo mr-1"></i> Return for Review
+                </button>
+                <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"
+                   class="btn btn-outline-secondary">Cancel</a>
+                <a asp-area="Technician" asp-controller="Tests" asp-action="VerificationHistory"
+                   asp-route-id="@Model.TestRequestTestTypeId" class="btn btn-outline-primary">
+                    <i class="fas fa-history mr-1"></i> View History
+                </a>
+            </div>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            'use strict';
+            const form = document.getElementById('verifyForm');
+            const notes = document.getElementById('verificationNotes');
+            const approve = document.getElementById('approveButton');
+            const sendBack = document.getElementById('returnButton');
+            if (!form || !notes || !approve || !sendBack) return;
+
+            form.addEventListener('submit', function(event) {
+                const submitter = event.submitter;
+                if (!submitter) { event.preventDefault(); return; }
+                if (submitter.value === 'ReturnForReview' && !notes.value.trim()) {
+                    event.preventDefault();
+                    alert('Please enter review notes before returning the test.');
+                    notes.focus();
+                    return;
+                }
+                const question = submitter.value === 'Verify'
+                    ? 'Approve and verify this test result?'
+                    : 'Return this test to the original technician for correction?';
+                if (!confirm(question)) {
+                    event.preventDefault();
+                    return;
+                }
+                approve.disabled = true;
+                sendBack.disabled = true;
+            });
+        })();
+    </script>
+}

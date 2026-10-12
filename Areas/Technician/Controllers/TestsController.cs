@@ -6,7 +6,9 @@ using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
+using System.Data;
 using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Areas.Technician.ViewModels;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
@@ -26,304 +28,524 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // =========================================================
-        // AVAILABLE TESTS
-        //
-        // Tests that:
-        // 1. Belong to received requests
-        // 2. Are still Submitted
-        // 3. Match test types assigned to logged-in technician
-        //
-        // GET: /Technician/Tests/Available
-        // =========================================================
+
+        // GET: /Technician/Tests/AssignedTestTypes
+        [HttpGet]
+        public async Task<IActionResult> AssignedTestTypes()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(technicianId))
+            {
+                return Challenge();
+            }
+
+            var assignedTestTypes = await _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.TestCategory)
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.SampleType)
+                .Where(x =>
+                    x.TechnicianId == technicianId &&
+                    x.IsActive)
+                .OrderBy(x => x.TestType!.Name)
+                .ToListAsync();
+
+            return View(assignedTestTypes);
+        }
+
+
+
+
 
         [HttpGet]
         public async Task<IActionResult> Available()
         {
+            // STEP 1: Identify logged-in technician
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            // STEP 2: Retrieve Laboratory Manager assignments
+            // Include active and revoked assignments.
+            var assignmentRecords = await (
+                from assignment in _context.TechnicianTestTypes
+                    .AsNoTracking()
+                join test in _context.TestTypes
+                    .AsNoTracking()
+                    on assignment.TestTypeId equals test.TestTypeId
+                where assignment.TechnicianId == technicianId
+                select new TechnicianAssignmentRowViewModel
+                {
+                    TestTypeId = test.TestTypeId,
+                    Name = test.Name,
+
+                    Category = test.TestCategory != null
+                        ? test.TestCategory.Description
+                        : null,
+
+                    SampleType = test.SampleType != null
+                        ? test.SampleType.Name
+                        : null,
+
+                    IsActive = assignment.IsActive
+                }
+            ).ToListAsync();
+
+            // STEP 3: Keep one display row per assigned test type
+            var assignments = assignmentRecords
+                .GroupBy(x => x.TestTypeId)
+                .Select(g => g
+                    .OrderByDescending(x => x.IsActive)
+                    .First())
+                .OrderBy(x => x.Name)
+                .ToList();
+
+            // STEP 4: Retrieve selected tests
+            // Include the ApplicationUser patient and doctor.
+            var selectedTests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Doctor)
+                .Where(x => x.TechnicianId == technicianId)
+                .OrderByDescending(x => x.StartDateTime)
+                .ThenBy(x => x.TestRequestTestTypeId)
+                .ToListAsync();
+
+            // STEP 5: Map selected tests and deadlines
+            var deadlineRows = selectedTests.Select(x =>
+            {
+                var request = x.TestRequest;
+
+                // Patient is an ApplicationUser
+                var patient = request?.Patient;
+
+                var patientName =
+                    !string.IsNullOrWhiteSpace(patient?.FullName)
+                        ? patient.FullName
+                        : "Patient not found";
+
+                return new TechnicianDeadlineRowViewModel
+                {
+                    RequestReference =
+                        request?.RequestNumber
+                        ?? x.TestRequestId.ToString(),
+
+                    PatientName = patientName,
+
+                    TestTypeName =
+                        x.TestType?.Name
+                        ?? "Unknown Test",
+
+                    Status = x.Status,
+
+                    // StartDateTime is stored in UTC
+                    StartDateTimeUtc = x.StartDateTime,
+
+                    TurnaroundHours =
+                        x.TestType == null
+                            ? null
+                            : (double?)x.TestType.TurnAroundTimeHours
+                };
+            }).ToList();
+
+            // STEP 6: Pass selected tests to the unified table
+            ViewBag.SelectedTests = deadlineRows;
+
+            // STEP 7: Return the existing single-table view
+            return View("Available", assignments);
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> AssignmentDetails(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(technicianId))
+                return Challenge();
+
+            var assignment = await (
+                from a in _context.TechnicianTestTypes.AsNoTracking()
+                join t in _context.TestTypes.AsNoTracking()
+                    on a.TestTypeId equals t.TestTypeId
+                where a.TechnicianId == technicianId
+                      && a.TestTypeId == id
+                select new TechnicianAssignmentRowViewModel
+                {
+                    TestTypeId = t.TestTypeId,
+                    Name = t.Name,
+                    Category = t.TestCategory != null
+                        ? t.TestCategory.Description : null,
+                    SampleType = t.SampleType != null
+                        ? t.SampleType.Name : null,
+                    IsActive = a.IsActive
+                }
+            ).FirstOrDefaultAsync();
+
+            if (assignment == null)
+                return NotFound();
+
+            return View(assignment);
+        }
+
+
+        // Replace the existing GET and POST Select actions in TestsController with these methods.
+        // StartDateTime is stored in UTC; convert to local time only when displaying it.
+
+        [HttpGet]
+        public async Task<IActionResult> Select()
+        {
+            // STEP 1: Get logged-in technician
             var technician = await _userManager.GetUserAsync(User);
 
             if (technician == null)
+                return Challenge();
+
+            // STEP 2: Get active test types assigned to this technician
+            var assignedTestTypeIds = await _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(x =>
+                    x.TechnicianId == technician.Id &&
+                    x.IsActive)
+                .Select(x => x.TestTypeId)
+                .Distinct()
+                .ToListAsync();
+
+            // STEP 3: Get available patient tests
+            var availableTests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                .Include(x => x.TestRequest)
+                .Where(x =>
+                    assignedTestTypeIds.Contains(x.TestTypeId) &&
+
+                    x.Status == "SamplesReceived" &&
+
+                    (x.TechnicianId == null ||
+                     x.TechnicianId == "") &&
+
+                    x.TestRequest != null &&
+
+                    (
+                        x.TestRequest.Status ==
+                            TestRequestStatus.SamplesReceived.ToString() ||
+
+                        x.TestRequest.Status ==
+                            TestRequestStatus.InProgress.ToString()
+                    ))
+                .OrderBy(x => x.TestRequestId)
+                .ThenBy(x => x.TestRequestTestTypeId)
+                .ToListAsync();
+
+            // STEP 4: Collect patient and doctor IDs
+            var patientIds = availableTests
+                .Where(x => x.TestRequest != null)
+                .Select(x => x.TestRequest!.PatientId)
+                .Distinct()
+                .ToList();
+
+            var doctorIds = availableTests
+                .Where(x => x.TestRequest != null)
+                .Select(x => x.TestRequest!.DoctorId)
+                .Distinct()
+                .ToList();
+
+            // STEP 5: Retrieve matching patient records
+            var patients = await _context.Patients
+                .AsNoTracking()
+                .Where(x => patientIds.Contains(x.PatientId))
+                .ToDictionaryAsync(x => x.PatientId);
+
+            // STEP 6: Retrieve matching doctor Identity accounts
+            var doctorUsers = await _userManager.Users
+                .AsNoTracking()
+                .Where(x => doctorIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id);
+
+            // STEP 7: Map results to the view model
+            var model = availableTests.Select(x =>
             {
-                return Unauthorized();
-            }
+                var request = x.TestRequest;
 
+                var patient = request != null &&
+                              patients.TryGetValue(
+                                  request.PatientId,
+                                  out var matchedPatient)
+                    ? matchedPatient
+                    : null;
 
-            // -----------------------------------------------------
-            // Get test types assigned to this technician
-            // -----------------------------------------------------
+                var doctor = request != null &&
+                             doctorUsers.TryGetValue(
+                                 request.DoctorId,
+                                 out var matchedDoctor)
+                    ? matchedDoctor
+                    : null;
 
-            var assignedTestTypeIds =
-                await _context.TechnicianTestTypes
-                    .AsNoTracking()
-                    .Where(x =>
-                        x.TechnicianId == technician.Id &&
-                        x.IsActive)
-                    .Select(x => x.TestTypeId)
-                    .ToListAsync();
+                return new SelectPatientTestViewModel
+                {
+                    RequestedTestId =
+                        x.TestRequestTestTypeId,
 
+                    RequestReference =
+                        request?.RequestNumber
+                        ?? x.TestRequestId.ToString(),
 
-            if (!assignedTestTypeIds.Any())
-            {
-                return View(
-                    new List<TestRequestTestTypeModel>());
-            }
+                    PatientName =
+                        patient?.FullName
+                        ?? "Patient not found",
 
+                    PatientIdNumber =
+                        patient?.IDNumber
+                        ?? "Not available",
 
-            // -----------------------------------------------------
-            // Get available request tests
-            // -----------------------------------------------------
+                    DoctorFullName =
+                        doctor?.FullName
+                        ?? "Doctor not found",
 
-            var tests =
-                await _context.TestRequestTestTypes
+                    DoctorUsername =
+                        doctor?.UserName
+                        ?? "Not available",
 
-                    .AsNoTracking()
+                    ClinicalNotes =
+                        request?.ClinicalNotes
+                        ?? "No clinical notes provided",
 
-                    .Include(x => x.TestRequest)
-                        .ThenInclude(r => r!.Patient)
+                    TestTypeName =
+                        x.TestType?.Name
+                        ?? "Unknown Test",
 
-                    .Include(x => x.TestRequest)
-                        .ThenInclude(r => r!.Doctor)
+                    Priority =
+                        request?.Urgency.ToString()
+                        ?? "Not specified",
 
-                    .Include(x => x.TestType)
-                        .ThenInclude(t => t!.TestCategory)
+                    TurnaroundDisplay =
+                        x.TestType == null
+                            ? "Not specified"
+                            : $"{x.TestType.TurnAroundTimeHours} hours",
 
-                    .Include(x => x.TestType)
-                        .ThenInclude(t => t!.SampleType)
+                    RequestStatus =
+                        request?.Status
+                        ?? "Unknown",
 
-                    .Where(x =>
-                        assignedTestTypeIds.Contains(x.TestTypeId) &&
+                    TestStatus = x.Status
+                };
+            }).ToList();
 
-                        x.Status == "Submitted" &&
-
-                        x.TestRequest != null &&
-
-                        (
-                            x.TestRequest.Status ==
-                                TestRequestStatus.SamplesReceived.ToString()
-                            ||
-                            x.TestRequest.Status ==
-                                TestRequestStatus.InProgress.ToString()
-                        ))
-
-                    .OrderByDescending(x =>
-                        x.TestRequest!.Urgency)
-
-                    .ThenBy(x =>
-                        x.TestRequest!.RequestDate)
-
-                    .ToListAsync();
-
-
-            return View(tests);
+            // STEP 8: Return your existing Select.cshtml
+            return View("Select", model);
         }
 
-
-        // =========================================================
-        // SELECT TEST
-        //
-        // Technician claims/selects a test for processing.
-        //
-        // POST: /Technician/Tests/Select
-        // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Select(
-            int testRequestTestTypeId)
+        public async Task<IActionResult> Select(int testRequestTestTypeId)
         {
-            var technician =
-                await _userManager.GetUserAsync(User);
+            var technician = await _userManager.GetUserAsync(User);
 
             if (technician == null)
+                return Challenge();
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    System.Data.IsolationLevel.Serializable);
+
+            try
             {
-                return Unauthorized();
-            }
-
-
-            // -----------------------------------------------------
-            // Find requested test
-            // -----------------------------------------------------
-
-            var requestTest =
-                await _context.TestRequestTestTypes
-
+                // -----------------------------------------------------
+                // 1. Find the requested patient test
+                // -----------------------------------------------------
+                var requestTest = await _context.TestRequestTestTypes
                     .Include(x => x.TestRequest)
-
                     .Include(x => x.TestType)
-
                     .FirstOrDefaultAsync(x =>
-                        x.TestRequestTestTypeId ==
-                        testRequestTestTypeId);
+                        x.TestRequestTestTypeId == testRequestTestTypeId);
 
-
-            if (requestTest == null)
-            {
-                TempData["ErrorMessage"] =
-                    "The selected test could not be found.";
-
-                return RedirectToAction(nameof(Available));
-            }
-
-
-            // -----------------------------------------------------
-            // Check current status
-            // -----------------------------------------------------
-
-            if (!string.Equals(
-                    requestTest.Status,
-                    "Submitted",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                TempData["ErrorMessage"] =
-                    "This test is no longer available for selection.";
-
-                return RedirectToAction(nameof(Available));
-            }
-
-
-            // -----------------------------------------------------
-            // Verify technician is assigned to this test type
-            // -----------------------------------------------------
-
-            var technicianCanPerformTest =
-                await _context.TechnicianTestTypes
-                    .AnyAsync(x =>
-                        x.TechnicianId == technician.Id &&
-                        x.TestTypeId == requestTest.TestTypeId &&
-                        x.IsActive);
-
-
-            if (!technicianCanPerformTest)
-            {
-                TempData["ErrorMessage"] =
-                    "You are not assigned to perform this test type.";
-
-                return RedirectToAction(nameof(Available));
-            }
-
-
-            // -----------------------------------------------------
-            // Request must have received its samples
-            // -----------------------------------------------------
-
-            if (requestTest.TestRequest == null)
-            {
-                TempData["ErrorMessage"] =
-                    "The test request could not be found.";
-
-                return RedirectToAction(nameof(Available));
-            }
-
-
-            var request = requestTest.TestRequest;
-
-
-            if (request.Status !=
-                    TestRequestStatus.SamplesReceived.ToString()
-                &&
-                request.Status !=
-                    TestRequestStatus.InProgress.ToString())
-            {
-                TempData["ErrorMessage"] =
-                    "Samples must be received before this test can be selected.";
-
-                return RedirectToAction(nameof(Available));
-            }
-
-
-            // -----------------------------------------------------
-            // IMPORTANT
-            // These are the fields your TestRequestTestTypeModel
-            // should contain:
-            //
-            // TechnicianId
-            // StartDateTime
-            // CompletionDateTime
-            //
-            // -----------------------------------------------------
-
-            requestTest.TechnicianId =
-                technician.Id;
-
-            requestTest.StartDateTime =
-                DateTime.Now;
-
-            requestTest.Status =
-                "In Progress";
-
-
-            // -----------------------------------------------------
-            // First selected test changes overall request to
-            // In Progress.
-            // -----------------------------------------------------
-
-            if (request.Status ==
-                TestRequestStatus.SamplesReceived.ToString())
-            {
-                request.Status =
-                    TestRequestStatus.InProgress.ToString();
-            }
-
-
-            // -----------------------------------------------------
-            // DEDUCT CONSUMABLES
-            // -----------------------------------------------------
-
-            var consumables =
-                await _context.TestTypeConsumables
-
-                    .Include(x => x.Consumable)
-
-                    .Where(x =>
-                        x.TestTypeId ==
-                        requestTest.TestTypeId)
-
-                    .ToListAsync();
-
-
-            foreach (var item in consumables)
-            {
-                if (item.Consumable == null)
-                {
-                    continue;
-                }
-
-
-                if (item.Consumable.QuantityOnHand <
-                    item.QuantityRequired)
+                if (requestTest == null)
                 {
                     TempData["ErrorMessage"] =
-                        $"Insufficient stock for " +
-                        $"{item.Consumable.Name}.";
+                        "The selected patient test could not be found.";
 
-                    return RedirectToAction(
-                        nameof(Available));
+                    return RedirectToAction(nameof(Select));
                 }
-            }
 
-
-            // Stock validation passed.
-            // Now deduct.
-            foreach (var item in consumables)
-            {
-                if (item.Consumable != null)
+                // -----------------------------------------------------
+                // 2. Ensure the sample has been received and test is available
+                // -----------------------------------------------------
+                if (!string.Equals(
+                        requestTest.Status,
+                        "SamplesReceived",
+                        StringComparison.OrdinalIgnoreCase))
                 {
-                    item.Consumable.QuantityOnHand -=
+                    TempData["ErrorMessage"] =
+                        "This test is no longer available for selection. Its sample must be received and it must not already be in progress.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                // -----------------------------------------------------
+                // 3. Ensure the test has not been claimed
+                // -----------------------------------------------------
+                if (!string.IsNullOrEmpty(requestTest.TechnicianId))
+                {
+                    TempData["ErrorMessage"] =
+                        "Another technician has already selected this test.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                // -----------------------------------------------------
+                // 4. Verify active manager authorization
+                // -----------------------------------------------------
+                var technicianCanPerformTest =
+                    await _context.TechnicianTestTypes
+                        .AnyAsync(x =>
+                            x.TechnicianId == technician.Id &&
+                            x.TestTypeId == requestTest.TestTypeId &&
+                            x.IsActive);
+
+                if (!technicianCanPerformTest)
+                {
+                    TempData["ErrorMessage"] =
+                        "You are not authorized to perform this test type. " +
+                        "Your assignment may have been deactivated.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                // -----------------------------------------------------
+                // 5. Check the parent test request
+                // -----------------------------------------------------
+                var request = requestTest.TestRequest;
+
+                if (request == null)
+                {
+                    TempData["ErrorMessage"] =
+                        "The parent test request could not be found.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                var samplesReceived =
+                    TestRequestStatus.SamplesReceived.ToString();
+
+                var inProgress =
+                    TestRequestStatus.InProgress.ToString();
+
+                if (request.Status != samplesReceived &&
+                    request.Status != inProgress)
+                {
+                    TempData["ErrorMessage"] =
+                        "Samples must be received before this test can be selected.";
+
+                    return RedirectToAction(nameof(Select));
+                }
+
+                // -----------------------------------------------------
+                // 6. Retrieve required consumables
+                // -----------------------------------------------------
+                var consumables = await _context.TestTypeConsumables
+                    .Include(x => x.Consumable)
+                    .Where(x =>
+                        x.TestTypeId == requestTest.TestTypeId)
+                    .ToListAsync();
+
+                // -----------------------------------------------------
+                // 7. Validate consumable availability
+                // -----------------------------------------------------
+                foreach (var item in consumables)
+                {
+                    if (item.Consumable == null)
+                    {
+                        TempData["ErrorMessage"] =
+                            "A required consumable could not be found.";
+
+                        return RedirectToAction(nameof(Select));
+                    }
+
+                    if (item.QuantityRequired <= 0)
+                    {
+                        TempData["ErrorMessage"] =
+                            "Invalid consumable quantity configuration.";
+
+                        return RedirectToAction(nameof(Select));
+                    }
+
+                    if (item.Consumable.QuantityOnHand <
+                        item.QuantityRequired)
+                    {
+                        TempData["ErrorMessage"] =
+                            $"Insufficient stock for {item.Consumable.Name}.";
+
+                        return RedirectToAction(nameof(Select));
+                    }
+                }
+
+                // -----------------------------------------------------
+                // 8. Record selection and update test progress
+                // -----------------------------------------------------
+                requestTest.TechnicianId = technician.Id;
+                requestTest.StartDateTime = DateTime.UtcNow;
+                requestTest.CompletionDateTime = null;
+                requestTest.Status = "In Progress";
+
+                // -----------------------------------------------------
+                // 9. Update the parent request when testing starts
+                // -----------------------------------------------------
+                if (request.Status == samplesReceived)
+                {
+                    request.Status = inProgress;
+                }
+
+                // -----------------------------------------------------
+                // 10. Deduct required consumables
+                // -----------------------------------------------------
+                foreach (var item in consumables)
+                {
+                    item.Consumable!.QuantityOnHand -=
                         item.QuantityRequired;
                 }
+
+                // -----------------------------------------------------
+                // 11. Save and commit all changes
+                // -----------------------------------------------------
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] =
+                    $"{requestTest.TestType?.Name ?? "Test"} " +
+                    "has been selected successfully and is now In Progress.";
+
+                return RedirectToAction(nameof(MyTests));
             }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
 
+                TempData["ErrorMessage"] =
+                    "Another user modified this test or its stock. " +
+                    "Please refresh the page and try again.";
 
-            await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Select));
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
 
+                TempData["ErrorMessage"] =
+                    "The test could not be selected. Please try again.";
 
-            TempData["SuccessMessage"] =
-                $"{requestTest.TestType?.Name ?? "Test"} " +
-                "was selected successfully.";
-
-
-            return RedirectToAction(nameof(MyTests));
+                return RedirectToAction(nameof(Select));
+            }
         }
+
 
 
         // =========================================================
@@ -393,17 +615,26 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // /Technician/Tests/Details/5
         // =========================================================
 
+
         [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
         public async Task<IActionResult> Details(int id)
         {
+            // ==========================================
+            // 1. IDENTIFY LOGGED-IN TECHNICIAN
+            // ==========================================
+
             var technician =
                 await _userManager.GetUserAsync(User);
 
             if (technician == null)
             {
-                return Unauthorized();
+                return Challenge();
             }
 
+            // ==========================================
+            // 2. RETRIEVE REQUESTED TEST
+            // ==========================================
 
             var test =
                 await _context.TestRequestTestTypes
@@ -427,18 +658,94 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                             t!.MeasurementUnitDetails)
 
                     .FirstOrDefaultAsync(x =>
-                        x.TestRequestTestTypeId == id &&
-                        x.TechnicianId == technician.Id);
-
+                        x.TestRequestTestTypeId == id);
 
             if (test == null)
             {
                 return NotFound();
             }
 
+            // ==========================================
+            // 3. CHECK ORIGINAL TECHNICIAN
+            // ==========================================
+
+            bool isTestOwner =
+                test.TechnicianId == technician.Id;
+
+            // ==========================================
+            // 4. CHECK INDEPENDENT VERIFIER
+            // ==========================================
+
+            bool canVerify = false;
+
+            if (!isTestOwner &&
+                test.Status == "Completed")
+            {
+                canVerify =
+                    await _context.Set<TechnicianTestTypeModel>()
+                        .AsNoTracking()
+                        .AnyAsync(x =>
+                            x.TechnicianId == technician.Id &&
+                            x.TestTypeId == test.TestTypeId);
+            }
+
+            // ==========================================
+            // 5. ENFORCE ACCESS CONTROL
+            // ==========================================
+
+            if (!isTestOwner && !canVerify)
+            {
+                return Forbid();
+            }
+
+            // ==========================================
+            // 6. PASS PERMISSIONS TO VIEW
+            // ==========================================
+
+            ViewBag.IsTestOwner = isTestOwner;
+            ViewBag.CanVerify = canVerify;
+
+            // ==========================================
+            // 7. RETRIEVE CAPTURED RESULTS
+            // ==========================================
+
+            var results = await _context.TestResults
+                .AsNoTracking()
+                .Where(x =>
+                    x.TestRequestTestTypeId == id)
+                .OrderBy(x => x.ResultName)
+                .ToListAsync();
+
+            ViewBag.TestResults = results;
+
+            // ==========================================
+            // 8. RETRIEVE MANAGER-APPROVED MEASUREMENTS
+            // ==========================================
+
+            var measurements =
+                await _context.TestTypeMeasurements
+
+                    .AsNoTracking()
+
+                    .Include(x => x.MeasurementUnit)
+
+                    .Where(x =>
+                        x.TestTypeId == test.TestTypeId)
+
+                    .OrderBy(x => x.DisplayOrder)
+                    .ThenBy(x => x.MeasurementName)
+
+                    .ToListAsync();
+
+            ViewBag.TestMeasurements = measurements;
+
+            // ==========================================
+            // 9. RETURN TEST DETAILS
+            // ==========================================
 
             return View(test);
         }
+
 
 
         // =========================================================
@@ -449,44 +756,59 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // GET: /Technician/Tests/Review
         // =========================================================
 
+
         [HttpGet]
         public async Task<IActionResult> Review()
         {
-            var technician =
-                await _userManager.GetUserAsync(User);
+            var technicianId = _userManager.GetUserId(User);
 
-            if (technician == null)
+            if (string.IsNullOrWhiteSpace(technicianId))
             {
-                return Unauthorized();
+                return Challenge();
             }
 
+            // Retrieve tests returned to this technician
+            // following unsuccessful verification.
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
 
-            var tests =
-                await _context.TestRequestTestTypes
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
 
-                    .AsNoTracking()
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.TestCategory)
 
-                    .Include(x => x.TestRequest)
-                        .ThenInclude(r => r!.Patient)
+                .Where(x =>
+                    x.TechnicianId == technicianId &&
+                    x.Status == "To Be Reviewed")
 
-                    .Include(x => x.TestType)
-                        .ThenInclude(t => t!.TestCategory)
+                .OrderByDescending(x =>
+                    x.TestRequest!.Urgency)
 
-                    .Where(x =>
-                        x.TechnicianId == technician.Id &&
-                        x.Status == "To Be Reviewed")
+                .ThenBy(x => x.StartDateTime)
 
-                    .OrderByDescending(x =>
-                        x.TestRequest!.Urgency)
+                .ToListAsync();
 
-                    .ThenBy(x =>
-                        x.StartDateTime)
+            // Retrieve saved results belonging to these tests.
+            var testIds = tests
+                .Select(x => x.TestRequestTestTypeId)
+                .ToList();
 
-                    .ToListAsync();
+            var savedResults = await _context.TestResults
+                .AsNoTracking()
+                .Where(x =>
+                    testIds.Contains(x.TestRequestTestTypeId) &&
+                    x.TechnicianId == technicianId)
+                .ToListAsync();
 
+            // Make results available to the Review view.
+            ViewData["SavedResults"] = savedResults;
 
-            return View(tests);
+            ViewData["ReviewCount"] = tests.Count;
+
+            return View("Review", tests);
         }
+
 
 
         // =========================================================
@@ -572,6 +894,28 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // GET: /Technician/Tests/Overdue
         // =========================================================
 
+        private void RecordResultHistory(
+            TestResultModel result,
+            string technicianId,
+            string action,
+            string? notes,
+            string? previousValue = null,
+            string? newValue = null)
+        {
+            _context.TestResultVerificationHistories.Add(
+                new TestResultVerificationHistoryModel
+                {
+                    TestResultId = result.TestResultId,
+                    TestResult = result,
+                    ActionByTechnicianId = technicianId,
+                    Action = action,
+                    Notes = notes,
+                    PreviousResultValue = previousValue,
+                    NewResultValue = newValue,
+                    ActionDateTime = DateTime.UtcNow
+                });
+        }
+
         [HttpGet]
         public async Task<IActionResult> Overdue()
         {
@@ -634,6 +978,502 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return View(overdueTests);
         }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> CaptureResults(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(technicianId))
+                return Challenge();
+
+            // -----------------------------------------------------
+            // Retrieve the test assigned to this technician
+            // -----------------------------------------------------
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+
+                // Patient
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+
+                // Requesting doctor
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Doctor)
+
+                // Test category
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.TestCategory)
+
+                // Sample type
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.SampleType)
+
+                // Measurement units
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.MeasurementUnitDetails)
+
+                .AsSplitQuery()
+
+                .FirstOrDefaultAsync(x =>
+                    x.TestRequestTestTypeId == id &&
+                    x.TechnicianId == technicianId);
+
+            if (test == null)
+                return NotFound();
+
+            // -----------------------------------------------------
+            // Check test status
+            // -----------------------------------------------------
+
+            if (test.Status != "In Progress" &&
+                test.Status != "To Be Reviewed")
+            {
+                TempData["ErrorMessage"] =
+                    "This test is not available for result capture.";
+
+                return RedirectToAction(
+                    nameof(Details),
+                    new { id });
+            }
+
+            // -----------------------------------------------------
+            // Retrieve patient medical history
+            // -----------------------------------------------------
+
+            var patientUserId = test.TestRequest?.Patient?.Id;
+
+            NMB_HLabSys.Areas.Patient.Models.PatientModel?
+                patientMedicalRecord = null;
+
+            if (!string.IsNullOrEmpty(patientUserId))
+            {
+                patientMedicalRecord = await _context
+                    .Set<NMB_HLabSys.Areas.Patient.Models.PatientModel>()
+                    .AsNoTracking()
+                    .Include(p => p.PatientConditions)
+                    .Include(p => p.PatientAllergies)
+                    .Include(p => p.PatientMedications)
+                    .AsSplitQuery()
+                    .FirstOrDefaultAsync(p =>
+                        p.UserId == patientUserId);
+            }
+
+            ViewData["PatientMedicalRecord"] = patientMedicalRecord;
+
+            // -----------------------------------------------------
+            // Expected completion time
+            // -----------------------------------------------------
+
+            DateTime? expectedCompletion = null;
+            bool isOverdue = false;
+
+            if (test.StartDateTime.HasValue &&
+                test.TestType != null)
+            {
+                expectedCompletion =
+    test.StartDateTime.Value.AddMinutes(
+        test.TestType.TurnAroundTimeHours);
+
+                isOverdue =
+                    test.Status == "In Progress" &&
+                    DateTime.Now > expectedCompletion.Value;
+            }
+
+            ViewData["ExpectedCompletion"] = expectedCompletion;
+            ViewData["IsOverdue"] = isOverdue;
+
+            // Doctor's clinical notes from the test request.
+            ViewData["ClinicalNotes"] = test.TestRequest?.ClinicalNotes;
+
+            // Option A: one result per requested test type.
+            // The test type itself provides the unit and reference limits.
+            var existingResults = await _context.TestResults
+                .AsNoTracking()
+                .Where(r => r.TestRequestTestTypeId == id &&
+                            r.TechnicianId == technicianId)
+                .OrderByDescending(r => r.CapturedDateTime)
+                .ToListAsync();
+
+            ViewData["ExistingResults"] = existingResults;
+            ViewData["CapturedResults"] = existingResults;
+
+            return View(test);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CaptureResults(
+            int testRequestTestTypeId,
+            string resultValue,
+            string? notes)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(technicianId))
+                return Challenge();
+
+            resultValue = resultValue?.Trim() ?? string.Empty;
+            notes = notes?.Trim();
+
+            if (string.IsNullOrWhiteSpace(resultValue) ||
+                resultValue.Length > 200 ||
+                (notes?.Length ?? 0) > 2000)
+            {
+                TempData["ErrorMessage"] =
+                    "Enter a result (maximum 200 characters) and valid notes (maximum 2000 characters).";
+                return RedirectToAction(nameof(CaptureResults),
+                    new { id = testRequestTestTypeId });
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(
+                System.Data.IsolationLevel.Serializable);
+
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(x => x.TestType)
+                        .ThenInclude(t => t!.MeasurementUnitDetails)
+                    .FirstOrDefaultAsync(x =>
+                        x.TestRequestTestTypeId == testRequestTestTypeId &&
+                        x.TechnicianId == technicianId);
+
+                if (test == null)
+                    return NotFound();
+
+                if (test.Status != "In Progress" &&
+                    test.Status != "To Be Reviewed")
+                {
+                    TempData["ErrorMessage"] = "This test cannot accept results.";
+                    return RedirectToAction(nameof(MyTests));
+                }
+
+                var testType = test.TestType;
+                if (testType == null)
+                    return NotFound();
+
+                string resultName = testType.Name;
+                string measurementUnit = testType.MeasurementUnitDetails?.Unit ?? "";
+
+                if (string.IsNullOrWhiteSpace(resultName) ||
+                    resultName.Length > 200 ||
+                    string.IsNullOrWhiteSpace(measurementUnit) ||
+                    measurementUnit.Length > 100)
+                {
+                    TempData["ErrorMessage"] =
+                        "The test catalogue has an invalid name or measurement unit.";
+                    return RedirectToAction(nameof(CaptureResults),
+                        new { id = testRequestTestTypeId });
+                }
+
+                decimal? referenceMin = testType.NormalMin;
+                decimal? referenceMax = testType.NormalMax;
+
+                // Existing seed data uses 0/0 as a placeholder for missing ranges.
+                // Do not classify numeric results against this placeholder.
+                if (referenceMin == 0m && referenceMax == 0m)
+                {
+                    referenceMin = null;
+                    referenceMax = null;
+                }
+
+                if (referenceMin.HasValue && referenceMax.HasValue &&
+                    referenceMin.Value > referenceMax.Value)
+                {
+                    TempData["ErrorMessage"] = "The configured reference range is invalid.";
+                    return RedirectToAction(nameof(CaptureResults),
+                        new { id = testRequestTestTypeId });
+                }
+
+                bool isAbnormal = false;
+                string resultFlag = "Not Evaluated";
+
+                if (decimal.TryParse(resultValue,
+                    System.Globalization.NumberStyles.Number,
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    out decimal numericValue))
+                {
+                    if (referenceMin.HasValue && numericValue < referenceMin.Value)
+                    {
+                        isAbnormal = true;
+                        resultFlag = "Low";
+                    }
+                    else if (referenceMax.HasValue && numericValue > referenceMax.Value)
+                    {
+                        isAbnormal = true;
+                        resultFlag = "High";
+                    }
+                    else if (referenceMin.HasValue || referenceMax.HasValue)
+                    {
+                        resultFlag = "Normal";
+                    }
+                }
+
+                // One result per requested test type. Never silently overwrite
+                // a legacy multi-measurement result set.
+                var existingResults = await _context.TestResults
+                    .Where(r => r.TestRequestTestTypeId == testRequestTestTypeId)
+                    .ToListAsync();
+
+                if (existingResults.Count > 1)
+                {
+                    TempData["ErrorMessage"] =
+                        "Multiple legacy results exist for this test. " +
+                        "Please reconcile them before using single-result capture.";
+                    return RedirectToAction(nameof(CaptureResults),
+                        new { id = testRequestTestTypeId });
+                }
+
+                var result = existingResults.SingleOrDefault();
+                if (result != null && result.TechnicianId != technicianId)
+                    return Forbid();
+
+                bool isNewResult = result == null;
+                string? oldValue = result?.ResultValue;
+                string? oldName = result?.ResultName;
+                string? oldUnit = result?.MeasurementUnit;
+                decimal? oldMin = result?.ReferenceMin;
+                decimal? oldMax = result?.ReferenceMax;
+                string? oldFlag = result?.ResultFlag;
+                bool? oldAbnormal = result?.IsAbnormal;
+                string? oldNotes = result?.Notes;
+                int? oldMeasurementId = result?.TestTypeMeasurementId;
+
+                if (result == null)
+                {
+                    result = new TestResultModel
+                    {
+                        TestRequestTestTypeId = testRequestTestTypeId,
+                        TechnicianId = technicianId,
+                        TestTypeMeasurementId = null
+                    };
+                    _context.TestResults.Add(result);
+                }
+
+                bool changed = isNewResult ||
+                    oldValue != resultValue ||
+                    oldName != resultName ||
+                    oldUnit != measurementUnit ||
+                    oldMin != referenceMin ||
+                    oldMax != referenceMax ||
+                    oldFlag != resultFlag ||
+                    oldAbnormal != isAbnormal ||
+                    oldNotes != notes ||
+                    oldMeasurementId.HasValue;
+
+                result.TestTypeMeasurementId = null;
+                result.ResultName = resultName;
+                result.ResultValue = resultValue;
+                result.MeasurementUnit = measurementUnit;
+                result.ReferenceMin = referenceMin;
+                result.ReferenceMax = referenceMax;
+                result.IsAbnormal = isAbnormal;
+                result.ResultFlag = resultFlag;
+                result.Notes = notes;
+
+                if (changed)
+                {
+                    var now = DateTime.UtcNow;
+                    result.CapturedDateTime = now;
+
+                    _context.TestResultVerificationHistories.Add(
+                        new TestResultVerificationHistoryModel
+                        {
+                            TestResult = result,
+                            ActionByTechnicianId = technicianId,
+                            Action = isNewResult ? "Submitted" : "Corrected",
+                            Notes = isNewResult
+                                ? "Test result captured."
+                                : "Test result updated.",
+                            ActionDateTime = now,
+                            PreviousResultValue = oldValue,
+                            NewResultValue = resultValue,
+                            PreviousMeasurementUnit = oldUnit,
+                            NewMeasurementUnit = measurementUnit,
+                            PreviousReferenceMin = oldMin,
+                            NewReferenceMin = referenceMin,
+                            PreviousReferenceMax = oldMax,
+                            NewReferenceMax = referenceMax,
+                            PreviousResultFlag = oldFlag,
+                            NewResultFlag = resultFlag,
+                            PreviousIsAbnormal = oldAbnormal,
+                            NewIsAbnormal = isAbnormal,
+                            PreviousResultNotes = oldNotes,
+                            NewResultNotes = notes
+                        });
+                }
+
+                // Saving results does not complete the test.
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = changed
+                    ? "Test result saved successfully. You may now finish the test."
+                    : "No changes were detected.";
+
+                return RedirectToAction(nameof(CaptureResults),
+                    new { id = testRequestTestTypeId });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] =
+                    "An error occurred while saving the test result.";
+                return RedirectToAction(nameof(CaptureResults),
+                    new { id = testRequestTestTypeId });
+            }
+        }
+
+
+        // Replace BOTH existing FinishTest actions in Areas/Technician/Controllers/TestsController.cs.
+        // Requires Microsoft.EntityFrameworkCore and System.Data (or fully qualified IsolationLevel).
+        // Replace the existing FinishTest GET and POST actions with these methods.
+        // The POST uses a different C# method name to avoid CS0111.
+
+        [HttpGet]
+        public async Task<IActionResult> FinishTest(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestRequest)
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.MeasurementUnitDetails)
+                .FirstOrDefaultAsync(x =>
+                    x.TestRequestTestTypeId == id &&
+                    x.TechnicianId == technicianId);
+
+            if (test == null)
+                return NotFound();
+
+            if (test.Status != "In Progress" && test.Status != "To Be Reviewed")
+            {
+                TempData["ErrorMessage"] = "This test is not available for completion.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            // Option A: exactly one result per requested test.
+            // Read ALL results for the test, not just the current technician's,
+            // so legacy duplicate records cannot be overlooked.
+            var results = await _context.TestResults
+                .AsNoTracking()
+                .Where(r => r.TestRequestTestTypeId == id)
+                .ToListAsync();
+
+            var hasValidResult = results.Count == 1 &&
+                                 results[0].TechnicianId == technicianId &&
+                                 !string.IsNullOrWhiteSpace(results[0].ResultValue);
+
+            ViewData["HasValidResult"] = hasValidResult;
+            ViewData["ResultCount"] = results.Count;
+            ViewData["SavedResult"] = hasValidResult ? results[0] : null;
+
+            return View("FinishTest", test);
+        }
+
+        [HttpPost]
+        [ActionName("FinishTest")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FinishTestConfirmed(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(
+                System.Data.IsolationLevel.Serializable);
+
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .FirstOrDefaultAsync(x =>
+                        x.TestRequestTestTypeId == id &&
+                        x.TechnicianId == technicianId);
+
+                if (test == null)
+                    return NotFound();
+
+                if (test.Status != "In Progress" && test.Status != "To Be Reviewed")
+                {
+                    TempData["ErrorMessage"] = "This test cannot be completed in its current status.";
+                    return RedirectToAction(nameof(MyTests));
+                }
+
+                var results = await _context.TestResults
+                    .Where(r => r.TestRequestTestTypeId == id)
+                    .ToListAsync();
+
+                if (results.Count != 1 ||
+                    results[0].TechnicianId != technicianId ||
+                    string.IsNullOrWhiteSpace(results[0].ResultValue))
+                {
+                    TempData["ErrorMessage"] = results.Count > 1
+                        ? "Multiple legacy results exist for this test. Reconcile them before completion."
+                        : "Save a valid test result before finishing this test.";
+
+                    return RedirectToAction(nameof(CaptureResults), new { id });
+                }
+
+                var result = results[0];
+                var now = DateTime.UtcNow;
+
+                // If this test was returned for correction, remove the previous
+                // verification decision from the current result. Historical events
+                // remain intact in TestResultVerificationHistories.
+                if (test.Status == "To Be Reviewed")
+                {
+                    result.VerifiedByTechnicianId = null;
+                    result.VerifiedDateTime = null;
+                    result.VerificationNotes = null;
+                    result.RequiresReview = false;
+                    result.ReviewNotes = null;
+
+                    _context.TestResultVerificationHistories.Add(
+                        new TestResultVerificationHistoryModel
+                        {
+                            TestResultId = result.TestResultId,
+                            ActionByTechnicianId = technicianId,
+                            Action = "ResubmittedForVerification",
+                            Notes = "Corrected result resubmitted for independent verification.",
+                            ActionDateTime = now
+                        });
+                }
+
+                // 'Completed' means ready for a DIFFERENT authorised technician
+                // to verify. It does not mean 'Verified'.
+                test.Status = "Completed";
+                test.CompletionDateTime = now;
+
+                // IMPORTANT: Do NOT update the parent TestRequest.Status here.
+                // Do NOT send the doctor's PDF/email here.
+                // The verification workflow must do that only after ALL tests
+                // belonging to the request have reached the 'Verified' status.
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] =
+                    "Test submitted for independent verification successfully.";
+                return RedirectToAction(nameof(MyTests));
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] =
+                    "An error occurred while submitting the test for verification.";
+                return RedirectToAction(nameof(CaptureResults), new { id });
+            }
+        }
+
+
+
 
 
         // =========================================================
@@ -720,5 +1560,714 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             return View(nearingTat);
         }
+
+        // =====================================================
+        // 1. PENDING TEST RESULT VERIFICATION
+        // =====================================================
+
+
+        [HttpGet]
+        public async Task<IActionResult> CaptureResultsList()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrEmpty(technicianId))
+                return Challenge();
+
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                    .ThenInclude(t => t!.TestCategory)
+                .Include(x => x.TestRequest)
+                .Where(x =>
+                    x.TechnicianId == technicianId &&
+                    (x.Status == "In Progress" ||
+                     x.Status == "To Be Reviewed"))
+                .OrderBy(x => x.StartDateTime)
+                .ThenBy(x => x.TestRequestTestTypeId)
+                .ToListAsync();
+
+            return View(tests);
+        }
+
+
+
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> PendingVerification()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            // Only test types actively assigned by the Lab Manager.
+            var assignedTestTypeIds = _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(x =>
+                    x.TechnicianId == technicianId &&
+                    x.IsActive)
+                .Select(x => x.TestTypeId);
+
+            // Completed tests belonging to OTHER technicians,
+            // with exactly one valid saved result (Option A).
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Where(x =>
+                    x.Status == "Completed" &&
+                    x.TechnicianId != null &&
+                    x.TechnicianId != technicianId &&
+                    assignedTestTypeIds.Contains(x.TestTypeId) &&
+                    _context.TestResults.Count(r =>
+                        r.TestRequestTestTypeId ==
+                            x.TestRequestTestTypeId) == 1 &&
+                    _context.TestResults.Any(r =>
+                        r.TestRequestTestTypeId ==
+                            x.TestRequestTestTypeId &&
+                        r.TechnicianId == x.TechnicianId &&
+                        r.ResultValue != null &&
+                        r.ResultValue.Trim() != ""))
+                .OrderBy(x => x.CompletionDateTime)
+                .ToListAsync();
+
+            ViewData["PendingCount"] = tests.Count;
+
+            return View("PendingVerification", tests);
+        }
+
+        // Add these actions INSIDE Areas/Technician/Controllers/TestsController.cs.
+        // Requires using Microsoft.AspNetCore.Authorization;
+        // Requires using Microsoft.EntityFrameworkCore;
+        // Do not add a duplicate Verified() action if one already exists.
+
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> VerificationHistoryIndex()
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            // A technician can see history for their own tests or test types
+            // to which the Laboratory Manager has actively assigned them.
+            var authorisedTestTypeIds = _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(a => a.TechnicianId == technicianId && a.IsActive)
+                .Select(a => a.TestTypeId);
+
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestType)
+                .Include(t => t.TestRequest)
+                .Where(t =>
+                    (t.TechnicianId == technicianId || authorisedTestTypeIds.Contains(t.TestTypeId)) &&
+                    _context.TestResultVerificationHistories.Any(h =>
+                        h.TestResult != null &&
+                        h.TestResult.TestRequestTestTypeId == t.TestRequestTestTypeId))
+                .OrderByDescending(t => t.CompletionDateTime)
+                .ToListAsync();
+
+            return View("VerificationHistoryIndex", tests);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> Verified()
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            // Only tests this technician verified, or tests originally performed
+            // by them, are shown. The history relation records the verifier.
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestType)
+                .Include(t => t.TestRequest)
+                .Where(t => t.Status == "Verified" &&
+                    (t.TechnicianId == technicianId ||
+                     _context.TestResultVerificationHistories.Any(h =>
+                         h.TestResult != null &&
+                         h.TestResult.TestRequestTestTypeId == t.TestRequestTestTypeId &&
+                         h.Action == "Verified" &&
+                         h.ActionByTechnicianId == technicianId)))
+                .OrderByDescending(t => t.CompletionDateTime)
+                .ToListAsync();
+
+            return View("Verified", tests);
+        }
+
+
+
+
+        // Paste these two actions INSIDE your existing TestsController.
+        // Replace the old VerifyResult GET and POST; do not append duplicates.
+        // Uses existing project models and DbSets shown in your original actions.
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyResult(int id)
+        {
+            var verifierId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(verifierId))
+                return Challenge();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestRequest).ThenInclude(r => r!.Patient)
+                .Include(x => x.TestRequest).ThenInclude(r => r!.Doctor)
+                .Include(x => x.TestType).ThenInclude(t => t!.SampleType)
+                .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == id);
+
+            if (test == null)
+                return NotFound();
+
+            if (test.Status != "Completed")
+            {
+                TempData["ErrorMessage"] = "Only completed tests can be verified.";
+                return RedirectToAction(nameof(PendingVerification));
+            }
+
+            // A test must have an original, different technician.
+            if (string.IsNullOrWhiteSpace(test.TechnicianId) ||
+                test.TechnicianId == verifierId)
+                return Forbid();
+
+            // Enforce Laboratory Manager's active test-type assignment.
+            var authorised = await _context.TechnicianTestTypes
+                .AsNoTracking()
+                .AnyAsync(x => x.TechnicianId == verifierId &&
+                               x.TestTypeId == test.TestTypeId &&
+                               x.IsActive);
+
+            if (!authorised)
+                return Forbid();
+
+            var results = await _context.TestResults
+                .AsNoTracking()
+                .Where(x => x.TestRequestTestTypeId == id &&
+                            x.TechnicianId == test.TechnicianId)
+                .OrderBy(x => x.ResultName)
+                .ToListAsync();
+
+            // Option A: exactly one captured result per requested test type.
+            if (results.Count != 1 || string.IsNullOrWhiteSpace(results[0].ResultValue))
+            {
+                TempData["ErrorMessage"] =
+                    "This test must have exactly one saved result before verification. " +
+                    "Ask the original technician to resolve missing or legacy results.";
+                return RedirectToAction(nameof(PendingVerification));
+            }
+
+            ViewData["TestResults"] = results;
+            return View("VerifyResult", test);
+        }
+
+        // C# cannot overload GET and POST by HTTP attributes alone.
+        // Use a different C# method name and map it to the same action name.
+        [HttpPost]
+        [ActionName("VerifyResult")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyResultDecision(
+            int testRequestTestTypeId,
+            string decision,
+            string? notes)
+        {
+            var verifierId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(verifierId))
+                return Challenge();
+
+            if (testRequestTestTypeId <= 0)
+                return BadRequest();
+
+            if (decision != "Verify" && decision != "ReturnForReview")
+            {
+                TempData["ErrorMessage"] = "Invalid verification decision.";
+                return RedirectToAction(nameof(VerifyResult),
+                    new { id = testRequestTestTypeId });
+            }
+
+            notes = notes?.Trim();
+            if (decision == "ReturnForReview" && string.IsNullOrWhiteSpace(notes))
+            {
+                TempData["ErrorMessage"] =
+                    "Review notes are required when returning results.";
+                return RedirectToAction(nameof(VerifyResult),
+                    new { id = testRequestTestTypeId });
+            }
+
+            if ((notes?.Length ?? 0) > 2000)
+            {
+                TempData["ErrorMessage"] =
+                    "Verification notes cannot exceed 2000 characters.";
+                return RedirectToAction(nameof(VerifyResult),
+                    new { id = testRequestTestTypeId });
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(
+                System.Data.IsolationLevel.Serializable);
+
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == testRequestTestTypeId);
+
+                if (test == null)
+                    return NotFound();
+
+                if (test.Status != "Completed")
+                {
+                    TempData["ErrorMessage"] =
+                        "This test is no longer awaiting verification.";
+                    return RedirectToAction(nameof(PendingVerification));
+                }
+
+                if (string.IsNullOrWhiteSpace(test.TechnicianId) ||
+                    test.TechnicianId == verifierId)
+                    return Forbid();
+
+                var authorised = await _context.TechnicianTestTypes
+                    .AnyAsync(x => x.TechnicianId == verifierId &&
+                                   x.TestTypeId == test.TestTypeId &&
+                                   x.IsActive);
+                if (!authorised)
+                    return Forbid();
+
+                var results = await _context.TestResults
+                    .Where(x => x.TestRequestTestTypeId == testRequestTestTypeId &&
+                                x.TechnicianId == test.TechnicianId)
+                    .ToListAsync();
+
+                if (results.Count != 1 || string.IsNullOrWhiteSpace(results[0].ResultValue))
+                {
+                    TempData["ErrorMessage"] =
+                        "Exactly one saved result is required before verification.";
+                    return RedirectToAction(nameof(PendingVerification));
+                }
+
+                var result = results[0];
+                var now = DateTime.UtcNow;
+
+                if (decision == "Verify")
+                {
+                    result.VerifiedByTechnicianId = verifierId;
+                    result.VerifiedDateTime = now;
+                    result.VerificationNotes = notes;
+                    result.RequiresReview = false;
+                    result.ReviewNotes = null;
+                    test.Status = "Verified";
+                }
+                else
+                {
+                    result.VerifiedByTechnicianId = null;
+                    result.VerifiedDateTime = null;
+                    result.VerificationNotes = null;
+                    result.RequiresReview = true;
+                    result.ReviewNotes = notes;
+                    test.Status = "To Be Reviewed";
+                }
+
+                _context.TestResultVerificationHistories.Add(
+                    new TestResultVerificationHistoryModel
+                    {
+                        TestResultId = result.TestResultId,
+                        ActionByTechnicianId = verifierId,
+                        Action = decision == "Verify" ? "Verified" : "ReturnedForReview",
+                        Notes = notes,
+                        ActionDateTime = now
+                    });
+
+                // Save both the decision and its history atomically.
+                await _context.SaveChangesAsync();
+
+                // The final-delivery condition is ALL tests Verified, not merely Completed.
+                // Do NOT send email here until a reliable PDF/email workflow is integrated.
+                // A notification service/outbox should run after the transaction commits.
+                var allTestsVerified = decision == "Verify" &&
+                    !await _context.TestRequestTestTypes.AnyAsync(x =>
+                        x.TestRequestId == test.TestRequestId &&
+                        x.TestRequestTestTypeId != testRequestTestTypeId &&
+                        x.Status != "Verified");
+
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = decision == "Verify"
+                    ? (allTestsVerified
+                        ? "Test verified. All tests on this request are now verified; doctor notification is still pending integration."
+                        : "Test result verified successfully.")
+                    : "Test result returned to the original technician for review.";
+
+                return RedirectToAction(nameof(PendingVerification));
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] =
+                    "Verification could not be saved. Please try again.";
+                return RedirectToAction(nameof(PendingVerification));
+            }
+        }
+
+
+
+        // =====================================================
+        // 4. VERIFICATION HISTORY
+        // =====================================================
+        // Add to Areas/Technician/Controllers/TestsController.cs
+        [HttpGet]
+        public async Task<IActionResult> VerificationHistory(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestType)
+                .Include(x => x.TestRequest)
+                .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == id);
+
+            if (test == null)
+                return NotFound();
+
+            // Authorisation is enforced on the server, not only in the view.
+            var authorised = test.TechnicianId == technicianId ||
+                await _context.TechnicianTestTypes.AsNoTracking().AnyAsync(x =>
+                    x.TechnicianId == technicianId &&
+                    x.TestTypeId == test.TestTypeId &&
+                    x.IsActive);
+
+            if (!authorised)
+                return Forbid();
+
+            var history = await _context.TestResultVerificationHistories
+                .AsNoTracking()
+                .Include(x => x.ActionByTechnician)
+                .Include(x => x.TestResult)
+                .Where(x => x.TestResult != null &&
+                            x.TestResult.TestRequestTestTypeId == id)
+                .OrderByDescending(x => x.ActionDateTime)
+                .ThenByDescending(x => x.TestResultVerificationHistoryId)
+                .ToListAsync();
+
+            // The current result is shown separately from historical snapshots.
+            var currentResults = await _context.TestResults.AsNoTracking()
+                .Where(x => x.TestRequestTestTypeId == id)
+                .ToListAsync();
+
+            ViewData["Test"] = test;
+            ViewData["CurrentResults"] = currentResults;
+            return View("VerificationHistory", history);
+        }
+
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyTest(int id, string? verificationNotes)
+        {
+            var verifierId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(verifierId))
+                return Challenge();
+
+            verificationNotes = verificationNotes?.Trim();
+
+            if ((verificationNotes?.Length ?? 0) > 2000)
+            {
+                TempData["ErrorMessage"] =
+                    "Verification notes cannot exceed 2000 characters.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    IsolationLevel.Serializable);
+
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(x => x.TestRequest)
+                    .FirstOrDefaultAsync(x =>
+                        x.TestRequestTestTypeId == id);
+
+                if (test == null)
+                    return NotFound();
+
+                if (test.Status != "Completed")
+                {
+                    TempData["ErrorMessage"] =
+                        "Only completed tests can be verified.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                if (test.TechnicianId == verifierId)
+                {
+                    TempData["ErrorMessage"] =
+                        "You cannot verify a test that you performed.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Authorization against technician-test-type assignments
+                // must also be enforced here. See Step 2 below.
+
+                var results = await _context.TestResults
+                    .Where(x => x.TestRequestTestTypeId == id)
+                    .ToListAsync();
+
+                if (results.Count == 0)
+                {
+                    TempData["ErrorMessage"] =
+                        "This test has no captured results.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                if (results.Any(x =>
+                    x.TechnicianId == verifierId ||
+                    string.IsNullOrWhiteSpace(x.ResultValue) ||
+                    !x.TestTypeMeasurementId.HasValue))
+                {
+                    TempData["ErrorMessage"] =
+                        "Results are incomplete or cannot be independently verified.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                var now = DateTime.UtcNow;
+
+                foreach (var result in results)
+                {
+                    result.VerifiedByTechnicianId = verifierId;
+                    result.VerifiedDateTime = now;
+                    result.VerificationNotes = verificationNotes;
+
+                    result.RequiresReview = false;
+                    result.ReviewNotes = null;
+
+                    _context.TestResultVerificationHistories.Add(
+                        new TestResultVerificationHistoryModel
+                        {
+                            TestResult = result,
+                            ActionByTechnicianId = verifierId,
+                            Action = "Verified",
+                            Notes = verificationNotes ??
+                                "Measurement independently verified.",
+                            ActionDateTime = now,
+
+                            PreviousResultValue = result.ResultValue,
+                            NewResultValue = result.ResultValue,
+
+                            PreviousMeasurementUnit = result.MeasurementUnit,
+                            NewMeasurementUnit = result.MeasurementUnit,
+
+                            PreviousReferenceMin = result.ReferenceMin,
+                            NewReferenceMin = result.ReferenceMin,
+
+                            PreviousReferenceMax = result.ReferenceMax,
+                            NewReferenceMax = result.ReferenceMax,
+
+                            PreviousIsAbnormal = result.IsAbnormal,
+                            NewIsAbnormal = result.IsAbnormal,
+
+                            PreviousResultFlag = result.ResultFlag,
+                            NewResultFlag = result.ResultFlag,
+
+                            PreviousResultNotes = result.Notes,
+                            NewResultNotes = result.Notes
+                        });
+                }
+
+                test.Status = "Verified";
+
+                // The parent request can be marked Completed only
+                // when every requested test type is Verified.
+                bool hasUnverifiedTests =
+                    await _context.TestRequestTestTypes
+                        .AnyAsync(x =>
+                            x.TestRequestId == test.TestRequestId &&
+                            x.TestRequestTestTypeId != id &&
+                            x.Status != "Verified");
+
+                if (!hasUnverifiedTests && test.TestRequest != null)
+                {
+                    test.TestRequest.Status =
+                        TestRequestStatus.Completed.ToString();
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] =
+                    "Test results verified successfully.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+
+                TempData["ErrorMessage"] =
+                    "An error occurred while verifying the results.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectTest(int id, string reviewNotes)
+        {
+            var verifierId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(verifierId))
+                return Challenge();
+
+            reviewNotes = reviewNotes?.Trim() ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(reviewNotes) ||
+                reviewNotes.Length > 2000)
+            {
+                TempData["ErrorMessage"] =
+                    "A rejection reason is required and must not " +
+                    "exceed 2000 characters.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    IsolationLevel.Serializable);
+
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(x => x.TestRequest)
+                    .FirstOrDefaultAsync(x =>
+                        x.TestRequestTestTypeId == id);
+
+                if (test == null)
+                    return NotFound();
+
+                if (test.Status != "Completed")
+                {
+                    TempData["ErrorMessage"] =
+                        "Only completed tests can be rejected.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                if (test.TechnicianId == verifierId)
+                {
+                    TempData["ErrorMessage"] =
+                        "You cannot review a test that you performed.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Authorization against technician-test-type assignments
+                // must also be enforced here. See Step 2 below.
+
+                var results = await _context.TestResults
+                    .Where(x => x.TestRequestTestTypeId == id)
+                    .ToListAsync();
+
+                if (results.Count == 0)
+                {
+                    TempData["ErrorMessage"] =
+                        "No results are available for review.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                if (results.Any(x => x.TechnicianId == verifierId))
+                {
+                    TempData["ErrorMessage"] =
+                        "You cannot review measurements you captured.";
+
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                var now = DateTime.UtcNow;
+
+                foreach (var result in results)
+                {
+                    result.RequiresReview = true;
+                    result.ReviewNotes = reviewNotes;
+
+                    result.VerifiedByTechnicianId = null;
+                    result.VerifiedDateTime = null;
+                    result.VerificationNotes = null;
+
+                    _context.TestResultVerificationHistories.Add(
+                        new TestResultVerificationHistoryModel
+                        {
+                            TestResult = result,
+                            ActionByTechnicianId = verifierId,
+                            Action = "Rejected",
+                            Notes = reviewNotes,
+                            ActionDateTime = now,
+
+                            PreviousResultValue = result.ResultValue,
+                            NewResultValue = result.ResultValue,
+
+                            PreviousMeasurementUnit = result.MeasurementUnit,
+                            NewMeasurementUnit = result.MeasurementUnit,
+
+                            PreviousReferenceMin = result.ReferenceMin,
+                            NewReferenceMin = result.ReferenceMin,
+
+                            PreviousReferenceMax = result.ReferenceMax,
+                            NewReferenceMax = result.ReferenceMax,
+
+                            PreviousIsAbnormal = result.IsAbnormal,
+                            NewIsAbnormal = result.IsAbnormal,
+
+                            PreviousResultFlag = result.ResultFlag,
+                            NewResultFlag = result.ResultFlag,
+
+                            PreviousResultNotes = result.Notes,
+                            NewResultNotes = result.Notes
+                        });
+                }
+
+                test.Status = "To Be Reviewed";
+                test.CompletionDateTime = null;
+
+                // A rejected test must not leave its parent
+                // request in a completed/releasable state.
+                if (test.TestRequest != null &&
+                    test.TestRequest.Status ==
+                        TestRequestStatus.Completed.ToString())
+                {
+                    test.TestRequest.Status = "In Progress";
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] =
+                    "Test rejected and returned for correction.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+
+                TempData["ErrorMessage"] =
+                    "An error occurred while rejecting the test.";
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
     }
 }

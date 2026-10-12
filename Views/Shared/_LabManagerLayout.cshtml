@@ -627,9 +627,7 @@
 <body>
     <div class="manager-app">
 
-        <!-- =====================================================
-     SIDEBAR
-     ===================================================== -->
+        <!-- SIDEBAR-->
 
         <aside class="manager-sidebar"
                id="managerSidebar">
@@ -710,9 +708,7 @@
 
             </div>
 
-            <!-- =====================================================
-         NAVIGATION
-         ===================================================== -->
+            <!--NAVIGATION-->
 
             <nav class="sidebar-navigation">
 
@@ -738,9 +734,7 @@
 
                 </a>
 
-                <!-- =================================================
-             TEST MANAGEMENT
-             ================================================= -->
+                <!--TEST MANAGEMENT -->
 
                 <div class="sidebar-section">
                     Test Management
@@ -810,9 +804,7 @@
 
                 </a>
 
-                <!-- =================================================
-             INVENTORY
-             ================================================= -->
+                <!--INVENTORY -->
 
                 <div class="sidebar-section">
                     Inventory
@@ -882,9 +874,7 @@
 
                 </a>
 
-                <!-- =================================================
-             STAFF MANAGEMENT
-             ================================================= -->
+                <!-- STAFF MANAGEMENT-->
 
                 <div class="sidebar-section">
                     Staff Management
@@ -922,9 +912,7 @@
 
                 </a> *@
 
-                <!-- =================================================
-             REPORTS
-             ================================================= -->
+                <!--REPORTS -->
 
                 <div class="sidebar-section">
                     Reports
@@ -978,9 +966,7 @@
 
                 </a>
 
-                <!-- =================================================
-             ACCOUNT
-             ================================================= -->
+                <!--Acount settings -->
 
                 <div class="sidebar-section">
                     Account
@@ -1002,7 +988,7 @@
 
                 </a>
 
-                <a asp-area="Manager"
+                <a 
                    asp-controller="Profile"
                    asp-action="ChangePhoneNumber"
                    title="Change Phone Number"
@@ -1020,25 +1006,23 @@
 
                 <a asp-area="Manager"
                    asp-controller="Profile"
-                   asp-action="ChangePassword"
-                   title="Change Password"
-                   class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
+   asp-action="ChangePassword"
+   title="Change Password"
+   class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
 
-                    <span class="sidebar-link-icon">
-                        <i class="fa-solid fa-key"></i>
-                    </span>
+    <span class="sidebar-link-icon">
+        <i class="fa-solid fa-key"></i>
+    </span>
 
-                    <span class="sidebar-link-text">
-                        Change Password
-                    </span>
+    <span class="sidebar-link-text">
+        Change Password
+    </span>
 
-                </a>
+</a>
 
             </nav>
 
-            <!-- =====================================================
-         LOGOUT
-         ===================================================== -->
+            <!--LOGOUT-->
 
             <div class="sidebar-bottom">
 
@@ -1069,9 +1053,7 @@
 
         </aside>
 
-        <!-- =====================================================
-     RESTORE SIDEBAR BUTTON
-     ===================================================== -->
+        <!--RESTORE SIDEBAR BUTTON -->
 
         <button type="button"
                 class="sidebar-restore-btn"
@@ -1088,9 +1070,7 @@
              id="sidebarBackdrop">
         </div>
 
-        <!-- =====================================================
-     MAIN CONTENT
-     ===================================================== -->
+        <!--MAIN CONTENT -->
 
         <main class="manager-main">
 
@@ -1126,9 +1106,7 @@
 
     </div>
 
-    <!-- =========================================================
- SCRIPTS
- ========================================================= -->
+    <!-- SCRIPTS-->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
@@ -1182,9 +1160,7 @@
         "sidebarRestoreButton"
         );
 
-        /* ============================================
-        MOBILE
-        ============================================ */
+        /*MOBILE*/
 
         function openMobileSidebar() {
 
@@ -1245,9 +1221,7 @@
         );
         }
 
-        /* ============================================
-        COLLAPSE
-        ============================================ */
+        /*COLLAPSE */
 
         function updateCollapseIcon() {
 
@@ -1319,9 +1293,7 @@
         );
         }
 
-        /* ============================================
-        FULL WIDTH
-        ============================================ */
+        /*FULL WIDTH*/
 
         if (fullScreenToggle) {
 
@@ -1347,9 +1319,7 @@
         );
         }
 
-        /* ============================================
-        RESTORE SIDEBAR
-        ============================================ */
+        /* RESTORE SIDEBAR */
 
         if (restoreButton) {
 
@@ -1388,9 +1358,7 @@
         );
         }
 
-        /* ============================================
-        RESTORE SAVED STATE
-        ============================================ */
+        /*RESTORE SAVED STATE*/
 
         const saved =
         localStorage.getItem(
@@ -1409,9 +1377,7 @@
 
         updateCollapseIcon();
 
-        /* ============================================
-        RESIZE
-        ============================================ */
+        /*RESIZE */
 
         window.addEventListener(
         "resize",
@@ -1435,9 +1401,7 @@
         }
         );
 
-        /* ============================================
-        ESCAPE KEY
-        ============================================ */
+        /* ESCAPE KEY */
 
         document.addEventListener(
         "keydown",
