@@ -2,6 +2,7 @@
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Models.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class TestRequestTestTypeModel
 {   
@@ -22,4 +23,12 @@ public class TestRequestTestTypeModel
     public DateTime? StartDateTime { get; set; }
 
     public DateTime? CompletionDateTime { get; set; }
+
+    [Column(TypeName = "decimal(18,4)")]
+    public decimal? ResultValue { get; set; }
+
+    [StringLength(2000)]
+    public string? ResultNotes { get; set; }
+
+    public bool IsAbnormal { get; set; }
 }

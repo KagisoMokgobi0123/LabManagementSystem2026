@@ -115,6 +115,16 @@ namespace NMB_HLabSys.Areas.Doctor.Models
             get;
             set;
         } = new List<TestTypeModel>();
+
+
+        public virtual ICollection<TestRequestTestTypeModel> RequestedTestTypes { get; set; }
+            = new List<TestRequestTestTypeModel>();
+
+        [NotMapped]
+        public IReadOnlyCollection<TestTypeModel> EffectiveTestTypes => RequestedTestTypes.Any()
+            ? RequestedTestTypes.Where(x => x.TestType != null).Select(x => x.TestType!).ToList()
+            : TestTypes.ToList();
+
     }
 
 

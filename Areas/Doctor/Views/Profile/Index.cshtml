@@ -1,0 +1,433 @@
+﻿@model NMB_HLabSys.Areas.Technician.Models.TechnicianProfileViewModel
+
+@{
+    ViewData["Title"] = "My Profile";
+    Layout = "_DoctorLayout";
+
+    var initial = !string.IsNullOrWhiteSpace(Model.FirstName)
+        ? Model.FirstName.Substring(0, 1).ToUpper()
+        : "D";
+}
+
+<style>
+    .profile-page {
+        padding: 30px 0 50px;
+        background: #f4f7fb;
+        min-height: 100vh;
+    }
+
+    .phone-clickable {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+        .phone-clickable:hover {
+            border-color: #0284c7;
+            background: #f0f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.10);
+        }
+
+            .phone-clickable:hover .info-icon {
+                background: #0284c7;
+                color: #ffffff;
+            }
+
+            .phone-clickable:hover .fa-chevron-right {
+                color: #0284c7 !important;
+            }
+
+        .phone-clickable .info-value {
+            color: #334155;
+        }
+
+    .profile-header {
+        margin-bottom: 25px;
+    }
+
+    .profile-header h2 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 25px;
+        font-weight: 700;
+    }
+
+    .profile-header p {
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .profile-card {
+        overflow: hidden;
+        border: 0;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, .07);
+    }
+
+    .profile-banner {
+        height: 130px;
+        background: linear-gradient(
+            135deg,
+            #073b5c 0%,
+            #075985 50%,
+            #0284c7 100%
+        );
+    }
+
+    .profile-main {
+        padding: 0 30px 30px;
+    }
+
+    .profile-avatar-large {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 95px;
+        height: 95px;
+
+        margin-top: -48px;
+        margin-bottom: 15px;
+
+        border: 5px solid #fff;
+        border-radius: 50%;
+
+        background: #0284c7;
+        color: #fff;
+
+        box-shadow: 0 4px 15px rgba(15, 23, 42, .15);
+
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .profile-name {
+        margin-bottom: 3px;
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .profile-role {
+        color: #0284c7;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .info-section {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 1px solid #eef2f7;
+    }
+
+    .info-title {
+        margin-bottom: 15px;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: center;
+
+        min-height: 65px;
+        margin-bottom: 12px;
+        padding: 13px 15px;
+
+        border: 1px solid #e8edf3;
+        border-radius: 10px;
+
+        background: #fff;
+    }
+
+    .info-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+
+        margin-right: 12px;
+
+        border-radius: 9px;
+
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+
+    .info-label {
+        margin-bottom: 2px;
+        color: #94a3b8;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .info-value {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .security-card {
+        padding: 20px;
+
+        border: 1px solid #e8edf3;
+        border-radius: 12px;
+
+        background: #f8fafc;
+    }
+</style>
+
+
+<div class="profile-page">
+
+    <div class="container-fluid">
+
+        <!-- PAGE HEADER -->
+
+        <div class="profile-header">
+
+            <h2>
+                <i class="fas fa-user-circle mr-2"></i>
+                My Profile
+            </h2>
+
+            <p>
+                View your doctor account and personal information.
+            </p>
+
+        </div>
+
+        @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+        @if (TempData["InfoMessage"] != null) { <div class="alert alert-info">@TempData["InfoMessage"]</div> }
+
+        <div class="mb-3"><a asp-area="Doctor" asp-controller="Profile" asp-action="Edit" class="btn btn-outline-primary btn-sm"><i class="fas fa-user-edit mr-1"></i>Edit profile</a></div>
+
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                <div class="profile-card">
+
+                    <div class="profile-banner"></div>
+
+                    <div class="profile-main">
+
+                        <div class="profile-avatar-large">
+                            @initial
+                        </div>
+
+                        <div class="profile-name">
+                            @Model.FullName
+                        </div>
+
+                        <div class="profile-role">
+                            <i class="fas fa-microscope mr-1"></i>
+                            Doctor
+                        </div>
+
+
+                        <div class="info-section">
+
+                            <div class="info-title">
+                                Personal Information
+                            </div>
+
+
+                            <div class="row">
+
+                                <!-- FIRST NAME -->
+
+                                <div class="col-md-6">
+
+                                    <div class="info-item">
+
+                                        <div class="info-icon">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+
+                                        <div>
+
+                                            <div class="info-label">
+                                                First Name
+                                            </div>
+
+                                            <div class="info-value">
+                                                @(string.IsNullOrWhiteSpace(Model.FirstName)
+                                                    ? "Not provided"
+                                                    : Model.FirstName)
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- LAST NAME -->
+
+                                <div class="col-md-6">
+
+                                    <div class="info-item">
+
+                                        <div class="info-icon">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+
+                                        <div>
+
+                                            <div class="info-label">
+                                                Last Name
+                                            </div>
+
+                                            <div class="info-value">
+                                                @(string.IsNullOrWhiteSpace(Model.LastName)
+                                                    ? "Not provided"
+                                                    : Model.LastName)
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- EMAIL -->
+
+                                <div class="col-md-6">
+
+                                    <div class="info-item">
+
+                                        <div class="info-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+
+                                        <div>
+
+                                            <div class="info-label">
+                                                Email Address
+                                            </div>
+
+                                            <div class="info-value">
+                                                @Model.Email
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- PHONE -->
+                                <!-- PHONE -->
+
+                                <div class="col-md-6">
+
+                                    <a href="/Doctor/Profile/ChangePhoneNumber"
+                                       class="text-decoration-none">
+
+                                        <div class="info-item phone-clickable">
+
+                                            <div class="info-icon">
+                                                <i class="fas fa-phone"></i>
+                                            </div>
+
+                                            <div class="flex-grow-1">
+
+                                                <div class="info-label">
+                                                    Phone Number
+                                                </div>
+
+                                                <div class="info-value">
+                                                    @(string.IsNullOrWhiteSpace(Model.PhoneNumber)
+                                                        ? "Not provided"
+                                                        : Model.PhoneNumber)
+                                                </div>
+
+                                            </div>
+
+                                            <div class="ml-auto">
+                                                <i class="fas fa-chevron-right text-muted"></i>
+                                            </div>
+
+                                        </div>
+
+                                    </a>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- SECURITY -->
+
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <div class="profile-card p-4">
+
+                    <h5 class="info-title">
+                        <i class="fas fa-shield-alt mr-2 text-primary"></i>
+                        Account Security
+                    </h5>
+
+                    <div class="security-card">
+
+                        <div class="mb-3">
+
+                            <strong>
+                                Password
+                            </strong>
+
+                            <div class="text-muted small mt-1">
+                                Keep your laboratory account protected
+                                by using a secure password.
+                            </div>
+
+                        </div>
+
+                        <a href="/Doctor/Profile/ChangePassword"
+                           class="btn btn-primary btn-sm btn-block">
+
+                            <i class="fas fa-key mr-1"></i>
+
+                            Change Password
+
+                        </a>
+
+                    </div>
+
+
+                    <a href="/Doctor/Home/Index"
+                       class="btn btn-outline-secondary btn-sm btn-block mt-3">
+
+                        <i class="fas fa-arrow-left mr-1"></i>
+
+                        Back to Dashboard
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,11 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Patient.Models.PatientModel>
+@{ ViewData["Title"] = "Patients"; Layout = "_DoctorLayout"; }
+<div class="container-fluid py-4">
+ <div class="d-flex flex-wrap justify-content-between align-items-center mb-3"><div><h2>Patients</h2><p class="text-muted mb-0">Find patients by South African ID number or open their records.</p></div><a class="btn btn-primary" asp-area="Doctor" asp-controller="Patients" asp-action="Create"><i class="fas fa-user-plus mr-1"></i> Add patient</a></div>
+ @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+ <form method="get" class="card card-body mb-3"><label for="idNumber">Patient ID number</label><div class="input-group"><input id="idNumber" name="idNumber" value="@ViewBag.SearchId" class="form-control" maxlength="13" pattern="[0-9]{13}" placeholder="Enter 13-digit ID number"/><div class="input-group-append"><button class="btn btn-outline-primary" type="submit">Search</button></div></div></form>
+ <div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Patient</th><th>ID number</th><th>Date of birth</th><th>Contact</th><th></th></tr></thead><tbody>
+ @foreach (var p in Model) { <tr><td>@p.FullName</td><td>@p.IDNumber</td><td>@p.DateOfBirth.ToString("dd MMM yyyy")</td><td>@p.ContactNumber</td><td class="text-right"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@p.PatientId">View record</a></td></tr> }
+ @if (!Model.Any()) { <tr><td colspan="5" class="text-center text-muted py-4">@if(string.IsNullOrWhiteSpace(ViewBag.SearchId as string)){<span>Enter a patient's ID number to find their record. Patient records are not browsable as a list.</span>}else{<span>No patient found for this ID number. You can add a new patient.</span>}</td></tr> }
+ </tbody></table></div></div>
+</div>
