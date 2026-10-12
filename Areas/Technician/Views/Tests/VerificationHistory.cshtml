@@ -1,82 +1,248 @@
 ﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>
 @using NMB_HLabSys.Areas.Manager.Models
+@using NMB_HLabSys.Areas.Technician.Models
 @{
     ViewData["Title"] = "Verification History";
     Layout = "_TechnicianLayout";
     var test = ViewData["Test"] as TestRequestTestTypeModel;
-    var events = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>();
+    var currentResults = ViewData["CurrentResults"] as IEnumerable<TestResultModel>
+                         ?? Enumerable.Empty<TestResultModel>();
+    var events = Model?.ToList() ?? new List<TestResultVerificationHistoryModel>();
 }
 <style>
-    .tv-hero {
-        background: linear-gradient(120deg,#103a76,#1976c9);
-        color: #fff;
-        border-radius: 16px;
+    .vh-page {
+        background: #f4f7fb;
+        min-height: 100vh;
+        padding: 30px 16px 65px;
+    }
+
+    .vh-container {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    .vh-hero {
+        background: linear-gradient(125deg,#103a76,#1976c9);
+        color: white;
         padding: 28px;
-        margin-bottom: 24px
+        border-radius: 16px;
+        margin-bottom: 22px;
     }
 
-    .tv-card {
-        background: #fff;
+        .vh-hero h1 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0 0 8px;
+        }
+
+        .vh-hero p {
+            margin: 0;
+            color: #e1efff;
+        }
+
+    .vh-card {
+        background: white;
+        border: 1px solid #e3ebf4;
         border-radius: 14px;
-        box-shadow: 0 4px 20px rgba(18,49,85,.08);
         padding: 22px;
-        margin-bottom: 22px
+        margin-bottom: 20px;
+        box-shadow: 0 4px 18px rgba(18,49,85,.06);
     }
 
-    .tv-event {
-        border-left: 4px solid #2377c0;
-        padding: 14px 18px;
-        margin-bottom: 16px;
-        background: #f5f9fe;
-        border-radius: 0 12px 12px 0
+        .vh-card h2 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #214e80;
+            margin-bottom: 17px;
+        }
+
+    .vh-grid {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 15px;
     }
 
-    .tv-action {
-        color: #174e86;
-        font-weight: 700
+    .vh-label {
+        font-size: .8rem;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+
+    .vh-value {
+        font-weight: 650;
+        color: #22344a;
+        overflow-wrap: anywhere;
+    }
+
+    .vh-event {
+        border-left: 4px solid #2a7bc5;
+        padding: 17px 18px;
+        margin-bottom: 14px;
+        background: #f9fbfe;
+        border-radius: 0 11px 11px 0;
+    }
+
+        .vh-event.returned {
+            border-left-color: #d98a1c;
+        }
+
+        .vh-event.verified {
+            border-left-color: #239461;
+        }
+
+        .vh-event h3 {
+            font-size: 1rem;
+            font-weight: 800;
+            margin: 0 0 8px;
+        }
+
+    .vh-meta {
+        color: #64748b;
+        font-size: .86rem;
+        margin-bottom: 13px;
+    }
+
+    .vh-note {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        background: #fff;
+        border: 1px solid #e6ecf3;
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    .vh-changes {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .9rem;
+    }
+
+        .vh-changes th, .vh-changes td {
+            border-bottom: 1px solid #e5edf5;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+        }
+
+        .vh-changes th {
+            background: #edf4fb;
+            color: #254a72;
+        }
+
+    .vh-table-wrap {
+        overflow-x: auto;
+    }
+
+    .vh-empty {
+        color: #63748a;
+        background: #f7f9fc;
+        border-radius: 9px;
+        padding: 18px;
+    }
+
+    @@media(max-width:650px) {
+        .vh-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .vh-card {
+            padding: 16px;
+        }
     }
 </style>
-<div class="container-fluid py-4">
-    <div class="tv-hero">
-        <h2><i class="fas fa-history mr-2"></i>Verification History</h2>
-        <p class="mb-0">Review the recorded decisions, notes and result corrections.</p>
-    </div>
-    <div class="tv-card">
-        <div class="d-flex justify-content-between align-items-center flex-wrap">
-            <div>
-                <h4 class="mb-1">@(test?.TestType?.Name ?? "Test")</h4>
-                <p class="text-muted mb-0">Test ID: @(test?.TestRequestTestTypeId.ToString() ?? "—") · Current status: @(test?.Status ?? "—")</p>
-            </div>
-            <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" class="btn btn-outline-primary mt-2">Back to My Tests</a>
-        </div>
-    </div>
-    <div class="tv-card">
-        <h4 class="mb-3">Activity timeline (@events.Count)</h4>
-        @if (!events.Any())
+<div class="vh-page">
+    <div class="vh-container">
+        <header class="vh-hero">
+            <h1><i class="fas fa-history mr-2"></i>Verification History</h1>
+            <p>Read-only record of result submissions, reviews, corrections and approvals.</p>
+        </header>
+
+        @if (test != null)
         {
-            <p class="text-muted mb-0">No verification history has been recorded for this test yet.</p>
-        }
-        else
-        {
-            @foreach (var entry in events)
-            {
-                <div class="tv-event">
-                    <div class="d-flex justify-content-between flex-wrap">
-                        <span class="tv-action">@entry.Action</span>
-                        <small class="text-muted">@entry.ActionDateTime.ToString("dd MMM yyyy, HH:mm") UTC</small>
-                    </div>
-                    <div class="mt-2"><strong>Technician ID:</strong> @entry.ActionByTechnicianId</div>
-                    @if (!string.IsNullOrWhiteSpace(entry.Notes))
-                    {
-                        <div class="mt-2"><strong>Notes:</strong><div style="white-space:pre-wrap">@entry.Notes</div></div>
-                    }
-                    @if (entry.PreviousResultValue != null || entry.NewResultValue != null)
-                    {
-                        <div class="mt-2"><strong>Result change:</strong> @(entry.PreviousResultValue ?? "—") → @(entry.NewResultValue ?? "—")</div>
-                    }
-                    <small class="text-muted d-block mt-2">Result record: #@entry.TestResultId</small>
+            <section class="vh-card">
+                <h2>Test Details</h2>
+                <div class="vh-grid">
+                    <div><div class="vh-label">Request Number</div><div class="vh-value">@(test.TestRequest?.RequestNumber ?? "—")</div></div>
+                    <div><div class="vh-label">Test</div><div class="vh-value">@(test.TestType?.Name ?? "—")</div></div>
+                    <div><div class="vh-label">Test ID</div><div class="vh-value">#@test.TestRequestTestTypeId</div></div>
+                    <div><div class="vh-label">Current Status</div><div class="vh-value">@test.Status</div></div>
                 </div>
-            }
+            </section>
         }
+
+        <section class="vh-card">
+            <h2>Current Saved Result</h2>
+            @if (!currentResults.Any())
+            {
+                <div class="vh-empty">No current saved result was found.</div>
+            }
+            else
+            {
+                @foreach (var result in currentResults)
+                {
+                    <div class="vh-grid mb-3">
+                        <div><div class="vh-label">Result</div><div class="vh-value">@result.ResultValue @(result.MeasurementUnit ?? "")</div></div>
+                        <div><div class="vh-label">Classification</div><div class="vh-value">@(result.ResultFlag ?? "—")</div></div>
+                        <div><div class="vh-label">Reference Range</div><div class="vh-value">@(result.ReferenceMin?.ToString() ?? "—") to @(result.ReferenceMax?.ToString() ?? "—")</div></div>
+                        <div><div class="vh-label">Technician Notes</div><div class="vh-value" style="white-space:pre-wrap">@(result.Notes ?? "—")</div></div>
+                    </div>
+                }
+            }
+        </section>
+
+        <section class="vh-card">
+            <h2>Audit Timeline (@events.Count)</h2>
+            @if (events.Count == 0)
+            {
+                <div class="vh-empty">No verification history has been recorded for this test yet.</div>
+            }
+            @foreach (var item in events)
+            {
+                var styleClass = item.Action == "Verified" ? "verified" :
+                                 item.Action == "ReturnedForReview" ? "returned" : "";
+                var hasSnapshot = item.PreviousResultValue != null || item.NewResultValue != null ||
+                                  item.PreviousMeasurementUnit != null || item.NewMeasurementUnit != null ||
+                                  item.PreviousReferenceMin.HasValue || item.NewReferenceMin.HasValue ||
+                                  item.PreviousReferenceMax.HasValue || item.NewReferenceMax.HasValue ||
+                                  item.PreviousIsAbnormal.HasValue || item.NewIsAbnormal.HasValue ||
+                                  item.PreviousResultFlag != null || item.NewResultFlag != null ||
+                                  item.PreviousResultNotes != null || item.NewResultNotes != null;
+                <article class="vh-event @styleClass">
+                    <h3>@item.Action</h3>
+                    <div class="vh-meta">
+                        <i class="far fa-clock mr-1"></i>@item.ActionDateTime.ToString("dd MMM yyyy, HH:mm") UTC
+                        <span class="mx-2">•</span>
+                        Technician: @(item.ActionByTechnician?.UserName ?? item.ActionByTechnicianId)
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(item.Notes))
+                    {
+                        <div class="vh-label">Decision / Review Notes</div>
+                        <div class="vh-note mb-3">@item.Notes</div>
+                    }
+                    @if (hasSnapshot)
+                    {
+                        <div class="vh-table-wrap">
+                            <table class="vh-changes">
+                                <thead><tr><th>Field</th><th>Previous</th><th>New</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Result Value</td><td>@(item.PreviousResultValue ?? "—")</td><td>@(item.NewResultValue ?? "—")</td></tr>
+                                    <tr><td>Unit</td><td>@(item.PreviousMeasurementUnit ?? "—")</td><td>@(item.NewMeasurementUnit ?? "—")</td></tr>
+                                    <tr><td>Reference Minimum</td><td>@(item.PreviousReferenceMin?.ToString() ?? "—")</td><td>@(item.NewReferenceMin?.ToString() ?? "—")</td></tr>
+                                    <tr><td>Reference Maximum</td><td>@(item.PreviousReferenceMax?.ToString() ?? "—")</td><td>@(item.NewReferenceMax?.ToString() ?? "—")</td></tr>
+                                    <tr><td>Abnormal</td><td>@(item.PreviousIsAbnormal?.ToString() ?? "—")</td><td>@(item.NewIsAbnormal?.ToString() ?? "—")</td></tr>
+                                    <tr><td>Flag</td><td>@(item.PreviousResultFlag ?? "—")</td><td>@(item.NewResultFlag ?? "—")</td></tr>
+                                    <tr><td>Result Notes</td><td style="white-space:pre-wrap">@(item.PreviousResultNotes ?? "—")</td><td style="white-space:pre-wrap">@(item.NewResultNotes ?? "—")</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </article>
+            }
+        </section>
+        <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left mr-1"></i>Back to Pending Verification
+        </a>
     </div>
 </div>

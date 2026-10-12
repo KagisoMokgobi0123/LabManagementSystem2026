@@ -1,5 +1,379 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+@using System.Linq
+
 @{
+    ViewData["Title"] = "Tests for Review";
+    Layout = "_TechnicianLayout";
+
+    var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+    var total = tests.Count;
 }
+
+<style>
+    .review-page {
+        background: #f4f7fb;
+        min-height: 100vh;
+        padding: 30px 18px 60px;
+    }
+
+    .review-wrap {
+        max-width: 1250px;
+        margin: 0 auto;
+    }
+
+    .review-hero {
+        background: linear-gradient(120deg,#123b73,#2375bd);
+        color: #fff;
+        border-radius: 17px;
+        padding: 27px 30px;
+        margin-bottom: 22px;
+        box-shadow: 0 10px 26px rgba(21,72,131,.14);
+    }
+
+        .review-hero h1 {
+            font-size: 1.65rem;
+            font-weight: 750;
+            margin: 0 0 8px;
+        }
+
+        .review-hero p {
+            color: #e0edfb;
+            margin: 0;
+        }
+
+    .review-stats {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+
+    .review-stat {
+        background: #fff;
+        border: 1px solid #e2eaf3;
+        border-radius: 13px;
+        padding: 19px 22px;
+        box-shadow: 0 4px 16px rgba(31,62,104,.05);
+    }
+
+    .review-stat-label {
+        font-size: .85rem;
+        color: #60748d;
+        font-weight: 650;
+    }
+
+    .review-stat-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #123b73;
+        margin-top: 5px;
+    }
+
+    .review-card {
+        background: #fff;
+        border: 1px solid #e2eaf3;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 5px 18px rgba(31,62,104,.05);
+    }
+
+    .review-card-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 20px 22px;
+        border-bottom: 1px solid #e9eff6;
+    }
+
+        .review-card-header h2 {
+            font-size: 1.1rem;
+            color: #1c477a;
+            font-weight: 750;
+            margin: 0;
+        }
+
+    .review-filters {
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+    }
+
+        .review-filters input, .review-filters select {
+            min-height: 40px;
+            border: 1px solid #cbd7e6;
+            border-radius: 8px;
+            padding: 8px 11px;
+            color: #253b53;
+            background: #fff;
+        }
+
+        .review-filters input {
+            min-width: 210px;
+        }
+
+    .review-table-wrap {
+        overflow-x: auto;
+    }
+
+    .review-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .review-table th {
+            background: #f7f9fc;
+            color: #526981;
+            font-size: .78rem;
+            letter-spacing: .025em;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 14px 16px;
+            white-space: nowrap;
+        }
+
+        .review-table td {
+            padding: 17px 16px;
+            border-top: 1px solid #edf1f6;
+            color: #273a50;
+            vertical-align: middle;
+            font-size: .9rem;
+        }
+
+        .review-table tr:hover td {
+            background: #fafcff;
+        }
+
+    .review-primary {
+        font-weight: 750;
+        color: #1c477a;
+    }
+
+    .review-sub {
+        color: #73849a;
+        font-size: .8rem;
+        margin-top: 4px;
+    }
+
+    .review-status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #fff1d6;
+        color: #865c00;
+        font-size: .76rem;
+        font-weight: 750;
+        white-space: nowrap;
+    }
+
+    .review-urgency {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: #edf2f8;
+        color: #43566b;
+        font-weight: 700;
+        font-size: .77rem;
+    }
+
+    .review-urgency-high {
+        background: #fee8e8;
+        color: #ad2630;
+    }
+
+    .review-urgency-urgent {
+        background: #fee8e8;
+        color: #ad2630;
+    }
+
+    .review-urgency-stat {
+        background: #fee8e8;
+        color: #ad2630;
+    }
+
+    .review-action {
+        display: inline-block;
+        padding: 9px 13px;
+        background: #176ab0;
+        color: #fff !important;
+        border-radius: 8px;
+        text-decoration: none !important;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+        .review-action:hover {
+            background: #10548e;
+        }
+
+    .review-empty {
+        text-align: center;
+        padding: 55px 20px;
+        color: #667b92;
+    }
+
+        .review-empty i {
+            font-size: 2.2rem;
+            color: #8eabc7;
+            margin-bottom: 14px;
+        }
+
+    .review-footer {
+        padding: 13px 20px;
+        border-top: 1px solid #edf1f6;
+        color: #6b7d90;
+        font-size: .84rem;
+    }
+
+    @@media(max-width:650px) {
+        .review-page {
+            padding: 18px 10px 40px;
+        }
+
+        .review-hero {
+            padding: 22px;
+        }
+
+        .review-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .review-filters, .review-filters input, .review-filters select {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="review-page">
+    <div class="review-wrap">
+        <header class="review-hero">
+            <h1><i class="fas fa-clipboard-check mr-2"></i> Tests for Review</h1>
+            <p>Tests assigned to you that are awaiting review or correction.</p>
+        </header>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+        }
+
+        <div class="review-stats">
+            <div class="review-stat">
+                <div class="review-stat-label">Awaiting Review</div>
+                <div class="review-stat-value">@total</div>
+            </div>
+            <div class="review-stat">
+                <div class="review-stat-label">Assigned Technician</div>
+                <div class="review-stat-value" style="font-size:1.15rem">Your tests</div>
+            </div>
+        </div>
+
+        <section class="review-card" aria-labelledby="review-list-title">
+            <div class="review-card-header">
+                <h2 id="review-list-title"><i class="fas fa-list-alt mr-2"></i> Review Queue</h2>
+                <div class="review-filters">
+                    <input id="reviewSearch" type="search" placeholder="Search tests or requests" aria-label="Search review queue" />
+                    <select id="urgencyFilter" aria-label="Filter by urgency">
+                        <option value="">All urgency levels</option>
+                    </select>
+                </div>
+            </div>
+
+            @if (!tests.Any())
+            {
+                <div class="review-empty">
+                    <div><i class="fas fa-check-circle" aria-hidden="true"></i></div>
+                    <h3 style="font-size:1.1rem;color:#244b74">No tests awaiting review</h3>
+                    <p>You currently have no assigned tests with the status "To Be Reviewed".</p>
+                </div>
+            }
+            else
+            {
+                <div class="review-table-wrap">
+                    <table class="review-table">
+                        <thead>
+                            <tr>
+                                <th>Request</th>
+                                <th>Test / Category</th>
+                                <th>Urgency</th>
+                                <th>Started</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewRows">
+                            @foreach (var test in tests)
+                            {
+                                var urgency = test.TestRequest?.Urgency.ToString() ?? "Not specified";
+                                var urgencyClass = urgency.Trim().ToLowerInvariant().Replace(" ", "-");
+                                var searchText = $"{test.TestRequest?.RequestNumber} {test.TestType?.Name} {test.TestType?.TestCategory?.Description} {urgency}";
+                                <tr class="review-row" data-search="@searchText.ToLowerInvariant()" data-urgency="@urgency">
+                                    <td>
+                                        <div class="review-primary">@(test.TestRequest?.RequestNumber ?? "N/A")</div>
+                                        <div class="review-sub">Test #@test.TestRequestTestTypeId</div>
+                                    </td>
+                                    <td>
+                                        <div class="review-primary">@(test.TestType?.Name ?? "Unknown test")</div>
+                                        <div class="review-sub">@(test.TestType?.TestCategory?.Description ?? "Category not specified")</div>
+                                    </td>
+                                    <td><span class="review-urgency review-urgency-@urgencyClass">@urgency</span></td>
+                                    <td>@(test.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not started")</td>
+                                    <td><span class="review-status">@test.Status</span></td>
+                                    <td>
+                                        <a class="review-action" asp-area="Technician" asp-controller="Tests"
+                                           asp-action="Details" asp-route-id="@test.TestRequestTestTypeId">
+                                            <i class="fas fa-eye mr-1"></i> View Test
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div id="reviewNoMatches" class="review-empty" style="display:none">
+                    No tests match your search or urgency filter.
+                </div>
+                <div class="review-footer"><span id="reviewCount">@total</span> test(s) shown</div>
+            }
+        </section>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const search = document.getElementById('reviewSearch');
+        const filter = document.getElementById('urgencyFilter');
+        const rows = Array.from(document.querySelectorAll('.review-row'));
+        const count = document.getElementById('reviewCount');
+        const empty = document.getElementById('reviewNoMatches');
+        if (!search || !filter || !rows.length) return;
+
+        const levels = [...new Set(rows.map(row => row.dataset.urgency))].sort();
+        levels.forEach(level => {
+            const option = document.createElement('option');
+            option.value = level;
+            option.textContent = level;
+            filter.appendChild(option);
+        });
+
+        function refresh() {
+            const query = search.value.trim().toLowerCase();
+            const urgency = filter.value;
+            let visible = 0;
+            rows.forEach(row => {
+                const matches = (!query || row.dataset.search.includes(query)) &&
+                    (!urgency || row.dataset.urgency === urgency);
+                row.hidden = !matches;
+                if (matches) visible++;
+            });
+            if (count) count.textContent = visible;
+            if (empty) empty.style.display = visible ? 'none' : 'block';
+        }
+        search.addEventListener('input', refresh);
+        filter.addEventListener('change', refresh);
+    })();
+</script>
