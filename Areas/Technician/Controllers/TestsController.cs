@@ -200,6 +200,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // StartDateTime is stored in UTC; convert to local time only when displaying it.
 
         [HttpGet]
+
+
         public async Task<IActionResult> Select()
         {
             // STEP 1: Get logged-in technician
@@ -225,14 +227,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .Include(x => x.TestRequest)
                 .Where(x =>
                     assignedTestTypeIds.Contains(x.TestTypeId) &&
-
                     x.Status == "SamplesReceived" &&
-
-                    (x.TechnicianId == null ||
-                     x.TechnicianId == "") &&
-
+                    (x.TechnicianId == null || x.TechnicianId == "") &&
                     x.TestRequest != null &&
-
                     (
                         x.TestRequest.Status ==
                             TestRequestStatus.SamplesReceived.ToString() ||
@@ -244,43 +241,61 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .ThenBy(x => x.TestRequestTestTypeId)
                 .ToListAsync();
 
-            // STEP 4: Collect patient and doctor IDs
+            // STEP 4: Collect patient Identity IDs and doctor Identity IDs
             var patientIds = availableTests
                 .Where(x => x.TestRequest != null)
                 .Select(x => x.TestRequest!.PatientId)
+                .Where(id => !string.IsNullOrEmpty(id))
                 .Distinct()
                 .ToList();
 
             var doctorIds = availableTests
                 .Where(x => x.TestRequest != null)
                 .Select(x => x.TestRequest!.DoctorId)
+                .Where(id => !string.IsNullOrEmpty(id))
                 .Distinct()
                 .ToList();
 
-            // STEP 5: Retrieve matching patient records
-            var patients = await _context.Patients
+            // STEP 5: Retrieve patient Identity accounts
+            var patientUsers = await _userManager.Users
                 .AsNoTracking()
-                .Where(x => patientIds.Contains(x.PatientId))
-                .ToDictionaryAsync(x => x.PatientId);
+                .Where(x => patientIds.Contains(x.Id))
+                .ToDictionaryAsync(x => x.Id);
 
-            // STEP 6: Retrieve matching doctor Identity accounts
+            // STEP 6: Retrieve patient profiles using their Identity UserId
+            var patientProfiles = await _context.Patients
+                .AsNoTracking()
+                .Where(x => patientIds.Contains(x.UserId))
+                .ToDictionaryAsync(x => x.UserId);
+
+            // STEP 7: Retrieve doctor Identity accounts
             var doctorUsers = await _userManager.Users
                 .AsNoTracking()
                 .Where(x => doctorIds.Contains(x.Id))
                 .ToDictionaryAsync(x => x.Id);
 
-            // STEP 7: Map results to the view model
+            // STEP 8: Map results to the view model
             var model = availableTests.Select(x =>
             {
                 var request = x.TestRequest;
 
-                var patient = request != null &&
-                              patients.TryGetValue(
-                                  request.PatientId,
-                                  out var matchedPatient)
-                    ? matchedPatient
+                // Match the patient's Identity account
+                var patientUser = request != null &&
+                                  patientUsers.TryGetValue(
+                                      request.PatientId,
+                                      out var matchedPatientUser)
+                    ? matchedPatientUser
                     : null;
 
+                // Match the patient profile
+                var patientProfile = request != null &&
+                                     patientProfiles.TryGetValue(
+                                         request.PatientId,
+                                         out var matchedPatientProfile)
+                    ? matchedPatientProfile
+                    : null;
+
+                // Match the doctor's Identity account
                 var doctor = request != null &&
                              doctorUsers.TryGetValue(
                                  request.DoctorId,
@@ -290,19 +305,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                 return new SelectPatientTestViewModel
                 {
-                    RequestedTestId =
-                        x.TestRequestTestTypeId,
+                    RequestedTestId = x.TestRequestTestTypeId,
 
                     RequestReference =
                         request?.RequestNumber
                         ?? x.TestRequestId.ToString(),
 
+                    // Prefer the patient profile's name.
+                    // Fall back to the Identity account's name.
                     PatientName =
-                        patient?.FullName
-                        ?? "Patient not found",
+                        !string.IsNullOrWhiteSpace(patientProfile?.FullName)
+                            ? patientProfile.FullName
+                            : patientUser?.FullName ?? "Patient not found",
 
                     PatientIdNumber =
-                        patient?.IDNumber
+                        patientProfile?.IDNumber
                         ?? "Not available",
 
                     DoctorFullName =
@@ -338,7 +355,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 };
             }).ToList();
 
-            // STEP 8: Return your existing Select.cshtml
+            // STEP 9: Return the Select view
             return View("Select", model);
         }
 
