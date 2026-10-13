@@ -784,7 +784,7 @@
         </a>
          @*Redirect the technician to the Receive Samples view*@
         <a href="Technician/Tests/ReceiveSamples"
-           class="hero-btn hero-btn-primary"
+                               class="hero-btn hero-btn-outline"
            style="white-space: nowrap;">
 
             <i class="fas fa-vials"></i>
@@ -831,9 +831,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="MyTests"
+                <a href="Technician/Tests/MyTests"
                    class="stat-card-link"
                    title="View my selected tests">
 
@@ -876,9 +874,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="Available"
+                <a href="Technician/Tests/Available"
                    class="stat-card-link"
                    title="View tests waiting for selection">
 
@@ -921,9 +917,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Verification"
-                   asp-action="Pending"
+                <a href="Technician/Tests/Verified"
                    class="stat-card-link"
                    title="View results waiting for verification">
 
@@ -966,9 +960,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="Review"
+                <a href="Technician/Tests/Review"
                    class="stat-card-link"
                    title="View tests returned for review">
 
@@ -1019,9 +1011,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="Urgent"
+                <a href="Technician/Tests/Urgent"
                    class="stat-card-link"
                    title="View urgent and STAT tests">
 
@@ -1064,9 +1054,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="Overdue"
+                <a href="Technician/Tests/Overdue"
                    class="stat-card-link"
                    title="View overdue tests">
 
@@ -1109,9 +1097,7 @@
 
             <div class="col-xl-4 col-md-12 mb-4">
 
-                <a asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="NearingTat"
+                <a href="Technician/Tests/NearingTat"
                    class="stat-card-link"
                    title="View tests nearing turnaround time">
 
@@ -1451,9 +1437,7 @@
 
                             <div class="col-md-6">
 
-                                <a asp-area="Technician"
-                                   asp-controller="Verification"
-                                   asp-action="History"
+                                <a href="/Technician/Tests/VerificationHistory"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1484,9 +1468,7 @@
 
                             <div class="col-md-6">
 
-                                <a asp-area="Technician"
-                                   asp-controller="Reports"
-                                   asp-action="Index"
+                                <a href="/Technician/Reports/Index"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1542,9 +1524,7 @@
 
                     <div class="card-body">
 
-                        <a asp-area="Technician"
-                           asp-controller="Tests"
-                           asp-action="Urgent"
+                        <a href="/Technician/Tests/Urgent"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-red">
@@ -1567,9 +1547,7 @@
                         </a>
 
 
-                        <a asp-area="Technician"
-                           asp-controller="Tests"
-                           asp-action="Overdue"
+                        <a href="/Technician/Tests/Overdue"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-red">
@@ -1592,9 +1570,7 @@
                         </a>
 
 
-                        <a asp-area="Technician"
-                           asp-controller="Tests"
-                           asp-action="NearingTat"
+                        <a href="/Technician/Tests/NearingTat"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-yellow">
@@ -1617,9 +1593,7 @@
                         </a>
 
 
-                        <a asp-area="Technician"
-                           asp-controller="Tests"
-                           asp-action="Review"
+                        <a href="/Technician/Tests/Review"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-orange">
@@ -1772,9 +1746,7 @@
 
                                     <div class="mt-3">
 
-                                        <a asp-area="Technician"
-                                           asp-controller="Tests"
-                                           asp-action="Available"
+                                        <a href="/Technician/Tests/Available"
                                            class="btn btn-primary btn-sm">
 
                                             <i class="fas fa-list-check mr-1"></i>
@@ -1828,9 +1800,7 @@
 
                     <div class="col-md-4">
 
-                        <a asp-area="Technician"
-                           asp-controller="Verification"
-                           asp-action="Pending"
+                        <a href="/Technician/Tests/Pending"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1861,9 +1831,7 @@
 
                     <div class="col-md-4">
 
-                        <a asp-area="Technician"
-                           asp-controller="Verification"
-                           asp-action="Verified"
+                        <a href="/Technician/Tests/Verified"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1894,9 +1862,7 @@
 
                     <div class="col-md-4">
 
-                        <a asp-area="Technician"
-                           asp-controller="Verification"
-                           asp-action="History"
+                        <a href="/Technician/Tests/VerificationHistory"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1982,9 +1948,7 @@
 
                     <div class="col-md-4 text-md-right mt-3 mt-md-0">
 
-                        <a asp-area="Technician"
-                           asp-controller="Reports"
-                           asp-action="Index"
+                        <a href="/Technician/Reports/Index"
                            class="btn btn-primary btn-sm">
 
                             <i class="fas fa-file-pdf mr-1"></i>

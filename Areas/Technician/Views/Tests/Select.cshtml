@@ -310,16 +310,17 @@
                         <thead>
                             <tr>
                                 <th>Request Number</th>
+                                  <th>Priority</th>
                                 <th>Patient</th>
-                                <th>ID Number</th>
+                             @*    <th>ID Number</th> *@
                                 <th>Doctor Full Name</th>
                                 <th>Doctor Username</th>
                                 <th>Clinical Notes</th>
                                 <th>Test Type</th>
-                                <th>Priority</th>
-                                <th>Turnaround</th>
-                                <th>Request Status</th>
-                                <th>Sample Status</th>
+                                
+                             @*    <th>Turnaround</th> *@
+                                <th>Status</th>
+                               @*  <th>Sample Status</th> *@
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -346,7 +347,12 @@
                                             @test.RequestReference
                                         </span>
                                     </td>
-
+                                    <!-- PRIORITY -->
+                                    <td>
+                                        <span class="select-pill @priorityClass">
+                                            @priority
+                                        </span>
+                                    </td>
                                     <!-- PATIENT FULL NAME -->
                                     <td>
                                         <span class="select-name">
@@ -354,10 +360,11 @@
                                         </span>
                                     </td>
 
+
                                     <!-- PATIENT ID -->
-                                    <td>
+                                   @*  <td>
                                         @test.PatientIdNumber
-                                    </td>
+                                    </td> *@
 
                                     <!-- DOCTOR FULL NAME -->
                                     <td>
@@ -383,33 +390,31 @@
                                         </span>
                                     </td>
 
-                                    <!-- PRIORITY -->
-                                    <td>
-                                        <span class="select-pill @priorityClass">
-                                            @priority
-                                        </span>
-                                    </td>
+                                  
 
                                     <!-- TURNAROUND -->
-                                    <td>
+                                    @* <td>
                                         <i class="far fa-clock text-muted mr-1"></i>
                                         @test.TurnaroundDisplay
                                     </td>
-
+ *@
                                     <!-- REQUEST STATUS -->
                                     <td>
-                                        <span class="select-pill @(requestStatus == "SamplesReceived" ? "success" : "")">
-                                            @requestStatus
+                                        <span class="select-pill @(requestStatus == "InProgress" ? "success" :
+                                                                           requestStatus == "SamplesReceived" ? "primary" : "")">
+                                            @(requestStatus == "SamplesReceived" ? "Sample Received" :
+                                              requestStatus == "InProgress" ? "In Progress" :
+                                              requestStatus)
                                         </span>
                                     </td>
 
                                     <!-- TEST STATUS -->
-                                    <td>
+                                   @*  <td>
                                         <span class="select-pill @(testStatus == "SamplesReceived" ? "success" : "")">
                                             <i class="fas fa-check-circle"></i>
                                             @testStatus
                                         </span>
-                                    </td>
+                                    </td> *@
 
                                     <!-- OPEN PERFORM TEST MODAL -->
                                     <td class="text-center">
