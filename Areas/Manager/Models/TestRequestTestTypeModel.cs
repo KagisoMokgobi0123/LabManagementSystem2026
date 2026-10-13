@@ -25,13 +25,14 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         public DateTime? StartDateTime { get; set; }
 
-    public DateTime? CompletionDateTime { get; set; }
+        public DateTime? CompletionDateTime { get; set; }
 
-    [Column(TypeName = "decimal(18,4)")]
-    public decimal? ResultValue { get; set; }
+        [Column(TypeName = "decimal(18,4)")]
+        public decimal? ResultValue { get; set; }
 
-    [StringLength(2000)]
-    public string? ResultNotes { get; set; }
+        [StringLength(2000)]
+        public string? ResultNotes { get; set; }
 
-    public bool IsAbnormal { get; set; }
+        public bool IsAbnormal { get; set; }
+    }
 }

@@ -1,4 +1,4 @@
-@model IEnumerable<TestRequestTestTypeModel>
+@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
 @using NMB_HLabSys.Areas.Doctor.Models
 @{ ViewData["Title"] = "Result Details"; Layout = "_DoctorLayout"; var request = ViewBag.Request as TestRequestsModel; }
 <div class="container-fluid py-4"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2>Results: @request?.RequestNumber</h2><p class="text-muted mb-0">Patient: @(request?.Patient?.FullName ?? "Patient") · @request?.RequestDate.ToString("dd MMM yyyy")</p></div><a asp-action="Index" class="btn btn-outline-secondary">Back to results</a></div><div class="alert alert-success">All associated test entries have completed. These results are available for clinical review.</div>

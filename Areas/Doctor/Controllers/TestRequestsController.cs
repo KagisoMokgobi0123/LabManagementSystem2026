@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Doctor.Services;
 using NMB_HLabSys.Areas.Doctor.ViewModels;
+using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Patient.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;

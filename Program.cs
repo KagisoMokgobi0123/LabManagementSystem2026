@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Areas.Doctor.Services;
+using NMB_HLabSys.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
