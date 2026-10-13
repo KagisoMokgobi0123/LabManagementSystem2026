@@ -40,7 +40,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // DETAILS
         // ============================================================
@@ -55,8 +54,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .Include(o => o.Supplier)
                     .Include(o => o.OrderItems)
                         .ThenInclude(i => i.Consumable)
-                    .FirstOrDefaultAsync(o =>
-                        o.OrderId == id);
+                    .FirstOrDefaultAsync(o => o.OrderId == id);
 
                 if (order == null)
                 {
@@ -66,16 +64,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                /*
-                 * The current UI uses Index.cshtml.
-                 * Keep that behaviour so Details does not require
-                 * a separate view.
-                 */
                 await LoadOrderData();
 
-                return View(
-                    "Index",
-                    await GetOrders());
+                // Keep the existing Index view.
+                // The selected order and its related IDs are loaded above.
+                return View("Index", await GetOrders());
             }
             catch (Exception ex)
             {
@@ -84,7 +77,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "Unable to load the selected order.");
             }
         }
-
 
         // ============================================================
         // CREATE
@@ -97,44 +89,27 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         {
             try
             {
-                // --------------------------------------------------------
-                // NORMALISE INPUT
-                // --------------------------------------------------------
-
                 model.OrderNumber =
-                    model.OrderNumber?.Trim()
-                    ?? string.Empty;
+                    model.OrderNumber?.Trim() ?? string.Empty;
 
                 model.Items ??=
                     new List<CreateOrderItemViewModel>();
 
-
-                // --------------------------------------------------------
+                // ----------------------------------------------------
                 // SERVER-SIDE VALIDATION
-                // --------------------------------------------------------
+                // ----------------------------------------------------
 
                 await ValidateCreateOrder(model);
-
 
                 if (!ModelState.IsValid)
                 {
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
-
-                // --------------------------------------------------------
-                // REMOVE INVALID/EMPTY ITEM VALUES
-                // --------------------------------------------------------
-
-                model.Items =
-                    model.Items
-                        .Where(i => i != null)
-                        .ToList();
-
+                model.Items = model.Items
+                    .Where(i => i != null)
+                    .ToList();
 
                 if (!model.Items.Any())
                 {
@@ -143,21 +118,16 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         "At least one consumable must be added.");
 
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
-
-                // --------------------------------------------------------
+                // ----------------------------------------------------
                 // DUPLICATE CONSUMABLE CHECK
-                // --------------------------------------------------------
+                // ----------------------------------------------------
 
-                bool hasDuplicates =
-                    model.Items
-                        .GroupBy(i => i.ConsumableId)
-                        .Any(g => g.Count() > 1);
+                bool hasDuplicates = model.Items
+                    .GroupBy(i => i.ConsumableId)
+                    .Any(g => g.Count() > 1);
 
                 if (hasDuplicates)
                 {
@@ -166,22 +136,17 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         "The same consumable cannot be added more than once.");
 
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
+                // ----------------------------------------------------
+                // LOAD SUPPLIER USING SupplierId
+                // ----------------------------------------------------
 
-                // --------------------------------------------------------
-                // LOAD SUPPLIER
-                // --------------------------------------------------------
-
-                var supplier =
-                    await _context.Suppliers
-                        .FirstOrDefaultAsync(s =>
-                            s.SupplierId == model.SupplierId &&
-                            !s.IsDeleted);
+                var supplier = await _context.Suppliers
+                    .FirstOrDefaultAsync(s =>
+                        s.SupplierId == model.SupplierId &&
+                        !s.IsDeleted);
 
                 if (supplier == null)
                 {
@@ -190,34 +155,23 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         "The selected supplier does not exist.");
 
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
+                // ----------------------------------------------------
+                // LOAD CONSUMABLES USING ConsumableId
+                // ----------------------------------------------------
 
-                // --------------------------------------------------------
-                // LOAD CONSUMABLES
-                // --------------------------------------------------------
+                var consumableIds = model.Items
+                    .Select(i => i.ConsumableId)
+                    .Distinct()
+                    .ToList();
 
-                var consumableIds =
-                    model.Items
-                        .Select(i => i.ConsumableId)
-                        .Distinct()
-                        .ToList();
-
-                var consumables =
-                    await _context.Consumables
-                        .Where(c =>
-                            consumableIds.Contains(c.ConsumableId) &&
-                            !c.IsDeleted)
-                        .ToListAsync();
-
-
-                // --------------------------------------------------------
-                // MAKE SURE ALL CONSUMABLES EXIST
-                // --------------------------------------------------------
+                var consumables = await _context.Consumables
+                    .Where(c =>
+                        consumableIds.Contains(c.ConsumableId) &&
+                        !c.IsDeleted)
+                    .ToListAsync();
 
                 if (consumables.Count != consumableIds.Count)
                 {
@@ -226,21 +180,17 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         "One or more selected consumables could not be found.");
 
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
-
-                // --------------------------------------------------------
+                // ----------------------------------------------------
                 // VALIDATE EACH CONSUMABLE
-                // --------------------------------------------------------
+                // ----------------------------------------------------
 
                 foreach (var item in model.Items)
                 {
-                    var consumable =
-                        consumables.FirstOrDefault(c =>
+                    var consumable = consumables
+                        .FirstOrDefault(c =>
                             c.ConsumableId == item.ConsumableId);
 
                     if (consumable == null)
@@ -252,14 +202,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         continue;
                     }
 
-
                     if (item.QuantityOrdered <= 0)
                     {
                         ModelState.AddModelError(
                             nameof(model.Items),
                             $"Quantity for '{consumable.Name}' must be greater than zero.");
                     }
-
 
                     if (consumable.SupplierId != model.SupplierId)
                     {
@@ -268,11 +216,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                             $"'{consumable.Name}' does not belong to the selected supplier.");
                     }
 
-
-                    /*
-                     * Only consumables currently requiring replenishment
-                     * should be ordered through this screen.
-                     */
                     if (consumable.StockStatus != StockStatus.ReorderNow &&
                         consumable.StockStatus != StockStatus.OutOfStock)
                     {
@@ -282,35 +225,30 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     }
                 }
 
-
                 if (!ModelState.IsValid)
                 {
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
-
-                // ========================================================
+                // ====================================================
                 // TRANSACTION
-                // ========================================================
+                // ====================================================
 
                 await using var transaction =
                     await _context.Database.BeginTransactionAsync();
 
                 try
                 {
-                    // ----------------------------------------------------
-                    // STEP 1
-                    // CREATE ORDER ONLY
-                    // ----------------------------------------------------
+                    // ------------------------------------------------
+                    // STEP 1: CREATE ORDER
+                    // OrderId is generated by the database.
+                    // ------------------------------------------------
 
                     var order = new OrderModel
                     {
                         OrderNumber = model.OrderNumber,
-                        SupplierId = model.SupplierId,
+                        SupplierId = supplier.SupplierId,
                         Status = OrderStatus.Ordered,
                         DateComplete = null,
                         CancellationReason = null,
@@ -319,59 +257,42 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
                     _context.Orders.Add(order);
 
-                    /*
-                     * IMPORTANT:
-                     *
-                     * Save the order first.
-                     *
-                     * This guarantees that OrderId is generated by the
-                     * database before any OrderItemModel is created.
-                     */
                     await _context.SaveChangesAsync();
 
+                    // order.OrderId now contains the database-generated ID.
 
-                    // ----------------------------------------------------
-                    // STEP 2
-                    // CREATE ORDER ITEMS
-                    // ----------------------------------------------------
+                    // ------------------------------------------------
+                    // STEP 2: CREATE ORDER ITEMS
+                    // Each OrderItemId is generated by the database.
+                    // ------------------------------------------------
 
                     foreach (var item in model.Items)
                     {
-                        var orderItem =
-                            new OrderItemModel
-                            {
-                                OrderId = order.OrderId,
-                                ConsumableId = item.ConsumableId,
-                                QuantityOrdered = item.QuantityOrdered,
-                                Status = OrderItemStatus.Ordered,
-                                DateReceived = null,
-                                CancellationReason = null,
-                                DateCancelled = null
-                            };
+                        var orderItem = new OrderItemModel
+                        {
+                            OrderId = order.OrderId,
+                            ConsumableId = item.ConsumableId,
+                            QuantityOrdered = item.QuantityOrdered,
+                            Status = OrderItemStatus.Ordered,
+                            DateReceived = null,
+                            CancellationReason = null,
+                            DateCancelled = null
+                        };
 
                         _context.OrderItems.Add(orderItem);
                     }
 
-
-                    // ----------------------------------------------------
-                    // STEP 3
-                    // SAVE ORDER ITEMS
-                    // ----------------------------------------------------
+                    // ------------------------------------------------
+                    // STEP 3: SAVE ORDER ITEMS
+                    // ------------------------------------------------
 
                     await _context.SaveChangesAsync();
 
-
-                    // ----------------------------------------------------
-                    // STEP 4
-                    // COMMIT
-                    // ----------------------------------------------------
+                    // ------------------------------------------------
+                    // STEP 4: COMMIT TRANSACTION
+                    // ------------------------------------------------
 
                     await transaction.CommitAsync();
-
-
-                    // ----------------------------------------------------
-                    // SUCCESS
-                    // ----------------------------------------------------
 
                     TempData["SuccessMessage"] =
                         $"Order '{order.OrderNumber}' was created successfully.";
@@ -381,35 +302,19 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 catch
                 {
                     await transaction.RollbackAsync();
-
                     throw;
                 }
             }
             catch (DbUpdateException ex)
             {
-                /*
-                 * This is intentionally handled separately so database
-                 * errors are easier to identify during development.
-                 */
-
-                var root =
-                    GetRootException(ex);
+                var root = GetRootException(ex);
 
                 Console.Error.WriteLine(
                     "============================================================");
-
-                Console.Error.WriteLine(
-                    "ORDER CREATE DATABASE ERROR");
-
-                Console.Error.WriteLine(
-                    $"Message: {ex.Message}");
-
-                Console.Error.WriteLine(
-                    $"Root Message: {root.Message}");
-
-                Console.Error.WriteLine(
-                    $"Stack Trace: {ex.StackTrace}");
-
+                Console.Error.WriteLine("ORDER CREATE DATABASE ERROR");
+                Console.Error.WriteLine($"Message: {ex.Message}");
+                Console.Error.WriteLine($"Root Message: {root.Message}");
+                Console.Error.WriteLine($"Stack Trace: {ex.StackTrace}");
                 Console.Error.WriteLine(
                     "============================================================");
 
@@ -426,27 +331,23 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // EDIT
         // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            OrderModel model)
+        public async Task<IActionResult> Edit(OrderModel model)
         {
             try
             {
                 model.OrderNumber =
-                    model.OrderNumber?.Trim()
-                    ?? string.Empty;
+                    model.OrderNumber?.Trim() ?? string.Empty;
 
-                var existingOrder =
-                    await _context.Orders
-                        .Include(o => o.OrderItems)
-                        .FirstOrDefaultAsync(o =>
-                            o.OrderId == model.OrderId);
+                var existingOrder = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .FirstOrDefaultAsync(o =>
+                        o.OrderId == model.OrderId);
 
                 if (existingOrder == null)
                 {
@@ -456,10 +357,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (existingOrder.Status ==
-                        OrderStatus.Complete ||
-                    existingOrder.Status ==
-                        OrderStatus.Cancelled)
+                if (existingOrder.Status == OrderStatus.Complete ||
+                    existingOrder.Status == OrderStatus.Cancelled)
                 {
                     TempData["ErrorMessage"] =
                         "Completed or cancelled orders cannot be edited.";
@@ -467,24 +366,16 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                await ValidateEditOrder(
-                    model.OrderId,
-                    model);
+                await ValidateEditOrder(model.OrderId, model);
 
                 if (!ModelState.IsValid)
                 {
                     await LoadOrderData();
-
-                    return View(
-                        "Index",
-                        await GetOrders());
+                    return View("Index", await GetOrders());
                 }
 
-                existingOrder.OrderNumber =
-                    model.OrderNumber;
-
-                existingOrder.SupplierId =
-                    model.SupplierId;
+                existingOrder.OrderNumber = model.OrderNumber;
+                existingOrder.SupplierId = model.SupplierId;
 
                 await _context.SaveChangesAsync();
 
@@ -501,7 +392,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // RECEIVE ITEM
         // ============================================================
@@ -512,12 +402,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         {
             try
             {
-                var item =
-                    await _context.OrderItems
-                        .Include(i => i.Order)
-                        .Include(i => i.Consumable)
-                        .FirstOrDefaultAsync(i =>
-                            i.OrderItemId == id);
+                var item = await _context.OrderItems
+                    .Include(i => i.Order)
+                    .Include(i => i.Consumable)
+                    .FirstOrDefaultAsync(i => i.OrderItemId == id);
 
                 if (item == null)
                 {
@@ -527,8 +415,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (item.Status !=
-                    OrderItemStatus.Ordered)
+                if (item.Status != OrderItemStatus.Ordered)
                 {
                     TempData["ErrorMessage"] =
                         "This order item has already been processed.";
@@ -536,8 +423,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (item.Order == null ||
-                    item.Consumable == null)
+                if (item.Order == null || item.Consumable == null)
                 {
                     TempData["ErrorMessage"] =
                         "The order item is missing required information.";
@@ -545,8 +431,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (item.Order.Status ==
-                    OrderStatus.Cancelled)
+                if (item.Order.Status == OrderStatus.Cancelled)
                 {
                     TempData["ErrorMessage"] =
                         "Items from a cancelled order cannot be received.";
@@ -565,14 +450,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         item.Consumable.QuantityOnHand,
                         item.Consumable.ReorderLevel);
 
-                item.Status =
-                    OrderItemStatus.Received;
+                item.Status = OrderItemStatus.Received;
+                item.DateReceived = DateTime.Now;
 
-                item.DateReceived =
-                    DateTime.Now;
-
-                await UpdateOrderStatus(
-                    item.Order);
+                await UpdateOrderStatus(item.Order);
 
                 await _context.SaveChangesAsync();
 
@@ -596,7 +477,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // CANCEL ITEM
         // ============================================================
@@ -610,8 +490,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             try
             {
                 cancellationReason =
-                    cancellationReason?.Trim()
-                    ?? string.Empty;
+                    cancellationReason?.Trim() ?? string.Empty;
 
                 if (string.IsNullOrWhiteSpace(cancellationReason))
                 {
@@ -629,11 +508,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                var item =
-                    await _context.OrderItems
-                        .Include(i => i.Order)
-                        .FirstOrDefaultAsync(i =>
-                            i.OrderItemId == id);
+                var item = await _context.OrderItems
+                    .Include(i => i.Order)
+                    .FirstOrDefaultAsync(i => i.OrderItemId == id);
 
                 if (item == null)
                 {
@@ -643,8 +520,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (item.Status !=
-                    OrderItemStatus.Ordered)
+                if (item.Status != OrderItemStatus.Ordered)
                 {
                     TempData["ErrorMessage"] =
                         "Only ordered items can be cancelled.";
@@ -660,8 +536,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (item.Order.Status ==
-                    OrderStatus.Cancelled)
+                if (item.Order.Status == OrderStatus.Cancelled)
                 {
                     TempData["ErrorMessage"] =
                         "This order has already been cancelled.";
@@ -669,18 +544,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                item.Status =
-                    OrderItemStatus.Cancelled;
+                item.Status = OrderItemStatus.Cancelled;
+                item.CancellationReason = cancellationReason;
+                item.DateCancelled = DateTime.Now;
 
-                item.CancellationReason =
-                    cancellationReason;
-
-                item.DateCancelled =
-                    DateTime.Now;
-
-                await UpdateOrderStatus(
-                    item.Order);
-
+                await UpdateOrderStatus(item.Order);
                 await _context.SaveChangesAsync();
 
                 TempData["SuccessMessage"] =
@@ -696,7 +564,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // CANCEL ORDER
         // ============================================================
@@ -710,8 +577,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             try
             {
                 cancellationReason =
-                    cancellationReason?.Trim()
-                    ?? string.Empty;
+                    cancellationReason?.Trim() ?? string.Empty;
 
                 if (string.IsNullOrWhiteSpace(cancellationReason))
                 {
@@ -729,11 +595,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                var order =
-                    await _context.Orders
-                        .Include(o => o.OrderItems)
-                        .FirstOrDefaultAsync(o =>
-                            o.OrderId == id);
+                var order = await _context.Orders
+                    .Include(o => o.OrderItems)
+                    .FirstOrDefaultAsync(o => o.OrderId == id);
 
                 if (order == null)
                 {
@@ -743,8 +607,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (order.Status ==
-                    OrderStatus.Complete)
+                if (order.Status == OrderStatus.Complete)
                 {
                     TempData["ErrorMessage"] =
                         "A completed order cannot be cancelled.";
@@ -752,8 +615,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (order.Status ==
-                    OrderStatus.Cancelled)
+                if (order.Status == OrderStatus.Cancelled)
                 {
                     TempData["ErrorMessage"] =
                         "This order has already been cancelled.";
@@ -761,28 +623,17 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                order.Status =
-                    OrderStatus.Cancelled;
-
-                order.CancellationReason =
-                    cancellationReason;
-
-                order.DateCancelled =
-                    DateTime.Now;
+                order.Status = OrderStatus.Cancelled;
+                order.CancellationReason = cancellationReason;
+                order.DateCancelled = DateTime.Now;
 
                 foreach (var item in order.OrderItems)
                 {
-                    if (item.Status ==
-                        OrderItemStatus.Ordered)
+                    if (item.Status == OrderItemStatus.Ordered)
                     {
-                        item.Status =
-                            OrderItemStatus.Cancelled;
-
-                        item.CancellationReason =
-                            cancellationReason;
-
-                        item.DateCancelled =
-                            DateTime.Now;
+                        item.Status = OrderItemStatus.Cancelled;
+                        item.CancellationReason = cancellationReason;
+                        item.DateCancelled = DateTime.Now;
                     }
                 }
 
@@ -801,83 +652,57 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // UPDATE ORDER STATUS
         // ============================================================
 
-        private async Task UpdateOrderStatus(
-            OrderModel order)
+        private async Task UpdateOrderStatus(OrderModel order)
         {
-            var items =
-                await _context.OrderItems
-                    .Where(i =>
-                        i.OrderId ==
-                        order.OrderId)
-                    .ToListAsync();
+            var items = await _context.OrderItems
+                .Where(i => i.OrderId == order.OrderId)
+                .ToListAsync();
 
             if (!items.Any())
             {
-                order.Status =
-                    OrderStatus.Ordered;
-
+                order.Status = OrderStatus.Ordered;
                 return;
             }
 
-            bool hasOrdered =
-                items.Any(i =>
-                    i.Status ==
-                    OrderItemStatus.Ordered);
+            bool hasOrdered = items.Any(i =>
+                i.Status == OrderItemStatus.Ordered);
 
-            bool hasReceived =
-                items.Any(i =>
-                    i.Status ==
-                    OrderItemStatus.Received);
+            bool hasReceived = items.Any(i =>
+                i.Status == OrderItemStatus.Received);
 
-            bool hasCancelled =
-                items.Any(i =>
-                    i.Status ==
-                    OrderItemStatus.Cancelled);
+            bool hasCancelled = items.Any(i =>
+                i.Status == OrderItemStatus.Cancelled);
 
-            if (hasOrdered &&
-                !hasReceived &&
-                !hasCancelled)
+            if (hasOrdered && !hasReceived && !hasCancelled)
             {
-                order.Status =
-                    OrderStatus.Ordered;
-
+                order.Status = OrderStatus.Ordered;
                 return;
             }
 
-            if (hasOrdered &&
-                hasReceived)
+            if (hasOrdered && hasReceived)
             {
-                order.Status =
-                    OrderStatus.PartiallyComplete;
-
+                order.Status = OrderStatus.PartiallyComplete;
                 return;
             }
 
-            if (!hasOrdered &&
-                (hasReceived ||
-                 hasCancelled))
+            if (!hasOrdered && (hasReceived || hasCancelled))
             {
-                order.Status =
-                    OrderStatus.Complete;
+                order.Status = OrderStatus.Complete;
 
                 if (!order.DateComplete.HasValue)
                 {
-                    order.DateComplete =
-                        DateTime.Now;
+                    order.DateComplete = DateTime.Now;
                 }
 
                 return;
             }
 
-            order.Status =
-                OrderStatus.Ordered;
+            order.Status = OrderStatus.Ordered;
         }
-
 
         // ============================================================
         // VALIDATE CREATE
@@ -899,19 +724,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "Order number cannot exceed 50 characters.");
             }
 
-
-            // --------------------------------------------------------
-            // DUPLICATE ORDER NUMBER
-            // --------------------------------------------------------
-
             if (!string.IsNullOrWhiteSpace(model.OrderNumber))
             {
-                bool exists =
-                    await _context.Orders
-                        .AnyAsync(o =>
-                            o.OrderNumber.ToLower()
-                            ==
-                            model.OrderNumber.ToLower());
+                bool exists = await _context.Orders
+                    .AnyAsync(o =>
+                        o.OrderNumber.ToLower() ==
+                        model.OrderNumber.ToLower());
 
                 if (exists)
                 {
@@ -921,11 +739,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
             }
 
-
-            // --------------------------------------------------------
-            // SUPPLIER
-            // --------------------------------------------------------
-
             if (model.SupplierId <= 0)
             {
                 ModelState.AddModelError(
@@ -934,11 +747,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
             else
             {
-                bool supplierExists =
-                    await _context.Suppliers
-                        .AnyAsync(s =>
-                            s.SupplierId == model.SupplierId &&
-                            !s.IsDeleted);
+                bool supplierExists = await _context.Suppliers
+                    .AnyAsync(s =>
+                        s.SupplierId == model.SupplierId &&
+                        !s.IsDeleted);
 
                 if (!supplierExists)
                 {
@@ -948,20 +760,13 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
             }
 
-
-            // --------------------------------------------------------
-            // ITEMS
-            // --------------------------------------------------------
-
-            if (model.Items == null ||
-                !model.Items.Any())
+            if (model.Items == null || !model.Items.Any())
             {
                 ModelState.AddModelError(
                     nameof(model.Items),
                     "At least one consumable must be added.");
             }
         }
-
 
         // ============================================================
         // VALIDATE EDIT
@@ -984,16 +789,13 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "Order number cannot exceed 50 characters.");
             }
 
-
             if (!string.IsNullOrWhiteSpace(model.OrderNumber))
             {
-                bool duplicate =
-                    await _context.Orders
-                        .AnyAsync(o =>
-                            o.OrderId != id &&
-                            o.OrderNumber.ToLower()
-                            ==
-                            model.OrderNumber.ToLower());
+                bool duplicate = await _context.Orders
+                    .AnyAsync(o =>
+                        o.OrderId != id &&
+                        o.OrderNumber.ToLower() ==
+                        model.OrderNumber.ToLower());
 
                 if (duplicate)
                 {
@@ -1002,7 +804,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         "This order number already exists.");
                 }
             }
-
 
             if (model.SupplierId <= 0)
             {
@@ -1013,12 +814,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return;
             }
 
-
-            bool supplierExists =
-                await _context.Suppliers
-                    .AnyAsync(s =>
-                        s.SupplierId == model.SupplierId &&
-                        !s.IsDeleted);
+            bool supplierExists = await _context.Suppliers
+                .AnyAsync(s =>
+                    s.SupplierId == model.SupplierId &&
+                    !s.IsDeleted);
 
             if (!supplierExists)
             {
@@ -1028,59 +827,49 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
         // ============================================================
         // LOAD ORDER DATA
         // ============================================================
 
         private async Task LoadOrderData()
         {
-            ViewBag.Suppliers =
-                await _context.Suppliers
-                    .Where(s => !s.IsDeleted)
-                    .OrderBy(s => s.SupplierName)
-                    .ToListAsync();
+            ViewBag.Suppliers = await _context.Suppliers
+                .AsNoTracking()
+                .Where(s => !s.IsDeleted)
+                .OrderBy(s => s.SupplierName)
+                .ToListAsync();
 
-
-            ViewBag.Consumables =
-                await _context.Consumables
-                    .Include(c => c.Supplier)
-                    .Where(c =>
-                        !c.IsDeleted &&
-                        (
-                            c.StockStatus ==
-                                StockStatus.ReorderNow ||
-                            c.StockStatus ==
-                                StockStatus.OutOfStock
-                        ))
-                    .OrderBy(c =>
-                        c.StockStatus ==
-                            StockStatus.OutOfStock
-                            ? 0
-                            : 1)
-                    .ThenBy(c => c.Name)
-                    .ToListAsync();
-
+            ViewBag.Consumables = await _context.Consumables
+                .AsNoTracking()
+                .Include(c => c.Supplier)
+                .Where(c =>
+                    !c.IsDeleted &&
+                    (c.StockStatus == StockStatus.ReorderNow ||
+                     c.StockStatus == StockStatus.OutOfStock))
+                .OrderBy(c =>
+                    c.StockStatus == StockStatus.OutOfStock ? 0 : 1)
+                .ThenBy(c => c.Name)
+                .ToListAsync();
 
             ViewBag.ReorderConsumables =
                 await GetReorderConsumables();
         }
 
-
         // ============================================================
         // GET ORDERS
+        // Loads primary keys, foreign keys and related entities.
         // ============================================================
 
         private async Task<List<OrderModel>> GetOrders()
         {
             return await _context.Orders
+                .AsNoTracking()
                 .Include(o => o.Supplier)
                 .Include(o => o.OrderItems)
                     .ThenInclude(i => i.Consumable)
                 .OrderByDescending(o => o.OrderId)
                 .ToListAsync();
         }
-
 
         // ============================================================
         // GET REORDER CONSUMABLES
@@ -1090,28 +879,21 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             GetReorderConsumables()
         {
             return await _context.Consumables
+                .AsNoTracking()
                 .Include(c => c.Supplier)
                 .Where(c =>
                     !c.IsDeleted &&
-                    (
-                        c.StockStatus ==
-                            StockStatus.ReorderNow ||
-                        c.StockStatus ==
-                            StockStatus.OutOfStock
-                    ))
+                    (c.StockStatus == StockStatus.ReorderNow ||
+                     c.StockStatus == StockStatus.OutOfStock))
                 .OrderBy(c =>
-                    c.StockStatus ==
-                        StockStatus.OutOfStock
-                        ? 0
-                        : 1)
+                    c.StockStatus == StockStatus.OutOfStock ? 0 : 1)
                 .ThenBy(c => c.QuantityOnHand)
                 .ThenBy(c => c.Name)
                 .ToListAsync();
         }
 
-
         // ============================================================
-        // STOCK STATUS
+        // CALCULATE STOCK STATUS
         // ============================================================
 
         private StockStatus CalculateStockStatus(
@@ -1123,8 +905,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return StockStatus.OutOfStock;
             }
 
-            decimal reorderThreshold =
-                reorderLevel * 1.10m;
+            decimal reorderThreshold = reorderLevel * 1.10m;
 
             if (quantityOnHand <= reorderThreshold)
             {
@@ -1134,13 +915,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             return StockStatus.Sufficient;
         }
 
-
         // ============================================================
-        // ROOT EXCEPTION
+        // GET ROOT EXCEPTION
         // ============================================================
 
-        private Exception GetRootException(
-            Exception exception)
+        private Exception GetRootException(Exception exception)
         {
             var root = exception;
 
@@ -1152,39 +931,28 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             return root;
         }
 
-
         // ============================================================
-        // EXCEPTION HANDLING
+        // ERROR HANDLING
         // ============================================================
 
         private IActionResult HandleException(
             Exception ex,
             string userMessage)
         {
-            var rootException =
-                GetRootException(ex);
+            var rootException = GetRootException(ex);
 
             Console.Error.WriteLine(
                 "============================================================");
-
-            Console.Error.WriteLine(
-                userMessage);
-
+            Console.Error.WriteLine(userMessage);
             Console.Error.WriteLine(
                 $"Exception: {ex.GetType().FullName}");
-
-            Console.Error.WriteLine(
-                $"Message: {ex.Message}");
-
+            Console.Error.WriteLine($"Message: {ex.Message}");
             Console.Error.WriteLine(
                 $"Root Exception: {rootException.GetType().FullName}");
-
             Console.Error.WriteLine(
                 $"Root Message: {rootException.Message}");
-
             Console.Error.WriteLine(
                 $"Stack Trace:{Environment.NewLine}{ex.StackTrace}");
-
             Console.Error.WriteLine(
                 "============================================================");
 
