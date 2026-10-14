@@ -1109,6 +1109,16 @@ namespace NMBHLabSys.Migrations
                     b.Property<DateTime?>("CompletionDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsAbnormal")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ResultNotes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<decimal?>("ResultValue")
+                        .HasColumnType("decimal(18,4)");
+
                     b.Property<DateTime?>("StartDateTime")
                         .HasColumnType("datetime2");
 
@@ -1139,6 +1149,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 1,
+                            IsAbnormal = false,
                             Status = "Submitted",
                             TestRequestId = 1,
                             TestTypeId = 1
@@ -1146,6 +1157,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 2,
+                            IsAbnormal = false,
                             Status = "SamplesReceived",
                             TestRequestId = 2,
                             TestTypeId = 1
@@ -1153,6 +1165,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 3,
+                            IsAbnormal = false,
                             Status = "SamplesReceived",
                             TestRequestId = 2,
                             TestTypeId = 2
@@ -1160,6 +1173,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 4,
+                            IsAbnormal = false,
                             Status = "SamplesReceived",
                             TestRequestId = 3,
                             TestTypeId = 3
@@ -1167,6 +1181,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 5,
+                            IsAbnormal = false,
                             Status = "Submitted",
                             TestRequestId = 5,
                             TestTypeId = 6
@@ -1174,6 +1189,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 6,
+                            IsAbnormal = false,
                             Status = "SamplesReceived",
                             TestRequestId = 6,
                             TestTypeId = 3
@@ -1181,6 +1197,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 7,
+                            IsAbnormal = false,
                             Status = "SamplesReceived",
                             TestRequestId = 9,
                             TestTypeId = 3
@@ -1188,6 +1205,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestTestTypeId = 8,
+                            IsAbnormal = false,
                             Status = "Submitted",
                             TestRequestId = 10,
                             TestTypeId = 1
@@ -1789,6 +1807,15 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<bool>("NoCurrentMedications")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NoKnownAllergies")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("NoKnownMedicalConditions")
+                        .HasColumnType("bit");
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
@@ -2646,7 +2673,7 @@ namespace NMBHLabSys.Migrations
                         .HasForeignKey("TechnicianId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", "TestRequest")
-                        .WithMany()
+                        .WithMany("RequestedTestTypes")
                         .HasForeignKey("TestRequestId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -3004,6 +3031,8 @@ namespace NMBHLabSys.Migrations
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
+                    b.Navigation("RequestedTestTypes");
+
                     b.Navigation("Samples");
 
                     b.Navigation("TestTypes");

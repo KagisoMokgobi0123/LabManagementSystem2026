@@ -199,8 +199,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // Replace the existing GET and POST Select actions in TestsController with these methods.
         // StartDateTime is stored in UTC; convert to local time only when displaying it.
 
-        [HttpGet]
-
 
         public async Task<IActionResult> Select()
         {
@@ -358,6 +356,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             // STEP 9: Return the Select view
             return View("Select", model);
         }
+
 
 
         [HttpPost]
@@ -999,43 +998,26 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
+
+
         [HttpGet]
         public async Task<IActionResult> CaptureResults(int id)
         {
+            // STEP 1: Identify the logged-in technician
             var technicianId = _userManager.GetUserId(User);
 
-            if (string.IsNullOrEmpty(technicianId))
+            if (string.IsNullOrWhiteSpace(technicianId))
                 return Challenge();
 
-            // -----------------------------------------------------
-            // Retrieve the test assigned to this technician
-            // -----------------------------------------------------
-
+            // STEP 2: Retrieve the test assigned to this technician
             var test = await _context.TestRequestTestTypes
                 .AsNoTracking()
-
-                // Patient
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Patient)
-
-                // Requesting doctor
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Doctor)
-
-                // Test category
-                .Include(x => x.TestType)
-                    .ThenInclude(t => t!.TestCategory)
-
-                // Sample type
-                .Include(x => x.TestType)
-                    .ThenInclude(t => t!.SampleType)
-
-                // Measurement units
                 .Include(x => x.TestType)
                     .ThenInclude(t => t!.MeasurementUnitDetails)
-
-                .AsSplitQuery()
-
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Doctor)
                 .FirstOrDefaultAsync(x =>
                     x.TestRequestTestTypeId == id &&
                     x.TechnicianId == technicianId);
@@ -1043,88 +1025,66 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             if (test == null)
                 return NotFound();
 
-            // -----------------------------------------------------
-            // Check test status
-            // -----------------------------------------------------
-
-            if (test.Status != "In Progress" &&
-                test.Status != "To Be Reviewed")
-            {
-                TempData["ErrorMessage"] =
-                    "This test is not available for result capture.";
-
-                return RedirectToAction(
-                    nameof(Details),
-                    new { id });
-            }
-
-            // -----------------------------------------------------
-            // Retrieve patient medical history
-            // -----------------------------------------------------
-
-            var patientUserId = test.TestRequest?.Patient?.Id;
-
-            NMB_HLabSys.Areas.Patient.Models.PatientModel?
-                patientMedicalRecord = null;
-
-            if (!string.IsNullOrEmpty(patientUserId))
-            {
-                patientMedicalRecord = await _context
-                    .Set<NMB_HLabSys.Areas.Patient.Models.PatientModel>()
-                    .AsNoTracking()
-                    .Include(p => p.PatientConditions)
-                    .Include(p => p.PatientAllergies)
-                    .Include(p => p.PatientMedications)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(p =>
-                        p.UserId == patientUserId);
-            }
-
-            ViewData["PatientMedicalRecord"] = patientMedicalRecord;
-
-            // -----------------------------------------------------
-            // Expected completion time
-            // -----------------------------------------------------
-
-            DateTime? expectedCompletion = null;
+            // STEP 3: Calculate the expected completion in HOURS
+            // StartDateTime is assumed to be stored in UTC.
+            DateTime? expectedCompletionUtc = null;
             bool isOverdue = false;
 
-            if (test.StartDateTime.HasValue &&
-                test.TestType != null)
+            if (test.StartDateTime.HasValue && test.TestType != null)
             {
-                expectedCompletion =
-    test.StartDateTime.Value.AddMinutes(
-        test.TestType.TurnAroundTimeHours);
+                expectedCompletionUtc =
+                    DateTime.SpecifyKind(
+                        test.StartDateTime.Value,
+                        DateTimeKind.Utc)
+                    .AddHours(test.TestType.TurnAroundTimeHours);
 
                 isOverdue =
-                    test.Status == "In Progress" &&
-                    DateTime.Now > expectedCompletion.Value;
+                    DateTime.UtcNow > expectedCompletionUtc.Value &&
+                    !string.Equals(
+                        test.Status,
+                        "Completed",
+                        StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(
+                        test.Status,
+                        "Verified",
+                        StringComparison.OrdinalIgnoreCase);
             }
 
-            ViewData["ExpectedCompletion"] = expectedCompletion;
+            // STEP 4: Supply deadline information to CaptureResults.cshtml
+            ViewData["ExpectedCompletion"] = expectedCompletionUtc;
             ViewData["IsOverdue"] = isOverdue;
 
-            // Doctor's clinical notes from the test request.
-            ViewData["ClinicalNotes"] = test.TestRequest?.ClinicalNotes;
-
-            // Option A: one result per requested test type.
-            // The test type itself provides the unit and reference limits.
+            // STEP 5: Retrieve existing result(s)
             var existingResults = await _context.TestResults
                 .AsNoTracking()
-                .Where(r => r.TestRequestTestTypeId == id &&
-                            r.TechnicianId == technicianId)
-                .OrderByDescending(r => r.CapturedDateTime)
+                .Where(r =>
+                    r.TestRequestTestTypeId == test.TestRequestTestTypeId)
+                .OrderBy(r => r.TestResultId)
                 .ToListAsync();
 
             ViewData["ExistingResults"] = existingResults;
-            ViewData["CapturedResults"] = existingResults;
 
+            // STEP 6: Supply clinical notes
+            ViewData["ClinicalNotes"] = test.TestRequest?.ClinicalNotes;
+
+            // STEP 7: Supply the patient's medical record
+            // PatientMedicalRecord must be the PatientModel associated
+            // with this patient's identity/user ID in your existing schema.
+            //
+            // If your existing action already retrieves PatientModel,
+            // retain that query and assign the result here.
+            //
+            // ViewData["PatientMedicalRecord"] = patientRecord;
+
+            // STEP 8: Return the existing model expected by the Razor view
             return View(test);
         }
 
 
+
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] 
         public async Task<IActionResult> CaptureResults(
             int testRequestTestTypeId,
             string resultValue,

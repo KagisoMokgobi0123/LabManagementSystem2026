@@ -18,7 +18,8 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public int TestTypeId { get; set; }
         public TestTypeModel? TestType { get; set; }
 
-        public string? TechnicianId { get; set; }
+        public string? TechnicianId { get; set; }   
+
         public ApplicationUser? Technician { get; set; }
 
         public string Status { get; set; } = "Submitted";

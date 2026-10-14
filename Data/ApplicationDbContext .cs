@@ -1177,9 +1177,8 @@ namespace NMB_HLabSys.Data
                     MeasurementUnit = 1,
                     NormalMin = 4.5m,
                     NormalMax = 11.0m,
-                    TurnAroundTimeHours = 120,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    TurnAroundTimeHours = 120, // 120 minutes
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1188,12 +1187,11 @@ namespace NMB_HLabSys.Data
                     Name = "White Blood Cell Differential",
                     TestCategoryId = 1,
                     SampleTypeId = 1,
-                    MeasurementUnit = 2,
+                    MeasurementUnit = 2, // %
                     NormalMin = 0m,
-                    NormalMax = 0m,
+                    NormalMax = 0m, // Individual cell types need separate ranges
                     TurnAroundTimeHours = 180,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1202,12 +1200,11 @@ namespace NMB_HLabSys.Data
                     Name = "Peripheral Blood Film",
                     TestCategoryId = 1,
                     SampleTypeId = 1,
-                    MeasurementUnit = 3,
+                    MeasurementUnit = 3, // Qualitative
                     NormalMin = 0m,
                     NormalMax = 0m,
                     TurnAroundTimeHours = 240,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1216,12 +1213,11 @@ namespace NMB_HLabSys.Data
                     Name = "Prothrombin Time (PT)",
                     TestCategoryId = 2,
                     SampleTypeId = 4,
-                    MeasurementUnit = 5,
+                    MeasurementUnit = 5, // seconds
                     NormalMin = 11.0m,
                     NormalMax = 13.5m,
                     TurnAroundTimeHours = 120,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1230,12 +1226,11 @@ namespace NMB_HLabSys.Data
                     Name = "Activated Partial Thromboplastin Time (aPTT)",
                     TestCategoryId = 2,
                     SampleTypeId = 4,
-                    MeasurementUnit = 5,
+                    MeasurementUnit = 5, // seconds
                     NormalMin = 25m,
                     NormalMax = 35m,
                     TurnAroundTimeHours = 120,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1244,12 +1239,11 @@ namespace NMB_HLabSys.Data
                     Name = "International Normalized Ratio (INR)",
                     TestCategoryId = 2,
                     SampleTypeId = 4,
-                    MeasurementUnit = 6,
+                    MeasurementUnit = 6, // ratio
                     NormalMin = 0.8m,
                     NormalMax = 1.2m,
                     TurnAroundTimeHours = 120,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1258,12 +1252,11 @@ namespace NMB_HLabSys.Data
                     Name = "Glucose (Fasting)",
                     TestCategoryId = 3,
                     SampleTypeId = 4,
-                    MeasurementUnit = 9,
+                    MeasurementUnit = 9, // mmol/L
                     NormalMin = 3.9m,
                     NormalMax = 5.5m,
                     TurnAroundTimeHours = 60,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1272,12 +1265,11 @@ namespace NMB_HLabSys.Data
                     Name = "Hemoglobin A1C (HbA1c)",
                     TestCategoryId = 3,
                     SampleTypeId = 1,
-                    MeasurementUnit = 2,
+                    MeasurementUnit = 2, // %
                     NormalMin = 4.0m,
                     NormalMax = 5.6m,
                     TurnAroundTimeHours = 120,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1286,12 +1278,11 @@ namespace NMB_HLabSys.Data
                     Name = "Urinalysis (Dipstick)",
                     TestCategoryId = 4,
                     SampleTypeId = 2,
-                    MeasurementUnit = 3,
+                    MeasurementUnit = 3, // Qualitative
                     NormalMin = 0m,
                     NormalMax = 0m,
                     TurnAroundTimeHours = 60,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    IsActive = TestTypeModel.RecordStatus.Active
                 },
 
                 new TestTypeModel
@@ -1300,15 +1291,13 @@ namespace NMB_HLabSys.Data
                     Name = "Blood Culture",
                     TestCategoryId = 5,
                     SampleTypeId = 1,
-                    MeasurementUnit = 3,
+                    MeasurementUnit = 3, // Qualitative
                     NormalMin = 0m,
                     NormalMax = 0m,
-                    TurnAroundTimeHours = 4320,
-                    IsActive =
-                        TestTypeModel.RecordStatus.Active
+                    TurnAroundTimeHours = 4320, // 72 hours
+                    IsActive = TestTypeModel.RecordStatus.Active
                 }
             );
-           
 
             builder.Entity<TechnicianTestTypeModel>().HasData(
                 new TechnicianTestTypeModel
@@ -1467,7 +1456,6 @@ namespace NMB_HLabSys.Data
                     CompletionDateTime = null
                 }
             );
-
 
             // ============================================================
             // TEST TYPE / CONSUMABLE SEED DATA
