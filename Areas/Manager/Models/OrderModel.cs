@@ -8,20 +8,11 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Key]
         public int OrderId { get; set; }
 
-
-        // ============================================================
-        // ORDER NUMBER
-        // ============================================================
-
         [Required]
         [StringLength(50)]
         [Display(Name = "Order Number")]
         public string OrderNumber { get; set; } = string.Empty;
 
-
-        // ============================================================
-        // SUPPLIER
-        // ============================================================
 
         [Required]
         public int SupplierId { get; set; }
@@ -29,27 +20,12 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [ForeignKey(nameof(SupplierId))]
         public virtual SupplierModel? Supplier { get; set; }
 
-
-        // ============================================================
-        // ORDER STATUS
-        // ============================================================
-
         [Required]
         [Display(Name = "Order Status")]
         public OrderStatus Status { get; set; } = OrderStatus.Ordered;
 
-
-        // ============================================================
-        // COMPLETION
-        // ============================================================
-
         [Display(Name = "Date Complete")]
         public DateTime? DateComplete { get; set; }
-
-
-        // ============================================================
-        // CANCELLATION
-        // ============================================================
 
         [StringLength(500)]
         [Display(Name = "Cancellation Reason")]
@@ -57,11 +33,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         [Display(Name = "Date Cancelled")]
         public DateTime? DateCancelled { get; set; }
-
-
-        // ============================================================
-        // ORDER ITEMS
-        // ============================================================
 
         // One order contains many order items.
         public virtual ICollection<OrderItemModel>
