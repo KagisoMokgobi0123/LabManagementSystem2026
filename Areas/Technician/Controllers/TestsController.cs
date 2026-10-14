@@ -1081,6 +1081,44 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
+        [HttpGet]
+        public async Task<IActionResult> TestResults()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            var results = await _context.TestResults
+                .AsNoTracking()
+                .Where(r => r.TechnicianId == technicianId)
+
+                // Load the test assignment and test type details.
+                .Include(r => r.TestRequestTestType)
+                    .ThenInclude(t => t!.TestType)
+                        .ThenInclude(t => t!.MeasurementUnitDetails)
+
+                // Load request number and patient details.
+                .Include(r => r.TestRequestTestType)
+                    .ThenInclude(t => t!.TestRequest)
+                        .ThenInclude(r => r!.Patient)
+
+                // Load test type -> consumables -> current inventory.
+                .Include(r => r.TestRequestTestType)
+                    .ThenInclude(t => t!.TestType)
+                        .ThenInclude(t => t!.TestTypeConsumables)
+                            .ThenInclude(tc => tc.Consumable)
+
+                // Load the measurement associated with the result.
+                .Include(r => r.TestTypeMeasurement)
+
+                .OrderByDescending(r => r.CapturedDateTime)
+                .ThenByDescending(r => r.TestResultId)
+                .ToListAsync();
+
+            return View(results);
+        }
+
 
 
         [HttpPost]

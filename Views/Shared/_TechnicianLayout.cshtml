@@ -1094,11 +1094,13 @@
 
 
              
-                <a href="/Technician/Tests/MyTests"
-                   title="Perform Test"
-                   class="sidebar-link @(controller == "Tests" && action == "CaptureResults" ? "active" : "")">
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="TestResults"
+                   title="Test Results"
+                   class="sidebar-link @(controller == "Tests" && action == "TestResults" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fas fa-flask"></i></span>
-                    <span class="sidebar-link-text">Perform Test</span>
+                    <span class="sidebar-link-text">Test Results</span>
                 </a>
 
                 <a href="/Technician/Tests/Review"
