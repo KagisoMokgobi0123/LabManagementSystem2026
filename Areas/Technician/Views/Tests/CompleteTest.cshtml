@@ -1,0 +1,163 @@
+﻿@model NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel
+@using NMB_HLabSys.Areas.Technician.Models
+
+@{
+    ViewData["Title"] = "Finish Test";
+    Layout = "_TechnicianLayout";
+
+    var testName = Model.TestType?.Name ?? "Unknown Test";
+    var requestNumber = Model.TestRequest?.RequestNumber ?? "N/A";
+    var status = Model.Status ?? "Unknown";
+    var started = Model.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not recorded";
+    bool canFinish = status == "In Progress" || status == "To Be Reviewed";
+    bool hasValidResult = ViewData["HasValidResult"] is bool valid && valid;
+    int resultCount = ViewData["ResultCount"] is int count ? count : 0;
+    var savedResult = ViewData["SavedResult"] as TestResultModel;
+    bool canSubmit = canFinish && hasValidResult;
+    bool isResubmission = status == "To Be Reviewed";
+}
+
+<style>
+    .finish-page { min-height: 100vh; background: #f4f7fb; padding: 35px 20px 70px; }
+    .finish-container { max-width: 850px; margin: 0 auto; }
+    .finish-header { background: linear-gradient(135deg, #073b5c, #0284c7); padding: 30px; border-radius: 15px; color: #fff; margin-bottom: 25px; }
+    .finish-header h2 { font-size: 25px; font-weight: 800; margin-bottom: 10px; }
+    .finish-header p { margin: 0; color: #dbeafe; font-size: 13px; }
+    .finish-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(15,23,42,.05); }
+    .finish-card-heading { padding: 23px 26px; border-bottom: 1px solid #e2e8f0; color: #073b5c; font-size: 17px; font-weight: 800; }
+    .finish-card-body { padding: 28px; }
+    .finish-info-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; margin-bottom: 25px; }
+    .finish-info-label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 7px; }
+    .finish-info-value { font-size: 14px; font-weight: 700; color: #0f172a; overflow-wrap: anywhere; }
+    .finish-badge { display: inline-block; background: #e0f2fe; color: #0369a1; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 700; }
+    .finish-warning { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 18px; color: #92400e; font-size: 13px; line-height: 1.8; margin-bottom: 25px; }
+    .finish-result { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 18px; margin-bottom: 25px; }
+    .finish-result.abnormal { background: #fff1f2; border-color: #fecdd3; }
+    .finish-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .finish-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; text-decoration: none !important; cursor: pointer; }
+    .finish-btn-back { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; }
+    .finish-btn-submit { background: #16a34a; border: 1px solid #16a34a; color: white; }
+    .finish-btn-submit:hover { background: #15803d; color: white; }
+    .finish-btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+    @@media (max-width: 600px) {
+        .finish-info-grid { grid-template-columns: 1fr; }
+        .finish-actions { flex-direction: column; align-items: stretch; }
+        .finish-btn { width: 100%; }
+    }
+</style>
+
+<div class="finish-page">
+    <div class="finish-container">
+        <div class="finish-header">
+            <h2><i class="fas fa-check-circle me-2"></i> Finish Laboratory Test</h2>
+            <p>Review the saved result before submitting this test for independent verification.</p>
+        </div>
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div>
+        }
+
+        <div class="finish-card">
+            <div class="finish-card-heading"><i class="fas fa-flask me-2"></i> Test Submission Summary</div>
+            <div class="finish-card-body">
+                <div class="finish-info-grid">
+                    <div><div class="finish-info-label">Request Number</div><div class="finish-info-value">@requestNumber</div></div>
+                    <div><div class="finish-info-label">Test ID</div><div class="finish-info-value">#@Model.TestRequestTestTypeId</div></div>
+                    <div><div class="finish-info-label">Test Name</div><div class="finish-info-value">@testName</div></div>
+                    <div><div class="finish-info-label">Current Status</div><div class="finish-info-value"><span class="finish-badge">@status</span></div></div>
+                    <div><div class="finish-info-label">Test Started</div><div class="finish-info-value">@started</div></div>
+                    <div><div class="finish-info-label">Completion Time</div><div class="finish-info-value">Recorded when submitted for verification</div></div>
+                </div>
+
+                @if (hasValidResult && savedResult != null)
+                {
+                    <div class="finish-result @(savedResult.IsAbnormal ? "abnormal" : "")">
+                        <strong><i class="fas fa-clipboard-check me-2"></i> Saved Test Result</strong>
+                        <div class="finish-info-grid mt-3 mb-0">
+                            <div><div class="finish-info-label">Result Value</div><div class="finish-info-value">@savedResult.ResultValue @savedResult.MeasurementUnit</div></div>
+                            <div><div class="finish-info-label">Result Classification</div><div class="finish-info-value">@(savedResult.ResultFlag ?? "Not Evaluated")</div></div>
+                            <div><div class="finish-info-label">Reference Minimum</div><div class="finish-info-value">@(savedResult.ReferenceMin?.ToString() ?? "Not configured")</div></div>
+                            <div><div class="finish-info-label">Reference Maximum</div><div class="finish-info-value">@(savedResult.ReferenceMax?.ToString() ?? "Not configured")</div></div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(savedResult.Notes))
+                        {
+                            <div class="finish-info-label mt-3">Technician Notes</div>
+                            <div style="white-space:pre-wrap;overflow-wrap:anywhere">@savedResult.Notes</div>
+                        }
+                    </div>
+                }
+                else if (resultCount > 1)
+                {
+                    <div class="alert alert-warning">Multiple existing results were found. They must be reconciled before this test can be completed.</div>
+                }
+                else
+                {
+                    <div class="alert alert-warning">No valid saved result was found. Return to Capture Results and save the test result first.</div>
+                }
+
+                <div class="finish-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Before submitting for independent verification:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Confirm that the single test result has been saved.</li>
+                        <li>Verify the result value and technician notes.</li>
+                        <li>Review any abnormal result flag and reference limits.</li>
+                        <li>A different, authorised technician must verify the result after submission.</li>
+                        <li>This step does not mark the test as Verified or send the doctor a report.</li>
+                    </ul>
+                </div>
+
+                @if (isResubmission)
+                {
+                    <div class="alert alert-info" role="status">
+                        <i class="fas fa-redo me-2"></i>
+                        This test was returned for review. Confirm that you have addressed the verifier's
+                        notes and corrected the saved result before resubmitting it.
+                        @if (!string.IsNullOrWhiteSpace(savedResult?.ReviewNotes))
+                        {
+                            <div class="mt-2"><strong>Verifier's review notes:</strong></div>
+                            <div style="white-space:pre-wrap;overflow-wrap:anywhere">@savedResult.ReviewNotes</div>
+                        }
+                    </div>
+                }
+                <div class="finish-actions">
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="CaptureResults"
+                       asp-route-id="@Model.TestRequestTestTypeId" class="finish-btn finish-btn-back">
+                        <i class="fas fa-arrow-left"></i> Back to Results
+                    </a>
+
+                    @if (canFinish)
+                    {
+                        <form asp-area="Technician" asp-controller="Tests" asp-action="FinishTest"
+                              asp-route-id="@Model.TestRequestTestTypeId" method="post" id="finishTestForm">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" id="finishTestButton" class="finish-btn finish-btn-submit"
+                                    disabled="@(!canSubmit)">
+                                <i class="fas fa-check-double"></i> @(isResubmission ? "Resubmit for Verification" : "Complete & Submit for Verification")
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button type="button" class="finish-btn finish-btn-submit" disabled>Test Cannot Be Completed</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('finishTestForm')?.addEventListener('submit', function (event) {
+        if (!confirm('Submit this test as Completed for independent verification? This does not verify the result or notify the doctor.')) {
+            event.preventDefault();
+            return;
+        }
+        document.getElementById('finishTestButton').disabled = true;
+    });
+</script>

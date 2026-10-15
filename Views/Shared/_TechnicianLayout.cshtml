@@ -1126,7 +1126,23 @@
                 <div class="sidebar-section">
                     Verification
                 </div>
+                <a asp-area="Technician"
+   asp-controller="Tests"
+   asp-action="PendingVerification"
+   title="Verify Test Results"
+   class="sidebar-link @(controller == "Tests" &&
+       (action == "PendingVerification" ||
+        action == "VerifyResult") ? "active" : "")">
 
+    <span class="sidebar-link-icon">
+        <i class="fas fa-check-circle"></i>
+    </span>
+
+    <span class="sidebar-link-text">
+        Verify Results
+    </span>
+
+</a>
 
                 <a href="/Technician/Tests/PendingVerification"
                    title="Pending Verification"
@@ -1146,22 +1162,7 @@
 
 
 
-                <a href="/Technician/Tests/Verified"
-                   title="Verified Results"
-                   class="sidebar-link @(controller == "Tests" && action == "Verified" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fas fa-check-circle"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Verified Results
-                    </span>
-
-                </a>
-
+          
 
 
                 <a asp-area="Technician" asp-controller="Tests" asp-action="VerificationHistoryIndex"

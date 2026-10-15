@@ -9,6 +9,7 @@
     var result = results.Count == 1 ? results[0] : null;
     var validResult = result != null && !string.IsNullOrWhiteSpace(result.ResultValue);
     var canVerify = Model.Status == "Completed" && validResult && results.Count == 1;
+    // The POST action independently enforces verifier identity and active assignment.
     var referenceRange = result == null || (result.ReferenceMin == null && result.ReferenceMax == null)
         ? "Not configured"
         : $"{result.ReferenceMin?.ToString() ?? "—"} to {result.ReferenceMax?.ToString() ?? "—"}";
@@ -226,6 +227,7 @@
               method="post" id="verifyForm">
             @Html.AntiForgeryToken()
             <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
+            <input type="hidden" name="decision" id="verificationDecision" value="" />
             <div class="form-group">
                 <label for="verificationNotes"><strong>Verification / Review Notes</strong></label>
                 <textarea id="verificationNotes" name="notes" class="form-control"
@@ -233,11 +235,11 @@
                           placeholder="Optional for approval; required when returning the test."></textarea>
             </div>
             <div class="tv-actions">
-                <button type="submit" name="decision" value="Verify" id="approveButton"
+                <button type="submit" data-decision="Verify" id="approveButton"
                         class="btn btn-success" disabled="@(!canVerify)">
                     <i class="fas fa-check-circle mr-1"></i> Approve &amp; Verify
                 </button>
-                <button type="submit" name="decision" value="ReturnForReview" id="returnButton"
+                <button type="submit" data-decision="ReturnForReview" id="returnButton"
                         class="btn btn-warning" disabled="@(!canVerify)">
                     <i class="fas fa-undo mr-1"></i> Return for Review
                 </button>
@@ -260,24 +262,29 @@
             const notes = document.getElementById('verificationNotes');
             const approve = document.getElementById('approveButton');
             const sendBack = document.getElementById('returnButton');
-            if (!form || !notes || !approve || !sendBack) return;
+            const decisionField = document.getElementById('verificationDecision');
+            if (!form || !notes || !approve || !sendBack || !decisionField) return;
 
             form.addEventListener('submit', function(event) {
                 const submitter = event.submitter;
                 if (!submitter) { event.preventDefault(); return; }
-                if (submitter.value === 'ReturnForReview' && !notes.value.trim()) {
+                const decision = submitter.dataset.decision;
+                if (decision !== 'Verify' && decision !== 'ReturnForReview') { event.preventDefault(); return; }
+                if (decision === 'ReturnForReview' && !notes.value.trim()) {
                     event.preventDefault();
                     alert('Please enter review notes before returning the test.');
                     notes.focus();
                     return;
                 }
-                const question = submitter.value === 'Verify'
+                const question = decision === 'Verify'
                     ? 'Approve and verify this test result?'
                     : 'Return this test to the original technician for correction?';
                 if (!confirm(question)) {
                     event.preventDefault();
                     return;
                 }
+                // A hidden field ensures the decision is posted even after buttons are disabled.
+                decisionField.value = decision;
                 approve.disabled = true;
                 sendBack.disabled = true;
             });

@@ -1,0 +1,53 @@
+﻿@model NMB_HLabSys.Areas.Technician.Models.TestResultModel
+@{ Layout = null; var test = Model.TestRequestTestType; }
+<style>
+.result-modal-header{padding:20px 24px;border:0;background:linear-gradient(135deg,#073b5c,#075985,#0284c7);color:#fff}
+.result-modal-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;margin-right:13px;border-radius:10px;background:rgba(255,255,255,.15);font-size:18px}
+.result-modal-heading{font-size:17px;font-weight:700;color:#fff;margin:0 0 3px}
+.result-modal-subheading{font-size:11px;color:rgba(255,255,255,.8)}
+.result-modal-close{border:0;background:transparent;color:#fff;font-size:27px;line-height:1;cursor:pointer}
+.result-modal-body{padding:24px;background:#f8fafc;max-height:65vh;overflow-y:auto}
+.result-modal-section{background:#fff;border:1px solid #eef2f7;border-radius:11px;padding:18px;margin-bottom:16px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
+.result-modal-section-title{font-size:14px;font-weight:700;color:#0f172a;margin-bottom:16px}
+.result-modal-label{display:block;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px}
+.result-modal-value{font-size:12px;font-weight:600;color:#334155;overflow-wrap:anywhere}
+.result-modal-info{border:1px solid #e2e8f0;border-radius:7px;background:#f8fafc;padding:10px 12px}
+.result-modal-footer{padding:15px 20px;border-top:1px solid #eef2f7;background:#fff;display:flex;justify-content:flex-end;gap:8px}
+.result-modal-pill{display:inline-block;padding:5px 10px;border-radius:50px;font-size:11px;font-weight:700;background:#e0f2fe;color:#0369a1}
+.result-modal-pill.alert-pill{background:#fee2e2;color:#991b1b}
+@@media(max-width:767px){.result-modal-body{padding:15px}.result-modal-section{padding:14px}}
+</style>
+<form id="editTestResultForm" asp-area="Technician" asp-controller="Tests" asp-action="EditResult" asp-route-id="@Model.TestResultId" method="post">
+ @Html.AntiForgeryToken()
+ <input type="hidden" name="id" value="@Model.TestResultId" />
+ <div class="modal-header result-modal-header">
+  <div class="d-flex align-items-center"><div class="result-modal-icon"><i class="fas fa-edit"></i></div>
+   <div><h5 class="result-modal-heading" id="testResultModalLabel">Edit Laboratory Result</h5><div class="result-modal-subheading">Correct an unverified result; changes are recorded in audit history</div></div></div>
+  <button type="button" class="result-modal-close" data-dismiss="modal" aria-label="Close">&times;</button>
+ </div>
+ <div class="modal-body result-modal-body">
+  <div class="result-modal-section"><h6 class="result-modal-section-title"><i class="fas fa-vial text-primary mr-2"></i>Result Information</h6>
+   <div class="row">
+    <div class="col-md-6 mb-3"><span class="result-modal-label">Result ID</span><span class="result-modal-value">#@Model.TestResultId</span></div>
+    <div class="col-md-6 mb-3"><span class="result-modal-label">Test</span><span class="result-modal-value">@(test?.TestType?.Name ?? Model.ResultName)</span></div>
+    <div class="col-md-6 mb-3"><span class="result-modal-label">Result Name</span><span class="result-modal-value">@Model.ResultName</span></div>
+    <div class="col-md-6 mb-3"><span class="result-modal-label">Unit</span><span class="result-modal-value">@(Model.MeasurementUnit ?? "N/A")</span></div>
+    <div class="col-12"><span class="result-modal-label">Test Status</span><span class="result-modal-pill">@(test?.Status ?? "Unknown")</span></div>
+   </div>
+  </div>
+  <div class="result-modal-section"><h6 class="result-modal-section-title"><i class="fas fa-pen text-primary mr-2"></i>Correction</h6>
+   <div class="alert alert-info small"><i class="fas fa-info-circle mr-1"></i>Changes are saved to the verification audit trail. Verified or pending-verification results cannot be edited.</div>
+   <div class="form-group"><label for="editResultValue" class="result-modal-label">Result Value <span class="text-danger">*</span></label>
+    <input type="text" id="editResultValue" name="resultValue" class="form-control" maxlength="200" value="@Model.ResultValue" required />
+   </div>
+   <div class="form-group mb-0"><label for="editResultNotes" class="result-modal-label">Notes</label>
+    <textarea id="editResultNotes" name="notes" class="form-control" rows="4" maxlength="2000">@Model.Notes</textarea>
+    <small class="text-muted">Up to 2,000 characters.</small>
+   </div>
+  </div>
+ </div>
+ <div class="modal-footer result-modal-footer">
+  <button type="button" class="btn btn-light btn-sm" data-dismiss="modal">Cancel</button>
+  <button type="submit" class="btn btn-primary btn-sm" id="saveResultChanges"><span class="save-result-normal"><i class="fas fa-save mr-1"></i>Save Changes</span><span class="save-result-loading d-none"><span class="spinner-border spinner-border-sm mr-1"></span>Saving...</span></button>
+ </div>
+</form>
