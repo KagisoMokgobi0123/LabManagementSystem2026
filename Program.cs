@@ -9,10 +9,6 @@ using NMB_HLabSys.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ============================================================
-// DATABASE
-// ============================================================
-
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
@@ -21,14 +17,9 @@ var connectionString =
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// ============================================================
-// ASP.NET CORE IDENTITY
-// ============================================================
-
-builder.Services
-    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     {
-        // Sign-in
+        // Sign in
         options.SignIn.RequireConfirmedAccount = false;
         options.SignIn.RequireConfirmedEmail = false;
 
@@ -52,28 +43,12 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// ============================================================
-// EMAIL SENDER
-// ============================================================
-//
-// Required by UserController:
-//
-//     IEmailSender
-//
-// The implementation is:
-//
-//     EmailSender
-//
-// This allows the application to send temporary passwords
-// when managers create doctors and laboratory technicians.
-// ============================================================
+
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
-// ============================================================
-// AUTHENTICATION COOKIE
-// ============================================================
+//authentication cookies.
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -89,53 +64,26 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// ============================================================
-// MVC
-// ============================================================
-
 builder.Services.AddControllersWithViews();
-
-// ============================================================
-// DOCTOR SERVICES
-// ============================================================
-
-// Registers DoctorEmailService for dependency injection.
 builder.Services.AddScoped<DoctorEmailService>();
-
-// ============================================================
-// SESSION
-// ============================================================
 
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
-{
-    options.IdleTimeout =
-        TimeSpan.FromMinutes(30);
-
+{ options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-// ============================================================
-// BUILD APPLICATION
-// ============================================================
 
 var app = builder.Build();
 
-// ============================================================
-// ERROR HANDLING
-// ============================================================
 
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
-
-// ============================================================
-// HTTP PIPELINE
-// ============================================================
 
 app.UseHttpsRedirection();
 
@@ -145,14 +93,9 @@ app.UseRouting();
 
 app.UseSession();
 
-// Authentication must run before authorization.
 app.UseAuthentication();
 
 app.UseAuthorization();
-
-// ============================================================
-// ROUTING
-// ============================================================
 
 app.MapControllerRoute(
     name: "areas",
@@ -161,10 +104,6 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-// ============================================================
-// SEED IDENTITY ROLES AND ACCOUNTS
-// ============================================================
 
 using (var scope = app.Services.CreateScope())
 {
@@ -185,8 +124,5 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// ============================================================
-// RUN APPLICATION
-// ============================================================
 
 app.Run();
