@@ -248,6 +248,8 @@
         color: #fff;
         text-decoration: none;
     }
+    .result-action-delete:hover { background: #b91c1c; color: #fff; }
+    .result-action-complete:hover { background: #15803d; color: #fff; }
 
     .results-empty {
         text-align: center;
@@ -539,13 +541,13 @@
                 </button>
             </form>
 
-            @* FinishTest GET displays confirmation; its POST completes the test. *@
+            @* CompleteTest GET displays the FinishTest confirmation view; its POST submits the test for verification. *@
             @if (test != null)
             {
                 <a class="result-action result-action-complete"
                    asp-area="Technician"
                    asp-controller="Tests"
-                   asp-action="FinishTest"
+                   asp-action="CompleteTest"
                    asp-route-id="@test.TestRequestTestTypeId"
                    title="Complete test and submit for verification"
                    aria-label="Complete test @test.TestRequestTestTypeId">

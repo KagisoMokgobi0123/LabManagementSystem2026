@@ -1519,7 +1519,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // The POST uses a different C# method name to avoid CS0111.
 
         [HttpGet]
-        public async Task<IActionResult> FinishTest(int id)
+        public async Task<IActionResult> CompleteTest(int id)
         {
             var technicianId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(technicianId))
@@ -1563,9 +1563,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
         [HttpPost]
-        [ActionName("FinishTest")]
+        [ActionName("CompleteTest")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> FinishTestConfirmed(int id)
+         public async Task<IActionResult> CompleteTestConfirmed(int id) 
         {
             var technicianId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(technicianId))
