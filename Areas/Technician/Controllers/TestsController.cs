@@ -776,54 +776,78 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // =========================================================
 
 
+
+
+        // Replace the existing Review() GET action inside TestsController.cs.
         [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
         public async Task<IActionResult> Review()
         {
             var technicianId = _userManager.GetUserId(User);
-
             if (string.IsNullOrWhiteSpace(technicianId))
-            {
                 return Challenge();
-            }
 
-            // Retrieve tests returned to this technician
-            // following unsuccessful verification.
+            // Only active Laboratory Manager assignments authorise independent verification.
+            var authorisedTestTypes = _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(a => a.TechnicianId == technicianId && a.IsActive)
+                .Select(a => a.TestTypeId);
+
+            // Returned tests belong to the original technician.
+            // Completed tests must belong to another technician and be eligible for verification.
             var tests = await _context.TestRequestTestTypes
                 .AsNoTracking()
-
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Patient)
-
-                .Include(x => x.TestType)
-                    .ThenInclude(t => t!.TestCategory)
-
-                .Where(x =>
-                    x.TechnicianId == technicianId &&
-                    x.Status == "To Be Reviewed")
-
-                .OrderByDescending(x =>
-                    x.TestRequest!.Urgency)
-
-                .ThenBy(x => x.StartDateTime)
-
+                .Include(t => t.TestRequest).ThenInclude(r => r!.Patient)
+                .Include(t => t.TestRequest).ThenInclude(r => r!.Doctor)
+                .Include(t => t.TestType).ThenInclude(t => t!.TestCategory)
+                .Where(t =>
+                    (t.Status == "To Be Reviewed" && t.TechnicianId == technicianId)
+                    ||
+                    (t.Status == "Completed" &&
+                     t.TechnicianId != null &&
+                     t.TechnicianId != technicianId &&
+                     authorisedTestTypes.Contains(t.TestTypeId) &&
+                     _context.TestResults.Count(r => r.TestRequestTestTypeId == t.TestRequestTestTypeId) == 1 &&
+                     _context.TestResults.Any(r =>
+                         r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
+                         r.TechnicianId == t.TechnicianId &&
+                         r.ResultValue != null && r.ResultValue.Trim() != "")))
+                .OrderBy(t => t.Status == "Completed" ? 0 : 1)
+                .ThenByDescending(t => t.CompletionDateTime)
                 .ToListAsync();
 
-            // Retrieve saved results belonging to these tests.
-            var testIds = tests
-                .Select(x => x.TestRequestTestTypeId)
-                .ToList();
+            var testIds = tests.Select(t => t.TestRequestTestTypeId).ToList();
 
+            // Include original technician's results for verifier review.
             var savedResults = await _context.TestResults
                 .AsNoTracking()
-                .Where(x =>
-                    testIds.Contains(x.TestRequestTestTypeId) &&
-                    x.TechnicianId == technicianId)
+                .Where(r => testIds.Contains(r.TestRequestTestTypeId))
+                .OrderBy(r => r.TestRequestTestTypeId)
                 .ToListAsync();
 
-            // Make results available to the Review view.
-            ViewData["SavedResults"] = savedResults;
+            var resultIds = savedResults.Select(r => r.TestResultId).ToList();
+            var histories = await _context.TestResultVerificationHistories
+                .AsNoTracking()
+                .Include(h => h.ActionByTechnician)
+                .Where(h => resultIds.Contains(h.TestResultId))
+                .OrderByDescending(h => h.ActionDateTime)
+                .ThenByDescending(h => h.TestResultVerificationHistoryId)
+                .ToListAsync();
 
-            ViewData["ReviewCount"] = tests.Count;
+            var latestReviewHistory = histories
+                .Where(h => h.Action == "ReturnedForReview")
+                .GroupBy(h => h.TestResultId)
+                .ToDictionary(g => g.Key,
+                    g => g.OrderByDescending(h => h.ActionDateTime)
+                          .ThenByDescending(h => h.TestResultVerificationHistoryId)
+                          .First());
+
+            ViewData["SavedResults"] = savedResults;
+            ViewData["ReviewHistories"] = histories;
+            ViewData["LatestReviewHistory"] = latestReviewHistory;
+            ViewData["ReviewCount"] = tests.Count(t => t.Status == "To Be Reviewed");
+            ViewData["CompletedCount"] = tests.Count(t => t.Status == "Completed");
+            ViewData["TotalCount"] = tests.Count;
 
             return View("Review", tests);
         }
@@ -1562,10 +1586,78 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return View("FinishTest", test);
         }
 
+        // Clinical information for the Complete Test confirmation modal.
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> CompleteTestClinicalContext(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId)) return Challenge();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id &&
+                                          t.TechnicianId == technicianId);
+
+            if (test == null) return NotFound();
+            if (test.Status != "In Progress" && test.Status != "To Be Reviewed")
+                return Conflict(new { message = "This test is not available for completion." });
+
+            var patientUserId = test.TestRequest?.Patient?.Id;
+            NMB_HLabSys.Areas.Patient.Models.PatientModel? record = null;
+
+            if (!string.IsNullOrWhiteSpace(patientUserId))
+            {
+                record = await _context.Set<NMB_HLabSys.Areas.Patient.Models.PatientModel>()
+                    .AsNoTracking()
+                    .Include(p => p.PatientConditions)
+                    .Include(p => p.PatientAllergies)
+                    .Include(p => p.PatientMedications)
+                    .AsSplitQuery()
+                    .FirstOrDefaultAsync(p => p.UserId == patientUserId);
+            }
+
+            // Select only clinically relevant, human-readable properties.
+            // Adjust these property names if your medical-history models use other names.
+            static string FormatEntries(System.Collections.IEnumerable? entries)
+            {
+                if (entries == null) return "Not recorded";
+                var lines = new List<string>();
+                string[] allowed = { "Name", "ConditionName", "AllergyName", "MedicationName",
+                                     "Description", "Dosage", "Frequency", "Notes", "Severity" };
+                foreach (var entry in entries)
+                {
+                    if (entry == null) continue;
+                    var parts = new List<string>();
+                    foreach (var name in allowed)
+                    {
+                        var property = entry.GetType().GetProperty(name);
+                        if (property == null || property.PropertyType != typeof(string)) continue;
+                        var value = property.GetValue(entry) as string;
+                        if (!string.IsNullOrWhiteSpace(value)) parts.Add(value.Trim());
+                    }
+                    if (parts.Count > 0) lines.Add(string.Join(" · ", parts.Distinct()));
+                }
+                return lines.Count == 0 ? "Not recorded" : string.Join("\n", lines);
+            }
+
+            return Json(new
+            {
+                medicalConditions = FormatEntries(record?.PatientConditions),
+                allergies = FormatEntries(record?.PatientAllergies),
+                medications = FormatEntries(record?.PatientMedications),
+                clinicalNotes = string.IsNullOrWhiteSpace(test.TestRequest?.ClinicalNotes)
+                    ? "Not recorded"
+                    : test.TestRequest.ClinicalNotes
+            });
+        }
+
         [HttpPost]
         [ActionName("CompleteTest")]
         [ValidateAntiForgeryToken]
-         public async Task<IActionResult> CompleteTestConfirmed(int id) 
+        public async Task<IActionResult> CompleteTestConfirmed(int id)
         {
             var technicianId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(technicianId))
@@ -1899,12 +1991,108 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> VerifyTestModal(int id)
+        {
+            var verifierId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(verifierId))
+                return Challenge();
+
+            if (id <= 0)
+                return BadRequest();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Include(x => x.TestType)
+                .FirstOrDefaultAsync(x =>
+                    x.TestRequestTestTypeId == id);
+
+            if (test == null)
+                return NotFound();
+
+            if (test.Status != "Completed")
+                return Conflict("Only completed tests can be verified.");
+
+            // The second technician cannot verify their own test.
+            if (string.IsNullOrWhiteSpace(test.TechnicianId) ||
+                test.TechnicianId == verifierId)
+                return Forbid();
+
+            // The Laboratory Manager must have assigned this test type.
+            var authorised = await _context.TechnicianTestTypes
+                .AsNoTracking()
+                .AnyAsync(x =>
+                    x.TechnicianId == verifierId &&
+                    x.TestTypeId == test.TestTypeId &&
+                    x.IsActive);
+
+            if (!authorised)
+                return Forbid();
+
+            // Ensure exactly one valid captured result exists.
+            var results = await _context.TestResults
+                .AsNoTracking()
+                .Where(x => x.TestRequestTestTypeId == id)
+                .ToListAsync();
+
+            if (results.Count != 1 ||
+                results[0].TechnicianId != test.TechnicianId ||
+                string.IsNullOrWhiteSpace(results[0].ResultValue))
+            {
+                return Conflict(
+                    "Exactly one valid captured result is required.");
+            }
+
+            ViewData["VerificationResult"] = results[0];
+
+            return PartialView("_VerifyTestModal", test);
+        }
+
 
 
         // Paste these two actions INSIDE your existing TestsController.
         // Replace the old VerifyResult GET and POST; do not append duplicates.
         // Uses existing project models and DbSets shown in your original actions.
+        // Add this GET action inside TestsController. Keep your existing VerifyResultDecision POST unchanged.
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> VerifyTest(int id)
+        {
+            var verifierId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(verifierId)) return Challenge();
+            if (id <= 0) return BadRequest();
 
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(x => x.TestRequest).ThenInclude(r => r!.Patient)
+                .Include(x => x.TestType)
+                .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == id);
+
+            if (test == null) return NotFound();
+            if (test.Status != "Completed") return Conflict("Only completed tests may be verified.");
+            if (string.IsNullOrWhiteSpace(test.TechnicianId) || test.TechnicianId == verifierId)
+                return Forbid();
+
+            var authorised = await _context.TechnicianTestTypes.AsNoTracking()
+                .AnyAsync(a => a.TechnicianId == verifierId && a.TestTypeId == test.TestTypeId && a.IsActive);
+            if (!authorised) return Forbid();
+
+            // Validate ALL result records, so a duplicate/legacy record cannot be overlooked.
+            var results = await _context.TestResults.AsNoTracking()
+                .Where(r => r.TestRequestTestTypeId == id)
+                .ToListAsync();
+            if (results.Count != 1 ||
+                results[0].TechnicianId != test.TechnicianId ||
+                string.IsNullOrWhiteSpace(results[0].ResultValue))
+                return Conflict("Exactly one valid result from the original technician is required.");
+
+            ViewData["VerificationResult"] = results[0];
+            return PartialView("_VerifyTestModal", test);
+        }
         [HttpGet]
         public async Task<IActionResult> VerifyResult(int id)
         {

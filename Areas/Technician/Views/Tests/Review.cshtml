@@ -7,6 +7,12 @@
 
     var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
     var total = tests.Count;
+    var pendingVerificationCount = tests.Count(t => t.Status == "Completed");
+    var returnedCount = tests.Count(t => t.Status == "To Be Reviewed");
+    var savedResults = ViewData["SavedResults"] as IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultModel>
+        ?? Enumerable.Empty<NMB_HLabSys.Areas.Technician.Models.TestResultModel>();
+    var resultByTest = savedResults.GroupBy(r => r.TestRequestTestTypeId)
+        .ToDictionary(g => g.Key, g => g.First());
 }
 
 <style>
@@ -43,7 +49,7 @@
 
     .review-stats {
         display: grid;
-        grid-template-columns: repeat(2,minmax(0,1fr));
+        grid-template-columns: repeat(3,minmax(0,1fr));
         gap: 16px;
         margin-bottom: 20px;
     }
@@ -167,6 +173,8 @@
         white-space: nowrap;
     }
 
+    .review-status.completed { background:#e7f2ff; color:#155a91; }
+    .review-status.returned { background:#fff1d6; color:#865c00; }
     .review-urgency {
         display: inline-block;
         padding: 5px 10px;
@@ -205,6 +213,39 @@
 
         .review-action:hover {
             background: #10548e;
+        }
+
+    .review-note {
+        background: #eff6ff;
+        border-left: 4px solid #0284c7;
+        padding: 12px 14px;
+        border-radius: 8px;
+        color: #334155;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        max-width: 340px;
+    }
+
+        .review-note.missing {
+            background: #fff7ed;
+            border-color: #f59e0b;
+        }
+
+    .review-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .review-action.verify { background:#16834b; border:0; cursor:pointer; }
+    .review-action.verify:hover { background:#11693c; }
+    .review-action.secondary {
+        background: #eaf2fb;
+        color: #155a91 !important;
+    }
+
+        .review-action.secondary:hover {
+            background: #d6e8f8;
         }
 
     .review-empty {
@@ -249,7 +290,7 @@
     <div class="review-wrap">
         <header class="review-hero">
             <h1><i class="fas fa-clipboard-check mr-2"></i> Tests for Review</h1>
-            <p>Tests assigned to you that are awaiting review or correction.</p>
+            <p>Independently verify completed tests from other technicians, or correct tests returned to you.</p>
         </header>
 
         @if (TempData["SuccessMessage"] != null)
@@ -263,12 +304,16 @@
 
         <div class="review-stats">
             <div class="review-stat">
-                <div class="review-stat-label">Awaiting Review</div>
-                <div class="review-stat-value">@total</div>
+                <div class="review-stat-label">Awaiting Your Verification</div>
+                <div class="review-stat-value">@pendingVerificationCount</div>
             </div>
             <div class="review-stat">
-                <div class="review-stat-label">Assigned Technician</div>
-                <div class="review-stat-value" style="font-size:1.15rem">Your tests</div>
+                <div class="review-stat-label">Returned for Correction</div>
+                <div class="review-stat-value">@returnedCount</div>
+            </div>
+            <div class="review-stat">
+                <div class="review-stat-label">Total in Queue</div>
+                <div class="review-stat-value">@total</div>
             </div>
         </div>
 
@@ -280,6 +325,11 @@
                     <select id="urgencyFilter" aria-label="Filter by urgency">
                         <option value="">All urgency levels</option>
                     </select>
+                    <select id="statusFilter" aria-label="Filter by test status">
+                        <option value="">All statuses</option>
+                        <option value="Completed">Completed — Verify</option>
+                        <option value="To Be Reviewed">To Be Reviewed — Correct</option>
+                    </select>
                 </div>
             </div>
 
@@ -287,8 +337,8 @@
             {
                 <div class="review-empty">
                     <div><i class="fas fa-check-circle" aria-hidden="true"></i></div>
-                    <h3 style="font-size:1.1rem;color:#244b74">No tests awaiting review</h3>
-                    <p>You currently have no assigned tests with the status "To Be Reviewed".</p>
+                    <h3 style="font-size:1.1rem;color:#244b74">No tests awaiting action</h3>
+                    <p>No completed tests are currently available for independent verification, and none of your tests have been returned for correction.</p>
                 </div>
             }
             else
@@ -302,16 +352,20 @@
                                 <th>Urgency</th>
                                 <th>Started</th>
                                 <th>Status</th>
+                                <th>Verifier Feedback</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="reviewRows">
                             @foreach (var test in tests)
                             {
+                                resultByTest.TryGetValue(test.TestRequestTestTypeId, out var savedResult);
+                                var feedback = savedResult?.ReviewNotes;
+                                var isCompleted = test.Status == "Completed";
                                 var urgency = test.TestRequest?.Urgency.ToString() ?? "Not specified";
                                 var urgencyClass = urgency.Trim().ToLowerInvariant().Replace(" ", "-");
-                                var searchText = $"{test.TestRequest?.RequestNumber} {test.TestType?.Name} {test.TestType?.TestCategory?.Description} {urgency}";
-                                <tr class="review-row" data-search="@searchText.ToLowerInvariant()" data-urgency="@urgency">
+                                var searchText = $"{test.TestRequest?.RequestNumber} {test.TestType?.Name} {test.TestType?.TestCategory?.Description} {urgency} {feedback} {test.Status}";
+                                <tr class="review-row" data-search="@searchText.ToLowerInvariant()" data-urgency="@urgency" data-status="@test.Status">
                                     <td>
                                         <div class="review-primary">@(test.TestRequest?.RequestNumber ?? "N/A")</div>
                                         <div class="review-sub">Test #@test.TestRequestTestTypeId</div>
@@ -322,12 +376,33 @@
                                     </td>
                                     <td><span class="review-urgency review-urgency-@urgencyClass">@urgency</span></td>
                                     <td>@(test.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not started")</td>
-                                    <td><span class="review-status">@test.Status</span></td>
+                                    <td><span class="review-status @(isCompleted ? "completed" : "returned")">@test.Status</span></td>
                                     <td>
-                                        <a class="review-action" asp-area="Technician" asp-controller="Tests"
-                                           asp-action="Details" asp-route-id="@test.TestRequestTestTypeId">
-                                            <i class="fas fa-eye mr-1"></i> View Test
-                                        </a>
+                                        <div class="review-note @(string.IsNullOrWhiteSpace(feedback) ? "missing" : "")">
+                                            @(isCompleted ? "Awaiting independent verification." : (string.IsNullOrWhiteSpace(feedback) ? "No verifier note recorded. Check the history." : feedback))
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="review-actions">
+                                            @if (isCompleted)
+                                            {
+                                                <button type="button" class="review-action verify js-open-verify"
+                                                        data-url="@Url.Action("VerifyTestModal", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">
+                                                    <i class="fas fa-user-check mr-1"></i> Verify Test
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <a class="review-action" asp-area="Technician" asp-controller="Tests"
+                                                   asp-action="CaptureResults" asp-route-id="@test.TestRequestTestTypeId">
+                                                    <i class="fas fa-edit mr-1"></i> Correct Result
+                                                </a>
+                                            }
+                                            <a class="review-action secondary" asp-area="Technician" asp-controller="Tests"
+                                               asp-action="VerificationHistory" asp-route-id="@test.TestRequestTestTypeId">
+                                                <i class="fas fa-history mr-1"></i> Full History
+                                            </a>
+                                        </div>
                                     </td>
                                 </tr>
                             }
@@ -343,10 +418,13 @@
     </div>
 </div>
 
+<div id="verifyModalHost"></div>
+
 <script>
     (function() {
         const search = document.getElementById('reviewSearch');
         const filter = document.getElementById('urgencyFilter');
+        const statusFilter = document.getElementById('statusFilter');
         const rows = Array.from(document.querySelectorAll('.review-row'));
         const count = document.getElementById('reviewCount');
         const empty = document.getElementById('reviewNoMatches');
@@ -363,10 +441,12 @@
         function refresh() {
             const query = search.value.trim().toLowerCase();
             const urgency = filter.value;
+            const status = statusFilter.value;
             let visible = 0;
             rows.forEach(row => {
                 const matches = (!query || row.dataset.search.includes(query)) &&
-                    (!urgency || row.dataset.urgency === urgency);
+                    (!urgency || row.dataset.urgency === urgency) &&
+                    (!status || row.dataset.status === status);
                 row.hidden = !matches;
                 if (matches) visible++;
             });
@@ -375,5 +455,94 @@
         }
         search.addEventListener('input', refresh);
         filter.addEventListener('change', refresh);
+        statusFilter.addEventListener('change', refresh);
     })();
+</script>
+
+<script>
+(function () {
+    const host = document.getElementById('verifyModalHost');
+    if (!host) return;
+    function closeModal() {
+        const modal = host.querySelector('#verifyTestModal');
+        if (!modal) return;
+        if (window.bootstrap && window.bootstrap.Modal) {
+            const instance = window.bootstrap.Modal.getInstance(modal);
+            if (instance) instance.hide();
+        } else if (window.jQuery && window.jQuery.fn.modal) {
+            window.jQuery(modal).modal('hide');
+        } else {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            document.body.classList.remove('modal-open');
+        }
+    }
+    // Checklist is loaded dynamically with the verification modal.
+    document.addEventListener('change', function(event) {
+        if (!event.target.matches('#verifyModalHost .vt-check')) return;
+        const modal = host.querySelector('#verifyTestModal');
+        if (!modal) return;
+        const checks = Array.from(modal.querySelectorAll('.vt-check'));
+        checks.forEach(c => c.closest('.vt-check-row')?.classList.toggle('checked', c.checked));
+        const checked = checks.filter(c => c.checked).length;
+        modal.querySelector('#vtCheckedCount').textContent = checked;
+        const ready = checks.length === 5 && checked === 5;
+        modal.querySelector('[data-decision="Verify"]').disabled = !ready;
+        const status = modal.querySelector('#vtVerificationStatus');
+        status.classList.toggle('ready', ready);
+        status.textContent = ready ? 'All 5 checks complete. Ready to verify.' : 'Complete all 5 checks to verify.';
+    });
+    document.addEventListener('click', async function (event) {
+        const trigger = event.target.closest('.js-open-verify');
+        if (trigger) {
+            event.preventDefault();
+            trigger.disabled = true;
+            try {
+                const response = await fetch(trigger.dataset.url, { credentials: 'same-origin' });
+                if (!response.ok) throw new Error('Unable to load verification form (HTTP ' + response.status + ').');
+                host.innerHTML = await response.text();
+                const modal = host.querySelector('#verifyTestModal');
+                if (!modal) throw new Error('Verification modal was not found in the response.');
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modal).show();
+                } else if (window.jQuery && window.jQuery.fn.modal) {
+                    window.jQuery(modal).modal('show');
+                } else {
+                    modal.style.display = 'block';
+                    modal.classList.add('show');
+                    document.body.classList.add('modal-open');
+                }
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                trigger.disabled = false;
+            }
+            return;
+        }
+        const decisionButton = event.target.closest('#verifyModalHost .js-verify-decision');
+        if (decisionButton) {
+            event.preventDefault();
+            const form = host.querySelector('#verifyTestForm');
+            const notes = host.querySelector('#verifyTestNotes');
+            const decision = decisionButton.dataset.decision;
+            if (!form || !notes) return;
+            if (decision === 'Verify' && !Array.from(host.querySelectorAll('.vt-check')).every(c => c.checked)) {
+                alert('Complete all five verification checks before verifying this test.');
+                return;
+            }
+            if (decision === 'ReturnForReview' && !notes.value.trim()) {
+                notes.classList.add('is-invalid');
+                notes.focus();
+                return;
+            }
+            notes.classList.remove('is-invalid');
+            host.querySelector('#verifyTestDecision').value = decision;
+            form.requestSubmit ? form.requestSubmit() : form.submit();
+            return;
+        }
+        if (event.target.closest('#verifyModalHost .js-close-verify-modal')) {
+            closeModal();
+        }
+    });
+})();
 </script>

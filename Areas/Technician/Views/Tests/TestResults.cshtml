@@ -1,5 +1,4 @@
-﻿
-@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultModel>
+﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultModel>
 
 @{
     ViewData["Title"] = "Test Results";
@@ -43,17 +42,17 @@
         color: #fff;
     }
 
-    .results-hero h1 {
-        font-size: 29px;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
+        .results-hero h1 {
+            font-size: 29px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
 
-    .results-hero p {
-        color: rgba(255,255,255,.82);
-        font-size: 13px;
-        margin: 0;
-    }
+        .results-hero p {
+            color: rgba(255,255,255,.82);
+            font-size: 13px;
+            margin: 0;
+        }
 
     .results-content {
         position: relative;
@@ -68,18 +67,18 @@
         height: 100%;
     }
 
-    .results-summary .label {
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 600;
-    }
+        .results-summary .label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+        }
 
-    .results-summary .number {
-        font-size: 28px;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 8px 0 0;
-    }
+        .results-summary .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 8px 0 0;
+        }
 
     .results-card {
         margin-top: 24px;
@@ -118,29 +117,29 @@
         margin: 0;
     }
 
-    .results-table thead th {
-        background: #f8fafc;
-        border-top: 0;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 13px;
-        color: #64748b;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: .4px;
-        white-space: nowrap;
-    }
+        .results-table thead th {
+            background: #f8fafc;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 13px;
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
 
-    .results-table tbody td {
-        padding: 14px 13px;
-        vertical-align: middle;
-        border-color: #f1f5f9;
-        color: #334155;
-        font-size: 12px;
-    }
+        .results-table tbody td {
+            padding: 14px 13px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
 
-    .results-table tbody tr:hover {
-        background: #f8fcff;
-    }
+        .results-table tbody tr:hover {
+            background: #f8fcff;
+        }
 
     .result-main {
         display: block;
@@ -164,29 +163,41 @@
         white-space: nowrap;
     }
 
-    .result-pill.normal {
-        background: #dcfce7;
-        color: #166534;
+        .result-pill.normal {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .result-pill.abnormal {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .result-pill.review {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .result-pill.verified {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .result-pill.deleted {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .result-pill.active {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+    .result-row-deleted {
+        opacity: .72;
+        background: #fff8f8;
     }
 
-    .result-pill.abnormal {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .result-pill.review {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .result-pill.verified {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .result-pill.deleted { background: #fee2e2; color: #991b1b; }
-    .result-pill.active { background: #e0f2fe; color: #075985; }
-    .result-row-deleted { opacity: .72; background: #fff8f8; }
     .result-pill.pending {
         background: #e0f2fe;
         color: #0369a1;
@@ -227,10 +238,26 @@
         text-decoration: none;
     }
 
-    .result-action-delete { background: #fee2e2; color: #991b1b; }
-    .result-action-complete { background: #dcfce7; color: #166534; }
-    .result-action-delete:hover { background: #b91c1c; color: white; }
-    .result-action-complete:hover { background: #15803d; color: white; }
+    .result-action-delete {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .result-action-complete {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .result-action-delete:hover {
+        background: #b91c1c;
+        color: white;
+    }
+
+    .result-action-complete:hover {
+        background: #15803d;
+        color: white;
+    }
+
     .result-actions {
         display: flex;
         align-items: center;
@@ -238,18 +265,37 @@
         gap: 6px;
         width: max-content;
     }
-    .result-actions > form { flex: 0 0 auto; margin: 0; }
-    .result-actions .result-action { flex: 0 0 auto; }
+
+        .result-actions > form {
+            flex: 0 0 auto;
+            margin: 0;
+        }
+
+        .result-actions .result-action {
+            flex: 0 0 auto;
+        }
+
     .results-table th:last-child,
-    .results-table td:last-child { min-width: 375px; white-space: nowrap; }
+    .results-table td:last-child {
+        min-width: 375px;
+        white-space: nowrap;
+    }
 
     .result-action:hover {
         background: #0284c7;
         color: #fff;
         text-decoration: none;
     }
-    .result-action-delete:hover { background: #b91c1c; color: #fff; }
-    .result-action-complete:hover { background: #15803d; color: #fff; }
+
+    .result-action-delete:hover {
+        background: #b91c1c;
+        color: #fff;
+    }
+
+    .result-action-complete:hover {
+        background: #15803d;
+        color: #fff;
+    }
 
     .results-empty {
         text-align: center;
@@ -375,7 +421,7 @@
                             <th>Test Status</th>
                             <th>Record Status</th>
                             <th>Captured</th>
-                          <th class="text-center">Action</th>
+                            <th class="text-center">Action</th>
                         </tr>
                     </thead>
 
@@ -508,55 +554,64 @@
                                 </td>
 
                                
-<td>
-    <div class="result-actions">
-        <button type="button"
-                class="result-action js-result-modal"
-                data-url="@Url.Action("ResultDetails", "Tests", new { area = "Technician", id = result.TestResultId })"
-                data-result-id="@result.TestResultId"
-                data-modal-title="View Result"
-                title="View result" aria-label="View result">
-            <i class="fas fa-eye" aria-hidden="true"></i> View
-        </button>
+                                <td>
+                                    <div class="result-actions">
+                                        <button type="button"
+                                                class="result-action js-result-modal"
+                                                data-url="@Url.Action("ResultDetails", "Tests", new { area = "Technician", id = result.TestResultId })"
+                                                data-result-id="@result.TestResultId"
+                                                data-modal-title="View Result"
+                                                title="View result" aria-label="View result">
+                                            <i class="fas fa-eye" aria-hidden="true"></i> View
+                                        </button>
 
-        @if (canModifyResult)
-        {
-            <button type="button"
-                    class="result-action js-result-modal"
-                    data-url="@Url.Action("EditResult", "Tests", new { area = "Technician", id = result.TestResultId })"
-                    data-result-id="@result.TestResultId"
-                    data-modal-title="Edit Result"
-                    title="Edit result" aria-label="Edit result">
-                <i class="fas fa-edit" aria-hidden="true"></i> Edit
-            </button>
+                                        @if (canModifyResult)
+                                        {
+                                            <button type="button"
+                                                    class="result-action js-result-modal"
+                                                    data-url="@Url.Action("EditResult", "Tests", new { area = "Technician", id = result.TestResultId })"
+                                                    data-result-id="@result.TestResultId"
+                                                    data-modal-title="Edit Result"
+                                                    title="Edit result" aria-label="Edit result">
+                                                <i class="fas fa-edit" aria-hidden="true"></i> Edit
+                                            </button>
 
-            <form asp-area="Technician" asp-controller="Tests"
-                  asp-action="DeleteResult" asp-route-id="@result.TestResultId"
-                  method="post" class="d-inline"
-                  onsubmit="return confirm('Soft delete this result? The audit history must be retained.');">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="result-action result-action-delete"
-                        title="Soft delete result" aria-label="Delete result">
-                    <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
-                </button>
-            </form>
+                                            <form asp-area="Technician" asp-controller="Tests"
+                                                  asp-action="DeleteResult" asp-route-id="@result.TestResultId"
+                                                  method="post" class="d-inline"
+                                                  onsubmit="return confirm('Soft delete this result? The audit history must be retained.');">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="result-action result-action-delete"
+                                                        title="Soft delete result" aria-label="Delete result">
+                                                    <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                                                </button>
+                                            </form>
 
-            @* CompleteTest GET displays the FinishTest confirmation view; its POST submits the test for verification. *@
-            @if (test != null)
-            {
-                <a class="result-action result-action-complete"
-                   asp-area="Technician"
-                   asp-controller="Tests"
-                   asp-action="CompleteTest"
-                   asp-route-id="@test.TestRequestTestTypeId"
-                   title="Complete test and submit for verification"
-                   aria-label="Complete test @test.TestRequestTestTypeId">
-                    <i class="fas fa-check-circle" aria-hidden="true"></i> Complete
-                </a>
-            }
-        }
-    </div>
-</td>
+                                         
+                                            @* The href is the POST destination; JS opens confirmation modal. *@
+                                            @if (test != null)
+                                            {
+                                                <a href="@Url.Action("CompleteTest", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"
+                                                   class="result-action result-action-complete js-complete-test"
+                                                   data-clinical-url="@Url.Action("CompleteTestClinicalContext", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"
+                                                   data-patient="@(patient?.FullName ?? "Patient unavailable")"
+                                                   data-test="@(testType?.Name ?? "Unknown test")"
+                                                   data-result-name="@result.ResultName"
+                                                   data-result="@result.ResultValue"
+                                                   data-unit="@result.MeasurementUnit"
+                                                   data-range="@(result.ReferenceMin?.ToString("0.##") ?? "—") to @(result.ReferenceMax?.ToString("0.##") ?? "—")"
+                                                   data-flag="@(result.IsAbnormal ? "ABNORMAL" : "NORMAL")"
+                                                   data-status="@status"
+                                                   data-assignment-id="@test.TestRequestTestTypeId"
+                                                   title="Review and complete this test"
+                                                   aria-label="Complete test @test.TestRequestTestTypeId">
+                                                    <i class="fas fa-check-circle" aria-hidden="true"></i> Complete
+                                                </a>
+                                            }
+
+                                        }
+                                    </div>
+                                </td>
 
                             </tr>
                         }
@@ -601,9 +656,87 @@
     </div>
 </div>
 
+@* Modal is outside the table and rendered only once. *@
+@await Html.PartialAsync("_CompleteTestModal")
+
 @section Scripts {
     <script>
-        $(function () {
+        $(function() {
+            // Complete link: show a confirmation modal, never submit on first click.
+            $(document).on('click', '.js-complete-test', function(event) {
+                event.preventDefault();
+                const $link = $(this);
+                const url = $link.attr('href');
+                if (!url || url === '#') {
+                    alert('The completion endpoint is unavailable.');
+                    return;
+                }
+                const fields = {
+                    '#completePatient': 'patient',
+                    '#completeTestName': 'test',
+                    '#completeResultName': 'result-name',
+                    '#completeResult': 'result',
+                    '#completeUnit': 'unit',
+                    '#completeRange': 'range',
+                    '#completeFlag': 'flag',
+                    '#completeStatus': 'status',
+                    '#completeAssignmentId': 'assignment-id'
+                };
+                Object.keys(fields).forEach(function(selector) {
+                    $(selector).text($link.attr('data-' + fields[selector]) || '—');
+                });
+                // Load clinical history from the server, not from untrusted table attributes.
+                const clinicalUrl = $link.attr('data-clinical-url');
+                const clinicalSelectors = ['#completeConditions', '#completeAllergies', '#completeMedications', '#completeClinicalNotes'];
+                clinicalSelectors.forEach(s => $(s).text('—'));
+                $('#completeClinicalLoading').removeClass('d-none');
+                $('#completeClinicalError').addClass('d-none').text('');
+                $('#completeSubmitButton').prop('disabled', true);
+                if (!clinicalUrl) {
+                    $('#completeClinicalLoading').addClass('d-none');
+                    $('#completeClinicalError').removeClass('d-none').text('Clinical information endpoint is missing.');
+                } else {
+                    $.getJSON(clinicalUrl)
+                        .done(function(data) {
+                            // Avoid showing stale clinical details if another test was selected.
+                            if ($('#completeTestForm').attr('action') !== url) return;
+                            $('#completeConditions').text(data.medicalConditions || 'Not recorded');
+                            $('#completeAllergies').text(data.allergies || 'Not recorded');
+                            $('#completeMedications').text(data.medications || 'Not recorded');
+                            $('#completeClinicalNotes').text(data.clinicalNotes || 'Not recorded');
+                            $('#completeSubmitButton').prop('disabled', false);
+                        })
+                        .fail(function() {
+                            if ($('#completeTestForm').attr('action') !== url) return;
+                            $('#completeClinicalError').removeClass('d-none')
+                                .text('Unable to load clinical information. Submission is disabled until this is resolved.');
+                        })
+                        .always(function() { $('#completeClinicalLoading').addClass('d-none'); });
+                }
+                $('#completeTestForm').attr('action', url);
+                const modalElement = document.getElementById('completeTestModal');
+                if (!modalElement) {
+                    alert('Complete Test modal was not rendered. Check _CompleteTestModal.cshtml.');
+                    return;
+                }
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                } else if ($.fn.modal) {
+                    $('#completeTestModal').modal('show');
+                } else {
+                    alert('Bootstrap modal JavaScript is missing. Check _TechnicianLayout.cshtml.');
+                }
+            });
+
+            $('#completeTestForm').on('submit', function() {
+                if (!this.action) return false;
+                $('#completeSubmitButton').prop('disabled', true);
+            });
+            $('#completeTestModal').on('hidden.bs.modal', function() {
+                $('#completeTestForm').removeAttr('action');
+                $('#completeSubmitButton').prop('disabled', false);
+            });
+
             const $modal = $('#testResultModal');
             const $content = $('#testResultModalContent');
             let activeRequest = null;
@@ -611,17 +744,17 @@
 
             function showLoading(title) {
                 $content.html(`
-                    <div class="modal-body text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                        <h6 class="mt-3 mb-1">Loading...</h6>
-                        <p class="text-muted mb-0"></p>
-                    </div>`);
+                            <div class="modal-body text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <h6 class="mt-3 mb-1">Loading...</h6>
+                                <p class="text-muted mb-0"></p>
+                            </div>`);
                 $content.find('.text-muted').text(title || 'Loading test result information...');
             }
 
-            $(document).on('click', '.js-result-modal', function (event) {
+            $(document).on('click', '.js-result-modal', function(event) {
                 event.preventDefault();
                 const $button = $(this);
                 const url = $button.attr('data-url');
@@ -635,13 +768,13 @@
                 $modal.modal('show');
 
                 activeRequest = $.ajax({ url: url, method: 'GET', cache: false })
-                    .done(function (html) {
+                    .done(function(html) {
                         if (sequence !== requestSequence) return;
                         // The existing _ViewResultsModal / _EditResultsModal partial
                         // should render .modal-header, .modal-body and (if needed) .modal-footer.
                         $content.html(html);
                     })
-                    .fail(function (xhr, status) {
+                    .fail(function(xhr, status) {
                         if (sequence !== requestSequence || status === 'abort') return;
                         let message = 'Unable to load this result. Please try again.';
                         if (xhr.status === 401) message = 'Your session has expired. Please sign in again.';
@@ -653,13 +786,13 @@
                             '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div>');
                         $content.find('.alert').text(message);
                     })
-                    .always(function () {
+                    .always(function() {
                         $button.prop('disabled', false);
                         if (sequence === requestSequence) activeRequest = null;
                     });
             });
 
-            $modal.on('hidden.bs.modal', function () {
+            $modal.on('hidden.bs.modal', function() {
                 ++requestSequence;
                 if (activeRequest) activeRequest.abort();
                 activeRequest = null;
@@ -668,7 +801,7 @@
 
             // The existing EditResult POST returns a redirect to TestResults.
             // Use normal form submission so anti-forgery, TempData and redirects work.
-            $(document).on('submit', '#editTestResultForm', function (event) {
+            $(document).on('submit', '#editTestResultForm', function(event) {
                 if (!this.checkValidity()) return;
                 const $button = $(this).find('#saveResultChanges');
                 if ($button.prop('disabled')) { event.preventDefault(); return; }
@@ -678,10 +811,10 @@
             });
 
             const $rows = $('#resultsTable tbody tr').not('.empty-row');
-            $('#resultsSearch').on('input', function () {
+            $('#resultsSearch').on('input', function() {
                 const query = (this.value || '').trim().toLowerCase();
                 let visible = 0;
-                $rows.each(function () {
+                $rows.each(function() {
                     const matches = $(this).text().toLowerCase().includes(query);
                     $(this).toggle(matches);
                     if (matches) visible++;

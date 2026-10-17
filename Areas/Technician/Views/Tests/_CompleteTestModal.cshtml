@@ -1,0 +1,158 @@
+﻿@* Complete Test confirmation modal. Keep element IDs aligned with TestResults.cshtml JavaScript. *@
+<style>
+    #completeTestModal .modal-content {
+        border: 0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 20px 55px rgba(0,0,0,.18);
+    }
+
+    #completeTestModal .modal-header {
+        background: linear-gradient(135deg,#073b5c,#0284c7);
+        color: #fff;
+        padding: 22px 26px;
+        border-bottom: 0;
+    }
+
+    #completeTestModal .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    #completeTestModal .modal-body {
+        background: #f8fafc;
+        padding: 25px;
+        max-height: 65vh;
+        overflow-y: auto;
+    }
+
+    #completeTestModal .modal-footer {
+        background: #fff;
+        border-top: 1px solid #e2e8f0;
+        padding: 15px 25px;
+    }
+
+    #completeTestModal .ctm-section-title {
+        color: #075985;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 12px 0 15px;
+    }
+
+    #completeTestModal .ctm-info {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 15px;
+        height: 100%;
+    }
+
+    #completeTestModal .ctm-info-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+
+        #completeTestModal .ctm-info-label i {
+            color: #0284c7;
+            margin-right: 7px;
+            width: 16px;
+        }
+
+    #completeTestModal .ctm-info-value {
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+    }
+
+    #completeTestModal .ctm-clinical-notes {
+        background: #eff6ff;
+        border-left: 4px solid #0284c7;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 5px 0 18px;
+    }
+
+        #completeTestModal .ctm-clinical-notes h6 {
+            color: #075985;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        #completeTestModal .ctm-clinical-notes p {
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            margin: 0;
+        }
+
+    #completeTestModal .ctm-warning {
+        background: #e0f2fe;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        padding: 14px;
+        color: #075985;
+        font-size: 13px;
+    }
+</style>
+
+<div class="modal fade" id="completeTestModal" tabindex="-1" role="dialog"
+     aria-labelledby="completeTestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title" id="completeTestModalLabel">
+                        <i class="fas fa-check-circle mr-2" aria-hidden="true"></i> Complete Laboratory Test
+                    </h5>
+                    <small>Review the result and patient clinical information before submission</small>
+                </div>
+                <button type="button" class="close text-white" style="opacity:1" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="completeTestForm" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <h6 class="ctm-section-title"><i class="fas fa-flask mr-2"></i>Test Details</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-hashtag"></i> Assignment ID</div><div class="ctm-info-value" id="completeAssignmentId"></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-user-injured"></i> Patient</div><div class="ctm-info-value" id="completePatient"></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-vials"></i> Test Type</div><div class="ctm-info-value" id="completeTestName"></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-file-medical-alt"></i> Result Name</div><div class="ctm-info-value" id="completeResultName"></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-poll"></i> Result Value</div><div class="ctm-info-value"><span id="completeResult"></span> <span id="completeUnit"></span></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-ruler-horizontal"></i> Reference Range</div><div class="ctm-info-value" id="completeRange"></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-exclamation-circle"></i> Result Flag</div><div class="ctm-info-value" id="completeFlag"></div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-tasks"></i> Current Status</div><div class="ctm-info-value" id="completeStatus"></div></div></div>
+                    </div>
+
+                    <h6 class="ctm-section-title"><i class="fas fa-notes-medical mr-2"></i>Patient Medical Information</h6>
+                    <div id="completeClinicalLoading" class="text-muted small mb-3" role="status">Loading patient clinical information...</div>
+                    <div id="completeClinicalError" class="alert alert-warning d-none" role="alert"></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-heartbeat"></i> Medical Conditions</div><div class="ctm-info-value" id="completeConditions">—</div></div></div>
+                        <div class="col-md-6 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-allergies"></i> Allergies</div><div class="ctm-info-value" id="completeAllergies">—</div></div></div>
+                        <div class="col-md-12 mb-3"><div class="ctm-info"><div class="ctm-info-label"><i class="fas fa-pills"></i> Current Medication</div><div class="ctm-info-value" id="completeMedications">—</div></div></div>
+                    </div>
+                    <div class="ctm-clinical-notes">
+                        <h6><i class="fas fa-user-md mr-2"></i> Doctor's Clinical Notes</h6>
+                        <p id="completeClinicalNotes">—</p>
+                    </div>
+                    <div class="ctm-warning" role="note">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Confirming changes the test status to <strong>Completed</strong> and submits it for independent verification by another authorised technician. It does <strong>not</strong> verify the result.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal" data-bs-dismiss="modal"><i class="fas fa-times mr-1"></i> Cancel</button>
+                    <button type="submit" id="completeSubmitButton" class="btn btn-success" disabled><i class="fas fa-check-circle mr-1"></i> Confirm &amp; Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
