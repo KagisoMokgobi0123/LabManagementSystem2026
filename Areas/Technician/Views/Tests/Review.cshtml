@@ -173,8 +173,16 @@
         white-space: nowrap;
     }
 
-    .review-status.completed { background:#e7f2ff; color:#155a91; }
-    .review-status.returned { background:#fff1d6; color:#865c00; }
+        .review-status.completed {
+            background: #e7f2ff;
+            color: #155a91;
+        }
+
+        .review-status.returned {
+            background: #fff1d6;
+            color: #865c00;
+        }
+
     .review-urgency {
         display: inline-block;
         padding: 5px 10px;
@@ -237,8 +245,16 @@
         gap: 8px;
     }
 
-    .review-action.verify { background:#16834b; border:0; cursor:pointer; }
-    .review-action.verify:hover { background:#11693c; }
+    .review-action.verify {
+        background: #16834b;
+        border: 0;
+        cursor: pointer;
+    }
+
+        .review-action.verify:hover {
+            background: #11693c;
+        }
+
     .review-action.secondary {
         background: #eaf2fb;
         color: #155a91 !important;
@@ -393,10 +409,10 @@
                                             }
                                             else
                                             {
-                                                <a class="review-action" asp-area="Technician" asp-controller="Tests"
-                                                   asp-action="CaptureResults" asp-route-id="@test.TestRequestTestTypeId">
+                                                <button type="button" class="review-action js-open-correction"
+                                                        data-url="@Url.Action("CorrectTestModal", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">
                                                     <i class="fas fa-edit mr-1"></i> Correct Result
-                                                </a>
+                                                </button>
                                             }
                                             <a class="review-action secondary" asp-area="Technician" asp-controller="Tests"
                                                asp-action="VerificationHistory" asp-route-id="@test.TestRequestTestTypeId">
@@ -419,6 +435,7 @@
 </div>
 
 <div id="verifyModalHost"></div>
+<div id="correctionModalHost"></div>
 
 <script>
     (function() {
@@ -460,89 +477,138 @@
 </script>
 
 <script>
-(function () {
-    const host = document.getElementById('verifyModalHost');
-    if (!host) return;
-    function closeModal() {
-        const modal = host.querySelector('#verifyTestModal');
-        if (!modal) return;
-        if (window.bootstrap && window.bootstrap.Modal) {
-            const instance = window.bootstrap.Modal.getInstance(modal);
-            if (instance) instance.hide();
-        } else if (window.jQuery && window.jQuery.fn.modal) {
-            window.jQuery(modal).modal('hide');
-        } else {
-            modal.style.display = 'none';
-            modal.classList.remove('show');
-            document.body.classList.remove('modal-open');
+    (function() {
+        const host = document.getElementById('verifyModalHost');
+        if (!host) return;
+        function closeModal() {
+            const modal = host.querySelector('#verifyTestModal');
+            if (!modal) return;
+            if (window.bootstrap && window.bootstrap.Modal) {
+                const instance = window.bootstrap.Modal.getInstance(modal);
+                if (instance) instance.hide();
+            } else if (window.jQuery && window.jQuery.fn.modal) {
+                window.jQuery(modal).modal('hide');
+            } else {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                document.body.classList.remove('modal-open');
+            }
         }
-    }
-    // Checklist is loaded dynamically with the verification modal.
-    document.addEventListener('change', function(event) {
-        if (!event.target.matches('#verifyModalHost .vt-check')) return;
-        const modal = host.querySelector('#verifyTestModal');
-        if (!modal) return;
-        const checks = Array.from(modal.querySelectorAll('.vt-check'));
-        checks.forEach(c => c.closest('.vt-check-row')?.classList.toggle('checked', c.checked));
-        const checked = checks.filter(c => c.checked).length;
-        modal.querySelector('#vtCheckedCount').textContent = checked;
-        const ready = checks.length === 5 && checked === 5;
-        modal.querySelector('[data-decision="Verify"]').disabled = !ready;
-        const status = modal.querySelector('#vtVerificationStatus');
-        status.classList.toggle('ready', ready);
-        status.textContent = ready ? 'All 5 checks complete. Ready to verify.' : 'Complete all 5 checks to verify.';
-    });
-    document.addEventListener('click', async function (event) {
-        const trigger = event.target.closest('.js-open-verify');
-        if (trigger) {
-            event.preventDefault();
-            trigger.disabled = true;
-            try {
-                const response = await fetch(trigger.dataset.url, { credentials: 'same-origin' });
-                if (!response.ok) throw new Error('Unable to load verification form (HTTP ' + response.status + ').');
-                host.innerHTML = await response.text();
-                const modal = host.querySelector('#verifyTestModal');
-                if (!modal) throw new Error('Verification modal was not found in the response.');
-                if (window.bootstrap && window.bootstrap.Modal) {
-                    window.bootstrap.Modal.getOrCreateInstance(modal).show();
-                } else if (window.jQuery && window.jQuery.fn.modal) {
-                    window.jQuery(modal).modal('show');
-                } else {
-                    modal.style.display = 'block';
-                    modal.classList.add('show');
-                    document.body.classList.add('modal-open');
+        // Checklist is loaded dynamically with the verification modal.
+        document.addEventListener('change', function(event) {
+            if (!event.target.matches('#verifyModalHost .vt-check')) return;
+            const modal = host.querySelector('#verifyTestModal');
+            if (!modal) return;
+            const checks = Array.from(modal.querySelectorAll('.vt-check'));
+            checks.forEach(c => c.closest('.vt-check-row')?.classList.toggle('checked', c.checked));
+            const checked = checks.filter(c => c.checked).length;
+            modal.querySelector('#vtCheckedCount').textContent = checked;
+            const ready = checks.length === 5 && checked === 5;
+            modal.querySelector('[data-decision="Verify"]').disabled = !ready;
+            const status = modal.querySelector('#vtVerificationStatus');
+            status.classList.toggle('ready', ready);
+            status.textContent = ready ? 'All 5 checks complete. Ready to verify.' : 'Complete all 5 checks to verify.';
+        });
+        document.addEventListener('click', async function(event) {
+            const trigger = event.target.closest('.js-open-verify');
+            if (trigger) {
+                event.preventDefault();
+                trigger.disabled = true;
+                try {
+                    const response = await fetch(trigger.dataset.url, { credentials: 'same-origin' });
+                    if (!response.ok) throw new Error('Unable to load verification form (HTTP ' + response.status + ').');
+                    host.innerHTML = await response.text();
+                    const modal = host.querySelector('#verifyTestModal');
+                    if (!modal) throw new Error('Verification modal was not found in the response.');
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        window.bootstrap.Modal.getOrCreateInstance(modal).show();
+                    } else if (window.jQuery && window.jQuery.fn.modal) {
+                        window.jQuery(modal).modal('show');
+                    } else {
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                        document.body.classList.add('modal-open');
+                    }
+                } catch (error) {
+                    alert(error.message);
+                } finally {
+                    trigger.disabled = false;
                 }
-            } catch (error) {
-                alert(error.message);
-            } finally {
-                trigger.disabled = false;
-            }
-            return;
-        }
-        const decisionButton = event.target.closest('#verifyModalHost .js-verify-decision');
-        if (decisionButton) {
-            event.preventDefault();
-            const form = host.querySelector('#verifyTestForm');
-            const notes = host.querySelector('#verifyTestNotes');
-            const decision = decisionButton.dataset.decision;
-            if (!form || !notes) return;
-            if (decision === 'Verify' && !Array.from(host.querySelectorAll('.vt-check')).every(c => c.checked)) {
-                alert('Complete all five verification checks before verifying this test.');
                 return;
             }
-            if (decision === 'ReturnForReview' && !notes.value.trim()) {
-                notes.classList.add('is-invalid');
-                notes.focus();
+            const decisionButton = event.target.closest('#verifyModalHost .js-verify-decision');
+            if (decisionButton) {
+                event.preventDefault();
+                const form = host.querySelector('#verifyTestForm');
+                const notes = host.querySelector('#verifyTestNotes');
+                const decision = decisionButton.dataset.decision;
+                if (!form || !notes) return;
+                if (decision === 'Verify' && !Array.from(host.querySelectorAll('.vt-check')).every(c => c.checked)) {
+                    alert('Complete all five verification checks before verifying this test.');
+                    return;
+                }
+                if (decision === 'ReturnForReview' && !notes.value.trim()) {
+                    notes.classList.add('is-invalid');
+                    notes.focus();
+                    return;
+                }
+                notes.classList.remove('is-invalid');
+                host.querySelector('#verifyTestDecision').value = decision;
+                form.requestSubmit ? form.requestSubmit() : form.submit();
                 return;
             }
-            notes.classList.remove('is-invalid');
-            host.querySelector('#verifyTestDecision').value = decision;
-            form.requestSubmit ? form.requestSubmit() : form.submit();
-            return;
+            if (event.target.closest('#verifyModalHost .js-close-verify-modal')) {
+                closeModal();
+            }
+        });
+    })();
+</script>
+
+<script>
+    (function() {
+        const host = document.getElementById('correctionModalHost');
+        if (!host) return;
+        function closeCorrection() {
+            const modal = host.querySelector('#correctTestModal');
+            if (!modal) return;
+            if (window.bootstrap?.Modal) {
+                window.bootstrap.Modal.getInstance(modal)?.hide();
+            } else if (window.jQuery?.fn?.modal) {
+                window.jQuery(modal).modal('hide');
+            } else {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                document.body.classList.remove('modal-open');
+            }
         }
-        if (event.target.closest('#verifyModalHost .js-close-verify-modal')) {
-            closeModal();
-        }
-    });
-})();
+        document.addEventListener('click', async function(event) {
+            const trigger = event.target.closest('.js-open-correction');
+            if (trigger) {
+                event.preventDefault();
+                trigger.disabled = true;
+                try {
+                    const response = await fetch(trigger.dataset.url, { credentials: 'same-origin' });
+                    if (!response.ok) throw new Error('Unable to load correction form (HTTP ' + response.status + ').');
+                    host.innerHTML = await response.text();
+                    const modal = host.querySelector('#correctTestModal');
+                    if (!modal) throw new Error('Correction modal was not found in the response.');
+                    if (window.bootstrap?.Modal) {
+                        window.bootstrap.Modal.getOrCreateInstance(modal).show();
+                    } else if (window.jQuery?.fn?.modal) {
+                        window.jQuery(modal).modal('show');
+                    } else {
+                        modal.style.display = 'block';
+                        modal.classList.add('show');
+                        document.body.classList.add('modal-open');
+                    }
+                } catch (error) { alert(error.message); }
+                finally { trigger.disabled = false; }
+                return;
+            }
+            if (event.target.closest('#correctionModalHost .js-close-correction')) {
+                event.preventDefault();
+                closeCorrection();
+            }
+        });
+    })();
 </script>

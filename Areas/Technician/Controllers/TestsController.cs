@@ -1583,7 +1583,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             ViewData["ResultCount"] = results.Count;
             ViewData["SavedResult"] = hasValidResult ? results[0] : null;
 
-            return View("FinishTest", test);
+            return View("CompleteTest", test);
         }
 
         // Clinical information for the Complete Test confirmation modal.
@@ -2092,6 +2092,38 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             ViewData["VerificationResult"] = results[0];
             return PartialView("_VerifyTestModal", test);
+        }
+        //This is a GET endpoint.Keep your existing CaptureResults POST action.
+[HttpGet]
+[Authorize(Roles = "LabTechnician")]
+public async Task<IActionResult> CorrectTestModal(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestType)
+                .Include(t => t.TestRequest)
+                .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id &&
+                                          t.TechnicianId == technicianId);
+
+            if (test == null) return NotFound();
+            if (test.Status != "To Be Reviewed")
+                return Conflict("Only tests returned for review can be corrected.");
+
+            var results = await _context.TestResults
+                .AsNoTracking()
+                .Where(r => r.TestRequestTestTypeId == id)
+                .ToListAsync();
+
+            if (results.Count != 1 || results[0].TechnicianId != technicianId)
+                return Conflict("Exactly one result captured by the original technician is required.");
+
+            var result = results[0];
+            result.TestRequestTestType = test;
+            return PartialView("_CorrectTestResultModal", result);
         }
         [HttpGet]
         public async Task<IActionResult> VerifyResult(int id)

@@ -225,6 +225,7 @@
             border-color: #cbd5e1;
             cursor: not-allowed
         }
+
     @@media(max - width:650px) {
         #verifyTestModal .vt-grid {
             grid-template-columns: repeat(2,minmax(0,1fr))
@@ -245,7 +246,7 @@
                 </div>
                 <button type="button" class="close js-close-verify-modal" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" style="color:white;opacity:1"><span aria-hidden="true">&times;</span></button>
             </div>
-            <form id="verifyTestForm" asp-area="Technician" asp-controller="Tests" asp-action="VerifyResult" method="post">
+            <form id="verifyTestForm" action="@Url.Action("VerifyResult", "Tests", new { area = "Technician" })" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
                 <input type="hidden" name="decision" id="verifyTestDecision" value="" />

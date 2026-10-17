@@ -619,14 +619,14 @@
                         }
 
                         <a href="@Url.Action(
-                            "FinishTest",
+                            "CompleteTest",
                             "Tests",
                             new { area = "Technician", id = Model.TestRequestTestTypeId })"
                            class="btn btn-success @(hasSavedResult ? "" : "disabled")"
                            aria-disabled="@(hasSavedResult ? "false" : "true")"
                            tabindex="@(hasSavedResult ? "0" : "-1")">
                             <i class="fas fa-check-circle mr-2"></i>
-                            Finish Test
+                            Complete Test
                         </a>
                     }
                 </div>
