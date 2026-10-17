@@ -778,78 +778,85 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
-        // Replace the existing Review() GET action inside TestsController.cs.
         [HttpGet]
-        [Authorize(Roles = "LabTechnician")]
         public async Task<IActionResult> Review()
         {
             var technicianId = _userManager.GetUserId(User);
-            if (string.IsNullOrWhiteSpace(technicianId))
+
+            if (string.IsNullOrEmpty(technicianId))
                 return Challenge();
 
-            // Only active Laboratory Manager assignments authorise independent verification.
-            var authorisedTestTypes = _context.TechnicianTestTypes
+            // Test types the signed-in technician is authorised to verify.
+            var authorisedTestTypeIds = await _context.TechnicianTestTypes
                 .AsNoTracking()
-                .Where(a => a.TechnicianId == technicianId && a.IsActive)
-                .Select(a => a.TestTypeId);
+                .Where(a =>
+                    a.TechnicianId == technicianId &&
+                    a.IsActive)
+                .Select(a => a.TestTypeId)
+                .Distinct()
+                .ToListAsync();
 
-            // Returned tests belong to the original technician.
-            // Completed tests must belong to another technician and be eligible for verification.
+            // Two queues:
+            // 1. Own tests returned for correction.
+            // 2. Other technicians' completed tests for verification.
             var tests = await _context.TestRequestTestTypes
                 .AsNoTracking()
-                .Include(t => t.TestRequest).ThenInclude(r => r!.Patient)
-                .Include(t => t.TestRequest).ThenInclude(r => r!.Doctor)
-                .Include(t => t.TestType).ThenInclude(t => t!.TestCategory)
+                .Include(t => t.TestRequest)
+                    .ThenInclude(r => r.Patient)
+                .Include(t => t.TestRequest)
+                    .ThenInclude(r => r.Doctor)
+                .Include(t => t.TestType)
+                    .ThenInclude(tt => tt.TestCategory)
                 .Where(t =>
-                    (t.Status == "To Be Reviewed" && t.TechnicianId == technicianId)
+                    (t.Status == "To Be Reviewed" &&
+                     t.TechnicianId == technicianId)
                     ||
                     (t.Status == "Completed" &&
                      t.TechnicianId != null &&
                      t.TechnicianId != technicianId &&
-                     authorisedTestTypes.Contains(t.TestTypeId) &&
-                     _context.TestResults.Count(r => r.TestRequestTestTypeId == t.TestRequestTestTypeId) == 1 &&
-                     _context.TestResults.Any(r =>
-                         r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
-                         r.TechnicianId == t.TechnicianId &&
-                         r.ResultValue != null && r.ResultValue.Trim() != "")))
-                .OrderBy(t => t.Status == "Completed" ? 0 : 1)
+                     authorisedTestTypeIds.Contains(t.TestTypeId)))
+                .OrderBy(t => t.Status == "To Be Reviewed" ? 0 : 1)
                 .ThenByDescending(t => t.CompletionDateTime)
                 .ToListAsync();
 
-            var testIds = tests.Select(t => t.TestRequestTestTypeId).ToList();
+            var testIds = tests
+                .Select(t => t.TestRequestTestTypeId)
+                .ToList();
 
-            // Include original technician's results for verifier review.
             var savedResults = await _context.TestResults
                 .AsNoTracking()
                 .Where(r => testIds.Contains(r.TestRequestTestTypeId))
-                .OrderBy(r => r.TestRequestTestTypeId)
                 .ToListAsync();
 
-            var resultIds = savedResults.Select(r => r.TestResultId).ToList();
+            var resultIds = savedResults
+                .Select(r => r.TestResultId)
+                .ToList();
+
             var histories = await _context.TestResultVerificationHistories
                 .AsNoTracking()
-                .Include(h => h.ActionByTechnician)
                 .Where(h => resultIds.Contains(h.TestResultId))
                 .OrderByDescending(h => h.ActionDateTime)
-                .ThenByDescending(h => h.TestResultVerificationHistoryId)
                 .ToListAsync();
-
-            var latestReviewHistory = histories
-                .Where(h => h.Action == "ReturnedForReview")
-                .GroupBy(h => h.TestResultId)
-                .ToDictionary(g => g.Key,
-                    g => g.OrderByDescending(h => h.ActionDateTime)
-                          .ThenByDescending(h => h.TestResultVerificationHistoryId)
-                          .First());
 
             ViewData["SavedResults"] = savedResults;
             ViewData["ReviewHistories"] = histories;
-            ViewData["LatestReviewHistory"] = latestReviewHistory;
-            ViewData["ReviewCount"] = tests.Count(t => t.Status == "To Be Reviewed");
-            ViewData["CompletedCount"] = tests.Count(t => t.Status == "Completed");
+
+            ViewData["LatestReviewHistory"] = histories
+                .Where(h => h.Action == "ReturnedForReview")
+                .GroupBy(h => h.TestResultId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.First());
+
+            ViewData["ReviewCount"] = tests.Count(t =>
+                t.Status == "To Be Reviewed");
+
+            ViewData["CompletedCount"] = tests.Count(t =>
+                t.Status == "Completed");
+
             ViewData["TotalCount"] = tests.Count;
 
-            return View("Review", tests);
+            return View(tests);
         }
 
 

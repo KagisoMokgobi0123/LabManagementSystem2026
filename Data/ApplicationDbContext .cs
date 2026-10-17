@@ -118,7 +118,7 @@ namespace NMB_HLabSys.Data
         // ============================================================
 
 
-        public DbSet<TestResultVerificationHistoryModel>TestResultVerificationHistories
+        public DbSet<TestResultVerificationHistoryModel> TestResultVerificationHistories
         { get; set; }
 
         public DbSet<MedicationCategory> MedicationCategories { get; set; }
@@ -166,7 +166,7 @@ namespace NMB_HLabSys.Data
                     .HasPrecision(18, 4);
             });
 
-    
+
 
             builder.Entity<TestResultVerificationHistoryModel>(entity =>
             {
@@ -1454,6 +1454,172 @@ namespace NMB_HLabSys.Data
                     Status = "Submitted",
                     StartDateTime = null,
                     CompletionDateTime = null
+                },
+
+                // DEVELOPMENT DEMO: Technician 1 completed this test.
+                // Technician 2 has an active assignment for TestTypeId 3
+                // and can independently verify the result.
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 1001,
+                    TestRequestId = 4,
+                    TestTypeId = 3,
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    Status = "Completed",
+                    StartDateTime = new DateTime(2026, 10, 14, 8, 30, 0),
+                    CompletionDateTime = new DateTime(2026, 10, 14, 10, 0, 0)
+                },
+
+                // DEVELOPMENT DEMO: Technician 2 completed this test.
+                // Technician 1 can independently verify it.
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 1002,
+                    TestRequestId = 8,
+                    TestTypeId = 3,
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    Status = "Completed",
+                    StartDateTime = new DateTime(2026, 10, 14, 9, 0, 0),
+                    CompletionDateTime = new DateTime(2026, 10, 14, 11, 15, 0)
+                },
+
+                // DEVELOPMENT DEMO: Returned to Technician 1 for correction.
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 1003,
+                    TestRequestId = 3,
+                    TestTypeId = 3,
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    Status = "To Be Reviewed",
+                    StartDateTime = new DateTime(2026, 10, 13, 8, 0, 0),
+                    CompletionDateTime = new DateTime(2026, 10, 13, 9, 30, 0)
+                },
+
+                // DEVELOPMENT DEMO: Returned to Technician 2 for correction.
+                new TestRequestTestTypeModel
+                {
+                    TestRequestTestTypeId = 1004,
+                    TestRequestId = 6,
+                    TestTypeId = 3,
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    Status = "To Be Reviewed",
+                    StartDateTime = new DateTime(2026, 10, 13, 10, 0, 0),
+                    CompletionDateTime = new DateTime(2026, 10, 13, 12, 0, 0)
+                }
+            );
+
+            // ============================================================
+            // DEVELOPMENT-ONLY REVIEW QUEUE RESULTS
+            // Fictional values for UI/workflow testing; not clinical records.
+            // ============================================================
+            builder.Entity<TestResultModel>().HasData(
+                new TestResultModel
+                {
+                    TestResultId = 2001,
+                    TestRequestTestTypeId = 1001,
+                    ResultName = "Peripheral Blood Film",
+                    ResultValue = "No abnormal cells seen",
+                    MeasurementUnit = "Qualitative",
+                    IsAbnormal = false,
+                    ResultFlag = "Not Evaluated",
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    Notes = "DEMO DATA ONLY - not for clinical use.",
+                    CapturedDateTime = new DateTime(2026, 10, 14, 9, 50, 0, DateTimeKind.Utc),
+                    RequiresReview = false,
+                    ReviewNotes = null,
+                    VerifiedByTechnicianId = null,
+                    VerifiedDateTime = null
+                },
+                new TestResultModel
+                {
+                    TestResultId = 2002,
+                    TestRequestTestTypeId = 1002,
+                    ResultName = "Peripheral Blood Film",
+                    ResultValue = "No abnormal cells seen",
+                    MeasurementUnit = "Qualitative",
+                    IsAbnormal = false,
+                    ResultFlag = "Not Evaluated",
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    Notes = "DEMO DATA ONLY - not for clinical use.",
+                    CapturedDateTime = new DateTime(2026, 10, 14, 11, 0, 0, DateTimeKind.Utc),
+                    RequiresReview = false,
+                    ReviewNotes = null,
+                    VerifiedByTechnicianId = null,
+                    VerifiedDateTime = null
+                },
+                new TestResultModel
+                {
+                    TestResultId = 2003,
+                    TestRequestTestTypeId = 1003,
+                    ResultName = "Peripheral Blood Film",
+                    ResultValue = "Film quality inadequate",
+                    MeasurementUnit = "Qualitative",
+                    IsAbnormal = false,
+                    ResultFlag = "Not Evaluated",
+                    TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    Notes = "DEMO DATA ONLY - not for clinical use.",
+                    CapturedDateTime = new DateTime(2026, 10, 13, 9, 15, 0, DateTimeKind.Utc),
+                    RequiresReview = true,
+                    ReviewNotes = "Please prepare a new blood film, review the morphology, and correct the recorded finding before resubmission.",
+                    VerifiedByTechnicianId = null,
+                    VerifiedDateTime = null
+                },
+                new TestResultModel
+                {
+                    TestResultId = 2004,
+                    TestRequestTestTypeId = 1004,
+                    ResultName = "Peripheral Blood Film",
+                    ResultValue = "Cell morphology unclear",
+                    MeasurementUnit = "Qualitative",
+                    IsAbnormal = false,
+                    ResultFlag = "Not Evaluated",
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    Notes = "DEMO DATA ONLY - not for clinical use.",
+                    CapturedDateTime = new DateTime(2026, 10, 13, 11, 45, 0, DateTimeKind.Utc),
+                    RequiresReview = true,
+                    ReviewNotes = "Please repeat the film examination and provide a clear qualitative interpretation before resubmission.",
+                    VerifiedByTechnicianId = null,
+                    VerifiedDateTime = null
+                }
+            );
+
+            // DEMO VERIFICATION AUDIT HISTORY
+            builder.Entity<TestResultVerificationHistoryModel>().HasData(
+                new TestResultVerificationHistoryModel
+                {
+                    TestResultVerificationHistoryId = 3001,
+                    TestResultId = 2001,
+                    ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    Action = "SubmittedForVerification",
+                    Notes = "Test submitted for independent verification.",
+                    ActionDateTime = new DateTime(2026, 10, 14, 10, 0, 0, DateTimeKind.Utc)
+                },
+                new TestResultVerificationHistoryModel
+                {
+                    TestResultVerificationHistoryId = 3002,
+                    TestResultId = 2002,
+                    ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    Action = "SubmittedForVerification",
+                    Notes = "Test submitted for independent verification.",
+                    ActionDateTime = new DateTime(2026, 10, 14, 11, 15, 0, DateTimeKind.Utc)
+                },
+                new TestResultVerificationHistoryModel
+                {
+                    TestResultVerificationHistoryId = 3003,
+                    TestResultId = 2003,
+                    ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    Action = "ReturnedForReview",
+                    Notes = "Please prepare a new blood film, review the morphology, and correct the recorded finding before resubmission.",
+                    ActionDateTime = new DateTime(2026, 10, 13, 9, 40, 0, DateTimeKind.Utc)
+                },
+                new TestResultVerificationHistoryModel
+                {
+                    TestResultVerificationHistoryId = 3004,
+                    TestResultId = 2004,
+                    ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                    Action = "ReturnedForReview",
+                    Notes = "Please repeat the film examination and provide a clear qualitative interpretation before resubmission.",
+                    ActionDateTime = new DateTime(2026, 10, 13, 12, 10, 0, DateTimeKind.Utc)
                 }
             );
 
