@@ -1,5 +1,145 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+@using System.Linq
 @{
+    ViewData["Title"] = "Overdue Tests";
+    Layout = "_TechnicianLayout";
+    var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
 }
+<style>
+    .tat-page {
+        padding: 24px;
+    }
+
+    .tat-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+        .tat-heading h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 750;
+        }
+
+    .tat-muted {
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .tat-button {
+        background: #0878a6;
+        color: white;
+        padding: 9px 15px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .tat-table-wrap {
+        background: white;
+        border-radius: 12px;
+        overflow-x: auto;
+        border: 1px solid #e2e8f0;
+    }
+
+    .tat-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 850px;
+    }
+
+        .tat-table th, .tat-table td {
+            padding: 14px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .tat-table th {
+            background: #f1f5f9;
+            font-weight: 700;
+        }
+
+    .tat-empty {
+        padding: 35px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        color: #475569;
+    }
+</style>
+<div class="tat-page">
+    <div class="tat-heading">
+        <div>
+            <h2>Overdue Tests (@tests.Count)</h2>
+            <p class="tat-muted">SUBOverdue Tests. Times shown in UTC.</p>
+        </div>
+        <a class="tat-button" href="/Technician/Tests/MyTests">Back to My Tests</a>
+    </div>
+    @if (tests.Count == 0)
+    {
+        <div class="tat-empty">No tests currently match this category.</div>
+    }
+    else
+    {
+        <div class="tat-table-wrap">
+            <table class="tat-table">
+                <thead>
+                    <tr><th>Request #</th><th>Test Type</th><th>Category</th><th>Started (UTC)</th><th>Expected Completion (UTC)</th><th>Minutes Overdue</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var test in tests)
+                    {
+                        DateTime? due =
+                            test.StartDateTime.HasValue && test.TestType != null
+                                ? test.StartDateTime.Value.AddHours(
+                                    test.TestType.TurnAroundTimeHours)
+                                : null;
+
+                        double minutes = due.HasValue
+                            ? (DateTime.UtcNow - due.Value).TotalMinutes
+                            : 0.0;
+
+                        <tr>
+                            <td>
+                                @(test.TestRequest?.RequestNumber
+                                    ?? test.TestRequestId.ToString())
+                            </td>
+
+                            <td>@(test.TestType?.Name ?? "Unknown")</td>
+
+                            <td>
+                                @(test.TestType?.TestCategory?.Description ?? "—")
+                            </td>
+
+                            <td>
+                                @(test.StartDateTime?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+                            </td>
+
+                            <td>
+                                @(due?.ToString("yyyy-MM-dd HH:mm") ?? "—")
+                            </td>
+
+                            <td>
+                                @(due.HasValue
+                                    ? $"{Math.Max(0, minutes):0} min"
+                                    : "—")
+                            </td>
+
+                            <td>@test.Status</td>
+
+                            <td>
+                                <a href="/Technician/Tests/Details/@test.TestRequestTestTypeId">
+                                    View Test
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

@@ -1,12 +1,61 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using NMB_HLabSys.Models.Identity
+@using Microsoft.EntityFrameworkCore
 @inject UserManager<ApplicationUser> UserManager
+@inject NMB_HLabSys.Data.ApplicationDbContext Db
 
 @{
     ViewData["Title"] = "Lab Technician Dashboard";
     Layout = "_TechnicianLayout";
 
     var currentUser = await UserManager.GetUserAsync(User);
+
+    // Current database counts (updated on every dashboard request).
+    var technicianId = currentUser?.Id;
+    var assignedTypeIds = Db.TechnicianTestTypes
+        .Where(a => a.TechnicianId == technicianId && a.IsActive)
+        .Select(a => a.TestTypeId);
+    var mySelectedCount = Db.TestRequestTestTypes.Count(t =>
+        t.TechnicianId == technicianId && t.Status == "In Progress");
+    var waitingSelectionCount = Db.TestRequestTestTypes.Count(t =>
+        t.Status == "SamplesReceived" && (t.TechnicianId == null || t.TechnicianId == "") && assignedTypeIds.Contains(t.TestTypeId));
+    var waitingVerificationCount = Db.TestRequestTestTypes.Count(t =>
+        t.Status == "Completed" && t.TechnicianId != null && t.TechnicianId != technicianId && assignedTypeIds.Contains(t.TestTypeId));
+    var toReviewCount = Db.TestRequestTestTypes.Count(t =>
+        t.TechnicianId == technicianId && t.Status == "To Be Reviewed");
+    var urgentRequestIds = Db.TestRequests.AsEnumerable()
+        .Where(r => r.Urgency.ToString().Equals("Urgent", StringComparison.OrdinalIgnoreCase)
+                 || r.Urgency.ToString().Equals("Stat", StringComparison.OrdinalIgnoreCase))
+        .Select(r => r.TestRequestId).ToList();
+    var urgentCount = Db.TestRequestTestTypes.Count(t =>
+        urgentRequestIds.Contains(t.TestRequestId) &&
+        (t.TechnicianId == technicianId ||
+         (t.Status == "SamplesReceived" && (t.TechnicianId == null || t.TechnicianId == "") && assignedTypeIds.Contains(t.TestTypeId))) &&
+        (t.Status == "SamplesReceived" || t.Status == "In Progress"));
+
+    // Current technician's selected tests; fetched fresh on each page request.
+    var workload = await Db.TestRequestTestTypes.AsNoTracking()
+            .Include(t => t.TestRequest)
+            .Include(t => t.TestType).ThenInclude(tt => tt.TestCategory)
+            .Where(t => t.TechnicianId == technicianId &&
+                (t.Status == "In Progress" || t.Status == "Completed" || t.Status == "To Be Reviewed"))
+            .OrderByDescending(t => t.StartDateTime)
+            .ToListAsync();
+    var workloadNowUtc = DateTime.UtcNow;
+    // Turnaround-time statistics for this technician's active tests.
+    // No matching records produce 0, never a dash.
+    var activeDeadlines = workload
+        .Where(t => t.Status == "In Progress" && t.StartDateTime.HasValue && t.TestType != null)
+        .Select(t => t.StartDateTime!.Value.AddHours(t.TestType!.TurnAroundTimeHours))
+        .ToList();
+    var overdueCount = activeDeadlines.Count(due => due < workloadNowUtc);
+    var nearingTatCount = activeDeadlines.Count(due =>
+        due >= workloadNowUtc && due <= workloadNowUtc.AddMinutes(60));
+
+    var workloadCategories = workload
+        .Select(t => t.TestType?.TestCategory?.Description)
+        .Where(c => !string.IsNullOrWhiteSpace(c))
+        .Distinct().OrderBy(c => c).ToList();
 
     var technicianName = currentUser?.FullName ?? "Lab Technician";
     var technicianEmail = currentUser?.Email ?? "";
@@ -19,8 +68,8 @@
 
 <style>
     /* =========================================================
-       PAGE
-       ========================================================= */
+               PAGE
+               ========================================================= */
 
     .tech-dashboard {
         min-height: 100vh;
@@ -28,42 +77,37 @@
     }
 
     /* =========================================================
-       HERO
-       ========================================================= */
+               HERO
+               ========================================================= */
 
     .tech-hero {
         position: relative;
         overflow: hidden;
         padding: 38px 0 82px;
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 45%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
     }
 
-    .tech-hero::before {
-        content: "";
-        position: absolute;
-        width: 260px;
-        height: 260px;
-        right: 220px;
-        bottom: -190px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.05);
-    }
+        .tech-hero::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: 220px;
+            bottom: -190px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
 
-    .tech-hero::after {
-        content: "";
-        position: absolute;
-        width: 380px;
-        height: 380px;
-        right: -100px;
-        top: -210px;
-        border-radius: 50%;
-        background: rgba(255,255,255,.06);
-    }
+        .tech-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
 
     .tech-hero-content {
         position: relative;
@@ -116,9 +160,9 @@
         transition: .2s ease;
     }
 
-    .hero-btn:hover {
-        transform: translateY(-2px);
-    }
+        .hero-btn:hover {
+            transform: translateY(-2px);
+        }
 
     .hero-btn-primary {
         background: #fff;
@@ -132,8 +176,8 @@
     }
 
     /* =========================================================
-       PAGE INNER
-       ========================================================= */
+               PAGE INNER
+               ========================================================= */
 
     .tech-page-inner {
         position: relative;
@@ -143,8 +187,8 @@
     }
 
     /* =========================================================
-       CLICKABLE STAT CARDS
-       ========================================================= */
+               CLICKABLE STAT CARDS
+               ========================================================= */
 
     .stat-card-link {
         display: block;
@@ -163,11 +207,7 @@
         background: #fff;
         box-shadow: 0 4px 18px rgba(15,23,42,.07);
         cursor: pointer;
-
-        transition:
-            transform .2s ease,
-            box-shadow .2s ease,
-            border-color .2s ease;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
     .stat-card-link:hover .stat-card {
@@ -181,11 +221,9 @@
         position: absolute;
         right: 20px;
         bottom: 17px;
-
         font-family: "Font Awesome 5 Free";
         font-size: 10px;
         font-weight: 900;
-
         color: #cbd5e1;
         opacity: 0;
         transform: translateX(-5px);
@@ -201,10 +239,10 @@
         outline: none;
     }
 
-    .stat-card-link:focus .stat-card {
-        border-color: #0284c7;
-        box-shadow: 0 0 0 3px rgba(2,132,199,.15);
-    }
+        .stat-card-link:focus .stat-card {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2,132,199,.15);
+        }
 
     .stat-top {
         display: flex;
@@ -238,11 +276,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 44px;
         height: 44px;
         min-width: 44px;
-
         border-radius: 11px;
         font-size: 17px;
     }
@@ -283,8 +319,8 @@
     }
 
     /* =========================================================
-       DASHBOARD CARDS
-       ========================================================= */
+               DASHBOARD CARDS
+               ========================================================= */
 
     .dashboard-card {
         margin-bottom: 24px;
@@ -294,15 +330,15 @@
         box-shadow: 0 4px 18px rgba(15,23,42,.06);
     }
 
-    .dashboard-card .card-header {
-        padding: 18px 20px;
-        border-bottom: 1px solid #eef2f7;
-        background: transparent;
-    }
+        .dashboard-card .card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f7;
+            background: transparent;
+        }
 
-    .dashboard-card .card-body {
-        padding: 20px;
-    }
+        .dashboard-card .card-body {
+            padding: 20px;
+        }
 
     .dashboard-title {
         margin: 0;
@@ -319,8 +355,8 @@
     }
 
     /* =========================================================
-       WORKFLOW
-       ========================================================= */
+               WORKFLOW
+               ========================================================= */
 
     .workflow {
         display: flex;
@@ -338,16 +374,12 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 48px;
         height: 48px;
-
         margin: auto;
         border-radius: 50%;
-
         background: #e0f2fe;
         color: #0284c7;
-
         font-size: 16px;
     }
 
@@ -366,8 +398,8 @@
     }
 
     /* =========================================================
-       CLICKABLE WORKFLOW
-       ========================================================= */
+               CLICKABLE WORKFLOW
+               ========================================================= */
 
     .workflow-link {
         position: relative;
@@ -381,39 +413,39 @@
         transition: transform .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
 
-    .workflow-link:hover {
-        transform: translateY(-4px);
-        border-color: #bae6fd;
-        background: #f8fcff;
-        box-shadow: 0 7px 20px rgba(15, 23, 42, .08);
-        color: inherit !important;
-        text-decoration: none !important;
-    }
+        .workflow-link:hover {
+            transform: translateY(-4px);
+            border-color: #bae6fd;
+            background: #f8fcff;
+            box-shadow: 0 7px 20px rgba(15, 23, 42, .08);
+            color: inherit !important;
+            text-decoration: none !important;
+        }
 
-    .workflow-link:focus {
-        outline: none;
-        border-color: #0284c7;
-        box-shadow: 0 0 0 3px rgba(2, 132, 199, .15);
-    }
+        .workflow-link:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, .15);
+        }
 
-    .workflow-link .workflow-icon {
-        transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
-    }
+        .workflow-link .workflow-icon {
+            transition: transform .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
+        }
 
-    .workflow-link:hover .workflow-icon {
-        transform: scale(1.08);
-        background: #0284c7;
-        color: #fff;
-        box-shadow: 0 5px 14px rgba(2, 132, 199, .25);
-    }
+        .workflow-link:hover .workflow-icon {
+            transform: scale(1.08);
+            background: #0284c7;
+            color: #fff;
+            box-shadow: 0 5px 14px rgba(2, 132, 199, .25);
+        }
 
-    .workflow-link .workflow-title {
-        transition: color .2s ease;
-    }
+        .workflow-link .workflow-title {
+            transition: color .2s ease;
+        }
 
-    .workflow-link:hover .workflow-title {
-        color: #0284c7;
-    }
+        .workflow-link:hover .workflow-title {
+            color: #0284c7;
+        }
 
     .workflow-hint {
         margin-top: 3px;
@@ -428,48 +460,39 @@
     }
 
     /* =========================================================
-       QUICK ACTIONS
-       ========================================================= */
+               QUICK ACTIONS
+               ========================================================= */
 
     .quick-action {
         display: flex;
         align-items: center;
-
         min-height: 78px;
         margin-bottom: 12px;
         padding: 15px;
-
         border: 1px solid #e8edf3;
         border-radius: 10px;
-
         background: #fff;
-
         color: inherit !important;
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .quick-action:hover {
-        transform: translateY(-2px);
-        border-color: #0284c7;
-        background: #f8fcff;
-        box-shadow: 0 6px 18px rgba(15,23,42,.06);
-    }
+        .quick-action:hover {
+            transform: translateY(-2px);
+            border-color: #0284c7;
+            background: #f8fcff;
+            box-shadow: 0 6px 18px rgba(15,23,42,.06);
+        }
 
     .quick-action-icon {
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 42px;
         height: 42px;
         min-width: 42px;
-
         margin-right: 12px;
-
         border-radius: 10px;
-
         background: #e0f2fe;
         color: #0284c7;
     }
@@ -493,8 +516,8 @@
     }
 
     /* =========================================================
-       ATTENTION
-       ========================================================= */
+               ATTENTION
+               ========================================================= */
 
     .attention-item {
         display: flex;
@@ -503,21 +526,18 @@
         border-bottom: 1px solid #f1f5f9;
     }
 
-    .attention-item:last-child {
-        border-bottom: 0;
-    }
+        .attention-item:last-child {
+            border-bottom: 0;
+        }
 
     .attention-icon {
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 37px;
         height: 37px;
         min-width: 37px;
-
         margin-right: 11px;
-
         border-radius: 9px;
     }
 
@@ -534,37 +554,31 @@
     }
 
     /* =========================================================
-       TABLE
-       ========================================================= */
+               TABLE
+               ========================================================= */
 
     .tech-table {
         margin-bottom: 0;
     }
 
-    .tech-table thead th {
-        padding: 12px 10px;
+        .tech-table thead th {
+            padding: 12px 10px;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
 
-        border-top: 0;
-        border-bottom: 1px solid #e2e8f0;
-
-        color: #64748b;
-
-        font-size: 10px;
-        font-weight: 700;
-
-        text-transform: uppercase;
-        letter-spacing: .4px;
-    }
-
-    .tech-table tbody td {
-        padding: 13px 10px;
-        vertical-align: middle;
-
-        border-color: #f1f5f9;
-
-        color: #334155;
-        font-size: 12px;
-    }
+        .tech-table tbody td {
+            padding: 13px 10px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
 
     .request-number {
         color: #075985;
@@ -574,9 +588,7 @@
     .status-badge {
         display: inline-block;
         padding: 5px 9px;
-
         border-radius: 50px;
-
         font-size: 10px;
         font-weight: 700;
     }
@@ -612,8 +624,8 @@
     }
 
     /* =========================================================
-       FILTERS
-       ========================================================= */
+               FILTERS
+               ========================================================= */
 
     .filter-select {
         height: 35px;
@@ -623,8 +635,8 @@
     }
 
     /* =========================================================
-       PROFILE
-       ========================================================= */
+               PROFILE
+               ========================================================= */
 
     .profile-summary {
         display: flex;
@@ -635,20 +647,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 46px;
         height: 46px;
-
         margin-right: 12px;
-
         border-radius: 50%;
-
-        background: linear-gradient(
-            135deg,
-            #075985,
-            #0284c7
-        );
-
+        background: linear-gradient( 135deg, #075985, #0284c7 );
         color: #fff;
         font-weight: 700;
     }
@@ -666,8 +669,8 @@
     }
 
     /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+               RESPONSIVE
+               ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -675,9 +678,9 @@
             padding-top: 25px;
         }
 
-        .tech-hero h1 {
-            font-size: 24px;
-        }
+            .tech-hero h1 {
+                font-size: 24px;
+            }
 
         .hero-actions {
             margin-top: 20px;
@@ -698,26 +701,26 @@
             text-align: left;
         }
 
-        .workflow-link .workflow-icon {
-            grid-column: 1;
-            grid-row: 1 / span 2;
-            margin: 0;
-        }
+            .workflow-link .workflow-icon {
+                grid-column: 1;
+                grid-row: 1 / span 2;
+                margin: 0;
+            }
 
-        .workflow-link .workflow-title {
-            grid-column: 2;
-            grid-row: 1;
-            align-self: end;
-            margin: 0;
-            font-size: 12px;
-        }
+            .workflow-link .workflow-title {
+                grid-column: 2;
+                grid-row: 1;
+                align-self: end;
+                margin: 0;
+                font-size: 12px;
+            }
 
-        .workflow-link .workflow-hint {
-            grid-column: 2;
-            grid-row: 2;
-            align-self: start;
-            margin-top: 2px;
-        }
+            .workflow-link .workflow-hint {
+                grid-column: 2;
+                grid-row: 2;
+                align-self: start;
+                margin-top: 2px;
+            }
 
         .workflow-line {
             flex: none;
@@ -768,42 +771,42 @@
 
 
 
-<div class="col-md-4">
+                    <div class="col-md-4">
 
-    <div class="hero-actions d-flex align-items-center justify-content-md-end"
-         style="flex-wrap: nowrap; gap: 10px;">
+                        <div class="hero-actions d-flex align-items-center justify-content-md-end"
+                             style="flex-wrap: nowrap; gap: 10px;">
 
-       @*Redirect the technician to the Select Test view*@
-        <a href="Technician/Tests/Select"
-           class="hero-btn hero-btn-primary"
-           style="white-space: nowrap;">
+                            @*Redirect the technician to the Select Test view*@
+                            <a href="/Technician/Tests/Select"
+                               class="hero-btn hero-btn-primary"
+                               style="white-space: nowrap;">
 
-            <i class="fas fa-clipboard-check"></i>
-            Select Test
+                                <i class="fas fa-clipboard-check"></i>
+                                Select Test
 
-        </a>
-         @*Redirect the technician to the Receive Samples view*@
-        <a href="Technician/Tests/ReceiveSamples"
+                            </a>
+                            @*Redirect the technician to the Receive Samples view*@
+                            <a href="/Technician/ReceiveSamples/Index"
                                class="hero-btn hero-btn-outline"
-           style="white-space: nowrap;">
+                               style="white-space: nowrap;">
 
-            <i class="fas fa-vials"></i>
-            Receive Samples
+                                <i class="fas fa-vials"></i>
+                                Receive Samples
 
-        </a>
-        @*Redirect the technician to the verified samples results*@
-        <a href="Technician/Tests/Verified"
-           class="hero-btn hero-btn-outline"
-           style="white-space: nowrap;">
+                            </a>
+                            @*Redirect the technician to the verified samples results*@
+                            <a href="/Technician/Tests/PendingVerification"
+                               class="hero-btn hero-btn-outline"
+                               style="white-space: nowrap;">
 
-            <i class="fas fa-check-double"></i>
-            Verify Results
+                                <i class="fas fa-check-double"></i>
+                                Verify Results
 
-        </a>
+                            </a>
 
-    </div>
+                        </div>
 
-</div>
+                    </div>
 
                 </div>
 
@@ -831,7 +834,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="Technician/Tests/MyTests"
+                <a href="/Technician/Tests/MyTests"
                    class="stat-card-link"
                    title="View my selected tests">
 
@@ -846,7 +849,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(mySelectedCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -874,7 +877,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="Technician/Tests/Available"
+                <a href="/Technician/Tests/Select"
                    class="stat-card-link"
                    title="View tests waiting for selection">
 
@@ -889,7 +892,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(waitingSelectionCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -917,7 +920,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="Technician/Tests/Verified"
+                <a href="/Technician/Tests/PendingVerification"
                    class="stat-card-link"
                    title="View results waiting for verification">
 
@@ -932,7 +935,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(waitingVerificationCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -960,7 +963,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="Technician/Tests/Review"
+                <a href="/Technician/Tests/Review"
                    class="stat-card-link"
                    title="View tests returned for review">
 
@@ -975,7 +978,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(toReviewCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -1011,7 +1014,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a href="Technician/Tests/Urgent"
+                <a href="/Technician/Tests/Urgent"
                    class="stat-card-link"
                    title="View urgent and STAT tests">
 
@@ -1026,7 +1029,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(urgentCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -1054,7 +1057,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a href="Technician/Tests/Overdue"
+                <a href="/Technician/Tests/Overdue"
                    class="stat-card-link"
                    title="View overdue tests">
 
@@ -1069,7 +1072,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(overdueCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -1097,7 +1100,7 @@
 
             <div class="col-xl-4 col-md-12 mb-4">
 
-                <a href="Technician/Tests/NearingTat"
+                <a href="/Technician/Tests/NearingTat"
                    class="stat-card-link"
                    title="View tests nearing turnaround time">
 
@@ -1112,7 +1115,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @(nearingTatCount)
                                 </h2>
 
                                 <div class="stat-note">
@@ -1138,6 +1141,32 @@
         </div>
 
 
+        <!-- LIVE TEST ACTIVITY: beneath the seven workload cards -->
+        <div class="dashboard-card" id="liveTestActivity">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center" style="gap:12px">
+                <div>
+                    <h4 class="dashboard-title"><i class="fas fa-chart-line text-primary mr-2"></i>Live Test Activity</h4>
+                    <p class="dashboard-subtitle">Your tests started and completed, based on UTC dates. Automatically refreshes every 15 seconds.</p>
+                </div>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Graph period">
+                    <button type="button" class="btn btn-primary activity-period" data-days="7">7 Days</button>
+                    <button type="button" class="btn btn-outline-primary activity-period" data-days="30">30 Days</button>
+                    <button type="button" class="btn btn-outline-primary activity-period" data-days="90">90 Days</button>
+                </div>
+                <button type="button" id="refreshActivity" class="btn btn-outline-secondary btn-sm"><i class="fas fa-sync-alt mr-1"></i> Refresh Now</button>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4 mb-2"><div class="p-3 rounded" style="background:#eff6ff"><small>Tests Started (period)</small><h3 id="activityStarted" class="mb-0">—</h3></div></div>
+                    <div class="col-md-4 mb-2"><div class="p-3 rounded" style="background:#ecfdf5"><small>Tests Completed (period)</small><h3 id="activityCompleted" class="mb-0">—</h3></div></div>
+                    <div class="col-md-4 mb-2"><div class="p-3 rounded" style="background:#f8fafc"><small>Completion rate*</small><h3 id="activityRate" class="mb-0">—</h3></div></div>
+                </div>
+                <div style="position:relative;height:320px"><canvas id="technicianActivityChart" role="img" aria-label="Line graph of started and completed laboratory tests"></canvas></div>
+                <p id="activityStatus" class="text-muted small mt-2 mb-0" role="status">Loading live statistics...</p>
+                <small class="text-muted">*Completed during period ÷ started during period; not a cohort completion rate.</small>
+            </div>
+        </div>
+
         <!-- =====================================================
              LABORATORY WORKFLOW
              ===================================================== -->
@@ -1160,7 +1189,7 @@
 
                 <div class="workflow">
 
-                    <a asp-area="Technician" asp-controller="ReceiveSamples" asp-action="Index"
+                    <a href="/Technician/ReceiveSamples/Index"
                        class="workflow-item workflow-link" title="Receive and verify laboratory samples">
                         <div class="workflow-icon"><i class="fas fa-vials"></i></div>
                         <div class="workflow-title">Receive Samples</div>
@@ -1169,7 +1198,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a asp-area="Technician" asp-controller="Tests" asp-action="Available"
+                    <a href="/Technician/Tests/Select"
                        class="workflow-item workflow-link" title="Select an available assigned test type">
                         <div class="workflow-icon"> <i class="fas fa-clipboard-list"></i></div>
                         <div class="workflow-title">Select Test Type</div>
@@ -1178,7 +1207,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
+                    <a href="/Technician/Tests/MyTests"
                        class="workflow-item workflow-link" title="View and perform your selected tests">
                         <div class="workflow-icon"><i class="fas fa-microscope"></i></div>
                         <div class="workflow-title">Perform Test</div>
@@ -1187,7 +1216,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a asp-area="Technician" asp-controller="Results" asp-action="Index"
+                    <a href="/Technician/Tests/TestResults"
                        class="workflow-item workflow-link" title="Capture laboratory test results">
                         <div class="workflow-icon"><i class="fas fa-file-medical"></i></div>
                         <div class="workflow-title">Capture Results</div>
@@ -1196,7 +1225,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a asp-area="Technician" asp-controller="Verification" asp-action="Pending"
+                    <a href="/Technician/Tests/PendingVerification"
                        class="workflow-item workflow-link" title="Verify completed test results">
                         <div class="workflow-icon"><i class="fas fa-user-check"></i></div>
                         <div class="workflow-title">Verify Results</div>
@@ -1205,7 +1234,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a asp-area="Technician" asp-controller="Verification" asp-action="Verified"
+                    <a href="/Technician/Tests/Verified"
                        class="workflow-item workflow-link" title="View verified laboratory results">
                         <div class="workflow-icon"><i class="fas fa-check-circle"></i></div>
                         <div class="workflow-title">Verified</div>
@@ -1252,7 +1281,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/ReceiveSamples/Index"   
+                                <a href="/Technician/ReceiveSamples/Index"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1283,17 +1312,17 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/Available" 
+                                <a href="/Technician/Tests/Select"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
-                                         <i class="fas fa-clipboard-list"></i>
+                                        <i class="fas fa-clipboard-list"></i>
                                     </div>
 
                                     <div>
 
                                         <div class="quick-action-title">
-                                            Select Test 
+                                            Select Test
                                         </div>
 
                                         <div class="quick-action-text">
@@ -1314,27 +1343,27 @@
 
                             <div class="col-md-6">
 
-                               <a href="/Technician/Tests/MyTests"
-   class="quick-action">
+                                <a href="/Technician/Tests/MyTests"
+                                   class="quick-action">
 
-    <div class="quick-action-icon">
-        <i class="fas fa-microscope"></i>
-    </div>
+                                    <div class="quick-action-icon">
+                                        <i class="fas fa-microscope"></i>
+                                    </div>
 
-    <div>
-        <div class="quick-action-title">
-            My Selected Tests
-        </div>
+                                    <div>
+                                        <div class="quick-action-title">
+                                            My Selected Tests
+                                        </div>
 
-        <div class="quick-action-text">
-            View tests selected and currently
-            being processed by you
-        </div>
-    </div>
+                                        <div class="quick-action-text">
+                                            View tests selected and currently
+                                            being processed by you
+                                        </div>
+                                    </div>
 
-    <i class="fas fa-chevron-right quick-action-arrow"></i>
+                                    <i class="fas fa-chevron-right quick-action-arrow"></i>
 
-</a>
+                                </a>
                             </div>
 
 
@@ -1342,7 +1371,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/MyTests" 
+                                <a href="/Technician/Tests/MyTests"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1373,7 +1402,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/MyTests" 
+                                <a href="/Technician/Tests/MyTests"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1404,13 +1433,11 @@
 
                             <div class="col-md-6">
 
-                                <a asp-area="Technician"
-                                   asp-controller="Tests"
-                                   asp-action="Review"
+                                <a href="/Technician/Tests/Review"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
-                                      <i class="fas fa-undo-alt"></i>
+                                        <i class="fas fa-undo-alt"></i>
                                     </div>
 
                                     <div>
@@ -1437,11 +1464,11 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/VerificationHistory"
+                                <a href="/Technician/Tests/VerificationHistoryIndex"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
-<i class="fas fa-check-circle"></i>
+                                        <i class="fas fa-check-circle"></i>
                                     </div>
 
                                     <div>
@@ -1631,94 +1658,49 @@
         <div class="dashboard-card">
 
             <div class="card-header">
-
                 <div class="row align-items-center">
-
                     <div class="col-lg-5">
-
-                        <h4 class="dashboard-title">
-                            My Test Workload
-                        </h4>
-
-                        <p class="dashboard-subtitle">
-                            Selected tests, expected completion times
-                            and processing status
-                        </p>
-
+                        <h4 class="dashboard-title">My Test Workload</h4>
+                        <p class="dashboard-subtitle">Selected tests, expected completion times and processing status</p>
                     </div>
-
-
                     <div class="col-lg-7 mt-3 mt-lg-0">
-
                         <div class="row">
-
                             <div class="col-md-3 mb-2 mb-md-0">
-
-                                <select class="form-control filter-select">
-
-                                    <option>All Urgencies</option>
-                                    <option>Routine</option>
-                                    <option>Urgent</option>
-                                    <option>STAT</option>
-
+                                <select id="workloadUrgency" class="form-control filter-select" onchange="filterTechnicianWorkload()">
+                                    <option value="">All Urgencies</option>
+                                    <option value="Routine">Routine</option>
+                                    <option value="Urgent">Urgent</option>
+                                    <option value="Stat">STAT</option>
                                 </select>
-
                             </div>
-
-
                             <div class="col-md-3 mb-2 mb-md-0">
-
-                                <select class="form-control filter-select">
-
-                                    <option>
-                                        All Categories
-                                    </option>
-
+                                <select id="workloadCategory" class="form-control filter-select" onchange="filterTechnicianWorkload()">
+                                    <option value="">All Categories</option>
+                                    @foreach (var category in workloadCategories)
+                                    {
+                                        <option value="@category">@category</option>
+                                    }
                                 </select>
-
                             </div>
-
-
                             <div class="col-md-3 mb-2 mb-md-0">
-
-                                <select class="form-control filter-select">
-
-                                    <option>Due Time</option>
-                                    <option>Overdue</option>
-                                    <option>Due Soon</option>
-
+                                <select id="workloadDue" class="form-control filter-select" onchange="filterTechnicianWorkload()">
+                                    <option value="">All Due Times</option>
+                                    <option value="overdue">Overdue</option>
+                                    <option value="soon">Due Soon (next 24h)</option>
                                 </select>
-
                             </div>
-
-
                             <div class="col-md-3">
-
-                                <input type="text"
-                                       class="form-control filter-select"
-                                       placeholder="Request #" />
-
+                                <input id="workloadRequest" type="text" class="form-control filter-select" placeholder="Request #" oninput="filterTechnicianWorkload()" />
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
-
             <div class="card-body p-0">
-
                 <div class="table-responsive">
-
-                    <table class="table tech-table">
-
+                    <table class="table tech-table" id="technicianWorkloadTable">
                         <thead>
-
                             <tr>
-
                                 <th>Request #</th>
                                 <th>Test Type</th>
                                 <th>Category</th>
@@ -1727,49 +1709,62 @@
                                 <th>Expected Completion</th>
                                 <th>Status</th>
                                 <th>Action</th>
-
                             </tr>
-
                         </thead>
-
-
                         <tbody>
-
-                            <tr>
-
-                                <td colspan="8"
-                                    class="text-center py-5 text-muted">
-
-                                    <i class="fas fa-microscope fa-2x mb-3 d-block"></i>
-
-                                    No tests currently selected.
-
-                                    <div class="mt-3">
-
-                                        <a href="/Technician/Tests/Available"
-                                           class="btn btn-primary btn-sm">
-
-                                            <i class="fas fa-list-check mr-1"></i>
-
-                                            View Available Tests
-
-                                        </a>
-
-                                    </div>
-
+                            @foreach (var test in workload)
+                            {
+                                var started = test.StartDateTime;
+                                DateTime? due = started.HasValue && test.TestType != null
+                                    ? started.Value.AddHours(test.TestType.TurnAroundTimeHours)
+                                    : null;
+                                var urgency = test.TestRequest?.Urgency.ToString() ?? "—";
+                                var category = test.TestType?.TestCategory?.Description ?? "—";
+                                var requestNumber = test.TestRequest?.RequestNumber ?? test.TestRequestId.ToString();
+                                var dueState = due.HasValue && test.Status != "Completed" && test.Status != "Verified"
+                                    ? (due.Value < workloadNowUtc ? "overdue" :
+                                       due.Value <= workloadNowUtc.AddHours(24) ? "soon" : "later")
+                                    : "none";
+                                <tr class="workload-row" data-urgency="@urgency" data-category="@category" data-due="@dueState" data-request="@requestNumber">
+                                    <td><span class="request-number">@requestNumber</span></td>
+                                    <td>@(test.TestType?.Name ?? "—")</td>
+                                    <td>@category</td>
+                                    <td>@urgency</td>
+                                    <td>@(started.HasValue ? started.Value.ToString("dd MMM yyyy HH:mm") + " UTC" : "Not started")</td>
+                                    <td>@(due.HasValue ? due.Value.ToString("dd MMM yyyy HH:mm") + " UTC" : "—")</td>
+                                    <td><span class="status-badge status-progress">@test.Status</span></td>
+                                    <td><a class="btn btn-outline-primary btn-sm" href="@Url.Action("Details", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">View</a></td>
+                                </tr>
+                            }
+                            <tr id="workloadEmpty" style="@(workload.Any() ? "display:none" : "")">
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    No matching selected tests.
+                                    <div class="mt-3"><a href="/Technician/Tests/Select" class="btn btn-primary btn-sm">View Available Tests</a></div>
                                 </td>
-
                             </tr>
-
                         </tbody>
-
                     </table>
-
                 </div>
-
             </div>
-
         </div>
+        <script>
+                    function filterTechnicianWorkload() {
+                        const urgency = document.getElementById('workloadUrgency').value.toLowerCase();
+                        const category = document.getElementById('workloadCategory').value.toLowerCase();
+                        const due = document.getElementById('workloadDue').value;
+                        const request = document.getElementById('workloadRequest').value.toLowerCase().trim();
+                        let shown = 0;
+                        document.querySelectorAll('#technicianWorkloadTable .workload-row').forEach(row => {
+                            const matches = (!urgency || row.dataset.urgency.toLowerCase() === urgency)
+                                && (!category || row.dataset.category.toLowerCase() === category)
+                                && (!due || row.dataset.due === due)
+                                && (!request || row.dataset.request.toLowerCase().includes(request));
+                            row.style.display = matches ? '' : 'none';
+                            if (matches) shown++;
+                        });
+                        document.getElementById('workloadEmpty').style.display = shown ? 'none' : '';
+                    }
+        </script>
 
 
         <!-- =====================================================
@@ -1800,7 +1795,7 @@
 
                     <div class="col-md-4">
 
-                        <a href="/Technician/Tests/Pending"
+                        <a href="/Technician/Tests/PendingVerification"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1862,12 +1857,12 @@
 
                     <div class="col-md-4">
 
-                        <a href="/Technician/Tests/VerificationHistory"
+                        <a href="/Technician/Tests/VerificationHistoryIndex"
                            class="quick-action">
 
                             <div class="quick-action-icon">
-   <i class="fas fa-undo-alt"></i>
-   </div>
+                                <i class="fas fa-undo-alt"></i>
+                            </div>
 
                             <div>
 
@@ -2068,3 +2063,61 @@
     </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+    const canvas = document.getElementById('technicianActivityChart');
+    if (!canvas) return;
+    const status = document.getElementById('activityStatus');
+    let days = 7;
+    let chart = null;
+    let loading = false;
+    const endpoint = '@Url.Action("TestActivityStats", "Home", new { area = "Technician" })';
+    const buttons = document.querySelectorAll('.activity-period');
+    async function refreshActivity() {
+        if (loading) return;
+        if (typeof Chart === 'undefined') {
+            status.textContent = 'Chart.js did not load. Check your internet connection or install Chart.js locally.';
+            return;
+        }
+        loading = true;
+        try {
+            const response = await fetch(endpoint + '?days=' + days, { cache: 'no-store', credentials: 'same-origin' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const data = await response.json();
+            const started = data.started.reduce((a, b) => a + b, 0);
+            const completed = data.completed.reduce((a, b) => a + b, 0);
+            document.getElementById('activityStarted').textContent = started;
+            document.getElementById('activityCompleted').textContent = completed;
+            document.getElementById('activityRate').textContent = started ? (completed / started * 100).toFixed(1) + '%' : 'N/A';
+            const series = [
+                { label: 'Started', data: data.started, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.25 },
+                { label: 'Completed', data: data.completed, borderColor: '#16a34a', backgroundColor: '#16a34a', tension: 0.25 }
+            ];
+            if (chart) {
+                chart.data.labels = data.labels;
+                chart.data.datasets = series;
+                chart.update();
+            } else {
+                chart = new Chart(canvas, {
+                    type: 'line',
+                    data: { labels: data.labels, datasets: series },
+                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                });
+            }
+            status.textContent = 'Last updated: ' + new Date().toLocaleTimeString() + ' (graph dates use UTC)';
+        } catch (err) {
+            status.textContent = 'Unable to load live statistics: ' + err.message;
+        } finally { loading = false; }
+    }
+    buttons.forEach(btn => btn.addEventListener('click', () => {
+        days = Number(btn.dataset.days);
+        buttons.forEach(b => { b.classList.toggle('btn-primary', b === btn); b.classList.toggle('btn-outline-primary', b !== btn); });
+        refreshActivity();
+    }));
+    document.getElementById('refreshActivity').addEventListener('click', refreshActivity);
+    refreshActivity();
+    const interval = setInterval(() => { if (!document.hidden) refreshActivity(); }, 15000);
+    window.addEventListener('pagehide', () => clearInterval(interval), { once: true });
+})();
+</script>

@@ -20,13 +20,15 @@
 
     var statRequests = requests.Count(r =>
         r.Urgency == Urgency.Stat);
+
+    var selectedUrgency = ViewBag.SelectedUrgency as string ?? "";
 }
 
 <style>
 
     /* =========================================================
-       PAGE
-       ========================================================= */
+           PAGE
+           ========================================================= */
 
     .receive-page {
         min-height: 100vh;
@@ -35,54 +37,37 @@
 
 
     /* =========================================================
-       HERO
-       ========================================================= */
+           HERO
+           ========================================================= */
 
     .receive-hero {
         position: relative;
         overflow: hidden;
-
         padding: 38px 0 82px;
-
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 45%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
     }
 
-    .receive-hero::before {
-        content: "";
+        .receive-hero::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: 200px;
+            bottom: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
 
-        position: absolute;
-
-        width: 280px;
-        height: 280px;
-
-        right: 200px;
-        bottom: -210px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.05);
-    }
-
-    .receive-hero::after {
-        content: "";
-
-        position: absolute;
-
-        width: 380px;
-        height: 380px;
-
-        right: -100px;
-        top: -220px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.06);
-    }
+        .receive-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
 
     .hero-content {
         position: relative;
@@ -91,189 +76,157 @@
 
     .hero-badge {
         display: inline-flex;
-
         align-items: center;
-
         gap: 7px;
-
         padding: 7px 13px;
-
         margin-bottom: 14px;
-
         border: 1px solid rgba(255,255,255,.20);
         border-radius: 50px;
-
         background: rgba(255,255,255,.13);
-
         color: #fff;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .receive-hero h1 {
         margin-bottom: 7px;
-
         color: #fff;
-
         font-size: 30px;
         font-weight: 700;
     }
 
     .receive-hero p {
         max-width: 720px;
-
         margin: 0;
-
         color: rgba(255,255,255,.82);
-
         font-size: 14px;
     }
 
 
     /* =========================================================
-       HERO BUTTONS
-       ========================================================= */
+           HERO BUTTONS
+           ========================================================= */
 
     .hero-actions {
         display: flex;
-
         justify-content: flex-end;
         flex-wrap: wrap;
-
         gap: 10px;
     }
 
     .hero-btn {
         display: inline-flex;
-
         align-items: center;
-
         gap: 7px;
-
         padding: 10px 17px;
-
         border-radius: 8px;
-
         font-size: 13px;
         font-weight: 600;
-
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .hero-btn:hover {
-        transform: translateY(-2px);
-    }
+        .hero-btn:hover {
+            transform: translateY(-2px);
+        }
 
     .hero-btn-primary {
         background: #fff;
-
         color: #075985 !important;
     }
 
     .hero-btn-outline {
         border: 1px solid rgba(255,255,255,.50);
-
         background: rgba(255,255,255,.08);
-
         color: #fff !important;
     }
 
 
     /* =========================================================
-       CONTENT
-       ========================================================= */
+           CONTENT
+           ========================================================= */
 
     .receive-content {
         position: relative;
-
         z-index: 5;
-
         margin-top: -48px;
-
         padding-bottom: 50px;
     }
 
 
     /* =========================================================
-       SUMMARY CARDS
-       ========================================================= */
+           SUMMARY CARDS
+           ========================================================= */
 
     .summary-card {
         height: 100%;
-
         padding: 20px;
-
         border: 1px solid transparent;
         border-radius: 13px;
-
         background: #fff;
-
-        box-shadow:
-            0 4px 18px rgba(15,23,42,.07);
-
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
         transition: .2s ease;
     }
 
-    .summary-card:hover {
-        transform: translateY(-3px);
-
-        border-color: #bae6fd;
-
-        box-shadow:
-            0 10px 25px rgba(15,23,42,.10);
+    .summary-card-link {
+        display: block;
+        height: 100%;
+        text-decoration: none !important;
+        color: inherit !important;
+        border-radius: 13px;
     }
+
+        .summary-card-link:focus-visible {
+            outline: 3px solid #0284c7;
+            outline-offset: 3px;
+        }
+
+        .summary-card-link.active .summary-card {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 2px rgba(2,132,199,.12);
+        }
+
+        .summary-card-link:hover .summary-card {
+            transform: translateY(-3px);
+            border-color: #bae6fd;
+            box-shadow: 0 10px 25px rgba(15,23,42,.10);
+        }
 
     .summary-top {
         display: flex;
-
         justify-content: space-between;
         align-items: flex-start;
-
         gap: 15px;
     }
 
     .summary-title {
         margin-bottom: 7px;
-
         color: #64748b;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .summary-number {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 28px;
         font-weight: 700;
     }
 
     .summary-note {
         margin-top: 7px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
     .summary-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 44px;
         height: 44px;
-
         min-width: 44px;
-
         border-radius: 11px;
-
         font-size: 17px;
     }
 
@@ -299,34 +252,26 @@
 
 
     /* =========================================================
-       TABLE CARD
-       ========================================================= */
+           TABLE CARD
+           ========================================================= */
 
     .requests-card {
         margin-top: 24px;
-
         overflow: hidden;
-
         border: 0;
         border-radius: 13px;
-
         background: #fff;
-
-        box-shadow:
-            0 4px 18px rgba(15,23,42,.06);
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
     }
 
     .requests-card-header {
         padding: 18px 20px;
-
         border-bottom: 1px solid #eef2f7;
     }
 
     .requests-title {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 15px;
         font-weight: 700;
     }
@@ -334,235 +279,206 @@
     .requests-subtitle {
         margin-top: 4px;
         margin-bottom: 0;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       FILTERS
-       ========================================================= */
+           FILTERS
+           ========================================================= */
 
     .filter-control {
         height: 37px;
-
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-
         color: #334155;
-
         font-size: 11px;
     }
 
-    .filter-control:focus {
-        border-color: #38bdf8;
-
-        box-shadow:
-            0 0 0 3px rgba(14,165,233,.10);
-    }
+        .filter-control:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(14,165,233,.10);
+        }
 
     .search-wrapper {
         position: relative;
     }
 
-    .search-wrapper i {
-        position: absolute;
+        .search-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94a3b8;
+            transform: translateY(-50%);
+            z-index: 2;
+        }
 
-        top: 50%;
-        left: 13px;
-
-        color: #94a3b8;
-
-        transform: translateY(-50%);
-
-        z-index: 2;
-    }
-
-    .search-wrapper input {
-        padding-left: 36px;
-    }
+        .search-wrapper input {
+            padding-left: 36px;
+        }
 
 
     /* =========================================================
-       TABLE
-       ========================================================= */
+           TABLE
+           ========================================================= */
 
     .requests-table {
         margin-bottom: 0;
+        min-width: 1280px;
+        width: 100%;
     }
 
-    .requests-table thead th {
-        padding: 12px 13px;
+        .requests-table .request-date {
+            white-space: nowrap;
+            font-size: 11px;
+        }
 
-        border-top: 0;
-        border-bottom: 1px solid #e2e8f0;
+        .requests-table .request-number,
+        .requests-table .person-name,
+        .requests-table .barcode-value,
+        .requests-table .test-count {
+            white-space: nowrap;
+        }
 
-        background: #f8fafc;
+        .requests-table .barcode-value {
+            max-width: 190px;
+            overflow-wrap: anywhere;
+            white-space: normal;
+            font-size: 11px;
+        }
 
-        color: #64748b;
+        .requests-table td:last-child {
+            white-space: nowrap;
+        }
 
-        font-size: 10px;
-        font-weight: 700;
 
-        text-transform: uppercase;
+        .requests-table thead th {
+            padding: 12px 13px;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
 
-        letter-spacing: .4px;
+        .requests-table tbody td {
+            padding: 14px 13px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
 
-        white-space: nowrap;
-    }
+        .requests-table tbody tr {
+            transition: .15s ease;
+        }
 
-    .requests-table tbody td {
-        padding: 14px 13px;
-
-        vertical-align: middle;
-
-        border-color: #f1f5f9;
-
-        color: #334155;
-
-        font-size: 12px;
-    }
-
-    .requests-table tbody tr {
-        transition: .15s ease;
-    }
-
-    .requests-table tbody tr:hover {
-        background: #f8fcff;
-    }
+            .requests-table tbody tr:hover {
+                background: #f8fcff;
+            }
 
 
     /* =========================================================
-       REQUEST
-       ========================================================= */
+           REQUEST
+           ========================================================= */
 
     .request-number {
         color: #075985;
-
         font-weight: 700;
     }
 
     .request-date {
         display: block;
-
         margin-top: 3px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* =========================================================
-       PERSON
-       ========================================================= */
+           PERSON
+           ========================================================= */
 
     .person-name {
         display: block;
-
         color: #334155;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .person-label {
         display: block;
-
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* =========================================================
-       BARCODE
-       ========================================================= */
+           BARCODE
+           ========================================================= */
 
     .barcode-value {
         display: inline-flex;
-
         align-items: center;
-
         gap: 6px;
-
         padding: 5px 9px;
-
         border: 1px solid #e2e8f0;
         border-radius: 6px;
-
         background: #f8fafc;
-
         color: #334155;
-
         font-family: Consolas, monospace;
-
         font-size: 11px;
         font-weight: 600;
     }
 
     .barcode-missing {
         color: #94a3b8;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       SAMPLE TYPE
-       ========================================================= */
+           SAMPLE TYPE
+           ========================================================= */
 
     .sample-type {
         display: flex;
-
         align-items: center;
-
         gap: 7px;
     }
 
     .sample-type-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 30px;
         height: 30px;
-
         min-width: 30px;
-
         border-radius: 7px;
-
         background: #e0f2fe;
-
         color: #0284c7;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       URGENCY
-       ========================================================= */
+           URGENCY
+           ========================================================= */
 
     .urgency-badge {
         display: inline-flex;
-
         align-items: center;
-
         gap: 5px;
-
         padding: 5px 9px;
-
         border-radius: 50px;
-
         font-size: 10px;
         font-weight: 700;
-
         white-space: nowrap;
     }
 
@@ -583,183 +499,131 @@
 
 
     /* =========================================================
-       STATUS
-       ========================================================= */
+           STATUS
+           ========================================================= */
 
     .status-badge {
         display: inline-flex;
-
         align-items: center;
-
         gap: 5px;
-
         padding: 5px 9px;
-
         border-radius: 50px;
-
         background: #e0f2fe;
-
         color: #0369a1;
-
         font-size: 10px;
         font-weight: 700;
-
         white-space: nowrap;
     }
 
 
     /* =========================================================
-       TEST TYPE COUNT
-       ========================================================= */
+           TEST TYPE COUNT
+           ========================================================= */
 
     .test-count {
         display: inline-flex;
-
         align-items: center;
-
         gap: 5px;
-
         padding: 5px 8px;
-
         border-radius: 6px;
-
         background: #f1f5f9;
-
         color: #475569;
-
         font-size: 10px;
         font-weight: 600;
     }
 
 
     /* =========================================================
-       RECEIVE BUTTON
-       ========================================================= */
+           RECEIVE BUTTON
+           ========================================================= */
 
     .btn-receive {
         display: inline-flex;
-
         align-items: center;
-
         gap: 6px;
-
         padding: 7px 12px;
-
         border: 0;
         border-radius: 7px;
-
         background: #0284c7;
-
         color: #fff !important;
-
         font-size: 11px;
         font-weight: 600;
-
         text-decoration: none !important;
-
-        box-shadow:
-            0 3px 8px rgba(2,132,199,.18);
-
+        box-shadow: 0 3px 8px rgba(2,132,199,.18);
         transition: .2s ease;
     }
 
-    .btn-receive:hover {
-        transform: translateY(-1px);
-
-        background: #0369a1;
-
-        box-shadow:
-            0 5px 12px rgba(2,132,199,.25);
-    }
+        .btn-receive:hover {
+            transform: translateY(-1px);
+            background: #0369a1;
+            box-shadow: 0 5px 12px rgba(2,132,199,.25);
+        }
 
     .btn-disabled {
         display: inline-flex;
-
         align-items: center;
-
         gap: 5px;
-
         padding: 7px 10px;
-
         border-radius: 7px;
-
         background: #f1f5f9;
-
         color: #94a3b8;
-
         font-size: 10px;
         font-weight: 600;
     }
 
 
     /* =========================================================
-       EMPTY STATE
-       ========================================================= */
+           EMPTY STATE
+           ========================================================= */
 
     .empty-state {
         padding: 65px 20px;
-
         text-align: center;
     }
 
     .empty-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 65px;
         height: 65px;
-
         margin: 0 auto 16px;
-
         border-radius: 50%;
-
         background: #dcfce7;
-
         color: #16a34a;
-
         font-size: 24px;
     }
 
     .empty-state h5 {
         margin-bottom: 7px;
-
         color: #334155;
-
         font-size: 15px;
         font-weight: 700;
     }
 
     .empty-state p {
         max-width: 450px;
-
         margin: auto;
-
         color: #94a3b8;
-
         font-size: 12px;
     }
 
 
     /* =========================================================
-       MODAL
-       ========================================================= */
+           MODAL
+           ========================================================= */
 
     #receiveSampleModal .modal-content {
         overflow: hidden;
-
         border: 0;
         border-radius: 13px;
-
-        box-shadow:
-            0 20px 60px rgba(15,23,42,.20);
+        box-shadow: 0 20px 60px rgba(15,23,42,.20);
     }
 
 
     /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+           RESPONSIVE
+           ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -767,13 +631,12 @@
             padding-top: 25px;
         }
 
-        .receive-hero h1 {
-            font-size: 24px;
-        }
+            .receive-hero h1 {
+                font-size: 24px;
+            }
 
         .hero-actions {
             justify-content: flex-start;
-
             margin-top: 20px;
         }
 
@@ -843,7 +706,7 @@
                             </a>
 
 
-                            <a  href="/Technician/Home/Index"  
+                            <a href="/Technician/Home/Index"
                                class="hero-btn hero-btn-outline">
 
                                 <i class="fas fa-gauge-high"></i>
@@ -883,36 +746,38 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <div class="summary-card">
+                <a class="summary-card-link @(string.IsNullOrWhiteSpace(selectedUrgency) ? "active" : "")" href="@Url.Action("Index", "ReceiveSamples", new { area = "Technician" })" aria-label="Show all samples awaiting reception">
+                    <div class="summary-card">
 
-                    <div class="summary-top">
+                        <div class="summary-top">
 
-                        <div>
+                            <div>
 
-                            <div class="summary-title">
-                                Awaiting Reception
+                                <div class="summary-title">
+                                    Awaiting Reception
+                                </div>
+
+                                <h2 class="summary-number">
+                                    @totalRequests
+                                </h2>
+
+                                <div class="summary-note">
+                                    Submitted laboratory requests
+                                </div>
+
                             </div>
 
-                            <h2 class="summary-number">
-                                @totalRequests
-                            </h2>
 
-                            <div class="summary-note">
-                                Submitted laboratory requests
+                            <div class="summary-icon icon-blue">
+
+                                <i class="fas fa-vials"></i>
+
                             </div>
-
-                        </div>
-
-
-                        <div class="summary-icon icon-blue">
-
-                            <i class="fas fa-vials"></i>
 
                         </div>
 
                     </div>
-
-                </div>
+                </a>
 
             </div>
 
@@ -921,36 +786,38 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <div class="summary-card">
+                <a class="summary-card-link @((selectedUrgency.Equals("Routine", StringComparison.OrdinalIgnoreCase)) ? "active" : "")" href="@Url.Action("Index", "ReceiveSamples", new { area = "Technician", urgency = "Routine" })" aria-label="Show Routine samples awaiting reception">
+                    <div class="summary-card">
 
-                    <div class="summary-top">
+                        <div class="summary-top">
 
-                        <div>
+                            <div>
 
-                            <div class="summary-title">
-                                Routine
+                                <div class="summary-title">
+                                    Routine
+                                </div>
+
+                                <h2 class="summary-number">
+                                    @routineRequests
+                                </h2>
+
+                                <div class="summary-note">
+                                    Standard priority requests
+                                </div>
+
                             </div>
 
-                            <h2 class="summary-number">
-                                @routineRequests
-                            </h2>
 
-                            <div class="summary-note">
-                                Standard priority requests
+                            <div class="summary-icon icon-cyan">
+
+                                <i class="fas fa-flask"></i>
+
                             </div>
-
-                        </div>
-
-
-                        <div class="summary-icon icon-cyan">
-
-                            <i class="fas fa-flask"></i>
 
                         </div>
 
                     </div>
-
-                </div>
+                </a>
 
             </div>
 
@@ -959,36 +826,38 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <div class="summary-card">
+                <a class="summary-card-link @((selectedUrgency.Equals("Urgent", StringComparison.OrdinalIgnoreCase)) ? "active" : "")" href="@Url.Action("Index", "ReceiveSamples", new { area = "Technician", urgency = "Urgent" })" aria-label="Show Urgent samples awaiting reception">
+                    <div class="summary-card">
 
-                    <div class="summary-top">
+                        <div class="summary-top">
 
-                        <div>
+                            <div>
 
-                            <div class="summary-title">
-                                Urgent
+                                <div class="summary-title">
+                                    Urgent
+                                </div>
+
+                                <h2 class="summary-number">
+                                    @urgentRequests
+                                </h2>
+
+                                <div class="summary-note">
+                                    High-priority requests
+                                </div>
+
                             </div>
 
-                            <h2 class="summary-number">
-                                @urgentRequests
-                            </h2>
 
-                            <div class="summary-note">
-                                High-priority requests
+                            <div class="summary-icon icon-orange">
+
+                                <i class="fas fa-triangle-exclamation"></i>
+
                             </div>
-
-                        </div>
-
-
-                        <div class="summary-icon icon-orange">
-
-                            <i class="fas fa-triangle-exclamation"></i>
 
                         </div>
 
                     </div>
-
-                </div>
+                </a>
 
             </div>
 
@@ -997,36 +866,38 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <div class="summary-card">
+                <a class="summary-card-link @((selectedUrgency.Equals("Stat", StringComparison.OrdinalIgnoreCase)) ? "active" : "")" href="@Url.Action("Index", "ReceiveSamples", new { area = "Technician", urgency = "Stat" })" aria-label="Show Stat samples awaiting reception">
+                    <div class="summary-card">
 
-                    <div class="summary-top">
+                        <div class="summary-top">
 
-                        <div>
+                            <div>
 
-                            <div class="summary-title">
-                                STAT
+                                <div class="summary-title">
+                                    STAT
+                                </div>
+
+                                <h2 class="summary-number">
+                                    @statRequests
+                                </h2>
+
+                                <div class="summary-note">
+                                    Immediate laboratory priority
+                                </div>
+
                             </div>
 
-                            <h2 class="summary-number">
-                                @statRequests
-                            </h2>
 
-                            <div class="summary-note">
-                                Immediate laboratory priority
+                            <div class="summary-icon icon-red">
+
+                                <i class="fas fa-bolt"></i>
+
                             </div>
-
-                        </div>
-
-
-                        <div class="summary-icon icon-red">
-
-                            <i class="fas fa-bolt"></i>
 
                         </div>
 
                     </div>
-
-                </div>
+                </a>
 
             </div>
 
@@ -1079,15 +950,15 @@
                                         All Urgencies
                                     </option>
 
-                                    <option value="Routine">
+                                    <option value="Routine" selected="@(selectedUrgency.Equals("Routine", StringComparison.OrdinalIgnoreCase))">
                                         Routine
                                     </option>
 
-                                    <option value="Urgent">
+                                    <option value="Urgent" selected="@(selectedUrgency.Equals("Urgent", StringComparison.OrdinalIgnoreCase))">
                                         Urgent
                                     </option>
 
-                                    <option value="Stat">
+                                    <option value="Stat" selected="@(selectedUrgency.Equals("Stat", StringComparison.OrdinalIgnoreCase))">
                                         STAT
                                     </option>
 
@@ -1122,7 +993,7 @@
             </div>
 
 
-            @if (requests.Any())
+            @if (requests.Any(r => string.IsNullOrWhiteSpace(selectedUrgency) || r.Urgency.ToString().Equals(selectedUrgency, StringComparison.OrdinalIgnoreCase)))
             {
                 <div class="table-responsive">
 
@@ -1176,7 +1047,7 @@
 
                         <tbody>
 
-                            @foreach (var request in requests)
+                            @foreach (var request in requests.Where(r => string.IsNullOrWhiteSpace(selectedUrgency) || r.Urgency.ToString().Equals(selectedUrgency, StringComparison.OrdinalIgnoreCase)))
                             {
                                 var sample = request.Samples
                                     .FirstOrDefault(s =>
@@ -1215,8 +1086,7 @@
 
                                             <i class="far fa-calendar mr-1"></i>
 
-                                            @request.RequestDate
-                                                .ToString("dd MMM yyyy HH:mm")
+                                            @(request.RequestDate.ToString("dd MMM yyyy HH:mm"))
 
                                         </span>
 
@@ -1562,1056 +1432,1056 @@
 
     <script>
 
-    $(document).ready(function () {
+        $(document).ready(function() {
 
-        // ============================================================
-        // DATATABLE
-        // ============================================================
+            // ============================================================
+            // DATATABLE
+            // ============================================================
 
-        let table = null;
+            let table = null;
 
-        if ($("#requestsTable").length) {
+            if ($("#requestsTable").length) {
 
-            table = $("#requestsTable").DataTable({
+                table = $("#requestsTable").DataTable({
 
-                processing: true,
-                autoWidth: false,
+                    processing: true,
+                    autoWidth: false,
 
-                pageLength: 10,
+                    pageLength: 10,
 
-                lengthMenu: [
-                    [10, 25, 50, 100, -1],
-                    [10, 25, 50, 100, "All"]
-                ],
+                    lengthMenu: [
+                        [10, 25, 50, 100, -1],
+                        [10, 25, 50, 100, "All"]
+                    ],
 
-                paging: true,
-                pagingType: "full_numbers",
+                    paging: true,
+                    pagingType: "full_numbers",
 
-                scrollX: true,
-                scrollY: "500px",
-                scrollCollapse: true,
+                    scrollX: true,
+                    scrollY: "500px",
+                    scrollCollapse: true,
 
-                order: [[0, "desc"]],
+                    order: [[0, "desc"]],
 
-                // Action column
-                columnDefs: [
-                    {
-                        targets: 8,
-                        orderable: false,
-                        searchable: false
-                    }
-                ],
+                    // Action column
+                    columnDefs: [
+                        {
+                            targets: 8,
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
 
-                // ====================================================
-                // DATATABLE LAYOUT
-                // ====================================================
+                    // ====================================================
+                    // DATATABLE LAYOUT
+                    // ====================================================
 
-                dom:
-                    "<'row align-items-center mb-3'" +
+                    dom:
+                        "<'row align-items-center mb-3'" +
                         "<'col-lg-4 col-md-6'l>" +
                         "<'col-lg-8 col-md-6 text-md-right'B>" +
-                    ">" +
+                        ">" +
 
-                    "<'row'" +
+                        "<'row'" +
                         "<'col-sm-12'tr>" +
-                    ">" +
+                        ">" +
 
-                    "<'row align-items-center mt-3'" +
+                        "<'row align-items-center mt-3'" +
                         "<'col-md-5'i>" +
                         "<'col-md-7'p>" +
-                    ">",
+                        ">",
 
-                // ====================================================
-                // EXPORT BUTTONS
-                // ====================================================
+                    // ====================================================
+                    // EXPORT BUTTONS
+                    // ====================================================
 
-                buttons: [
+                    buttons: [
 
-                    // ------------------------------------------------
-                    // COPY
-                    // ------------------------------------------------
+                        // ------------------------------------------------
+                        // COPY
+                        // ------------------------------------------------
 
-                    {
-                        extend: "copyHtml5",
+                        {
+                            extend: "copyHtml5",
 
-                        text:
-                            '<i class="fas fa-copy mr-1"></i> Copy',
+                            text:
+                                '<i class="fas fa-copy mr-1"></i> Copy',
 
-                        className:
-                            "btn btn-outline-secondary btn-sm",
+                            className:
+                                "btn btn-outline-secondary btn-sm",
 
-                        title:
-                            "NMB-HLabSys - Samples Awaiting Reception",
+                            title:
+                                "NMB-HLabSys - Samples Awaiting Reception",
 
-                        exportOptions: {
+                            exportOptions: {
 
-                            columns: [
-                                0,
-                                1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7
-                            ],
+                                columns: [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                    6,
+                                    7
+                                ],
 
-                            modifier: {
-                                search: "applied",
-                                order: "applied",
-                                page: "all"
-                            },
+                                modifier: {
+                                    search: "applied",
+                                    order: "applied",
+                                    page: "all"
+                                },
 
-                            format: {
+                                format: {
 
-                                body: function (
-                                    data,
-                                    row,
-                                    column,
-                                    node
-                                ) {
+                                    body: function(
+                                        data,
+                                        row,
+                                        column,
+                                        node
+                                    ) {
 
-                                    return $(node)
-                                        .text()
-                                        .replace(/\s+/g, " ")
-                                        .trim();
-                                }
-                            }
-                        }
-                    },
-
-
-                    // ------------------------------------------------
-                    // EXCEL
-                    // ------------------------------------------------
-
-                    {
-                        extend: "excelHtml5",
-
-                        text:
-                            '<i class="fas fa-file-excel mr-1"></i> Excel',
-
-                        className:
-                            "btn btn-success btn-sm",
-
-                        title:
-                            "NMB-HLabSys Samples Awaiting Reception",
-
-                        filename:
-                            "NMB-HLabSys_Samples_Awaiting_Reception",
-
-                        sheetName:
-                            "Awaiting Reception",
-
-                        exportOptions: {
-
-                            columns: [
-                                0,
-                                1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7
-                            ],
-
-                            modifier: {
-                                search: "applied",
-                                order: "applied",
-                                page: "all"
-                            },
-
-                            format: {
-
-                                body: function (
-                                    data,
-                                    row,
-                                    column,
-                                    node
-                                ) {
-
-                                    return $(node)
-                                        .text()
-                                        .replace(/\s+/g, " ")
-                                        .trim();
-                                }
-                            }
-                        }
-                    },
-
-
-                    // ------------------------------------------------
-                    // PDF
-                    // ------------------------------------------------
-
-                    {
-                        extend: "pdfHtml5",
-
-                        text:
-                            '<i class="fas fa-file-pdf mr-1"></i> PDF',
-
-                        className:
-                            "btn btn-danger btn-sm",
-
-                        title:
-                            "NMB-HLabSys - Samples Awaiting Reception",
-
-                        filename:
-                            "NMB-HLabSys_Samples_Awaiting_Reception",
-
-                        orientation:
-                            "landscape",
-
-                        pageSize:
-                            "A4",
-
-                        exportOptions: {
-
-                            columns: [
-                                0,
-                                1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7
-                            ],
-
-                            modifier: {
-                                search: "applied",
-                                order: "applied",
-                                page: "all"
-                            },
-
-                            format: {
-
-                                body: function (
-                                    data,
-                                    row,
-                                    column,
-                                    node
-                                ) {
-
-                                    return $(node)
-                                        .text()
-                                        .replace(/\s+/g, " ")
-                                        .trim();
+                                        return $(node)
+                                            .text()
+                                            .replace(/\s+/g, " ")
+                                            .trim();
+                                    }
                                 }
                             }
                         },
 
-                        customize: function (doc) {
 
-                            doc.pageMargins =
-                                [20, 45, 20, 40];
+                        // ------------------------------------------------
+                        // EXCEL
+                        // ------------------------------------------------
 
-                            doc.defaultStyle.fontSize =
-                                7;
+                        {
+                            extend: "excelHtml5",
 
-                            doc.styles.tableHeader.fontSize =
-                                7;
+                            text:
+                                '<i class="fas fa-file-excel mr-1"></i> Excel',
 
-                            doc.styles.tableHeader.bold =
-                                true;
+                            className:
+                                "btn btn-success btn-sm",
 
-                            doc.styles.title.fontSize =
-                                16;
+                            title:
+                                "NMB-HLabSys Samples Awaiting Reception",
 
-                            doc.styles.title.alignment =
-                                "center";
+                            filename:
+                                "NMB-HLabSys_Samples_Awaiting_Reception",
 
+                            sheetName:
+                                "Awaiting Reception",
 
-                            // =========================================
-                            // REPORT INFORMATION
-                            // =========================================
+                            exportOptions: {
 
-                            doc.content.splice(
+                                columns: [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                    6,
+                                    7
+                                ],
 
-                                1,
-
-                                0,
-
-                                {
-                                    text:
-                                        "Laboratory Sample Reception Report",
-
-                                    alignment:
-                                        "center",
-
-                                    fontSize:
-                                        10,
-
-                                    margin:
-                                        [0, 0, 0, 4]
+                                modifier: {
+                                    search: "applied",
+                                    order: "applied",
+                                    page: "all"
                                 },
 
-                                {
-                                    text:
-                                        "Submitted samples currently awaiting laboratory reception",
+                                format: {
 
-                                    alignment:
-                                        "center",
+                                    body: function(
+                                        data,
+                                        row,
+                                        column,
+                                        node
+                                    ) {
 
-                                    fontSize:
-                                        8,
-
-                                    margin:
-                                        [0, 0, 0, 4]
-                                },
-
-                                {
-                                    text:
-                                        "Generated: " +
-                                        new Date().toLocaleString(),
-
-                                    alignment:
-                                        "center",
-
-                                    fontSize:
-                                        7,
-
-                                    margin:
-                                        [0, 0, 0, 15]
+                                        return $(node)
+                                            .text()
+                                            .replace(/\s+/g, " ")
+                                            .trim();
+                                    }
                                 }
-                            );
-
-
-                            // =========================================
-                            // TABLE WIDTHS
-                            // =========================================
-
-                            const tableContent =
-                                doc.content.find(function (item) {
-                                    return item.table;
-                                });
-
-                            if (tableContent) {
-
-                                tableContent.table.widths = [
-                                    "13%",
-                                    "14%",
-                                    "14%",
-                                    "14%",
-                                    "12%",
-                                    "8%",
-                                    "10%",
-                                    "15%"
-                                ];
                             }
+                        },
 
 
-                            // =========================================
-                            // FOOTER
-                            // =========================================
+                        // ------------------------------------------------
+                        // PDF
+                        // ------------------------------------------------
 
-                            doc.footer =
-                                function (
-                                    currentPage,
-                                    pageCount
-                                ) {
+                        {
+                            extend: "pdfHtml5",
 
-                                    return {
+                            text:
+                                '<i class="fas fa-file-pdf mr-1"></i> PDF',
 
-                                        columns: [
+                            className:
+                                "btn btn-danger btn-sm",
 
-                                            {
-                                                text:
-                                                    "NMB-HLabSys | Laboratory Sample Reception",
+                            title:
+                                "NMB-HLabSys - Samples Awaiting Reception",
 
-                                                alignment:
-                                                    "left",
+                            filename:
+                                "NMB-HLabSys_Samples_Awaiting_Reception",
 
-                                                margin:
-                                                    [20, 0, 0, 0]
-                                            },
+                            orientation:
+                                "landscape",
 
-                                            {
-                                                text:
-                                                    "Page " +
-                                                    currentPage +
-                                                    " of " +
-                                                    pageCount,
+                            pageSize:
+                                "A4",
 
-                                                alignment:
-                                                    "right",
+                            exportOptions: {
 
-                                                margin:
-                                                    [0, 0, 20, 0]
-                                            }
-                                        ],
+                                columns: [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                    6,
+                                    7
+                                ],
+
+                                modifier: {
+                                    search: "applied",
+                                    order: "applied",
+                                    page: "all"
+                                },
+
+                                format: {
+
+                                    body: function(
+                                        data,
+                                        row,
+                                        column,
+                                        node
+                                    ) {
+
+                                        return $(node)
+                                            .text()
+                                            .replace(/\s+/g, " ")
+                                            .trim();
+                                    }
+                                }
+                            },
+
+                            customize: function(doc) {
+
+                                doc.pageMargins =
+                                    [20, 45, 20, 40];
+
+                                doc.defaultStyle.fontSize =
+                                    7;
+
+                                doc.styles.tableHeader.fontSize =
+                                    7;
+
+                                doc.styles.tableHeader.bold =
+                                    true;
+
+                                doc.styles.title.fontSize =
+                                    16;
+
+                                doc.styles.title.alignment =
+                                    "center";
+
+
+                                // =========================================
+                                // REPORT INFORMATION
+                                // =========================================
+
+                                doc.content.splice(
+
+                                    1,
+
+                                    0,
+
+                                    {
+                                        text:
+                                            "Laboratory Sample Reception Report",
+
+                                        alignment:
+                                            "center",
+
+                                        fontSize:
+                                            10,
+
+                                        margin:
+                                            [0, 0, 0, 4]
+                                    },
+
+                                    {
+                                        text:
+                                            "Submitted samples currently awaiting laboratory reception",
+
+                                        alignment:
+                                            "center",
+
+                                        fontSize:
+                                            8,
+
+                                        margin:
+                                            [0, 0, 0, 4]
+                                    },
+
+                                    {
+                                        text:
+                                            "Generated: " +
+                                            new Date().toLocaleString(),
+
+                                        alignment:
+                                            "center",
 
                                         fontSize:
                                             7,
 
-                                        color:
-                                            "#64748b"
+                                        margin:
+                                            [0, 0, 0, 15]
+                                    }
+                                );
+
+
+                                // =========================================
+                                // TABLE WIDTHS
+                                // =========================================
+
+                                const tableContent =
+                                    doc.content.find(function(item) {
+                                        return item.table;
+                                    });
+
+                                if (tableContent) {
+
+                                    tableContent.table.widths = [
+                                        "13%",
+                                        "14%",
+                                        "14%",
+                                        "14%",
+                                        "12%",
+                                        "8%",
+                                        "10%",
+                                        "15%"
+                                    ];
+                                }
+
+
+                                // =========================================
+                                // FOOTER
+                                // =========================================
+
+                                doc.footer =
+                                    function(
+                                        currentPage,
+                                        pageCount
+                                    ) {
+
+                                        return {
+
+                                            columns: [
+
+                                                {
+                                                    text:
+                                                        "NMB-HLabSys | Laboratory Sample Reception",
+
+                                                    alignment:
+                                                        "left",
+
+                                                    margin:
+                                                        [20, 0, 0, 0]
+                                                },
+
+                                                {
+                                                    text:
+                                                        "Page " +
+                                                        currentPage +
+                                                        " of " +
+                                                        pageCount,
+
+                                                    alignment:
+                                                        "right",
+
+                                                    margin:
+                                                        [0, 0, 20, 0]
+                                                }
+                                            ],
+
+                                            fontSize:
+                                                7,
+
+                                            color:
+                                                "#64748b"
+                                        };
                                     };
-                                };
-                        }
-                    },
+                            }
+                        },
 
 
-                    // ------------------------------------------------
-                    // PRINT
-                    // ------------------------------------------------
+                        // ------------------------------------------------
+                        // PRINT
+                        // ------------------------------------------------
 
-                    {
-                        extend: "print",
+                        {
+                            extend: "print",
 
-                        text:
-                            '<i class="fas fa-print mr-1"></i> Print',
+                            text:
+                                '<i class="fas fa-print mr-1"></i> Print',
 
-                        className:
-                            "btn btn-primary btn-sm",
+                            className:
+                                "btn btn-primary btn-sm",
 
-                        title:
-                            "NMB-HLabSys - Samples Awaiting Reception",
+                            title:
+                                "NMB-HLabSys - Samples Awaiting Reception",
 
-                        messageTop:
-                            "Laboratory Sample Reception Report",
+                            messageTop:
+                                "Laboratory Sample Reception Report",
 
-                        exportOptions: {
+                            exportOptions: {
 
-                            columns: [
-                                0,
-                                1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7
-                            ],
+                                columns: [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                    6,
+                                    7
+                                ],
 
-                            modifier: {
-                                search: "applied",
-                                order: "applied",
-                                page: "all"
+                                modifier: {
+                                    search: "applied",
+                                    order: "applied",
+                                    page: "all"
+                                }
                             }
                         }
+                    ],
+
+
+                    // ====================================================
+                    // LANGUAGE
+                    // ====================================================
+
+                    language: {
+
+                        processing:
+                            "Loading records...",
+
+                        emptyTable:
+                            "No samples are currently awaiting reception.",
+
+                        zeroRecords:
+                            "No matching sample requests were found.",
+
+                        info:
+                            "Showing _START_ to _END_ of _TOTAL_ requests",
+
+                        infoEmpty:
+                            "Showing 0 requests",
+
+                        infoFiltered:
+                            "(filtered from _MAX_ total requests)",
+
+                        lengthMenu:
+                            "Show _MENU_ records",
+
+                        paginate: {
+
+                            // Font Awesome 5 compatible icons
+                            first:
+                                '<i class="fas fa-angle-double-left"></i>',
+
+                            previous:
+                                '<i class="fas fa-chevron-left"></i>',
+
+                            next:
+                                '<i class="fas fa-chevron-right"></i>',
+
+                            last:
+                                '<i class="fas fa-angle-double-right"></i>'
+                        }
                     }
-                ],
+                });
 
 
-                // ====================================================
-                // LANGUAGE
-                // ====================================================
+                // ========================================================
+                // SEARCH
+                // ========================================================
 
-                language: {
+                $("#requestSearch").on(
+                    "keyup change",
+                    function() {
 
-                    processing:
-                        "Loading records...",
-
-                    emptyTable:
-                        "No samples are currently awaiting reception.",
-
-                    zeroRecords:
-                        "No matching sample requests were found.",
-
-                    info:
-                        "Showing _START_ to _END_ of _TOTAL_ requests",
-
-                    infoEmpty:
-                        "Showing 0 requests",
-
-                    infoFiltered:
-                        "(filtered from _MAX_ total requests)",
-
-                    lengthMenu:
-                        "Show _MENU_ records",
-
-                    paginate: {
-
-                        // Font Awesome 5 compatible icons
-                        first:
-                            '<i class="fas fa-angle-double-left"></i>',
-
-                        previous:
-                            '<i class="fas fa-chevron-left"></i>',
-
-                        next:
-                            '<i class="fas fa-chevron-right"></i>',
-
-                        last:
-                            '<i class="fas fa-angle-double-right"></i>'
+                        table
+                            .search(this.value)
+                            .draw();
                     }
-                }
-            });
+                );
 
 
-            // ========================================================
-            // SEARCH
-            // ========================================================
+                // ========================================================
+                // URGENCY FILTER
+                // Column 6 = Urgency
+                // ========================================================
 
-            $("#requestSearch").on(
-                "keyup change",
-                function () {
+                $("#urgencyFilter").on(
+                    "change",
+                    function() {
 
-                    table
-                        .search(this.value)
-                        .draw();
-                }
-            );
+                        const value =
+                            $(this).val();
 
+                        if (!value) {
 
-            // ========================================================
-            // URGENCY FILTER
-            // Column 6 = Urgency
-            // ========================================================
+                            table
+                                .column(6)
+                                .search("")
+                                .draw();
 
-            $("#urgencyFilter").on(
-                "change",
-                function () {
-
-                    const value =
-                        $(this).val();
-
-                    if (!value) {
+                            return;
+                        }
 
                         table
                             .column(6)
-                            .search("")
+                            .search(
+                                "^" + value + "$",
+                                true,
+                                false
+                            )
                             .draw();
+                    }
+                );
+            }
+
+
+            // ============================================================
+            // RECEIVE SAMPLE MODAL
+            // ============================================================
+
+            $(document).on(
+                "click",
+                ".js-receive-sample",
+                function(event) {
+
+                    event.preventDefault();
+
+
+                    // ====================================================
+                    // BUTTON
+                    // ====================================================
+
+                    const button =
+                        $(this);
+
+
+                    // ====================================================
+                    // READ VALUES DIRECTLY FROM HTML ATTRIBUTES
+                    // ====================================================
+
+                    const testRequestId =
+                        button.attr("data-request-id");
+
+                    const sampleId =
+                        button.attr("data-sample-id");
+
+                    const requestNumber =
+                        button.attr("data-request-number");
+
+                    const barcode =
+                        button.attr("data-barcode");
+
+
+                    // ====================================================
+                    // DEBUG INFORMATION
+                    // ====================================================
+
+                    console.log(
+                        "========================================"
+                    );
+
+                    console.log(
+                        "RECEIVE SAMPLE BUTTON CLICKED"
+                    );
+
+                    console.log(
+                        "TestRequestId:",
+                        testRequestId
+                    );
+
+                    console.log(
+                        "SampleId:",
+                        sampleId
+                    );
+
+                    console.log(
+                        "RequestNumber:",
+                        requestNumber
+                    );
+
+                    console.log(
+                        "Barcode:",
+                        barcode
+                    );
+
+                    console.log(
+                        "========================================"
+                    );
+
+
+                    // ====================================================
+                    // VALIDATE TEST REQUEST ID
+                    // ====================================================
+
+                    if (
+                        !testRequestId ||
+                        testRequestId === "0"
+                    ) {
+
+                        Swal.fire({
+
+                            icon:
+                                "error",
+
+                            title:
+                                "Request Missing",
+
+                            text:
+                                "Unable to determine the TestRequestId for this sample.",
+
+                            confirmButtonText:
+                                "OK"
+                        });
 
                         return;
                     }
 
-                    table
-                        .column(6)
-                        .search(
-                            "^" + value + "$",
-                            true,
-                            false
-                        )
-                        .draw();
-                }
-            );
-        }
 
+                    // ====================================================
+                    // VALIDATE SAMPLE ID
+                    // ====================================================
 
-        // ============================================================
-        // RECEIVE SAMPLE MODAL
-        // ============================================================
+                    if (
+                        !sampleId ||
+                        sampleId === "0"
+                    ) {
 
-        $(document).on(
-            "click",
-            ".js-receive-sample",
-            function (event) {
+                        Swal.fire({
 
-                event.preventDefault();
+                            icon:
+                                "error",
 
+                            title:
+                                "Sample Missing",
 
-                // ====================================================
-                // BUTTON
-                // ====================================================
+                            text:
+                                "Unable to determine the SampleId for this sample.",
 
-                const button =
-                    $(this);
+                            confirmButtonText:
+                                "OK"
+                        });
 
+                        return;
+                    }
 
-                // ====================================================
-                // READ VALUES DIRECTLY FROM HTML ATTRIBUTES
-                // ====================================================
 
-                const testRequestId =
-                    button.attr("data-request-id");
+                    // ====================================================
+                    // PREVENT DOUBLE CLICK
+                    // ====================================================
 
-                const sampleId =
-                    button.attr("data-sample-id");
+                    button
+                        .prop("disabled", true);
 
-                const requestNumber =
-                    button.attr("data-request-number");
 
-                const barcode =
-                    button.attr("data-barcode");
+                    // ====================================================
+                    // SHOW LOADING CONTENT
+                    // ====================================================
 
+                    $("#receiveSampleModalContent")
+                        .html(`
 
-                // ====================================================
-                // DEBUG INFORMATION
-                // ====================================================
+                                <div class="modal-body text-center py-5">
 
-                console.log(
-                    "========================================"
-                );
+                                    <div
+                                        class="spinner-border text-primary"
+                                        role="status">
 
-                console.log(
-                    "RECEIVE SAMPLE BUTTON CLICKED"
-                );
+                                        <span class="sr-only">
+                                            Loading...
+                                        </span>
 
-                console.log(
-                    "TestRequestId:",
-                    testRequestId
-                );
+                                    </div>
 
-                console.log(
-                    "SampleId:",
-                    sampleId
-                );
+                                    <h6 class="mt-3 mb-1">
 
-                console.log(
-                    "RequestNumber:",
-                    requestNumber
-                );
+                                        Loading Sample
 
-                console.log(
-                    "Barcode:",
-                    barcode
-                );
+                                    </h6>
 
-                console.log(
-                    "========================================"
-                );
+                                    <p class="text-muted mb-0">
 
+                                        ${requestNumber || "Request"}
 
-                // ====================================================
-                // VALIDATE TEST REQUEST ID
-                // ====================================================
+                                        <br />
 
-                if (
-                    !testRequestId ||
-                    testRequestId === "0"
-                ) {
+                                        ${barcode || ""}
 
-                    Swal.fire({
+                                    </p>
 
-                        icon:
-                            "error",
+                                </div>
 
-                        title:
-                            "Request Missing",
+                            `);
 
-                        text:
-                            "Unable to determine the TestRequestId for this sample.",
 
-                        confirmButtonText:
-                            "OK"
-                    });
+                    // ====================================================
+                    // SHOW MODAL
+                    // ====================================================
 
-                    return;
-                }
+                    $("#receiveSampleModal")
+                        .modal("show");
 
 
-                // ====================================================
-                // VALIDATE SAMPLE ID
-                // ====================================================
+                    // ====================================================
+                    // URL
+                    // ====================================================
 
-                if (
-                    !sampleId ||
-                    sampleId === "0"
-                ) {
+                    const receiveUrl =
+                        '@Url.Action(
+                                                    "Receive",
+                                                    "ReceiveSamples",
+                                    new { area = "Technician" })';
 
-                    Swal.fire({
 
-                        icon:
-                            "error",
+                    console.log(
+                        "Receive URL:",
+                        receiveUrl
+                    );
 
-                        title:
-                            "Sample Missing",
 
-                        text:
-                            "Unable to determine the SampleId for this sample.",
+                    // ====================================================
+                    // AJAX GET
+                    //
+                    // Controller:
+                    //
+                    // Receive(
+                    //     int testRequestId,
+                    //     int sampleId
+                    // )
+                    //
+                    // ====================================================
 
-                        confirmButtonText:
-                            "OK"
-                    });
+                    $.ajax({
 
-                    return;
-                }
+                        url:
+                            receiveUrl,
 
+                        type:
+                            "GET",
 
-                // ====================================================
-                // PREVENT DOUBLE CLICK
-                // ====================================================
+                        cache:
+                            false,
 
-                button
-                    .prop("disabled", true);
+                        data: {
 
+                            testRequestId:
+                                testRequestId,
 
-                // ====================================================
-                // SHOW LOADING CONTENT
-                // ====================================================
-
-                $("#receiveSampleModalContent")
-                    .html(`
-
-                        <div class="modal-body text-center py-5">
-
-                            <div
-                                class="spinner-border text-primary"
-                                role="status">
-
-                                <span class="sr-only">
-                                    Loading...
-                                </span>
-
-                            </div>
-
-                            <h6 class="mt-3 mb-1">
-
-                                Loading Sample
-
-                            </h6>
-
-                            <p class="text-muted mb-0">
-
-                                ${requestNumber || "Request"}
-
-                                <br />
-
-                                ${barcode || ""}
-
-                            </p>
-
-                        </div>
-
-                    `);
-
-
-                // ====================================================
-                // SHOW MODAL
-                // ====================================================
-
-                $("#receiveSampleModal")
-                    .modal("show");
-
-
-                // ====================================================
-                // URL
-                // ====================================================
-
-                const receiveUrl =
-                    '@Url.Action(
-                        "Receive",
-                        "ReceiveSamples",
-                        new { area = "Technician" })';
-
-
-                console.log(
-                    "Receive URL:",
-                    receiveUrl
-                );
-
-
-                // ====================================================
-                // AJAX GET
-                //
-                // Controller:
-                //
-                // Receive(
-                //     int testRequestId,
-                //     int sampleId
-                // )
-                //
-                // ====================================================
-
-                $.ajax({
-
-                    url:
-                        receiveUrl,
-
-                    type:
-                        "GET",
-
-                    cache:
-                        false,
-
-                    data: {
-
-                        testRequestId:
-                            testRequestId,
-
-                        sampleId:
-                            sampleId
-                    },
-
-
-                    // ================================================
-                    // SUCCESS
-                    // ================================================
-
-                    success:
-                        function (
-                            response,
-                            textStatus,
-                            xhr
-                        ) {
-
-                            console.log(
-                                "Sample loaded successfully."
-                            );
-
-                            console.log(
-                                "HTTP Status:",
-                                xhr.status
-                            );
-
-
-                            $("#receiveSampleModalContent")
-                                .html(response);
-
-
-                            button
-                                .prop(
-                                    "disabled",
-                                    false
-                                );
+                            sampleId:
+                                sampleId
                         },
 
 
-                    // ================================================
-                    // ERROR
-                    // ================================================
+                        // ================================================
+                        // SUCCESS
+                        // ================================================
 
-                    error:
-                        function (
-                            xhr,
-                            textStatus,
-                            errorThrown
-                        ) {
+                        success:
+                            function(
+                                response,
+                                textStatus,
+                                xhr
+                            ) {
 
-                            button
-                                .prop(
-                                    "disabled",
-                                    false
+                                console.log(
+                                    "Sample loaded successfully."
+                                );
+
+                                console.log(
+                                    "HTTP Status:",
+                                    xhr.status
                                 );
 
 
-                            $("#receiveSampleModal")
-                                .modal("hide");
+                                $("#receiveSampleModalContent")
+                                    .html(response);
 
 
-                            // =========================================
-                            // CONSOLE DEBUG
-                            // =========================================
+                                button
+                                    .prop(
+                                        "disabled",
+                                        false
+                                    );
+                            },
 
-                            console.error(
-                                "========================================"
-                            );
 
-                            console.error(
-                                "FAILED TO LOAD SAMPLE"
-                            );
+                        // ================================================
+                        // ERROR
+                        // ================================================
 
-                            console.error(
-                                "HTTP Status:",
-                                xhr.status
-                            );
-
-                            console.error(
-                                "Text Status:",
-                                textStatus
-                            );
-
-                            console.error(
-                                "Error:",
+                        error:
+                            function(
+                                xhr,
+                                textStatus,
                                 errorThrown
-                            );
+                            ) {
 
-                            console.error(
-                                "TestRequestId:",
-                                testRequestId
-                            );
-
-                            console.error(
-                                "SampleId:",
-                                sampleId
-                            );
-
-                            console.error(
-                                "RequestNumber:",
-                                requestNumber
-                            );
-
-                            console.error(
-                                "Barcode:",
-                                barcode
-                            );
-
-                            console.error(
-                                "Server Response:",
-                                xhr.responseText
-                            );
-
-                            console.error(
-                                "========================================"
-                            );
+                                button
+                                    .prop(
+                                        "disabled",
+                                        false
+                                    );
 
 
-                            // =========================================
-                            // USER-FRIENDLY ERROR
-                            // =========================================
-
-                            let errorMessage =
-                                "The sample information could not be loaded.";
+                                $("#receiveSampleModal")
+                                    .modal("hide");
 
 
-                            // -----------------------------------------
-                            // HTTP 400
-                            // -----------------------------------------
+                                // =========================================
+                                // CONSOLE DEBUG
+                                // =========================================
 
-                            if (xhr.status === 400) {
+                                console.error(
+                                    "========================================"
+                                );
 
-                                errorMessage =
-                                    xhr.responseText ||
-                                    "This sample cannot currently be received.";
-                            }
+                                console.error(
+                                    "FAILED TO LOAD SAMPLE"
+                                );
 
+                                console.error(
+                                    "HTTP Status:",
+                                    xhr.status
+                                );
 
-                            // -----------------------------------------
-                            // HTTP 401
-                            // -----------------------------------------
+                                console.error(
+                                    "Text Status:",
+                                    textStatus
+                                );
 
-                            else if (xhr.status === 401) {
+                                console.error(
+                                    "Error:",
+                                    errorThrown
+                                );
 
-                                errorMessage =
-                                    "Your login session has expired. Please sign in again.";
-                            }
+                                console.error(
+                                    "TestRequestId:",
+                                    testRequestId
+                                );
 
+                                console.error(
+                                    "SampleId:",
+                                    sampleId
+                                );
 
-                            // -----------------------------------------
-                            // HTTP 403
-                            // -----------------------------------------
+                                console.error(
+                                    "RequestNumber:",
+                                    requestNumber
+                                );
 
-                            else if (xhr.status === 403) {
+                                console.error(
+                                    "Barcode:",
+                                    barcode
+                                );
 
-                                errorMessage =
-                                    "You are not authorized to receive laboratory samples.";
-                            }
+                                console.error(
+                                    "Server Response:",
+                                    xhr.responseText
+                                );
 
-
-                            // -----------------------------------------
-                            // HTTP 404
-                            // -----------------------------------------
-
-                            else if (xhr.status === 404) {
-
-                                errorMessage =
-                                    "The sample could not be found. " +
-                                    "TestRequestId: " +
-                                    testRequestId +
-                                    ", SampleId: " +
-                                    sampleId +
-                                    ".";
-                            }
-
-
-                            // -----------------------------------------
-                            // HTTP 500
-                            // -----------------------------------------
-
-                            else if (xhr.status === 500) {
-
-                                errorMessage =
-                                    "A server error occurred while loading the sample. " +
-                                    "Check the Visual Studio Output window for the exception.";
-                            }
+                                console.error(
+                                    "========================================"
+                                );
 
 
-                            // -----------------------------------------
-                            // HTTP 0
-                            // -----------------------------------------
+                                // =========================================
+                                // USER-FRIENDLY ERROR
+                                // =========================================
 
-                            else if (xhr.status === 0) {
-
-                                errorMessage =
-                                    "The request could not reach the server. " +
-                                    "Check your connection and application.";
-                            }
+                                let errorMessage =
+                                    "The sample information could not be loaded.";
 
 
-                            // =========================================
-                            // SWEETALERT
-                            // =========================================
+                                // -----------------------------------------
+                                // HTTP 400
+                                // -----------------------------------------
 
-                            Swal.fire({
+                                if (xhr.status === 400) {
 
-                                icon:
-                                    "error",
+                                    errorMessage =
+                                        xhr.responseText ||
+                                        "This sample cannot currently be received.";
+                                }
 
-                                title:
-                                    "Unable to Load Sample",
 
-                                html:
-                                    "<div style='text-align:left'>" +
+                                // -----------------------------------------
+                                // HTTP 401
+                                // -----------------------------------------
+
+                                else if (xhr.status === 401) {
+
+                                    errorMessage =
+                                        "Your login session has expired. Please sign in again.";
+                                }
+
+
+                                // -----------------------------------------
+                                // HTTP 403
+                                // -----------------------------------------
+
+                                else if (xhr.status === 403) {
+
+                                    errorMessage =
+                                        "You are not authorized to receive laboratory samples.";
+                                }
+
+
+                                // -----------------------------------------
+                                // HTTP 404
+                                // -----------------------------------------
+
+                                else if (xhr.status === 404) {
+
+                                    errorMessage =
+                                        "The sample could not be found. " +
+                                        "TestRequestId: " +
+                                        testRequestId +
+                                        ", SampleId: " +
+                                        sampleId +
+                                        ".";
+                                }
+
+
+                                // -----------------------------------------
+                                // HTTP 500
+                                // -----------------------------------------
+
+                                else if (xhr.status === 500) {
+
+                                    errorMessage =
+                                        "A server error occurred while loading the sample. " +
+                                        "Check the Visual Studio Output window for the exception.";
+                                }
+
+
+                                // -----------------------------------------
+                                // HTTP 0
+                                // -----------------------------------------
+
+                                else if (xhr.status === 0) {
+
+                                    errorMessage =
+                                        "The request could not reach the server. " +
+                                        "Check your connection and application.";
+                                }
+
+
+                                // =========================================
+                                // SWEETALERT
+                                // =========================================
+
+                                Swal.fire({
+
+                                    icon:
+                                        "error",
+
+                                    title:
+                                        "Unable to Load Sample",
+
+                                    html:
+                                        "<div style='text-align:left'>" +
 
                                         "<p>" +
-                                            errorMessage +
+                                        errorMessage +
                                         "</p>" +
 
                                         "<hr>" +
 
                                         "<small>" +
 
-                                            "<strong>Request:</strong> " +
-                                            (requestNumber || "N/A") +
+                                        "<strong>Request:</strong> " +
+                                        (requestNumber || "N/A") +
 
-                                            "<br>" +
+                                        "<br>" +
 
-                                            "<strong>TestRequestId:</strong> " +
-                                            testRequestId +
+                                        "<strong>TestRequestId:</strong> " +
+                                        testRequestId +
 
-                                            "<br>" +
+                                        "<br>" +
 
-                                            "<strong>SampleId:</strong> " +
-                                            sampleId +
+                                        "<strong>SampleId:</strong> " +
+                                        sampleId +
 
-                                            "<br>" +
+                                        "<br>" +
 
-                                            "<strong>HTTP Status:</strong> " +
-                                            xhr.status +
+                                        "<strong>HTTP Status:</strong> " +
+                                        xhr.status +
 
                                         "</small>" +
 
-                                    "</div>",
+                                        "</div>",
 
-                                confirmButtonText:
-                                    "OK"
-                            });
-                        }
-                });
-            }
-        );
-
-
-        // ============================================================
-        // RESET RECEIVE MODAL AFTER CLOSING
-        // ============================================================
-
-        $("#receiveSampleModal")
-            .on(
-                "hidden.bs.modal",
-                function () {
-
-                    $("#receiveSampleModalContent")
-                        .html(`
-
-                            <div class="modal-body text-center py-5">
-
-                                <div
-                                    class="spinner-border text-primary"
-                                    role="status">
-
-                                    <span class="sr-only">
-                                        Loading...
-                                    </span>
-
-                                </div>
-
-                                <p class="mt-3 text-muted mb-0">
-
-                                    Loading sample information...
-
-                                </p>
-
-                            </div>
-
-                        `);
+                                    confirmButtonText:
+                                        "OK"
+                                });
+                            }
+                    });
                 }
             );
 
-    });
 
-</script>
+            // ============================================================
+            // RESET RECEIVE MODAL AFTER CLOSING
+            // ============================================================
+
+            $("#receiveSampleModal")
+                .on(
+                    "hidden.bs.modal",
+                    function() {
+
+                        $("#receiveSampleModalContent")
+                            .html(`
+
+                                    <div class="modal-body text-center py-5">
+
+                                        <div
+                                            class="spinner-border text-primary"
+                                            role="status">
+
+                                            <span class="sr-only">
+                                                Loading...
+                                            </span>
+
+                                        </div>
+
+                                        <p class="mt-3 text-muted mb-0">
+
+                                            Loading sample information...
+
+                                        </p>
+
+                                    </div>
+
+                                `);
+                    }
+                );
+
+        });
+
+    </script>
 }
