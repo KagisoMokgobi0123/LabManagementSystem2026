@@ -1935,40 +1935,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return View("PendingVerification", tests);
         }
 
-        // Add these actions INSIDE Areas/Technician/Controllers/TestsController.cs.
-        // Requires using Microsoft.AspNetCore.Authorization;
-        // Requires using Microsoft.EntityFrameworkCore;
-        // Do not add a duplicate Verified() action if one already exists.
-
-        [HttpGet]
-        [Authorize(Roles = "LabTechnician")]
-        public async Task<IActionResult> VerificationHistoryIndex()
-        {
-            var technicianId = _userManager.GetUserId(User);
-            if (string.IsNullOrWhiteSpace(technicianId))
-                return Challenge();
-
-            // A technician can see history for their own tests or test types
-            // to which the Laboratory Manager has actively assigned them.
-            var authorisedTestTypeIds = _context.TechnicianTestTypes
-                .AsNoTracking()
-                .Where(a => a.TechnicianId == technicianId && a.IsActive)
-                .Select(a => a.TestTypeId);
-
-            var tests = await _context.TestRequestTestTypes
-                .AsNoTracking()
-                .Include(t => t.TestType)
-                .Include(t => t.TestRequest)
-                .Where(t =>
-                    (t.TechnicianId == technicianId || authorisedTestTypeIds.Contains(t.TestTypeId)) &&
-                    _context.TestResultVerificationHistories.Any(h =>
-                        h.TestResult != null &&
-                        h.TestResult.TestRequestTestTypeId == t.TestRequestTestTypeId))
-                .OrderByDescending(t => t.CompletionDateTime)
-                .ToListAsync();
-
-            return View("VerificationHistoryIndex", tests);
-        }
+     
 
         [HttpGet]
         [Authorize(Roles = "LabTechnician")]
@@ -2189,6 +2156,117 @@ public async Task<IActionResult> CorrectTestModal(int id)
             ViewData["TestResults"] = results;
             return View("VerifyResult", test);
         }
+        // Add inside TestsController, alongside the existing VerificationHistory(int id) action.
+        // Add INSIDE Areas/Technician/Controllers/TestsController.cs
+        // Keep your existing VerificationHistory(int id) action unchanged.
+
+        [HttpGet]
+        public async Task<IActionResult> VerificationHistoryIndex()
+        {
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            var histories = await _context.TestResultVerificationHistories
+                .AsNoTracking()
+                .Include(h => h.ActionByTechnician)
+                .Include(h => h.TestResult)
+                    .ThenInclude(r => r!.TestRequestTestType)
+                        .ThenInclude(t => t!.TestType)
+                .Include(h => h.TestResult)
+                    .ThenInclude(r => r!.TestRequestTestType)
+                        .ThenInclude(t => t!.TestRequest)
+                .Where(h =>
+                    h.TestResult != null &&
+                    h.TestResult.TestRequestTestType != null &&
+                    (h.TestResult.TestRequestTestType.TechnicianId == technicianId ||
+                     h.ActionByTechnicianId == technicianId))
+                .OrderByDescending(h => h.ActionDateTime)
+                .ThenByDescending(h => h.TestResultVerificationHistoryId)
+                .ToListAsync();
+
+            return View("VerificationHistoryIndex", histories);
+        }
+        [HttpGet]
+
+        [HttpGet]
+        public async Task<IActionResult> VerificationTimelineModal(int id)
+        {
+            // 1. Identify the logged-in technician.
+            var technicianId = _userManager.GetUserId(User);
+
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Challenge();
+
+            if (id <= 0)
+                return BadRequest("Invalid test ID.");
+
+            // 2. Retrieve the selected test.
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestType)
+                .Include(t => t.TestRequest)
+                .FirstOrDefaultAsync(t =>
+                    t.TestRequestTestTypeId == id);
+
+            if (test == null)
+                return NotFound("Test not found.");
+
+            // 3. Check technician access.
+            bool isTestOwner = test.TechnicianId == technicianId;
+
+            bool participated = await _context
+                .TestResultVerificationHistories
+                .AsNoTracking()
+                .AnyAsync(h =>
+                    h.TestResult != null &&
+                    h.TestResult.TestRequestTestTypeId == id &&
+                    h.ActionByTechnicianId == technicianId);
+
+            if (!isTestOwner && !participated)
+                return Forbid();
+
+            // 4. Retrieve the current saved test result.
+            var currentResult = await _context.TestResults
+                .AsNoTracking()
+                .Include(r => r.Technician)
+                .Include(r => r.VerifiedByTechnician)
+                .Where(r => r.TestRequestTestTypeId == id)
+                .OrderByDescending(r => r.CapturedDateTime)
+                .ThenByDescending(r => r.TestResultId)
+                .FirstOrDefaultAsync();
+
+            // 5. Retrieve verification history.
+            var history = await _context
+                .TestResultVerificationHistories
+                .AsNoTracking()
+                .Include(h => h.ActionByTechnician)
+                .Where(h =>
+                    h.TestResult != null &&
+                    h.TestResult.TestRequestTestTypeId == id)
+                .OrderBy(h => h.ActionDateTime)
+                .ThenBy(h => h.TestResultVerificationHistoryId)
+                .ToListAsync();
+
+            // 6. Temporary diagnostic response.
+            // This confirms whether the database queries work.
+            ViewData["Test"] = test;
+            ViewData["CurrentResult"] = currentResult;
+
+            return PartialView("_VerificationTimelineModal", history);
+
+            // Once the diagnostic succeeds, we will restore:
+            //
+            // ViewData["Test"] = test;
+            // ViewData["CurrentResult"] = currentResult;
+            //
+            // return PartialView(
+            //     "_VerificationTimelineModal",
+            //     history);
+        }
+
+
 
         // C# cannot overload GET and POST by HTTP attributes alone.
         // Use a different C# method name and map it to the same action name.

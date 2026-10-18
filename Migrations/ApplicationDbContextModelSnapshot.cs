@@ -180,7 +180,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("AllergyCategoryId");
 
-                    b.ToTable("Allergies");
+                    b.ToTable("Allergies", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.AllergyCategory", b =>
@@ -203,7 +203,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("AllergyCategoryId");
 
-                    b.ToTable("AllergyCategories");
+                    b.ToTable("AllergyCategories", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalCondition", b =>
@@ -231,7 +231,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("MedicalConditionCategoryId");
 
-                    b.ToTable("MedicalConditions");
+                    b.ToTable("MedicalConditions", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory", b =>
@@ -254,7 +254,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("MedicalConditionCategoryId");
 
-                    b.ToTable("MedicalConditionCategories");
+                    b.ToTable("MedicalConditionCategories", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.Medication", b =>
@@ -282,7 +282,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("MedicationCategoryId");
 
-                    b.ToTable("Medications");
+                    b.ToTable("Medications", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Administrator.Models.MedicationCategory", b =>
@@ -305,7 +305,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("MedicationCategoryId");
 
-                    b.ToTable("MedicationCategories");
+                    b.ToTable("MedicationCategories", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
@@ -355,7 +355,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("PatientModelPatientId");
 
-                    b.ToTable("TestRequests");
+                    b.ToTable("TestRequests", (string)null);
 
                     b.HasData(
                         new
@@ -505,7 +505,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Consumables");
+                    b.ToTable("Consumables", (string)null);
 
                     b.HasData(
                         new
@@ -650,7 +650,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("MeasurementUnitId");
 
-                    b.ToTable("MeasurementUnits");
+                    b.ToTable("MeasurementUnits", (string)null);
 
                     b.HasData(
                         new
@@ -787,7 +787,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.OrderModel", b =>
@@ -826,7 +826,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockAdjustmentModel", b =>
@@ -853,7 +853,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("ConsumableId");
 
-                    b.ToTable("StockAdjustments");
+                    b.ToTable("StockAdjustments", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.StockStatusHistoryModel", b =>
@@ -883,7 +883,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("ConsumableId");
 
-                    b.ToTable("StockStatusHistories");
+                    b.ToTable("StockStatusHistories", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.SupplierModel", b =>
@@ -917,7 +917,7 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("SupplierName")
                         .IsUnique();
 
-                    b.ToTable("Suppliers");
+                    b.ToTable("Suppliers", (string)null);
 
                     b.HasData(
                         new
@@ -988,7 +988,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TechnicianTestTypes");
+                    b.ToTable("TechnicianTestTypes", (string)null);
 
                     b.HasData(
                         new
@@ -1063,7 +1063,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("TestCategoryId");
 
-                    b.ToTable("TestCategories");
+                    b.ToTable("TestCategories", (string)null);
 
                     b.HasData(
                         new
@@ -1143,7 +1143,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TestRequestTestTypes");
+                    b.ToTable("TestRequestTestTypes", (string)null);
 
                     b.HasData(
                         new
@@ -1279,7 +1279,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TestTypeConsumables");
+                    b.ToTable("TestTypeConsumables", (string)null);
 
                     b.HasData(
                         new
@@ -1391,7 +1391,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
-                    b.ToTable("TestTypeMeasurements");
+                    b.ToTable("TestTypeMeasurements", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeModel", b =>
@@ -1451,7 +1451,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestRequestsModelTestRequestId");
 
-                    b.ToTable("TestTypes");
+                    b.ToTable("TestTypes", (string)null);
 
                     b.HasData(
                         new
@@ -1599,7 +1599,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("AllergyCategoryId");
 
-                    b.ToTable("AllergyModel");
+                    b.ToTable("AllergyModel", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.ConsentRequestItemModel", b =>
@@ -1622,7 +1622,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestRequestId");
 
-                    b.ToTable("ConsentRequestItems");
+                    b.ToTable("ConsentRequestItems", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicalConditionModel", b =>
@@ -1648,7 +1648,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("MedicalConditionCategoryId");
 
-                    b.ToTable("MedicalConditionModel");
+                    b.ToTable("MedicalConditionModel", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.MedicationModel", b =>
@@ -1675,7 +1675,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("MedicationCategoryId");
 
-                    b.ToTable("MedicationModel");
+                    b.ToTable("MedicationModel", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel", b =>
@@ -1705,7 +1705,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("PatientAllergies");
+                    b.ToTable("PatientAllergies", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientConditionModel", b =>
@@ -1735,7 +1735,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("PatientConditions");
+                    b.ToTable("PatientConditions", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel", b =>
@@ -1771,7 +1771,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("PatientDoctorConsents");
+                    b.ToTable("PatientDoctorConsents", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel", b =>
@@ -1810,7 +1810,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("PatientId");
 
-                    b.ToTable("PatientMedications");
+                    b.ToTable("PatientMedications", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Patient.Models.PatientModel", b =>
@@ -1887,7 +1887,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Patients");
+                    b.ToTable("Patients", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
@@ -1934,7 +1934,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestRequestId");
 
-                    b.ToTable("Samples");
+                    b.ToTable("Samples", (string)null);
 
                     b.HasData(
                         new
@@ -2033,7 +2033,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasKey("SampleTypeId");
 
-                    b.ToTable("SampleTypes");
+                    b.ToTable("SampleTypes", (string)null);
 
                     b.HasData(
                         new
@@ -2226,7 +2226,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("VerifiedByTechnicianId");
 
-                    b.ToTable("TestResults");
+                    b.ToTable("TestResults", (string)null);
 
                     b.HasData(
                         new
@@ -2376,7 +2376,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestResultId");
 
-                    b.ToTable("TestResultVerificationHistories");
+                    b.ToTable("TestResultVerificationHistories", (string)null);
 
                     b.HasData(
                         new
@@ -2450,7 +2450,7 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PasswordResetOtps");
+                    b.ToTable("PasswordResetOtps", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Models.Identity.ApplicationUser", b =>
@@ -2568,7 +2568,7 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("DoctorProfiles");
+                    b.ToTable("DoctorProfiles", (string)null);
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Models.Users.TechnicianProfile", b =>
@@ -2604,7 +2604,7 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("TechnicianProfiles");
+                    b.ToTable("TechnicianProfiles", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

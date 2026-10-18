@@ -1,0 +1,181 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>
+@using System
+@using System.Linq
+@{
+    ViewData["Title"] = "Verification History";
+    Layout = "_TechnicianLayout";
+    var events = (Model ?? Enumerable.Empty<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>()).ToList();
+    var testCount = events.Where(h => h.TestResult != null).Select(h => h.TestResult!.TestRequestTestTypeId).Distinct().Count();
+    var verifiedCount = events.Count(h => h.Action == "Verified");
+    var returnedCount = events.Count(h => h.Action == "ReturnedForReview");
+}
+<style>
+    .vh-page{background:#f4f7fb;min-height:100vh;padding:30px 18px 60px;font-family:inherit;color:#24364d}
+    .vh-wrap{max-width:1350px;margin:0 auto}
+    .vh-hero{background:linear-gradient(115deg,#153e77,#2777bd);border-radius:17px;padding:29px 32px;color:#fff;margin-bottom:22px;box-shadow:0 10px 25px rgba(21,72,131,.13)}
+    .vh-hero h1{font-size:1.65rem;font-weight:800;margin:0 0 8px;color:#fff}
+    .vh-hero p{margin:0;color:#e3eefb;font-size:.96rem}
+    .vh-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:22px}
+    .vh-stat{background:#fff;border:1px solid #e1e9f3;border-radius:14px;padding:21px 23px;box-shadow:0 4px 16px rgba(31,62,104,.045)}
+    .vh-stat-label{font-weight:700;font-size:.88rem;color:#60748d}
+    .vh-stat-value{font-size:1.85rem;font-weight:800;color:#163e76;margin-top:7px}
+    .vh-card{background:#fff;border:1px solid #e0e8f2;border-radius:15px;box-shadow:0 5px 20px rgba(31,62,104,.05);overflow:hidden}
+    .vh-head{padding:20px 23px;border-bottom:1px solid #e9eef5;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+    .vh-head h2{margin:0;color:#194779;font-size:1.13rem;font-weight:800}
+    .vh-filters{display:flex;gap:10px;flex-wrap:wrap}
+    .vh-filters input,.vh-filters select{border:1px solid #cbd8e7;border-radius:8px;padding:10px 12px;min-height:42px;background:white;color:#2c425d;font-size:.88rem}
+    .vh-filters input{min-width:230px}
+    .vh-scroll{overflow-x:auto}
+    .vh-table{width:100%;border-collapse:collapse;min-width:980px}
+    .vh-table thead th{background:#f7f9fc;color:#60758e;text-align:left;text-transform:uppercase;letter-spacing:.035em;font-size:.74rem;font-weight:800;padding:15px 16px;white-space:nowrap}
+    .vh-table tbody td{padding:17px 16px;border-top:1px solid #edf1f6;vertical-align:top;font-size:.88rem;line-height:1.5}
+    .vh-table tbody tr:hover{background:#fafcff}
+    .vh-request{font-weight:800;color:#1a4b81;white-space:nowrap}
+    .vh-date{white-space:nowrap;color:#526a83;font-variant-numeric:tabular-nums}
+    .vh-test{font-weight:700;color:#263e57;min-width:150px}
+    .vh-actor{white-space:nowrap;color:#354d67}
+    .vh-notes{max-width:320px;min-width:180px;overflow-wrap:anywhere;color:#52677d}
+    .vh-badge{display:inline-block;border-radius:999px;padding:6px 10px;font-size:.75rem;font-weight:800;white-space:nowrap}
+    .vh-badge-success{background:#e4f6ec;color:#187243}
+    .vh-badge-warning{background:#fff0d9;color:#966000}
+    .vh-badge-info{background:#e6f1fc;color:#155b9a}
+    .vh-badge-neutral{background:#edf1f6;color:#4c5e73}
+    .vh-link{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:8px;background:#176bb1;color:#fff!important;font-size:.82rem;font-weight:750;text-decoration:none!important;white-space:nowrap}
+    .vh-link:hover{background:#10558f}
+    .vh-modal-backdrop{position:fixed;inset:0;background:rgba(9,25,48,.65);z-index:10550;display:none;align-items:center;justify-content:center;padding:20px}
+    .vh-modal-backdrop.is-open{display:flex}
+    .vh-modal{width:min(780px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+    .vh-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #e5ebf3}
+    .vh-modal-close{background:#eef3f9;border:0;border-radius:8px;padding:7px 12px;font-size:1.3rem;cursor:pointer}
+    .vh-modal-body{padding:22px 24px}
+    .vh-empty{padding:55px 22px;text-align:center;color:#6c8097}
+    .vh-footer{border-top:1px solid #edf1f6;padding:14px 22px;color:#73869a;font-size:.82rem}
+    @@media(max-width:850px){.vh-stats{grid-template-columns:1fr}.vh-page{padding:18px 10px 40px}.vh-hero{padding:23px}.vh-filters,.vh-filters input,.vh-filters select{width:100%}}
+</style>
+<div class="vh-page">
+ <div class="vh-wrap">
+  <section class="vh-hero">
+   <h1><i class="fas fa-history me-2" aria-hidden="true"></i> Verification History</h1>
+   <p>Audit trail of test submissions, corrections, independent verification decisions and returns for review.</p>
+  </section>
+  <section class="vh-stats" aria-label="History statistics">
+   <div class="vh-stat"><div class="vh-stat-label">Tests with activity</div><div class="vh-stat-value">@testCount</div></div>
+   <div class="vh-stat"><div class="vh-stat-label">Verification approvals</div><div class="vh-stat-value">@verifiedCount</div></div>
+   <div class="vh-stat"><div class="vh-stat-label">Returned for review</div><div class="vh-stat-value">@returnedCount</div></div>
+  </section>
+  <section class="vh-card">
+   <div class="vh-head">
+    <h2><i class="fas fa-list-alt me-2" aria-hidden="true"></i> Audit Events</h2>
+    <div class="vh-filters">
+     <input id="vhSearch" type="search" placeholder="Search requests, tests, notes..." aria-label="Search verification history" />
+     <select id="vhAction" aria-label="Filter by action">
+      <option value="">All actions</option>
+      <option value="Verified">Verified</option>
+      <option value="ReturnedForReview">Returned for review</option>
+      <option value="Corrected">Corrected</option>
+      <option value="SubmittedForVerification">Submitted for verification</option>
+      <option value="ResubmittedForVerification">Resubmitted for verification</option>
+      <option value="Submitted">Result captured</option>
+     </select>
+    </div>
+   </div>
+   <div class="vh-scroll">
+    <table class="vh-table" id="vhTable">
+     <thead><tr><th>Date (UTC)</th><th>Request</th><th>Test</th><th>Action</th><th>Performed by</th><th>Notes</th><th>Details</th></tr></thead>
+     <tbody>
+     @foreach (var h in events)
+     {
+         var test = h.TestResult?.TestRequestTestType;
+         var actor = h.ActionByTechnician?.FullName ?? "Unknown technician";
+         var label = h.Action switch
+         {
+             "Verified" => "Verified",
+             "ReturnedForReview" => "Returned for review",
+             "Corrected" => "Corrected",
+             "SubmittedForVerification" => "Submitted for verification",
+             "ResubmittedForVerification" => "Resubmitted for verification",
+             "Submitted" => "Result captured",
+             _ => h.Action
+         };
+         var badge = h.Action switch
+         {
+             "Verified" => "vh-badge-success",
+             "ReturnedForReview" => "vh-badge-warning",
+             "Corrected" or "ResubmittedForVerification" => "vh-badge-info",
+             _ => "vh-badge-neutral"
+         };
+         <tr data-action="@h.Action">
+          <td class="vh-date">@h.ActionDateTime.ToString("yyyy-MM-dd")<div>@h.ActionDateTime.ToString("HH:mm") UTC</div></td>
+          <td class="vh-request">@(test?.TestRequest?.RequestNumber ?? "—")</td>
+          <td class="vh-test">@(test?.TestType?.Name ?? "Unknown test")</td>
+          <td><span class="vh-badge @badge">@label</span></td>
+          <td class="vh-actor">@actor</td>
+          <td class="vh-notes">@(string.IsNullOrWhiteSpace(h.Notes) ? "—" : h.Notes)</td>
+          <td>
+           @if (test != null)
+           {
+                                        <button type="button" class="vh-link vh-open-timeline" data-url="@Url.Action("VerificationTimelineModal", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"><i class="fas fa-eye me-1"></i> Test Details</button>
+           }
+          </td>
+         </tr>
+     }
+     </tbody>
+    </table>
+   </div>
+   <div id="vhNoResults" class="vh-empty" style="display:none"><i class="fas fa-search" aria-hidden="true"></i><p class="mt-2 mb-0">No audit events match your filters.</p></div>
+   @if (!events.Any())
+   {
+    <div class="vh-empty">No verification history has been recorded for your tests yet.</div>
+   }
+   <div class="vh-footer"><span id="vhVisibleCount">@events.Count</span> of @events.Count audit events shown · Dates displayed in UTC</div>
+  </section>
+ </div>
+</div>
+<div id="vhTimelineOverlay" class="vh-modal-backdrop" aria-hidden="true">
+ <div class="vh-modal" role="dialog" aria-modal="true" aria-labelledby="vhTimelineHeading">
+  <div class="vh-modal-header"><h2 id="vhTimelineHeading" style="margin:0;font-size:1.15rem;color:#194779">Test verification timeline</h2><button id="vhTimelineClose" type="button" class="vh-modal-close" aria-label="Close timeline">&times;</button></div>
+  <div id="vhTimelineContent" class="vh-modal-body" aria-live="polite"></div>
+ </div>
+</div>
+<script>
+(function () {
+    const search = document.getElementById('vhSearch');
+    const filter = document.getElementById('vhAction');
+    const rows = Array.from(document.querySelectorAll('#vhTable tbody tr'));
+    const count = document.getElementById('vhVisibleCount');
+    const empty = document.getElementById('vhNoResults');
+    function apply() {
+        const query = (search.value || '').trim().toLocaleLowerCase();
+        const action = filter.value;
+        let visible = 0;
+        rows.forEach(row => {
+            const matches = (!query || row.textContent.toLocaleLowerCase().includes(query)) && (!action || row.dataset.action === action);
+            row.style.display = matches ? '' : 'none';
+            if (matches) visible++;
+        });
+        count.textContent = visible;
+        empty.style.display = rows.length && visible === 0 ? '' : 'none';
+    }
+    search.addEventListener('input', apply);
+    filter.addEventListener('change', apply);
+    const overlay = document.getElementById('vhTimelineOverlay');
+    const content = document.getElementById('vhTimelineContent');
+    const close = document.getElementById('vhTimelineClose');
+    let previousFocus = null;
+    function hideTimeline(){ overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden','true'); content.innerHTML=''; if(previousFocus) previousFocus.focus(); }
+    close.addEventListener('click', hideTimeline);
+    overlay.addEventListener('click', e => { if(e.target === overlay) hideTimeline(); });
+    document.addEventListener('keydown', e => { if(!overlay.classList.contains('is-open')) return; if(e.key === 'Escape') hideTimeline(); if(e.key === 'Tab'){const focusables=Array.from(overlay.querySelectorAll('button,a[href],input,[tabindex]:not([tabindex="-1"])')).filter(x=>!x.disabled);if(!focusables.length)return;const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus();}} });
+    document.querySelectorAll('.vh-open-timeline').forEach(btn => btn.addEventListener('click', async () => {
+      previousFocus = btn;
+      overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden','false');
+      content.textContent = 'Loading verification history...'; close.focus();
+      try {
+        const response = await fetch(btn.dataset.url, {headers:{'X-Requested-With':'XMLHttpRequest'}, credentials:'same-origin'});
+        if(!response.ok) throw new Error('Unable to load timeline (HTTP '+response.status+').');
+        const html = await response.text();
+        if(overlay.classList.contains('is-open')) content.innerHTML = html;
+      } catch(error) { if(overlay.classList.contains('is-open')) content.textContent = error.message; }
+    }));
+})();
+</script>

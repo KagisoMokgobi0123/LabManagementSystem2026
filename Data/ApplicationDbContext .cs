@@ -462,6 +462,34 @@ namespace NMB_HLabSys.Data
 
 
             // ============================================================
+            // DEVELOPMENT DEMO: LERATO PATIENT PROFILE
+            // PatientId is distinct from AspNetUsers.Id (UserId).
+            // All demographic values below are fictional test data.
+            // ============================================================
+            builder.Entity<PatientModel>().HasData(
+                new PatientModel
+                {
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    UserId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
+                    Name = "Lerato",
+                    Surname = "Patient",
+                    IDNumber = "0001015009087",
+                    DateOfBirth = new DateTime(2000, 1, 1),
+                    ContactNumber = "0710000000",
+                    Email = "lerato.demo@example.com",
+                    Address = "Demo Address",
+                    Suburb = "Central",
+                    City = "Gqeberha",
+                    Province = "Eastern Cape",
+                    PostalCode = "6001",
+                    NoKnownMedicalConditions = false,
+                    NoKnownAllergies = false,
+                    NoCurrentMedications = false,
+                    CreatedDate = new DateTime(2026, 10, 17)
+                }
+            );
+
+            // ============================================================
             // TEST REQUEST SEED DATA
             // ============================================================
 
@@ -568,8 +596,7 @@ namespace NMB_HLabSys.Data
                     Urgency = Urgency.Stat,
                     ClinicalNotes =
                         "Pre-surgery coagulation screen - STAT request.",
-                    Status =
-                        TestRequestStatus.Submitted.ToString()
+                    Status = TestRequestStatus.SamplesReceived.ToString()
                 },
 
                 new TestRequestsModel
@@ -1380,7 +1407,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 2,
                     TestTypeId = 1,
                     TechnicianId = null,
-                    Status = "SamplesReceived",
+                    Status = "Submitted",
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
@@ -1391,7 +1418,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 2,
                     TestTypeId = 2,
                     TechnicianId = null,
-                    Status = "SamplesReceived",
+                    Status = "Submitted",
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
@@ -1403,7 +1430,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 3,
                     TestTypeId = 3,
                     TechnicianId = null,
-                    Status = "SamplesReceived",
+                    Status = "Submitted",
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
@@ -1427,7 +1454,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 6,
                     TestTypeId = 3,
                     TechnicianId = null,
-                    Status = "SamplesReceived",
+                    Status = "Submitted",
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
@@ -1439,7 +1466,7 @@ namespace NMB_HLabSys.Data
                     TestRequestId = 9,
                     TestTypeId = 3,
                     TechnicianId = null,
-                    Status = "SamplesReceived",
+                    Status = "Submitted",
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
@@ -1708,6 +1735,192 @@ namespace NMB_HLabSys.Data
                     ConsumableId = 12,
                     QuantityRequired = 2
                 }
+            );
+
+            // ============================================================
+            // DEVELOPMENT DEMO: PATIENT MEDICAL HISTORY
+            // Lerato Patient (AspNetUsers.LastName = "Patient")
+            // AspNetUsers.Id = c0fbfbb4-daf5-44e3-bf57-acfded7baceb; patient profile ID = f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15
+            // Lookup IDs 1 and 2 are seeded below in the patient-model lookup tables.
+            // These are fictional demonstration records only.
+            // ============================================================
+            // Lookup records required by the patient-history foreign keys.
+            // AllergyCategories(1) and MedicationCategories(1) already exist
+            // in the development database; do not re-seed those parent rows.
+            // Category 9001 is new: verify it is unused before migration.
+            builder.Entity<MedicalConditionCategory>().HasData(
+                new MedicalConditionCategory
+                {
+                    MedicalConditionCategoryId = 9001,
+                    Name = "Demo chronic conditions",
+                    Description = "DEMO DATA ONLY - laboratory assessment",
+                    Status = (NMB_HLabSys.Areas.Administrator.Models.Enums.Status)1
+                }
+            );
+
+            builder.Entity<AllergyModel>().HasData(
+                new AllergyModel { AllergyId = 1, AllergyName = "Penicillin", Description = "DEMO DATA ONLY", AllergyCategoryId = 1 },
+                new AllergyModel { AllergyId = 2, AllergyName = "Peanuts", Description = "DEMO DATA ONLY", AllergyCategoryId = 1 }
+            );
+
+            builder.Entity<MedicalConditionModel>().HasData(
+                new MedicalConditionModel { MedicalConditionId = 1, ConditionName = "Hypertension", Description = "DEMO DATA ONLY", MedicalConditionCategoryId = 9001 },
+                new MedicalConditionModel { MedicalConditionId = 2, ConditionName = "Type 2 diabetes", Description = "DEMO DATA ONLY", MedicalConditionCategoryId = 9001 }
+            );
+
+            builder.Entity<MedicationModel>().HasData(
+                new MedicationModel { MedicationId = 1, MedicationName = "Metformin", Description = "DEMO DATA ONLY", MedicationCategoryId = 1 },
+                new MedicationModel { MedicationId = 2, MedicationName = "Amlodipine", Description = "DEMO DATA ONLY", MedicationCategoryId = 1 }
+            );
+
+            builder.Entity<PatientConditionModel>().HasData(
+                new PatientConditionModel
+                {
+                    PatientConditionId = 5001,
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    MedicalConditionId = 1,
+                    DateDiagnosed = new DateTime(2024, 3, 12),
+                    Notes = "DEMO DATA ONLY - example medical condition."
+                },
+                new PatientConditionModel
+                {
+                    PatientConditionId = 5002,
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    MedicalConditionId = 2,
+                    DateDiagnosed = new DateTime(2025, 6, 18),
+                    Notes = "DEMO DATA ONLY - example medical condition."
+                }
+            );
+
+            builder.Entity<PatientAllergyModel>().HasData(
+                new PatientAllergyModel
+                {
+                    PatientAllergyId = 6001,
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    AllergyId = 1,
+                    Severity = "Moderate",
+                    Notes = "DEMO DATA ONLY - fictional allergy history."
+                },
+                new PatientAllergyModel
+                {
+                    PatientAllergyId = 6002,
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    AllergyId = 2,
+                    Severity = "Mild",
+                    Notes = "DEMO DATA ONLY - fictional allergy history."
+                }
+            );
+
+            builder.Entity<PatientMedicationModel>().HasData(
+                new PatientMedicationModel
+                {
+                    PatientMedicationId = 7001,
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    MedicationId = 1,
+                    Dosage = "500 mg",
+                    Frequency = "Twice daily",
+                    StartDate = new DateTime(2026, 1, 10),
+                    EndDate = null,
+                    Notes = "DEMO DATA ONLY - fictional medication history."
+                },
+                new PatientMedicationModel
+                {
+                    PatientMedicationId = 7002,
+                    PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
+                    MedicationId = 2,
+                    Dosage = "10 mg",
+                    Frequency = "Once daily",
+                    StartDate = new DateTime(2026, 2, 15),
+                    EndDate = null,
+                    Notes = "DEMO DATA ONLY - fictional medication history."
+                }
+            );
+
+            // ============================================================
+            // TECHNICIAN ASSESSMENT DATA - DEVELOPMENT / DEMO ONLY
+            // Main technician: 63950297-85b0-4b81-934a-bad2bf77f3cb
+            // No real clinical data. Verify IDs against your existing database.
+            // ============================================================
+
+            // Four pending requests now each have at least two unreceived samples.
+            builder.Entity<SampleModel>().HasData(
+                new SampleModel { SampleId = 8101, TestRequestId = 1, Barcode = "DEMO-SMP-8101", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8102, TestRequestId = 5, Barcode = "DEMO-SMP-8102", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8103, TestRequestId = 7, Barcode = "DEMO-SMP-8103", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8104, TestRequestId = 10, Barcode = "DEMO-SMP-8104", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
+            );
+
+            // Five selected tests awaiting capture; no result rows yet.
+            // Test types 1, 2 and 3 are actively assigned to the main technician.
+            builder.Entity<TestRequestTestTypeModel>().HasData(
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1101, TestRequestId = 2, TestTypeId = 1, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 8, 0, 0), CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1102, TestRequestId = 2, TestTypeId = 2, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 9, 0, 0), CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1103, TestRequestId = 3, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 10, 0, 0), CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1104, TestRequestId = 6, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 11, 0, 0), CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1105, TestRequestId = 9, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 12, 0, 0), CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1106, TestRequestId = 8, TestTypeId = 3, TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Status = "Completed", StartDateTime = new DateTime(2026, 10, 14, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 14, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1107, TestRequestId = 3, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "To Be Reviewed", StartDateTime = new DateTime(2026, 10, 14, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 14, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1201, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 1, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 1, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1202, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 2, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 2, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1203, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 3, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 3, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1204, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 4, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 4, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1205, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 5, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 5, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1206, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 6, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 6, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1207, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 7, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 7, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1208, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 8, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 8, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1209, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 9, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 9, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1210, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 10, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 10, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1211, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 11, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 11, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1212, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 12, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 12, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1213, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 13, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 13, 9, 0, 0) },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1214, TestRequestId = 4, TestTypeId = 3, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "Verified", StartDateTime = new DateTime(2026, 10, 14, 8, 0, 0), CompletionDateTime = new DateTime(2026, 10, 14, 9, 0, 0) }
+            );
+
+            builder.Entity<TestResultModel>().HasData(
+                new TestResultModel { TestResultId = 2106, TestRequestTestTypeId = 1106, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: morphology review", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 14, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = null, VerifiedDateTime = null },
+                new TestResultModel { TestResultId = 2107, TestRequestTestTypeId = 1107, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: morphology review", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 14, 8, 50, 0, DateTimeKind.Utc), RequiresReview = true, ReviewNotes = "DEMO: repeat examination required", VerifiedByTechnicianId = null, VerifiedDateTime = null },
+                new TestResultModel { TestResultId = 2201, TestRequestTestTypeId = 1201, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 1, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 1, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2202, TestRequestTestTypeId = 1202, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 2, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 2, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2203, TestRequestTestTypeId = 1203, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 3, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 3, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2204, TestRequestTestTypeId = 1204, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 4, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 4, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2205, TestRequestTestTypeId = 1205, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 5, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 5, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2206, TestRequestTestTypeId = 1206, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 6, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 6, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2207, TestRequestTestTypeId = 1207, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 7, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 7, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2208, TestRequestTestTypeId = 1208, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 8, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 8, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2209, TestRequestTestTypeId = 1209, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 9, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 9, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2210, TestRequestTestTypeId = 1210, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 10, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 10, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2211, TestRequestTestTypeId = 1211, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 11, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 11, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2212, TestRequestTestTypeId = 1212, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 12, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 12, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2213, TestRequestTestTypeId = 1213, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 13, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 13, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultModel { TestResultId = 2214, TestRequestTestTypeId = 1214, ResultName = "Peripheral Blood Film", ResultValue = "DEMO: no abnormal cells seen", MeasurementUnit = "Qualitative", IsAbnormal = false, ResultFlag = "Not Evaluated", TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Notes = "DEMO DATA ONLY", CapturedDateTime = new DateTime(2026, 10, 14, 8, 50, 0, DateTimeKind.Utc), RequiresReview = false, ReviewNotes = null, VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", VerifiedDateTime = new DateTime(2026, 10, 14, 9, 15, 0, DateTimeKind.Utc) }
+            );
+
+            builder.Entity<TestResultVerificationHistoryModel>().HasData(
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3101, TestResultId = 2002, ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Action = "ReturnedForReview", Notes = "DEMO: verification attempt 1 returned", ActionDateTime = new DateTime(2026, 10, 14, 12, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3102, TestResultId = 2002, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "ResubmittedForVerification", Notes = "DEMO: corrected after attempt 1", ActionDateTime = new DateTime(2026, 10, 14, 13, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3103, TestResultId = 2002, ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Action = "ReturnedForReview", Notes = "DEMO: verification attempt 2 returned", ActionDateTime = new DateTime(2026, 10, 14, 14, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3104, TestResultId = 2002, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "ResubmittedForVerification", Notes = "DEMO: third verification now pending", ActionDateTime = new DateTime(2026, 10, 14, 15, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3111, TestResultId = 2003, ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Action = "ResubmittedForVerification", Notes = "DEMO: second verification requested", ActionDateTime = new DateTime(2026, 10, 13, 10, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3112, TestResultId = 2003, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "ReturnedForReview", Notes = "DEMO: verification attempt 2 returned", ActionDateTime = new DateTime(2026, 10, 13, 11, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3113, TestResultId = 2003, ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Action = "ResubmittedForVerification", Notes = "DEMO: third verification requested", ActionDateTime = new DateTime(2026, 10, 13, 12, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3114, TestResultId = 2003, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "ReturnedForReview", Notes = "DEMO: verification attempt 3 returned, recapture pending", ActionDateTime = new DateTime(2026, 10, 13, 13, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3121, TestResultId = 2106, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "SubmittedForVerification", Notes = "DEMO: awaiting independent verification", ActionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3122, TestResultId = 2107, ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Action = "SubmittedForVerification", Notes = "DEMO: submitted for review", ActionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3123, TestResultId = 2107, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "ReturnedForReview", Notes = "DEMO: correction required", ActionDateTime = new DateTime(2026, 10, 14, 10, 0, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3201, TestResultId = 2201, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 1, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3202, TestResultId = 2202, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 2, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3203, TestResultId = 2203, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 3, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3204, TestResultId = 2204, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 4, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3205, TestResultId = 2205, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 5, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3206, TestResultId = 2206, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 6, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3207, TestResultId = 2207, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 7, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3208, TestResultId = 2208, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 8, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3209, TestResultId = 2209, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 9, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3210, TestResultId = 2210, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 10, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3211, TestResultId = 2211, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 11, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3212, TestResultId = 2212, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 12, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3213, TestResultId = 2213, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 13, 9, 15, 0, DateTimeKind.Utc) },
+                new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3214, TestResultId = 2214, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 14, 9, 15, 0, DateTimeKind.Utc) }
             );
         }
     }

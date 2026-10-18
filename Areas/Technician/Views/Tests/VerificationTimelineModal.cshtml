@@ -1,0 +1,13 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultVerificationHistoryModel>
+
+@{
+    Layout = null;
+}
+
+<div class="p-4">
+    <h5 class="text-success">Test Details Loaded Successfully</h5>
+
+    <p>
+        Verification events: @(Model?.Count() ?? 0)
+    </p>
+</div>
