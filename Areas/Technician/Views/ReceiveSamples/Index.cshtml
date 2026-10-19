@@ -27,8 +27,8 @@
 <style>
 
     /* =========================================================
-               PAGE
-               ========================================================= */
+                       PAGE
+                       ========================================================= */
 
     .receive-page {
         min-height: 100vh;
@@ -37,8 +37,8 @@
 
 
     /* =========================================================
-               HERO
-               ========================================================= */
+                       HERO
+                       ========================================================= */
 
     .receive-hero {
         position: relative;
@@ -104,8 +104,8 @@
 
 
     /* =========================================================
-               HERO BUTTONS
-               ========================================================= */
+                       HERO BUTTONS
+                       ========================================================= */
 
     .hero-actions {
         display: flex;
@@ -143,8 +143,8 @@
 
 
     /* =========================================================
-               CONTENT
-               ========================================================= */
+                       CONTENT
+                       ========================================================= */
 
     .receive-content {
         position: relative;
@@ -155,8 +155,8 @@
 
 
     /* =========================================================
-               SUMMARY CARDS
-               ========================================================= */
+                       SUMMARY CARDS
+                       ========================================================= */
 
     .summary-card {
         height: 100%;
@@ -252,8 +252,8 @@
 
 
     /* =========================================================
-               TABLE CARD
-               ========================================================= */
+                       TABLE CARD
+                       ========================================================= */
 
     .requests-card {
         margin-top: 24px;
@@ -285,8 +285,8 @@
 
 
     /* =========================================================
-               FILTERS
-               ========================================================= */
+                       FILTERS
+                       ========================================================= */
 
     .filter-control {
         height: 37px;
@@ -320,12 +320,12 @@
 
 
     /* =========================================================
-               TABLE
-               ========================================================= */
+                       TABLE
+                       ========================================================= */
 
     .requests-table {
         margin-bottom: 0;
-        min-width: 1280px;
+        min-width: 1150px;
         width: 100%;
     }
 
@@ -384,8 +384,8 @@
 
 
     /* =========================================================
-               REQUEST
-               ========================================================= */
+                       REQUEST
+                       ========================================================= */
 
     .request-number {
         color: #075985;
@@ -401,8 +401,8 @@
 
 
     /* =========================================================
-               PERSON
-               ========================================================= */
+                       PERSON
+                       ========================================================= */
 
     .person-name {
         display: block;
@@ -420,8 +420,8 @@
 
 
     /* =========================================================
-               BARCODE
-               ========================================================= */
+                       BARCODE
+                       ========================================================= */
 
     .barcode-value {
         display: inline-flex;
@@ -444,8 +444,8 @@
 
 
     /* =========================================================
-               SAMPLE TYPE
-               ========================================================= */
+                       SAMPLE TYPE
+                       ========================================================= */
 
     .sample-type {
         display: flex;
@@ -468,8 +468,8 @@
 
 
     /* =========================================================
-               URGENCY
-               ========================================================= */
+                       URGENCY
+                       ========================================================= */
 
     .urgency-badge {
         display: inline-flex;
@@ -499,8 +499,8 @@
 
 
     /* =========================================================
-               STATUS
-               ========================================================= */
+                       STATUS
+                       ========================================================= */
 
     .status-badge {
         display: inline-flex;
@@ -517,25 +517,8 @@
 
 
     /* =========================================================
-               TEST TYPE COUNT
-               ========================================================= */
-
-    .test-count {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 5px 8px;
-        border-radius: 6px;
-        background: #f1f5f9;
-        color: #475569;
-        font-size: 10px;
-        font-weight: 600;
-    }
-
-
-    /* =========================================================
-               RECEIVE BUTTON
-               ========================================================= */
+                       RECEIVE BUTTON
+                       ========================================================= */
 
     .btn-receive {
         display: inline-flex;
@@ -573,8 +556,8 @@
 
 
     /* =========================================================
-               EMPTY STATE
-               ========================================================= */
+                       EMPTY STATE
+                       ========================================================= */
 
     .empty-state {
         padding: 65px 20px;
@@ -610,8 +593,8 @@
 
 
     /* =========================================================
-               MODAL
-               ========================================================= */
+                       MODAL
+                       ========================================================= */
 
     #receiveSampleModal .modal-content {
         overflow: hidden;
@@ -622,8 +605,8 @@
 
 
     /* =========================================================
-               RESPONSIVE
-               ========================================================= */
+                       RESPONSIVE
+                       ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -644,6 +627,20 @@
             margin-top: 15px;
         }
     }
+
+    /* Keep the DataTables Copy label readable on its button. */
+    .dt-buttons .btn-copy-visible,
+    .dt-buttons .btn-copy-visible:hover,
+    .dt-buttons .btn-copy-visible:focus {
+        color: #ffffff !important;
+        background-color: #475569 !important;
+        border-color: #475569 !important;
+        opacity: 1;
+    }
+
+        .dt-buttons .btn-copy-visible i {
+            color: #ffffff !important;
+        }
 
 </style>
 
@@ -1025,10 +1022,6 @@
                                 </th>
 
                                 <th>
-                                    Tests
-                                </th>
-
-                                <th>
                                     Urgency
                                 </th>
 
@@ -1174,25 +1167,6 @@
                                                     N/A
                                                 </span>
                                             }
-
-                                        </td>
-
-
-                                        <!-- TEST COUNT -->
-
-                                        <td>
-
-                                            <span class="test-count">
-
-                                                <i class="fas fa-microscope"></i>
-
-                                                @request.TestTypes.Count
-
-                                                @(request.TestTypes.Count == 1
-                                                    ? "Test"
-                                                    : "Tests")
-
-                                            </span>
 
                                         </td>
 
@@ -1463,7 +1437,7 @@
                     // Action column
                     columnDefs: [
                         {
-                            targets: 8,
+                            targets: 7,
                             orderable: false,
                             searchable: false
                         }
@@ -1505,7 +1479,7 @@
                                 '<i class="fas fa-copy mr-1"></i> Copy',
 
                             className:
-                                "btn btn-outline-secondary btn-sm",
+                                "btn btn-secondary btn-sm btn-copy-visible",
 
                             title:
                                 "NMB-HLabSys - Samples Awaiting Reception",
@@ -1519,8 +1493,7 @@
                                     3,
                                     4,
                                     5,
-                                    6,
-                                    7
+                                    6
                                 ],
 
                                 modifier: {
@@ -1579,8 +1552,7 @@
                                     3,
                                     4,
                                     5,
-                                    6,
-                                    7
+                                    6
                                 ],
 
                                 modifier: {
@@ -1642,8 +1614,7 @@
                                     3,
                                     4,
                                     5,
-                                    6,
-                                    7
+                                    6
                                 ],
 
                                 modifier: {
@@ -1761,10 +1732,9 @@
                                         "14%",
                                         "14%",
                                         "14%",
+                                        "14%",
                                         "12%",
-                                        "8%",
-                                        "10%",
-                                        "15%"
+                                        "19%"
                                     ];
                                 }
 
@@ -1848,8 +1818,7 @@
                                     3,
                                     4,
                                     5,
-                                    6,
-                                    7
+                                    6
                                 ],
 
                                 modifier: {
@@ -1925,7 +1894,7 @@
 
                 // ========================================================
                 // URGENCY FILTER
-                // Column 6 = Urgency
+                // Column 5 = Urgency
                 // ========================================================
 
                 $("#urgencyFilter").on(
@@ -1938,7 +1907,7 @@
                         if (!value) {
 
                             table
-                                .column(6)
+                                .column(5)
                                 .search("")
                                 .draw();
 
@@ -1946,7 +1915,7 @@
                         }
 
                         table
-                            .column(6)
+                            .column(5)
                             .search(
                                 "^" + value + "$",
                                 true,
@@ -2103,37 +2072,37 @@
                     $("#receiveSampleModalContent")
                         .html(`
 
-                                        <div class="modal-body text-center py-5">
+                                                        <div class="modal-body text-center py-5">
 
-                                            <div
-                                                class="spinner-border text-primary"
-                                                role="status">
+                                                            <div
+                                                                class="spinner-border text-primary"
+                                                                role="status">
 
-                                                <span class="sr-only">
-                                                    Loading...
-                                                </span>
+                                                                <span class="sr-only">
+                                                                    Loading...
+                                                                </span>
 
-                                            </div>
+                                                            </div>
 
-                                            <h6 class="mt-3 mb-1">
+                                                            <h6 class="mt-3 mb-1">
 
-                                                Loading Sample
+                                                                Loading Sample
 
-                                            </h6>
+                                                            </h6>
 
-                                            <p class="text-muted mb-0">
+                                                            <p class="text-muted mb-0">
 
-                                                ${requestNumber || "Request"}
+                                                                ${requestNumber || "Request"}
 
-                                                <br />
+                                                                <br />
 
-                                                ${barcode || ""}
+                                                                ${barcode || ""}
 
-                                            </p>
+                                                            </p>
 
-                                        </div>
+                                                        </div>
 
-                                    `);
+                                                    `);
 
 
                     // ====================================================
@@ -2150,8 +2119,8 @@
 
                     const receiveUrl =
                         '@Url.Action(
-                                                                                                            "Receive",
-                                                                                                            "ReceiveSamples",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            "Receive",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                            "ReceiveSamples",
                                     new { area = "Technician" })';
 
 
@@ -2454,27 +2423,27 @@
                         $("#receiveSampleModalContent")
                             .html(`
 
-                                            <div class="modal-body text-center py-5">
+                                                            <div class="modal-body text-center py-5">
 
-                                                <div
-                                                    class="spinner-border text-primary"
-                                                    role="status">
+                                                                <div
+                                                                    class="spinner-border text-primary"
+                                                                    role="status">
 
-                                                    <span class="sr-only">
-                                                        Loading...
-                                                    </span>
+                                                                    <span class="sr-only">
+                                                                        Loading...
+                                                                    </span>
 
-                                                </div>
+                                                                </div>
 
-                                                <p class="mt-3 text-muted mb-0">
+                                                                <p class="mt-3 text-muted mb-0">
 
-                                                    Loading sample information...
+                                                                    Loading sample information...
 
-                                                </p>
+                                                                </p>
 
-                                            </div>
+                                                            </div>
 
-                                        `);
+                                                        `);
                     }
                 );
 

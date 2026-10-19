@@ -7,18 +7,13 @@
 <style>
 
     /* ============================================================
-       MODAL
-       ============================================================ */
+               MODAL
+               ============================================================ */
 
     .receive-modal-header {
         padding: 20px 24px;
         border: 0;
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 50%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 50%, #0284c7 100% );
         color: #fff;
     }
 
@@ -26,81 +21,63 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 44px;
         height: 44px;
         min-width: 44px;
-
         margin-right: 13px;
-
         border-radius: 10px;
-
         background: rgba(255,255,255,.15);
-
         font-size: 18px;
     }
 
     .receive-modal-title {
         margin: 0 0 2px;
-
         color: #fff;
-
         font-size: 17px;
         font-weight: 700;
     }
 
     .receive-modal-subtitle {
         color: rgba(255,255,255,.80);
-
         font-size: 11px;
     }
 
     .receive-close {
         border: 0;
         background: transparent;
-
         color: #fff;
-
         font-size: 27px;
         line-height: 1;
-
         opacity: .85;
-
         cursor: pointer;
     }
 
-    .receive-close:hover {
-        opacity: 1;
-    }
+        .receive-close:hover {
+            opacity: 1;
+        }
 
 
     /* ============================================================
-       BODY
-       ============================================================ */
+               BODY
+               ============================================================ */
 
     .receive-modal-body {
         padding: 24px;
-
         background: #f8fafc;
     }
 
     .receive-section {
         overflow: hidden;
-
         margin-bottom: 16px;
-
         border: 1px solid #eef2f7;
         border-radius: 11px;
-
         background: #fff;
-
-        box-shadow:
-            0 3px 12px rgba(15,23,42,.04);
+        box-shadow: 0 3px 12px rgba(15,23,42,.04);
     }
 
-    .receive-section:last-child {
-        margin-bottom: 0;
-    }
+        .receive-section:last-child {
+            margin-bottom: 0;
+        }
 
     .receive-section-body {
         padding: 18px;
@@ -109,7 +86,6 @@
     .section-heading {
         display: flex;
         align-items: center;
-
         margin-bottom: 16px;
     }
 
@@ -117,15 +93,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 36px;
         height: 36px;
         min-width: 36px;
-
         margin-right: 10px;
-
         border-radius: 8px;
-
         font-size: 13px;
     }
 
@@ -146,52 +118,41 @@
 
     .section-title {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 14px;
         font-weight: 700;
     }
 
     .section-subtitle {
         display: block;
-
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* ============================================================
-       INFORMATION
-       ============================================================ */
+               INFORMATION
+               ============================================================ */
 
     .information-label {
         display: block;
-
         margin-bottom: 5px;
-
         color: #94a3b8;
-
         font-size: 10px;
         font-weight: 600;
-
         text-transform: uppercase;
         letter-spacing: .3px;
     }
 
     .information-value {
         color: #334155;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .request-number-value {
         color: #0369a1;
-
         font-size: 13px;
         font-weight: 700;
     }
@@ -199,96 +160,73 @@
     .sample-information-box {
         display: flex;
         align-items: center;
-
         min-height: 43px;
-
         padding: 9px 12px;
-
         border: 1px solid #e2e8f0;
         border-radius: 7px;
-
         background: #f8fafc;
-
         color: #334155;
-
         font-size: 12px;
         font-weight: 600;
     }
 
-    .sample-information-box i {
-        width: 20px;
-
-        margin-right: 7px;
-
-        color: #0284c7;
-
-        text-align: center;
-    }
+        .sample-information-box i {
+            width: 20px;
+            margin-right: 7px;
+            color: #0284c7;
+            text-align: center;
+        }
 
 
     /* ============================================================
-       VERIFICATION INTRO
-       ============================================================ */
+               VERIFICATION INTRO
+               ============================================================ */
 
     .verification-information {
         display: flex;
         align-items: flex-start;
-
         gap: 8px;
-
         margin-bottom: 13px;
-
         padding: 10px 12px;
-
         border: 1px solid #bae6fd;
         border-radius: 7px;
-
         background: #f0f9ff;
-
         color: #0369a1;
-
         font-size: 11px;
     }
 
-    .verification-information i {
-        margin-top: 2px;
-    }
+        .verification-information i {
+            margin-top: 2px;
+        }
 
 
     /* ============================================================
-       VERIFICATION ITEM
-       ============================================================ */
+               VERIFICATION ITEM
+               ============================================================ */
 
     .verification-item {
         display: block;
-
         position: relative;
-
         margin: 0 0 9px;
-
         cursor: pointer;
-
         user-select: none;
     }
 
-    .verification-item:last-of-type {
-        margin-bottom: 0;
-    }
+        .verification-item:last-of-type {
+            margin-bottom: 0;
+        }
 
 
     /*
-       Keep the real checkbox in the document.
-       We only make it visually hidden.
-    */
+               Keep the real checkbox in the document.
+               We only make it visually hidden.
+            */
 
     .verification-checkbox {
         position: absolute;
-
         width: 1px;
         height: 1px;
-
         opacity: 0;
-
         pointer-events: none;
     }
 
@@ -296,60 +234,40 @@
     .verification-content {
         display: flex;
         align-items: center;
-
         width: 100%;
-
         padding: 12px 13px;
-
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-
         background: #fff;
-
-        transition:
-            border-color .18s ease,
-            background .18s ease,
-            box-shadow .18s ease,
-            transform .18s ease;
+        transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, transform .18s ease;
     }
 
 
     .verification-item:hover
     .verification-content {
-
         border-color: #7dd3fc;
-
         background: #f8fcff;
-
-        box-shadow:
-            0 3px 10px rgba(2,132,199,.07);
+        box-shadow: 0 3px 10px rgba(2,132,199,.07);
     }
 
 
     /* ============================================================
-       CUSTOM CHECKBOX
-       ============================================================ */
+               CUSTOM CHECKBOX
+               ============================================================ */
 
     .verification-check-icon {
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 27px;
         height: 27px;
         min-width: 27px;
-
         margin-right: 11px;
-
         border: 2px solid #cbd5e1;
         border-radius: 6px;
-
         background: #fff;
-
         color: transparent;
-
         font-size: 11px;
-
         transition: .18s ease;
     }
 
@@ -360,127 +278,97 @@
 
     .verification-title {
         display: block;
-
         color: #334155;
-
         font-size: 12px;
         font-weight: 700;
     }
 
     .verification-description {
         display: block;
-
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* ============================================================
-       CHECKED STATE
-       ============================================================ */
+               CHECKED STATE
+               ============================================================ */
 
-    .verification-checkbox:checked
-    + .verification-content {
-
+    .verification-checkbox:checked + .verification-content {
         border-color: #22c55e;
-
         background: #f0fdf4;
-
-        box-shadow:
-            0 3px 10px rgba(34,197,94,.08);
+        box-shadow: 0 3px 10px rgba(34,197,94,.08);
     }
 
 
-    .verification-checkbox:checked
-    + .verification-content
-    .verification-check-icon {
-
-        border-color: #22c55e;
-
-        background: #22c55e;
-
-        color: #fff;
-    }
+        .verification-checkbox:checked + .verification-content
+        .verification-check-icon {
+            border-color: #22c55e;
+            background: #22c55e;
+            color: #fff;
+        }
 
 
-    .verification-checkbox:checked
-    + .verification-content
-    .verification-title {
-
-        color: #166534;
-    }
+        .verification-checkbox:checked + .verification-content
+        .verification-title {
+            color: #166534;
+        }
 
 
     /* ============================================================
-       VERIFICATION STATUS
-       ============================================================ */
+               VERIFICATION STATUS
+               ============================================================ */
 
     .verification-status {
         display: flex;
         align-items: center;
-
         margin-top: 14px;
-
         padding: 10px 12px;
-
         border: 1px solid #fde68a;
         border-radius: 7px;
-
         background: #fffbeb;
-
         color: #92400e;
-
         font-size: 11px;
         font-weight: 600;
-
         transition: .2s ease;
     }
 
-    .verification-status i {
-        margin-right: 7px;
-    }
+        .verification-status i {
+            margin-right: 7px;
+        }
 
 
-    .verification-status.complete {
-        border-color: #bbf7d0;
-
-        background: #f0fdf4;
-
-        color: #166534;
-    }
+        .verification-status.complete {
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
 
 
     /* ============================================================
-       FOOTER
-       ============================================================ */
+               FOOTER
+               ============================================================ */
 
     .receive-modal-footer {
         display: flex;
         align-items: center;
         justify-content: flex-end;
-
         gap: 8px;
-
         padding: 15px 20px;
-
         border-top: 1px solid #eef2f7;
-
         background: #fff;
     }
 
     #btnConfirmReceive:disabled {
         cursor: not-allowed;
-
         opacity: .55;
     }
 
 
     /* ============================================================
-       RESPONSIVE
-       ============================================================ */
+               RESPONSIVE
+               ============================================================ */
 
     @@media (max-width: 767px) {
 
@@ -496,10 +384,9 @@
             flex-direction: column-reverse;
         }
 
-        .receive-modal-footer .btn {
-            width: 100%;
-        }
-
+            .receive-modal-footer .btn {
+                width: 100%;
+            }
     }
 
 </style>
@@ -515,38 +402,37 @@
     <!-- ============================================================
          HIDDEN VALUES
          ============================================================ -->
-
     <!-- Critical IDs -->
 
-<input type="hidden"
-       id="TestRequestId"
-       name="TestRequestId"
-       value="@Model.TestRequestId" />
+    <input type="hidden"
+           id="TestRequestId"
+           name="TestRequestId"
+           value="@Model.TestRequestId" />
 
-<input type="hidden"
-       id="SampleID"
-       name="SampleID"
-       value="@Model.SampleID" />
+    <input type="hidden"
+           id="SampleID"
+           name="SampleID"
+           value="@Model.SampleID" />
 
-<input type="hidden"
-       id="SampleTypeId"
-       name="SampleTypeId"
-       value="@Model.SampleTypeId" />
+    <input type="hidden"
+           id="SampleTypeId"
+           name="SampleTypeId"
+           value="@Model.SampleTypeId" />
 
-<input type="hidden"
-       id="RequestNumber"
-       name="RequestNumber"
-       value="@Model.RequestNumber" />
+    <input type="hidden"
+           id="RequestNumber"
+           name="RequestNumber"
+           value="@Model.RequestNumber" />
 
-<input type="hidden"
-       id="Barcode"
-       name="Barcode"
-       value="@Model.Barcode" />
+    <input type="hidden"
+           id="Barcode"
+           name="Barcode"
+           value="@Model.Barcode" />
 
-<input type="hidden"
-       id="DateTimeReceived"
-       name="DateTimeReceived"
-       value="@Model.DateTimeReceived.ToString("yyyy-MM-ddTHH:mm:ss")" />
+    <input type="hidden"
+           id="DateTimeReceived"
+           name="DateTimeReceived"
+           value="@Model.DateTimeReceived.ToString("yyyy-MM-ddTHH:mm:ss")" />
 
 
     <!-- ============================================================
@@ -608,11 +494,15 @@
         <!-- ========================================================
              VALIDATION
              ======================================================== -->
-
-        <div asp-validation-summary="ModelOnly"
-             class="alert alert-danger"
-             id="receiveValidationSummary">
-        </div>
+        @* Only show the red validation panel when the server reports errors. *@
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All"
+                 class="alert alert-danger"
+                 id="receiveValidationSummary"
+                 role="alert">
+            </div>
+        }
 
 
         <!-- ========================================================
@@ -833,6 +723,7 @@
                             </span>
 
                         </div>
+                        <small class="d-block mt-1 text-muted">The actual received timestamp is recorded when reception is confirmed.</small>
 
                     </div>
 
@@ -1210,1291 +1101,1313 @@
 </form>
 
 
-      <script>
-(function () {
-    "use strict";
+<script>
+    (function() {
+        "use strict";
 
-    // ============================================================
-    // MAIN FORM
-    // ============================================================
+        // ============================================================
+        // MAIN FORM
+        // ============================================================
 
-    const form = document.getElementById("receiveSampleForm");
+        const form = document.getElementById("receiveSampleForm");
 
-    if (!form) {
-        console.error("receiveSampleForm was not found.");
-        return;
-    }
-
-
-    // ============================================================
-    // MAIN ELEMENTS
-    // ============================================================
-
-    const confirmButton =
-        document.getElementById("btnConfirmReceive");
-
-    const closeButton =
-        document.getElementById("btnCloseReceiveModal");
-
-    const cancelButton =
-        document.getElementById("btnCancelReceive");
-
-    const verificationStatus =
-        document.getElementById("verificationStatus");
-
-    const verificationStatusText =
-        document.getElementById("verificationStatusText");
-
-    const verificationStatusIcon =
-        document.getElementById("verificationStatusIcon");
-
-
-    // ============================================================
-    // FIND CHECKBOX BY ID OR NAME
-    //
-    // This is intentionally defensive because Razor asp-for can
-    // generate checkbox + hidden input pairs.
-    // ============================================================
-
-    function findCheckbox(fieldName) {
-
-        // First try exact ID
-        const byId =
-            document.getElementById(fieldName);
-
-        if (
-            byId &&
-            byId.type === "checkbox"
-        ) {
-            return byId;
+        if (!form) {
+            console.error("receiveSampleForm was not found.");
+            return;
         }
 
 
-        // Then search inside this form by name + checkbox type
-        const byName =
-            form.querySelector(
-                'input[type="checkbox"][name="' +
-                fieldName +
-                '"]'
-            );
+        // ============================================================
+        // MAIN ELEMENTS
+        // ============================================================
 
-        if (byName) {
-            return byName;
-        }
+        const confirmButton =
+            document.getElementById("btnConfirmReceive");
 
+        const closeButton =
+            document.getElementById("btnCloseReceiveModal");
 
-        return null;
-    }
+        const cancelButton =
+            document.getElementById("btnCancelReceive");
 
+        const verificationStatus =
+            document.getElementById("verificationStatus");
 
-    // ============================================================
-    // VERIFICATION CHECKBOXES
-    // ============================================================
+        const verificationStatusText =
+            document.getElementById("verificationStatusText");
 
-    const verificationFields = [
-        "VerifyRequestNumber",
-        "VerifyTechnician",
-        "VerifyBarcode",
-        "VerifySampleType",
-        "VerifyDateTime"
-    ];
+        const verificationStatusIcon =
+            document.getElementById("verificationStatusIcon");
 
 
-    function getVerificationCheckboxes() {
+        // ============================================================
+        // FIND CHECKBOX BY ID OR NAME
+        //
+        // This is intentionally defensive because Razor asp-for can
+        // generate checkbox + hidden input pairs.
+        // ============================================================
 
-        return verificationFields.map(
-            function (fieldName) {
+        function findCheckbox(fieldName) {
 
-                return {
-                    name: fieldName,
-                    element: findCheckbox(fieldName)
-                };
+            // First try exact ID
+            const byId =
+                document.getElementById(fieldName);
+
+            if (
+                byId &&
+                byId.type === "checkbox"
+            ) {
+                return byId;
             }
-        );
-    }
 
 
-    // ============================================================
-    // FIELD VALUE
-    // ============================================================
+            // Then search inside this form by name + checkbox type
+            const byName =
+                form.querySelector(
+                    'input[type="checkbox"][name="' +
+                    fieldName +
+                    '"]'
+                );
 
-    function getFieldValue(id) {
+            if (byName) {
+                return byName;
+            }
 
-        const element =
-            document.getElementById(id);
 
-        if (!element) {
-
-            console.error(
-                "Field not found:",
-                id
-            );
-
-            return "";
+            return null;
         }
 
-        return element.value ?? "";
-    }
+
+        // ============================================================
+        // VERIFICATION CHECKBOXES
+        // ============================================================
+
+        const verificationFields = [
+            "VerifyRequestNumber",
+            "VerifyTechnician",
+            "VerifyBarcode",
+            "VerifySampleType",
+            "VerifyDateTime"
+        ];
 
 
-    // ============================================================
-    // RECEIVE MODEL VALUES
-    // ============================================================
+        function getVerificationCheckboxes() {
 
-    function getReceiveValues() {
+            return verificationFields.map(
+                function(fieldName) {
 
-        return {
-
-            testRequestId:
-                getFieldValue("TestRequestId"),
-
-            sampleId:
-                getFieldValue("SampleID"),
-
-            sampleTypeId:
-                getFieldValue("SampleTypeId"),
-
-            requestNumber:
-                getFieldValue("RequestNumber"),
-
-            barcode:
-                getFieldValue("Barcode"),
-
-            dateTimeReceived:
-                getFieldValue("DateTimeReceived")
-        };
-    }
+                    return {
+                        name: fieldName,
+                        element: findCheckbox(fieldName)
+                    };
+                }
+            );
+        }
 
 
-    // ============================================================
-    // COUNT VERIFIED
-    // ============================================================
+        // ============================================================
+        // FIELD VALUE
+        // ============================================================
 
-    function getCheckedCount() {
+        function getFieldValue(id) {
 
-        const checkboxes =
-            getVerificationCheckboxes();
+            const element =
+                document.getElementById(id);
 
-        let checkedCount = 0;
+            if (!element) {
+
+                console.error(
+                    "Field not found:",
+                    id
+                );
+
+                return "";
+            }
+
+            return element.value ?? "";
+        }
 
 
-        checkboxes.forEach(
-            function (item) {
+        // ============================================================
+        // RECEIVE MODEL VALUES
+        // ============================================================
+
+        function getReceiveValues() {
+
+            return {
+
+                testRequestId:
+                    getFieldValue("TestRequestId"),
+
+                sampleId:
+                    getFieldValue("SampleID"),
+
+                sampleTypeId:
+                    getFieldValue("SampleTypeId"),
+
+                requestNumber:
+                    getFieldValue("RequestNumber"),
+
+                barcode:
+                    getFieldValue("Barcode"),
+
+                dateTimeReceived:
+                    getFieldValue("DateTimeReceived")
+            };
+        }
+
+
+        // ============================================================
+        // COUNT VERIFIED
+        // ============================================================
+
+        function getCheckedCount() {
+
+            const checkboxes =
+                getVerificationCheckboxes();
+
+            let checkedCount = 0;
+
+
+            checkboxes.forEach(
+                function(item) {
+
+                    if (
+                        item.element &&
+                        item.element.checked === true
+                    ) {
+                        checkedCount++;
+                    }
+                }
+            );
+
+
+            return checkedCount;
+        }
+
+
+        // ============================================================
+        // ALL VERIFIED?
+        // ============================================================
+
+        function areAllVerified() {
+
+            const checkboxes =
+                getVerificationCheckboxes();
+
+
+            return checkboxes.every(
+                function(item) {
+
+                    return (
+                        item.element &&
+                        item.element.checked === true
+                    );
+                }
+            );
+        }
+
+
+        // ============================================================
+        // UPDATE VERIFICATION DISPLAY
+        // ============================================================
+
+        // Show the success alert only when the technician finishes all checks.
+        let verificationAlertShown = false;
+
+        function updateVerificationState() {
+
+            const checkedCount =
+                getCheckedCount();
+
+            const completed =
+                checkedCount === 5;
+
+
+            console.log(
+                "Verification count:",
+                checkedCount
+            );
+
+
+            // --------------------------------------------------------
+            // TEXT
+            // --------------------------------------------------------
+
+            if (verificationStatusText) {
+
+                if (completed) {
+
+                    verificationStatusText.textContent =
+                        "All 5 items verified — ready to receive sample";
+
+                } else {
+
+                    verificationStatusText.textContent =
+                        checkedCount +
+                        " of 5 items verified";
+                }
+            }
+
+
+            // --------------------------------------------------------
+            // STATUS BOX
+            // --------------------------------------------------------
+
+            if (verificationStatus) {
+
+                verificationStatus.classList.toggle(
+                    "complete",
+                    completed
+                );
+            }
+
+
+            // --------------------------------------------------------
+            // STATUS ICON
+            // --------------------------------------------------------
+
+            if (verificationStatusIcon) {
+
+                verificationStatusIcon.className =
+                    completed
+                        ? "fas fa-check-circle"
+                        : "fas fa-exclamation-triangle";
+            }
+
+
+            // Notify once when all five checks become verified.
+            // This does not mean the sample has been received yet.
+            if (completed && !verificationAlertShown) {
+                verificationAlertShown = true;
+                if (typeof Swal !== "undefined") {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Verified Successfully!",
+                        text: "All five sample details have been verified. You can now confirm reception.",
+                        confirmButtonText: "OK",
+                        confirmButtonColor: "#0284c7"
+                    });
+                }
+            } else if (!completed) {
+                verificationAlertShown = false;
+            }
+
+            // --------------------------------------------------------
+            // CONFIRM BUTTON
+            // --------------------------------------------------------
+
+            if (confirmButton) {
+
+                confirmButton.disabled =
+                    !completed;
+            }
+        }
+
+
+        // ============================================================
+        // REGISTER CHECKBOX EVENTS
+        // ============================================================
+
+        function registerVerificationEvents() {
+
+            const checkboxes =
+                getVerificationCheckboxes();
+
+
+            checkboxes.forEach(
+                function(item) {
+
+                    if (!item.element) {
+
+                        console.error(
+                            "Verification checkbox not found:",
+                            item.name
+                        );
+
+                        return;
+                    }
+
+
+                    console.log(
+                        "Verification checkbox found:",
+                        item.name,
+                        item.element
+                    );
+
+
+                    item.element.addEventListener(
+                        "change",
+                        function() {
+
+                            console.log(
+                                item.name +
+                                " changed:",
+                                item.element.checked
+                            );
+
+
+                            updateVerificationState();
+                        }
+                    );
+                }
+            );
+        }
+
+
+        registerVerificationEvents();
+
+        // Do not show an alert merely because the modal opened pre-checked.
+        verificationAlertShown = areAllVerified();
+        updateVerificationState();
+
+
+        // ============================================================
+        // ALSO LISTEN USING EVENT DELEGATION
+        //
+        // Useful because the modal itself is dynamically injected.
+        // ============================================================
+
+        form.addEventListener(
+            "change",
+            function(event) {
+
+                const target =
+                    event.target;
+
 
                 if (
-                    item.element &&
-                    item.element.checked === true
+                    !target ||
+                    target.type !== "checkbox"
                 ) {
-                    checkedCount++;
+                    return;
+                }
+
+
+                if (
+                    verificationFields.includes(
+                        target.name
+                    ) ||
+                    verificationFields.includes(
+                        target.id
+                    )
+                ) {
+
+                    console.log(
+                        "Delegated checkbox change:",
+                        target.name ||
+                        target.id,
+                        target.checked
+                    );
+
+
+                    updateVerificationState();
                 }
             }
         );
 
 
-        return checkedCount;
-    }
+        // ============================================================
+        // CLOSE MODAL
+        // ============================================================
 
+        function closeReceiveModal() {
 
-    // ============================================================
-    // ALL VERIFIED?
-    // ============================================================
-
-    function areAllVerified() {
-
-        const checkboxes =
-            getVerificationCheckboxes();
-
-
-        return checkboxes.every(
-            function (item) {
-
-                return (
-                    item.element &&
-                    item.element.checked === true
+            const modalElement =
+                document.getElementById(
+                    "receiveSampleModal"
                 );
+
+
+            if (!modalElement) {
+                return;
             }
-        );
-    }
 
 
-    // ============================================================
-    // UPDATE VERIFICATION DISPLAY
-    // ============================================================
+            // Bootstrap 5
+            if (
+                typeof bootstrap !== "undefined" &&
+                bootstrap.Modal
+            ) {
 
-    function updateVerificationState() {
-
-        const checkedCount =
-            getCheckedCount();
-
-        const completed =
-            checkedCount === 5;
-
-
-        console.log(
-            "Verification count:",
-            checkedCount
-        );
+                const instance =
+                    bootstrap.Modal.getInstance(
+                        modalElement
+                    ) ||
+                    bootstrap.Modal.getOrCreateInstance(
+                        modalElement
+                    );
 
 
-        // --------------------------------------------------------
-        // TEXT
-        // --------------------------------------------------------
+                instance.hide();
 
-        if (verificationStatusText) {
-
-            if (completed) {
-
-                verificationStatusText.textContent =
-                    "All 5 items verified — ready to receive sample";
-
-            } else {
-
-                verificationStatusText.textContent =
-                    checkedCount +
-                    " of 5 items verified";
+                return;
             }
+
+
+            // Bootstrap 4
+            if (
+                typeof jQuery !== "undefined" &&
+                jQuery.fn &&
+                jQuery.fn.modal
+            ) {
+
+                jQuery(
+                    "#receiveSampleModal"
+                ).modal("hide");
+
+                return;
+            }
+
+
+            // Fallback
+            modalElement.classList.remove(
+                "show"
+            );
+
+            modalElement.style.display =
+                "none";
+
+            modalElement.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+            document.body.classList.remove(
+                "modal-open"
+            );
+
+
+            document.body.style.removeProperty(
+                "padding-right"
+            );
+
+
+            document
+                .querySelectorAll(
+                    ".modal-backdrop"
+                )
+                .forEach(
+                    function(backdrop) {
+
+                        backdrop.remove();
+                    }
+                );
         }
 
 
-        // --------------------------------------------------------
-        // STATUS BOX
-        // --------------------------------------------------------
+        // ============================================================
+        // CLOSE BUTTON
+        // ============================================================
 
-        if (verificationStatus) {
+        if (closeButton) {
 
-            verificationStatus.classList.toggle(
-                "complete",
-                completed
+            closeButton.addEventListener(
+                "click",
+                function() {
+
+                    closeReceiveModal();
+                }
             );
         }
 
 
-        // --------------------------------------------------------
-        // STATUS ICON
-        // --------------------------------------------------------
+        // ============================================================
+        // CANCEL BUTTON
+        // ============================================================
 
-        if (verificationStatusIcon) {
+        if (cancelButton) {
 
-            verificationStatusIcon.className =
-                completed
-                    ? "fas fa-check-circle"
-                    : "fas fa-exclamation-triangle";
+            cancelButton.addEventListener(
+                "click",
+                function() {
+
+                    closeReceiveModal();
+                }
+            );
         }
 
 
-        // --------------------------------------------------------
-        // CONFIRM BUTTON
-        // --------------------------------------------------------
+        // ============================================================
+        // LOADING STATE
+        // ============================================================
 
-        if (confirmButton) {
+        function setLoading(isLoading) {
 
-            confirmButton.disabled =
-                !completed;
+            const normalContent =
+                form.querySelector(
+                    ".receive-button-content"
+                );
+
+            const loadingContent =
+                form.querySelector(
+                    ".receive-loading"
+                );
+
+
+            if (normalContent) {
+
+                normalContent.classList.toggle(
+                    "d-none",
+                    isLoading
+                );
+            }
+
+
+            if (loadingContent) {
+
+                loadingContent.classList.toggle(
+                    "d-none",
+                    !isLoading
+                );
+            }
+
+
+            if (confirmButton) {
+
+                confirmButton.disabled =
+                    isLoading;
+            }
         }
-    }
 
 
-    // ============================================================
-    // REGISTER CHECKBOX EVENTS
-    // ============================================================
+        // ============================================================
+        // RESTORE BUTTON
+        // ============================================================
 
-    function registerVerificationEvents() {
+        function restoreButtonState() {
 
-        const checkboxes =
-            getVerificationCheckboxes();
+            setLoading(false);
+
+            updateVerificationState();
+        }
 
 
-        checkboxes.forEach(
-            function (item) {
+        // ============================================================
+        // SHOW ERROR
+        // ============================================================
 
-                if (!item.element) {
+        function showReceiveError(message) {
 
-                    console.error(
-                        "Verification checkbox not found:",
-                        item.name
+            Swal.fire({
+
+                icon:
+                    "error",
+
+                title:
+                    "Unable to Receive Sample",
+
+                text:
+                    message ||
+                    "An unexpected error occurred.",
+
+                confirmButtonText:
+                    "OK",
+
+                width:
+                    650
+            });
+        }
+
+
+        // ============================================================
+        // INITIAL DEBUG
+        // ============================================================
+
+        const initialValues =
+            getReceiveValues();
+
+
+        console.log(
+            "======================================"
+        );
+
+        console.log(
+            "RECEIVE SAMPLE MODAL LOADED"
+        );
+
+        console.log(
+            "Form action:",
+            form.action
+        );
+
+        console.log(
+            "TestRequestId:",
+            initialValues.testRequestId
+        );
+
+        console.log(
+            "SampleID:",
+            initialValues.sampleId
+        );
+
+        console.log(
+            "SampleTypeId:",
+            initialValues.sampleTypeId
+        );
+
+        console.log(
+            "RequestNumber:",
+            initialValues.requestNumber
+        );
+
+        console.log(
+            "Barcode:",
+            initialValues.barcode
+        );
+
+
+        getVerificationCheckboxes()
+            .forEach(
+                function(item) {
+
+                    console.log(
+                        item.name,
+                        "exists:",
+                        !!item.element,
+                        "checked:",
+                        item.element
+                            ? item.element.checked
+                            : "N/A"
+                    );
+                }
+            );
+
+
+        console.log(
+            "======================================"
+        );
+
+
+        // ============================================================
+        // SUBMIT
+        // ============================================================
+
+        form.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                // ====================================================
+                // VERIFY ALL FIVE
+                // ====================================================
+
+                updateVerificationState();
+
+
+                if (!areAllVerified()) {
+
+                    Swal.fire({
+
+                        icon:
+                            "warning",
+
+                        title:
+                            "Verification Required",
+
+                        text:
+                            "Please verify all five sample details before receiving the sample.",
+
+                        confirmButtonText:
+                            "OK"
+                    });
+
+
+                    return;
+                }
+
+
+                // ====================================================
+                // GET VALUES
+                // ====================================================
+
+                const values =
+                    getReceiveValues();
+
+
+                const testRequestId =
+                    parseInt(
+                        values.testRequestId,
+                        10
+                    );
+
+
+                const sampleId =
+                    parseInt(
+                        values.sampleId,
+                        10
+                    );
+
+
+                const sampleTypeId =
+                    parseInt(
+                        values.sampleTypeId,
+                        10
+                    );
+
+
+                // ====================================================
+                // VALIDATE IDS
+                // ====================================================
+
+                if (
+                    Number.isNaN(
+                        testRequestId
+                    ) ||
+                    testRequestId <= 0
+                ) {
+
+                    showReceiveError(
+                        "TestRequestId is missing or invalid."
                     );
 
                     return;
                 }
 
 
-                console.log(
-                    "Verification checkbox found:",
-                    item.name,
-                    item.element
-                );
-
-
-                item.element.addEventListener(
-                    "change",
-                    function () {
-
-                        console.log(
-                            item.name +
-                            " changed:",
-                            item.element.checked
-                        );
-
-
-                        updateVerificationState();
-                    }
-                );
-            }
-        );
-    }
-
-
-    registerVerificationEvents();
-
-    updateVerificationState();
-
-
-    // ============================================================
-    // ALSO LISTEN USING EVENT DELEGATION
-    //
-    // Useful because the modal itself is dynamically injected.
-    // ============================================================
-
-    form.addEventListener(
-        "change",
-        function (event) {
-
-            const target =
-                event.target;
-
-
-            if (
-                !target ||
-                target.type !== "checkbox"
-            ) {
-                return;
-            }
-
-
-            if (
-                verificationFields.includes(
-                    target.name
-                ) ||
-                verificationFields.includes(
-                    target.id
-                )
-            ) {
-
-                console.log(
-                    "Delegated checkbox change:",
-                    target.name ||
-                    target.id,
-                    target.checked
-                );
-
-
-                updateVerificationState();
-            }
-        }
-    );
-
-
-    // ============================================================
-    // CLOSE MODAL
-    // ============================================================
-
-    function closeReceiveModal() {
-
-        const modalElement =
-            document.getElementById(
-                "receiveSampleModal"
-            );
-
-
-        if (!modalElement) {
-            return;
-        }
-
-
-        // Bootstrap 5
-        if (
-            typeof bootstrap !== "undefined" &&
-            bootstrap.Modal
-        ) {
-
-            const instance =
-                bootstrap.Modal.getInstance(
-                    modalElement
-                ) ||
-                bootstrap.Modal.getOrCreateInstance(
-                    modalElement
-                );
-
-
-            instance.hide();
-
-            return;
-        }
-
-
-        // Bootstrap 4
-        if (
-            typeof jQuery !== "undefined" &&
-            jQuery.fn &&
-            jQuery.fn.modal
-        ) {
-
-            jQuery(
-                "#receiveSampleModal"
-            ).modal("hide");
-
-            return;
-        }
-
-
-        // Fallback
-        modalElement.classList.remove(
-            "show"
-        );
-
-        modalElement.style.display =
-            "none";
-
-        modalElement.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-
-        document.body.classList.remove(
-            "modal-open"
-        );
-
-
-        document.body.style.removeProperty(
-            "padding-right"
-        );
-
-
-        document
-            .querySelectorAll(
-                ".modal-backdrop"
-            )
-            .forEach(
-                function (backdrop) {
-
-                    backdrop.remove();
-                }
-            );
-    }
-
-
-    // ============================================================
-    // CLOSE BUTTON
-    // ============================================================
-
-    if (closeButton) {
-
-        closeButton.addEventListener(
-            "click",
-            function () {
-
-                closeReceiveModal();
-            }
-        );
-    }
-
-
-    // ============================================================
-    // CANCEL BUTTON
-    // ============================================================
-
-    if (cancelButton) {
-
-        cancelButton.addEventListener(
-            "click",
-            function () {
-
-                closeReceiveModal();
-            }
-        );
-    }
-
-
-    // ============================================================
-    // LOADING STATE
-    // ============================================================
-
-    function setLoading(isLoading) {
-
-        const normalContent =
-            form.querySelector(
-                ".receive-button-content"
-            );
-
-        const loadingContent =
-            form.querySelector(
-                ".receive-loading"
-            );
-
-
-        if (normalContent) {
-
-            normalContent.classList.toggle(
-                "d-none",
-                isLoading
-            );
-        }
-
-
-        if (loadingContent) {
-
-            loadingContent.classList.toggle(
-                "d-none",
-                !isLoading
-            );
-        }
-
-
-        if (confirmButton) {
-
-            confirmButton.disabled =
-                isLoading;
-        }
-    }
-
-
-    // ============================================================
-    // RESTORE BUTTON
-    // ============================================================
-
-    function restoreButtonState() {
-
-        setLoading(false);
-
-        updateVerificationState();
-    }
-
-
-    // ============================================================
-    // SHOW ERROR
-    // ============================================================
-
-    function showReceiveError(message) {
-
-        Swal.fire({
-
-            icon:
-                "error",
-
-            title:
-                "Unable to Receive Sample",
-
-            text:
-                message ||
-                "An unexpected error occurred.",
-
-            confirmButtonText:
-                "OK",
-
-            width:
-                650
-        });
-    }
-
-
-    // ============================================================
-    // INITIAL DEBUG
-    // ============================================================
-
-    const initialValues =
-        getReceiveValues();
-
-
-    console.log(
-        "======================================"
-    );
-
-    console.log(
-        "RECEIVE SAMPLE MODAL LOADED"
-    );
-
-    console.log(
-        "Form action:",
-        form.action
-    );
-
-    console.log(
-        "TestRequestId:",
-        initialValues.testRequestId
-    );
-
-    console.log(
-        "SampleID:",
-        initialValues.sampleId
-    );
-
-    console.log(
-        "SampleTypeId:",
-        initialValues.sampleTypeId
-    );
-
-    console.log(
-        "RequestNumber:",
-        initialValues.requestNumber
-    );
-
-    console.log(
-        "Barcode:",
-        initialValues.barcode
-    );
-
-
-    getVerificationCheckboxes()
-        .forEach(
-            function (item) {
-
-                console.log(
-                    item.name,
-                    "exists:",
-                    !!item.element,
-                    "checked:",
-                    item.element
-                        ? item.element.checked
-                        : "N/A"
-                );
-            }
-        );
-
-
-    console.log(
-        "======================================"
-    );
-
-
-    // ============================================================
-    // SUBMIT
-    // ============================================================
-
-    form.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-
-            // ====================================================
-            // VERIFY ALL FIVE
-            // ====================================================
-
-            updateVerificationState();
-
-
-            if (!areAllVerified()) {
-
-                Swal.fire({
-
-                    icon:
-                        "warning",
-
-                    title:
-                        "Verification Required",
-
-                    text:
-                        "Please verify all five sample details before receiving the sample.",
-
-                    confirmButtonText:
-                        "OK"
-                });
-
-
-                return;
-            }
-
-
-            // ====================================================
-            // GET VALUES
-            // ====================================================
-
-            const values =
-                getReceiveValues();
-
-
-            const testRequestId =
-                parseInt(
-                    values.testRequestId,
-                    10
-                );
-
-
-            const sampleId =
-                parseInt(
-                    values.sampleId,
-                    10
-                );
-
-
-            const sampleTypeId =
-                parseInt(
-                    values.sampleTypeId,
-                    10
-                );
-
-
-            // ====================================================
-            // VALIDATE IDS
-            // ====================================================
-
-            if (
-                Number.isNaN(
-                    testRequestId
-                ) ||
-                testRequestId <= 0
-            ) {
-
-                showReceiveError(
-                    "TestRequestId is missing or invalid."
-                );
-
-                return;
-            }
-
-
-            if (
-                Number.isNaN(
-                    sampleId
-                ) ||
-                sampleId <= 0
-            ) {
-
-                showReceiveError(
-                    "SampleID is missing or invalid."
-                );
-
-                return;
-            }
-
-
-            if (
-                Number.isNaN(
-                    sampleTypeId
-                ) ||
-                sampleTypeId <= 0
-            ) {
-
-                showReceiveError(
-                    "SampleTypeId is missing or invalid."
-                );
-
-                return;
-            }
-
-
-            // ====================================================
-            // VALIDATE REQUEST NUMBER
-            // ====================================================
-
-            if (
-                !values.requestNumber ||
-                values.requestNumber
-                    .trim() === ""
-            ) {
-
-                showReceiveError(
-                    "Request number is missing."
-                );
-
-                return;
-            }
-
-
-            // ====================================================
-            // VALIDATE BARCODE
-            // ====================================================
-
-            if (
-                !values.barcode ||
-                values.barcode
-                    .trim() === ""
-            ) {
-
-                showReceiveError(
-                    "Sample barcode is missing."
-                );
-
-                return;
-            }
-
-
-            // ====================================================
-            // CREATE FORM DATA
-            // ====================================================
-
-            const formData =
-                new FormData(form);
-
-
-            // ====================================================
-            // FORCE CRITICAL VALUES
-            // ====================================================
-
-            formData.set(
-                "TestRequestId",
-                testRequestId.toString()
-            );
-
-
-            formData.set(
-                "SampleID",
-                sampleId.toString()
-            );
-
-
-            formData.set(
-                "SampleTypeId",
-                sampleTypeId.toString()
-            );
-
-
-            formData.set(
-                "RequestNumber",
-                values.requestNumber
-            );
-
-
-            formData.set(
-                "Barcode",
-                values.barcode
-            );
-
-
-            if (values.dateTimeReceived) {
-
-                formData.set(
-                    "DateTimeReceived",
-                    values.dateTimeReceived
-                );
-            }
-
-
-            // ====================================================
-            // IMPORTANT FIX
-            //
-            // Razor asp-for checkboxes may include an additional
-            // hidden false value. FormData.set() replaces all
-            // values for each key with exactly "true".
-            // ====================================================
-
-            formData.set(
-                "VerifyRequestNumber",
-                "true"
-            );
-
-
-            formData.set(
-                "VerifyTechnician",
-                "true"
-            );
-
-
-            formData.set(
-                "VerifyBarcode",
-                "true"
-            );
-
-
-            formData.set(
-                "VerifySampleType",
-                "true"
-            );
-
-
-            formData.set(
-                "VerifyDateTime",
-                "true"
-            );
-
-
-            // ====================================================
-            // DEBUG EXACT POST VALUES
-            // ====================================================
-
-            console.log(
-                "======================================"
-            );
-
-            console.log(
-                "RECEIVE SAMPLE POST"
-            );
-
-            console.log(
-                "URL:",
-                form.action
-            );
-
-            console.log(
-                "TestRequestId:",
-                formData.get(
-                    "TestRequestId"
-                )
-            );
-
-            console.log(
-                "SampleID:",
-                formData.get(
-                    "SampleID"
-                )
-            );
-
-            console.log(
-                "SampleTypeId:",
-                formData.get(
-                    "SampleTypeId"
-                )
-            );
-
-            console.log(
-                "VerifyRequestNumber:",
-                formData.get(
-                    "VerifyRequestNumber"
-                )
-            );
-
-            console.log(
-                "VerifyTechnician:",
-                formData.get(
-                    "VerifyTechnician"
-                )
-            );
-
-            console.log(
-                "VerifyBarcode:",
-                formData.get(
-                    "VerifyBarcode"
-                )
-            );
-
-            console.log(
-                "VerifySampleType:",
-                formData.get(
-                    "VerifySampleType"
-                )
-            );
-
-            console.log(
-                "VerifyDateTime:",
-                formData.get(
-                    "VerifyDateTime"
-                )
-            );
-
-            console.log(
-                "======================================"
-            );
-
-
-            // ====================================================
-            // LOADING
-            // ====================================================
-
-            setLoading(true);
-
-
-            try {
-
-                // =================================================
-                // POST
-                // =================================================
-
-                const response =
-                    await fetch(
-                        form.action,
-                        {
-                            method:
-                                "POST",
-
-                            body:
-                                formData,
-
-                            credentials:
-                                "same-origin",
-
-                            headers: {
-
-                                "X-Requested-With":
-                                    "XMLHttpRequest",
-
-                                "Accept":
-                                    "application/json"
-                            }
-                        }
-                    );
-
-
-                // =================================================
-                // READ RESPONSE
-                // =================================================
-
-                const contentType =
-                    response.headers.get(
-                        "content-type"
-                    ) || "";
-
-
-                const rawText =
-                    await response.text();
-
-
-                console.log(
-                    "======================================"
-                );
-
-                console.log(
-                    "SERVER RESPONSE"
-                );
-
-                console.log(
-                    "HTTP Status:",
-                    response.status
-                );
-
-                console.log(
-                    "HTTP Status Text:",
-                    response.statusText
-                );
-
-                console.log(
-                    "Response URL:",
-                    response.url
-                );
-
-                console.log(
-                    "Redirected:",
-                    response.redirected
-                );
-
-                console.log(
-                    "Content-Type:",
-                    contentType
-                );
-
-                console.log(
-                    "Raw response:",
-                    rawText
-                );
-
-                console.log(
-                    "======================================"
-                );
-
-
-                // =================================================
-                // REDIRECT
-                // =================================================
-
-                if (response.redirected) {
-
-                    throw new Error(
-                        "The request was redirected to " +
-                        response.url +
-                        ". Check authentication or authorization."
-                    );
-                }
-
-
-                // =================================================
-                // EMPTY RESPONSE
-                // =================================================
-
                 if (
-                    !rawText ||
-                    rawText.trim() === ""
+                    Number.isNaN(
+                        sampleId
+                    ) ||
+                    sampleId <= 0
                 ) {
 
-                    throw new Error(
-                        "The server returned an empty response. HTTP status: " +
-                        response.status
+                    showReceiveError(
+                        "SampleID is missing or invalid."
+                    );
+
+                    return;
+                }
+
+
+                if (
+                    Number.isNaN(
+                        sampleTypeId
+                    ) ||
+                    sampleTypeId <= 0
+                ) {
+
+                    showReceiveError(
+                        "SampleTypeId is missing or invalid."
+                    );
+
+                    return;
+                }
+
+
+                // ====================================================
+                // VALIDATE REQUEST NUMBER
+                // ====================================================
+
+                if (
+                    !values.requestNumber ||
+                    values.requestNumber
+                        .trim() === ""
+                ) {
+
+                    showReceiveError(
+                        "Request number is missing."
+                    );
+
+                    return;
+                }
+
+
+                // ====================================================
+                // VALIDATE BARCODE
+                // ====================================================
+
+                if (
+                    !values.barcode ||
+                    values.barcode
+                        .trim() === ""
+                ) {
+
+                    showReceiveError(
+                        "Sample barcode is missing."
+                    );
+
+                    return;
+                }
+
+
+                // ====================================================
+                // CREATE FORM DATA
+                // ====================================================
+
+                const formData =
+                    new FormData(form);
+
+
+                // ====================================================
+                // FORCE CRITICAL VALUES
+                // ====================================================
+
+                formData.set(
+                    "TestRequestId",
+                    testRequestId.toString()
+                );
+
+
+                formData.set(
+                    "SampleID",
+                    sampleId.toString()
+                );
+
+
+                formData.set(
+                    "SampleTypeId",
+                    sampleTypeId.toString()
+                );
+
+
+                formData.set(
+                    "RequestNumber",
+                    values.requestNumber
+                );
+
+
+                formData.set(
+                    "Barcode",
+                    values.barcode
+                );
+
+
+                if (values.dateTimeReceived) {
+
+                    formData.set(
+                        "DateTimeReceived",
+                        values.dateTimeReceived
                     );
                 }
 
 
-                // =================================================
-                // PARSE JSON
-                // =================================================
+                // ====================================================
+                // IMPORTANT FIX
+                //
+                // Razor asp-for checkboxes may include an additional
+                // hidden false value. FormData.set() replaces all
+                // values for each key with exactly "true".
+                // ====================================================
 
-                let data;
+                formData.set(
+                    "VerifyRequestNumber",
+                    "true"
+                );
+
+
+                formData.set(
+                    "VerifyTechnician",
+                    "true"
+                );
+
+
+                formData.set(
+                    "VerifyBarcode",
+                    "true"
+                );
+
+
+                formData.set(
+                    "VerifySampleType",
+                    "true"
+                );
+
+
+                formData.set(
+                    "VerifyDateTime",
+                    "true"
+                );
+
+
+                // ====================================================
+                // DEBUG EXACT POST VALUES
+                // ====================================================
+
+                console.log(
+                    "======================================"
+                );
+
+                console.log(
+                    "RECEIVE SAMPLE POST"
+                );
+
+                console.log(
+                    "URL:",
+                    form.action
+                );
+
+                console.log(
+                    "TestRequestId:",
+                    formData.get(
+                        "TestRequestId"
+                    )
+                );
+
+                console.log(
+                    "SampleID:",
+                    formData.get(
+                        "SampleID"
+                    )
+                );
+
+                console.log(
+                    "SampleTypeId:",
+                    formData.get(
+                        "SampleTypeId"
+                    )
+                );
+
+                console.log(
+                    "VerifyRequestNumber:",
+                    formData.get(
+                        "VerifyRequestNumber"
+                    )
+                );
+
+                console.log(
+                    "VerifyTechnician:",
+                    formData.get(
+                        "VerifyTechnician"
+                    )
+                );
+
+                console.log(
+                    "VerifyBarcode:",
+                    formData.get(
+                        "VerifyBarcode"
+                    )
+                );
+
+                console.log(
+                    "VerifySampleType:",
+                    formData.get(
+                        "VerifySampleType"
+                    )
+                );
+
+                console.log(
+                    "VerifyDateTime:",
+                    formData.get(
+                        "VerifyDateTime"
+                    )
+                );
+
+                console.log(
+                    "======================================"
+                );
+
+
+                // ====================================================
+                // LOADING
+                // ====================================================
+
+                setLoading(true);
 
 
                 try {
 
-                    data =
-                        JSON.parse(
-                            rawText
+                    // =================================================
+                    // POST
+                    // =================================================
+
+                    const response =
+                        await fetch(
+                            form.action,
+                            {
+                                method:
+                                    "POST",
+
+                                body:
+                                    formData,
+
+                                credentials:
+                                    "same-origin",
+
+                                headers: {
+
+                                    "X-Requested-With":
+                                        "XMLHttpRequest",
+
+                                    "Accept":
+                                        "application/json"
+                                }
+                            }
                         );
 
-                }
-                catch (parseError) {
 
-                    console.error(
-                        "JSON parse error:",
-                        parseError
+                    // =================================================
+                    // READ RESPONSE
+                    // =================================================
+
+                    const contentType =
+                        response.headers.get(
+                            "content-type"
+                        ) || "";
+
+
+                    const rawText =
+                        await response.text();
+
+
+                    console.log(
+                        "======================================"
+                    );
+
+                    console.log(
+                        "SERVER RESPONSE"
+                    );
+
+                    console.log(
+                        "HTTP Status:",
+                        response.status
+                    );
+
+                    console.log(
+                        "HTTP Status Text:",
+                        response.statusText
+                    );
+
+                    console.log(
+                        "Response URL:",
+                        response.url
+                    );
+
+                    console.log(
+                        "Redirected:",
+                        response.redirected
+                    );
+
+                    console.log(
+                        "Content-Type:",
+                        contentType
+                    );
+
+                    console.log(
+                        "Raw response:",
+                        rawText
+                    );
+
+                    console.log(
+                        "======================================"
                     );
 
 
+                    // =================================================
+                    // REDIRECT
+                    // =================================================
+
+                    if (response.redirected) {
+
+                        throw new Error(
+                            "The request was redirected to " +
+                            response.url +
+                            ". Check authentication or authorization."
+                        );
+                    }
+
+
+                    // =================================================
+                    // EMPTY RESPONSE
+                    // =================================================
+
                     if (
-                        rawText
-                            .trim()
-                            .toLowerCase()
-                            .startsWith("<")
+                        !rawText ||
+                        rawText.trim() === ""
                     ) {
 
                         throw new Error(
-                            "ASP.NET returned HTML instead of JSON. HTTP status: " +
+                            "The server returned an empty response. HTTP status: " +
                             response.status
                         );
                     }
 
 
-                    throw new Error(
-                        "The server returned an invalid response. HTTP status: " +
-                        response.status
-                    );
-                }
+                    // =================================================
+                    // PARSE JSON
+                    // =================================================
+
+                    let data;
 
 
-                console.log(
-                    "JSON response:",
-                    data
-                );
+                    try {
+
+                        data =
+                            JSON.parse(
+                                rawText
+                            );
+
+                    }
+                    catch (parseError) {
+
+                        console.error(
+                            "JSON parse error:",
+                            parseError
+                        );
 
 
-                // =================================================
-                // HTTP ERROR
-                // =================================================
+                        if (
+                            rawText
+                                .trim()
+                                .toLowerCase()
+                                .startsWith("<")
+                        ) {
 
-                if (!response.ok) {
+                            throw new Error(
+                                "ASP.NET returned HTML instead of JSON. HTTP status: " +
+                                response.status
+                            );
+                        }
 
-                    throw new Error(
-                        data?.message ||
-                        data?.error ||
-                        (
-                            "The server rejected the request. HTTP " +
+
+                        throw new Error(
+                            "The server returned an invalid response. HTTP status: " +
                             response.status
-                        )
+                        );
+                    }
+
+
+                    console.log(
+                        "JSON response:",
+                        data
+                    );
+
+
+                    // =================================================
+                    // HTTP ERROR
+                    // =================================================
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data?.message ||
+                            data?.error ||
+                            (
+                                "The server rejected the request. HTTP " +
+                                response.status
+                            )
+                        );
+                    }
+
+
+                    // =================================================
+                    // CONTROLLER ERROR
+                    // =================================================
+
+                    if (
+                        !data ||
+                        data.success !== true
+                    ) {
+
+                        throw new Error(
+                            data?.message ||
+                            data?.error ||
+                            "Unable to receive the sample."
+                        );
+                    }
+
+
+                    // =================================================
+                    // SUCCESS
+                    // =================================================
+
+                    setLoading(false);
+
+
+                    closeReceiveModal();
+
+
+                    await Swal.fire({
+
+                        icon:
+                            "success",
+
+                        title:
+                            "Sample Received",
+
+                        html:
+                            "<strong>" +
+                            (
+                                data.barcode ||
+                                values.barcode
+                            ) +
+                            "</strong>" +
+
+                            "<br><br>" +
+
+                            (
+                                data.message ||
+                                "The sample was received successfully."
+                            ) +
+
+                            (
+                                data.requestNumber
+                                    ? "<br><br><small>Request: " +
+                                    data.requestNumber +
+                                    "</small>"
+                                    : ""
+                            ) +
+
+                            (
+                                data.technician
+                                    ? "<br><small>Received by: " +
+                                    data.technician +
+                                    "</small>"
+                                    : ""
+                            ) +
+
+                            (
+                                data.receivedAt
+                                    ? "<br><small>Received: " +
+                                    data.receivedAt +
+                                    "</small>"
+                                    : ""
+                            ),
+
+                        confirmButtonText:
+                            "OK"
+                    });
+
+
+                    // =================================================
+                    // REFRESH LIST
+                    // =================================================
+
+                    window.location.reload();
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "======================================"
+                    );
+
+                    console.error(
+                        "RECEIVE SAMPLE FAILED"
+                    );
+
+                    console.error(
+                        error
+                    );
+
+                    console.error(
+                        "======================================"
+                    );
+
+
+                    restoreButtonState();
+
+
+                    showReceiveError(
+                        error?.message ||
+                        "An unexpected error occurred while receiving the sample."
                     );
                 }
-
-
-                // =================================================
-                // CONTROLLER ERROR
-                // =================================================
-
-                if (
-                    !data ||
-                    data.success !== true
-                ) {
-
-                    throw new Error(
-                        data?.message ||
-                        data?.error ||
-                        "Unable to receive the sample."
-                    );
-                }
-
-
-                // =================================================
-                // SUCCESS
-                // =================================================
-
-                setLoading(false);
-
-
-                closeReceiveModal();
-
-
-                await Swal.fire({
-
-                    icon:
-                        "success",
-
-                    title:
-                        "Sample Received",
-
-                    html:
-                        "<strong>" +
-                        (
-                            data.barcode ||
-                            values.barcode
-                        ) +
-                        "</strong>" +
-
-                        "<br><br>" +
-
-                        (
-                            data.message ||
-                            "The sample was received successfully."
-                        ) +
-
-                        (
-                            data.requestNumber
-                                ? "<br><br><small>Request: " +
-                                  data.requestNumber +
-                                  "</small>"
-                                : ""
-                        ) +
-
-                        (
-                            data.technician
-                                ? "<br><small>Received by: " +
-                                  data.technician +
-                                  "</small>"
-                                : ""
-                        ) +
-
-                        (
-                            data.receivedAt
-                                ? "<br><small>Received: " +
-                                  data.receivedAt +
-                                  "</small>"
-                                : ""
-                        ),
-
-                    confirmButtonText:
-                        "OK"
-                });
-
-
-                // =================================================
-                // REFRESH LIST
-                // =================================================
-
-                window.location.reload();
-
             }
-            catch (error) {
+        );
 
-                console.error(
-                    "======================================"
-                );
-
-                console.error(
-                    "RECEIVE SAMPLE FAILED"
-                );
-
-                console.error(
-                    error
-                );
-
-                console.error(
-                    "======================================"
-                );
-
-
-                restoreButtonState();
-
-
-                showReceiveError(
-                    error?.message ||
-                    "An unexpected error occurred while receiving the sample."
-                );
-            }
-        }
-    );
-
-})();
+    })();
 </script>
