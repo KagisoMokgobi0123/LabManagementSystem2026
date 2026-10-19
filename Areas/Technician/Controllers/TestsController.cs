@@ -230,6 +230,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     (x.Status == "Submitted" || x.Status == "SamplesReceived") &&
                     (x.TechnicianId == null || x.TechnicianId == "") &&
                     x.TestRequest != null &&
+                    !x.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-") &&
                     x.TestType != null &&
                     (x.TestRequest.Status == "Submitted" ||
                      x.TestRequest.Status == "SamplesReceived" ||
@@ -239,7 +240,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         sample.TestRequestId == x.TestRequestId &&
                         sample.SampleTypeId == x.TestType.SampleTypeId &&
                         sample.IsReceived && !sample.IsDeleted))
-                .OrderBy(x => x.TestRequestId)
+                // Highest clinical priority first: Stat, Urgent, Routine.
+                .OrderByDescending(x => x.TestRequest!.Urgency)
+                .ThenBy(x => x.TestRequestId)
                 .ThenBy(x => x.TestRequestTestTypeId)
                 .ToListAsync();
 
@@ -392,6 +395,14 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     TempData["ErrorMessage"] =
                         "The selected patient test could not be found.";
 
+                    return RedirectToAction(nameof(Select));
+                }
+
+                // Do not allow demo requests to be selected via a direct POST.
+                if (requestTest.TestRequest == null ||
+                    requestTest.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                {
+                    TempData["ErrorMessage"] = "This request is not available for technician selection.";
                     return RedirectToAction(nameof(Select));
                 }
 
@@ -798,83 +809,74 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         public async Task<IActionResult> Review()
         {
             var technicianId = _userManager.GetUserId(User);
-
-            if (string.IsNullOrEmpty(technicianId))
+            if (string.IsNullOrWhiteSpace(technicianId))
                 return Challenge();
 
-            // Test types the signed-in technician is authorised to verify.
-            var authorisedTestTypeIds = await _context.TechnicianTestTypes
+            // Keep all filtering in SQL; avoid local-array Contains expressions,
+            // which caused EF parameter extraction to fail in this environment.
+            var authorisedTypes = _context.TechnicianTestTypes
                 .AsNoTracking()
-                .Where(a =>
-                    a.TechnicianId == technicianId &&
-                    a.IsActive)
-                .Select(a => a.TestTypeId)
-                .Distinct()
-                .ToListAsync();
+                .Where(a => a.TechnicianId == technicianId && a.IsActive)
+                .Select(a => a.TestTypeId);
 
-            // Two queues:
-            // 1. Own tests returned for correction.
-            // 2. Other technicians' completed tests for verification.
-            var tests = await _context.TestRequestTestTypes
+            var eligibleTests = _context.TestRequestTestTypes
                 .AsNoTracking()
-                .Include(t => t.TestRequest)
-                    .ThenInclude(r => r.Patient)
-                .Include(t => t.TestRequest)
-                    .ThenInclude(r => r.Doctor)
-                .Include(t => t.TestType)
-                    .ThenInclude(tt => tt.TestCategory)
                 .Where(t =>
-                    (t.Status == "To Be Reviewed" &&
-                     t.TechnicianId == technicianId)
+                    (t.Status == "To Be Reviewed" && t.TechnicianId == technicianId)
                     ||
                     (t.Status == "Completed" &&
                      t.TechnicianId != null &&
                      t.TechnicianId != technicianId &&
-                     authorisedTestTypeIds.Contains(t.TestTypeId)))
+                     authorisedTypes.Contains(t.TestTypeId)));
+
+            // Preserve the entities and navigation properties used by Review.cshtml.
+            var tests = await eligibleTests
+                .Include(t => t.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Include(t => t.TestRequest)
+                    .ThenInclude(r => r!.Doctor)
+                .Include(t => t.TestType)
+                    .ThenInclude(tt => tt!.TestCategory)
                 .OrderBy(t => t.Status == "To Be Reviewed" ? 0 : 1)
                 .ThenByDescending(t => t.CompletionDateTime)
                 .ToListAsync();
 
-            var testIds = tests
-                .Select(t => t.TestRequestTestTypeId)
-                .ToList();
+            // SQL joins replace local testIds.Contains(...) and resultIds.Contains(...).
+            // Distinct removes duplicates without changing result entities.
+            var savedResults = await (
+                from result in _context.TestResults.AsNoTracking()
+                join test in eligibleTests
+                    on result.TestRequestTestTypeId equals test.TestRequestTestTypeId
+                select result
+            ).Distinct().ToListAsync();
 
-            var savedResults = await _context.TestResults
-                .AsNoTracking()
-                .Where(r => testIds.Contains(r.TestRequestTestTypeId))
-                .ToListAsync();
+            var histories = await (
+                from history in _context.TestResultVerificationHistories.AsNoTracking()
+                join result in _context.TestResults.AsNoTracking()
+                    on history.TestResultId equals result.TestResultId
+                join test in eligibleTests
+                    on result.TestRequestTestTypeId equals test.TestRequestTestTypeId
+                orderby history.ActionDateTime descending
+                select history
+            ).Distinct().ToListAsync();
 
-            var resultIds = savedResults
-                .Select(r => r.TestResultId)
-                .ToList();
-
-            var histories = await _context.TestResultVerificationHistories
-                .AsNoTracking()
-                .Where(h => resultIds.Contains(h.TestResultId))
+            histories = histories
                 .OrderByDescending(h => h.ActionDateTime)
-                .ToListAsync();
+                .ThenByDescending(h => h.TestResultVerificationHistoryId)
+                .ToList();
 
             ViewData["SavedResults"] = savedResults;
             ViewData["ReviewHistories"] = histories;
-
             ViewData["LatestReviewHistory"] = histories
                 .Where(h => h.Action == "ReturnedForReview")
                 .GroupBy(h => h.TestResultId)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.First());
-
-            ViewData["ReviewCount"] = tests.Count(t =>
-                t.Status == "To Be Reviewed");
-
-            ViewData["CompletedCount"] = tests.Count(t =>
-                t.Status == "Completed");
-
+                .ToDictionary(g => g.Key, g => g.First());
+            ViewData["ReviewCount"] = tests.Count(t => t.Status == "To Be Reviewed");
+            ViewData["CompletedCount"] = tests.Count(t => t.Status == "Completed");
             ViewData["TotalCount"] = tests.Count;
 
             return View(tests);
         }
-
 
 
         // =========================================================
@@ -2121,31 +2123,66 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         public async Task<IActionResult> VerifyResultsQueue()
         {
             var verifierId = _userManager.GetUserId(User);
+
             if (string.IsNullOrWhiteSpace(verifierId))
                 return Challenge();
 
+            // Get test types assigned to the currently logged-in technician.
             var assignedTypeIds = _context.TechnicianTestTypes
                 .AsNoTracking()
-                .Where(a => a.TechnicianId == verifierId && a.IsActive)
+                .Where(a =>
+                    a.TechnicianId == verifierId &&
+                    a.IsActive)
                 .Select(a => a.TestTypeId);
 
+            // Retrieve tests eligible for independent verification.
             var tests = await _context.TestRequestTestTypes
                 .AsNoTracking()
+
+                // Load test information.
                 .Include(t => t.TestType)
+
+                // Load request and patient information.
                 .Include(t => t.TestRequest)
                     .ThenInclude(r => r!.Patient)
-                .Where(t => t.Status == "Completed" &&
-                            t.TechnicianId != null &&
-                            t.TechnicianId != verifierId &&
-                            assignedTypeIds.Contains(t.TestTypeId) &&
-                            _context.TestResults.Count(r =>
-                                r.TestRequestTestTypeId == t.TestRequestTestTypeId) == 1 &&
-                            _context.TestResults.Any(r =>
-                                r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
-                                r.TechnicianId == t.TechnicianId &&
-                                r.ResultValue != null &&
-                                r.ResultValue.Trim() != ""))
+
+                // Load the technician who performed the test.
+                // Provides FirstName, LastName and UserName.
+                .Include(t => t.Technician)
+
+                .Where(t =>
+
+                    // Only completed tests can be verified.
+                    t.Status == "Completed" &&
+
+                    // Test must have an assigned technician.
+                    t.TechnicianId != null &&
+
+                    // Independent verification:
+                    // The verifier cannot verify their own test.
+                    t.TechnicianId != verifierId &&
+
+                    // The verifier must be assigned to this test type.
+                    assignedTypeIds.Contains(t.TestTypeId) &&
+
+                    // The test must have exactly one saved result.
+                    _context.TestResults.Count(r =>
+                        r.TestRequestTestTypeId ==
+                        t.TestRequestTestTypeId) == 1 &&
+
+                    // The result must belong to the original technician
+                    // and must contain a non-empty value.
+                    _context.TestResults.Any(r =>
+                        r.TestRequestTestTypeId ==
+                            t.TestRequestTestTypeId &&
+                        r.TechnicianId == t.TechnicianId &&
+                        r.ResultValue != null &&
+                        r.ResultValue.Trim() != "")
+                )
+
+                // Display oldest completed tests first.
                 .OrderBy(t => t.CompletionDateTime)
+
                 .ToListAsync();
 
             return View("VerifyResultsQueue", tests);

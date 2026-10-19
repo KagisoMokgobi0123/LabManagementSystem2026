@@ -35,5 +35,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public string? ResultNotes { get; set; }
 
         public bool IsAbnormal { get; set; }
+
     }
 }
