@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Areas.Technician.Models;
+using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
@@ -12,11 +14,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly ApplicationDbContext _context;
 
         private readonly ILogger<ProfileController> _logger;
 
 
-        public ProfileController(
+        public ProfileController(ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             ILogger<ProfileController> logger)
@@ -24,6 +27,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
 
 
@@ -33,27 +37,43 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // =========================================================
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        // =========================================================
+        // MY PROFILE
+        // GET: /Technician/Profile
+        // =========================================================
+
+        [HttpGet]
+        public async Task<IActionResult> ProfileIndex()
         {
+            // STEP 1: Get the logged-in technician
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
             {
-                return NotFound();
+                return Challenge();
             }
 
+            // STEP 2: Retrieve technician profile details
+            var technicianProfile = await _context.TechnicianProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == user.Id);
+
+            // STEP 3: Populate profile view model
             var model = new TechnicianProfileViewModel
             {
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 FullName = user.FullName,
                 Email = user.Email ?? "",
-                PhoneNumber = user.PhoneNumber ?? ""
+                PhoneNumber = user.PhoneNumber ?? "",
+
+                IdNumber = technicianProfile?.IdNumber ?? "",
+                EmployeeNumber = technicianProfile?.EmployeeNumber ?? ""
             };
 
+            // STEP 4: Return profile view
             return View(model);
         }
-
 
         // =========================================================
         // CHANGE PASSWORD

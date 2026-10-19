@@ -18,5 +18,8 @@ namespace NMB_HLabSys.Areas.Technician.Models
 
         [Display(Name = "Phone Number")]
         public string PhoneNumber { get; set; } = string.Empty;
+        public string IdNumber { get; set; } = "";
+
+        public string EmployeeNumber { get; set; } = "";
     }
 }

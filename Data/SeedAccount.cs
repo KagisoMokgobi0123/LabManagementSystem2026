@@ -1,84 +1,41 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Models.Users;
-using Microsoft.EntityFrameworkCore;
 
 namespace NMB_HLabSys.Data
 {
     public static class SeedAccount
     {
- 
-        // role names
-
         public const string DoctorRole = "Doctor";
         public const string LabTechnicianRole = "LabTechnician";
         public const string ManagerRole = "Manager";
         public const string PatientRole = "Patient";
         public const string AdministratorRole = "Administrator";
 
-
-        // seed
-
-        public static async Task SeedAsync(
-            IServiceProvider services)
+        public static async Task SeedAsync(IServiceProvider services)
         {
-            var roleManager =
-                services.GetRequiredService<
-                    RoleManager<IdentityRole>>();
-
-            var userManager =
-                services.GetRequiredService<
-                    UserManager<ApplicationUser>>();
-
-            // Database Context - FIX
-            var context = services.GetRequiredService<
-                ApplicationDbContext>();
-
-
-            // Roles
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+            var context = services.GetRequiredService<ApplicationDbContext>();
 
             await CreateRolesAsync(roleManager);
 
+            await CreateUserAsync(userManager, "administrator@nmbhlab.co.za", "Admin@123",
+                "John", "Administrator", AdministratorRole);
 
-            // Admin
-            await CreateUserAsync(
-                userManager,
-                email: "administrator@nmbhlab.co.za",
-                password: "Admin@123",
-                firstName: "John",
-                lastName: "Administrator",
-                role: AdministratorRole);
+            await CreateDoctorAsync(userManager, context, "doctor@nmbhlab.co.za",
+                "Doctor@123", "John", "Doctor", "MP0000000");
 
+            await CreateTechnicianAsync(userManager, context,
+                email: "technician@nmbhlab.co.za",
+                password: "Tech@1234",
+                firstName: "Thabo",
+                lastName: "Technician",
+                idNumber: "8001015009087",
+                employeeNumber: "TECH001");
 
-            // Doctor
-
-            await CreateDoctorAsync(
-                userManager,
-                email: "doctor@nmbhlab.co.za",
-                password: "Doctor@123",
-                firstName: "John",
-                lastName: "Doctor",
-                hpcsaNumber: "MP0000000");
-
-
-
-            // lab technician
-await CreateTechnicianAsync(
-    userManager,
-    context,
-    email: "technician@nmbhlab.co.za",
-    password: "Tech@1234",
-    firstName: "Thabo",
-    lastName: "Technician",
-    idNumber: "8001015009087",
-    employeeNumber: "TECH001");
-
- 
-
-
-            await CreateTechnicianAsync(
-                userManager,
-                context,
+            await CreateTechnicianAsync(userManager, context,
                 email: "technician2@nmbhlab.co.za",
                 password: "Tech@1234",
                 firstName: "Rudzani",
@@ -86,269 +43,147 @@ await CreateTechnicianAsync(
                 idNumber: "0201015009087",
                 employeeNumber: "TECH002");
 
+            await CreateUserAsync(userManager, "manager@nmbhlab.co.za", "Manager@123",
+                "Sarah", "Manager", ManagerRole);
 
-            //manager
+            // Frank Smith is not seeded here: the supplied email duplicates Sarah's.
+            // Add a separate CreateUserAsync call once Frank has his own email.
 
-            await CreateUserAsync(
-                userManager,
-                email: "manager@nmbhlab.co.za",
-                password: "Manager@123",
-                firstName: "Sarah",
-                lastName: "Manager",
-                role: ManagerRole);
-
-
-            await CreateUserAsync(
-                userManager,
-                email: "manager@nmbhlab.co.za",
-                password: "Manager@123",
-                firstName: "Frank",
-                lastName: "Smith",
-                role: ManagerRole);
-
-
-            //Patient
-
-            await CreateUserAsync(
-                userManager,
-                email: "patient@nmbhlab.co.za",
-                password: "Patient@123",
-                firstName: "Lerato",
-                lastName: "Patient",
-                role: PatientRole);
+            await CreateUserAsync(userManager, "patient@nmbhlab.co.za", "Patient@123",
+                "Lerato", "Patient", PatientRole);
         }
 
-
-
-
-        private static async Task CreateRolesAsync(
-            RoleManager<IdentityRole> roleManager)
+        private static async Task CreateRolesAsync(RoleManager<IdentityRole> roleManager)
         {
-            string[] roles =
-            {
-                DoctorRole,
-                LabTechnicianRole,
-                ManagerRole,
-                PatientRole,
-                AdministratorRole
-            };
-
+            string[] roles = { DoctorRole, LabTechnicianRole, ManagerRole,
+                PatientRole, AdministratorRole };
 
             foreach (var roleName in roles)
             {
                 if (await roleManager.RoleExistsAsync(roleName))
-                {
                     continue;
-                }
 
-
-                var result =
-                    await roleManager.CreateAsync(
-                        new IdentityRole(roleName));
-
-
-                if (!result.Succeeded)
-                {
-                    var errors =
-                        string.Join(
-                            ", ",
-                            result.Errors.Select(
-                                e => e.Description));
-
-
-                    throw new InvalidOperationException(
-                        $"Could not create role '{roleName}'. " +
-                        $"Errors: {errors}");
-                }
+                var result = await roleManager.CreateAsync(new IdentityRole(roleName));
+                EnsureSucceeded(result, $"create role '{roleName}'");
             }
         }
 
-
-
-
-        private static async Task<ApplicationUser>
-            CreateUserAsync(
-                UserManager<ApplicationUser> userManager,
-                string email,
-                string password,
-                string firstName,
-                string lastName,
-                string role)
+        private static async Task<ApplicationUser> CreateUserAsync(
+            UserManager<ApplicationUser> userManager,
+            string email, string password, string firstName, string lastName, string role)
         {
-            var user =
-                await userManager.FindByEmailAsync(email);
-
-
-            // create a user if email use doesn't exist
-
+            var user = await userManager.FindByEmailAsync(email);
             if (user == null)
             {
                 user = new ApplicationUser
                 {
                     UserName = email,
-
                     Email = email,
-
                     EmailConfirmed = true,
-
                     FirstName = firstName,
-
                     LastName = lastName,
-
                     IsActive = true,
-
-                    MustChangePassword = false,
-
+                    MustChangePassword = true,
                     IsProfileCompleted = true,
-
                     CreatedDate = DateTime.UtcNow
                 };
 
-
-                var createResult =
-                    await userManager.CreateAsync(
-                        user,
-                        password);
-
-
-                if (!createResult.Succeeded)
-                {
-                    var errors =
-                        string.Join(
-                            ", ",
-                            createResult.Errors.Select(
-                                e => e.Description));
-
-
-                    throw new InvalidOperationException(
-                        $"Could not create user '{email}'. " +
-                        $"Errors: {errors}");
-                }
+                var result = await userManager.CreateAsync(user, password);
+                EnsureSucceeded(result, $"create user '{email}'");
             }
-
-
-            // assign role
 
             if (!await userManager.IsInRoleAsync(user, role))
             {
-                var roleResult =
-                    await userManager.AddToRoleAsync(
-                        user,
-                        role);
-
-
-                if (!roleResult.Succeeded)
-                {
-                    var errors =
-                        string.Join(
-                            ", ",
-                            roleResult.Errors.Select(
-                                e => e.Description));
-
-
-                    throw new InvalidOperationException(
-                        $"Could not assign role '{role}' " +
-                        $"to '{email}'. " +
-                        $"Errors: {errors}");
-                }
+                var result = await userManager.AddToRoleAsync(user, role);
+                EnsureSucceeded(result, $"assign role '{role}' to '{email}'");
             }
-
 
             return user;
         }
 
-
-        //create a doctor
-
         private static async Task CreateDoctorAsync(
             UserManager<ApplicationUser> userManager,
-            string email,
-            string password,
-            string firstName,
-            string lastName,
-            string hpcsaNumber)
+            ApplicationDbContext context,
+            string email, string password, string firstName,
+            string lastName, string hpcsaNumber)
         {
-            var user =
-                await CreateUserAsync(
-                    userManager,
-                    email,
-                    password,
-                    firstName,
-                    lastName,
-                    DoctorRole);
+            var user = await CreateUserAsync(userManager, email, password,
+                firstName, lastName, DoctorRole);
 
-
-            // check if profile exits
-
-            if (user.DoctorProfile != null)
-            {
+            // Query the database: navigation properties are not automatically loaded.
+            var exists = await context.Set<DoctorProfile>()
+                .AnyAsync(p => p.UserId == user.Id);
+            if (exists)
                 return;
-            }
 
-
-            // if not, create a profile
-
-            user.DoctorProfile =
-                new DoctorProfile
-                {
-                    UserId = user.Id,
-
-                    HPCSANumber = hpcsaNumber
-                };
-
-
-            await userManager.UpdateAsync(user);
+            context.Set<DoctorProfile>().Add(new DoctorProfile
+            {
+                UserId = user.Id,
+                HPCSANumber = hpcsaNumber
+            });
+            await context.SaveChangesAsync();
         }
-
-
-        // create a lab technician
 
         private static async Task CreateTechnicianAsync(
             UserManager<ApplicationUser> userManager,
             ApplicationDbContext context,
-            string email,
-            string password,
-            string firstName,
-            string lastName,
-            string idNumber,
-            string employeeNumber)
+            string email, string password, string firstName,
+            string lastName, string idNumber, string employeeNumber,
+            string? phoneNumber = null)
         {
-            
-            var user = await CreateUserAsync(
-                userManager,
-                email,
-                password,
-                firstName,
-                lastName,
-                LabTechnicianRole);
+            var user = await CreateUserAsync(userManager, email, password,
+                firstName, lastName, LabTechnicianRole);
 
-            // Check whether technician profile exists
-            var existingProfile = await context
-                .Set<TechnicianProfile>()
-                .FirstOrDefaultAsync(x => x.UserId == user.Id);
+            var profiles = context.Set<TechnicianProfile>();
+            var existingProfile = await profiles
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-            if (existingProfile != null)
+            if (existingProfile == null)
             {
-                Console.WriteLine(
-                    $"Technician profile already exists: {email}");
-                return;
+                var conflict = await profiles.AnyAsync(p =>
+                    p.IdNumber == idNumber || p.EmployeeNumber == employeeNumber);
+
+                if (conflict)
+                    throw new InvalidOperationException(
+                        $"The ID number or employee number for '{email}' is already assigned to another technician.");
+
+                profiles.Add(new TechnicianProfile
+                {
+                    UserId = user.Id,
+                    IdNumber = idNumber,
+                    EmployeeNumber = employeeNumber
+                });
+                await context.SaveChangesAsync();
+            }
+            else if (existingProfile.IdNumber != idNumber ||
+                     existingProfile.EmployeeNumber != employeeNumber)
+            {
+                // Do not overwrite existing identification data on application startup.
+                throw new InvalidOperationException(
+                    $"Existing profile for '{email}' has different identification details. Review it manually.");
             }
 
-            // Create technician profile
-            var profile = new TechnicianProfile
+            // No phone number is invented; existing numbers are left unchanged.
+            if (!string.IsNullOrWhiteSpace(phoneNumber))
             {
-                UserId = user.Id,
-                IdNumber = idNumber,
-                EmployeeNumber = employeeNumber
-            };
+                var cleanedPhone = phoneNumber.Trim();
+                if (user.PhoneNumber != cleanedPhone)
+                {
+                    var result = await userManager.SetPhoneNumberAsync(user, cleanedPhone);
+                    EnsureSucceeded(result, $"set phone number for '{email}'");
+                }
+            }
 
-            context.Set<TechnicianProfile>().Add(profile);
-
-            await context.SaveChangesAsync();
-
-            Console.WriteLine(
-                $"Successfully seeded technician: {firstName} {lastName}");
+            Console.WriteLine($"Technician seed checked: {firstName} {lastName} ({employeeNumber})");
         }
 
+        private static void EnsureSucceeded(IdentityResult result, string operation)
+        {
+            if (result.Succeeded)
+                return;
+
+            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+            throw new InvalidOperationException($"Could not {operation}. Errors: {errors}");
+        }
     }
 }
