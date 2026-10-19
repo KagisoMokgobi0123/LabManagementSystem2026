@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -6,8 +5,13 @@ using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Areas.Doctor.Services;
 using NMB_HLabSys.Services;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure QuestPDF once at application startup.
+// Use Community only if your organization meets QuestPDF's license eligibility.
+QuestPDF.Settings.License = LicenseType.Community;
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
@@ -18,38 +22,33 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-    {
-        // Sign in
-        options.SignIn.RequireConfirmedAccount = false;
-        options.SignIn.RequireConfirmedEmail = false;
+{
+    // Sign in
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
 
-        // Password requirements
-        options.Password.RequiredLength = 8;
-        options.Password.RequiredUniqueChars = 1;
-        options.Password.RequireDigit = true;
-        options.Password.RequireLowercase = true;
-        options.Password.RequireUppercase = true;
-        options.Password.RequireNonAlphanumeric = true;
+    // Password requirements
+    options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 1;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
 
-        // Lockout
-        options.Lockout.AllowedForNewUsers = true;
-        options.Lockout.MaxFailedAccessAttempts = 5;
-        options.Lockout.DefaultLockoutTimeSpan =
-            TimeSpan.FromMinutes(15);
+    // Lockout
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
 
-        // User
-        options.User.RequireUniqueEmail = true;
-    })
+    // User
+    options.User.RequireUniqueEmail = true;
+})
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-
-
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-
-//authentication cookies.
-
+// Authentication cookies
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -66,18 +65,16 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<DoctorEmailService>();
-
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
-{ options.IdleTimeout = TimeSpan.FromMinutes(30);
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-
 var app = builder.Build();
-
 
 if (!app.Environment.IsDevelopment())
 {
@@ -86,15 +83,10 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(
@@ -115,14 +107,9 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger =
-            services.GetRequiredService<ILogger<Program>>();
-
-        logger.LogError(
-            ex,
-            "An error occurred while seeding Identity accounts.");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while seeding Identity accounts.");
     }
 }
-
 
 app.Run();

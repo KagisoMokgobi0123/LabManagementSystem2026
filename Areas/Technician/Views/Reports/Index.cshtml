@@ -317,9 +317,7 @@
                     </div>
 
                     <div class="col-md-4 text-md-right">
-                        <a asp-area="Technician"
-                           asp-controller="Dashboard"
-                           asp-action="Index"
+                        <a href="@Url.Action("Index", "Dashboard", new { area = "Technician" })"
                            class="reports-back">
 
                             <i class="fas fa-arrow-left"></i>
@@ -377,9 +375,7 @@
                         </div>
 
                         <form id="reportForm"
-                              asp-area="Technician"
-                              asp-controller="Reports"
-                              asp-action="DownloadPdf"
+                              action="@Url.Action("DownloadPdf", "Reports", new { area = "Technician" })"
                               method="get">
 
                             <div class="row">
@@ -396,6 +392,7 @@
                                            id="startDate"
                                            name="startDate"
                                            class="reports-input"
+                                           value="2026-10-01"
                                            required />
 
                                     <div class="reports-help">
@@ -416,6 +413,7 @@
                                            id="endDate"
                                            name="endDate"
                                            class="reports-input"
+                                           value="2026-10-14"
                                            required />
 
                                     <div class="reports-help">
@@ -615,6 +613,11 @@
         form.addEventListener("submit", function(event) {
 
             clearError();
+            if (!form.getAttribute("action")) {
+                event.preventDefault();
+                showError("Report download URL is missing. Check the ReportsController route.");
+                return;
+            }
 
             if (!startDate.value || !endDate.value) {
                 event.preventDefault();
@@ -627,7 +630,9 @@
                 showError(
                     "The end date cannot be earlier than the start date."
                 );
+                return;
             }
+            // Allow native GET submission so the browser receives the PDF download.
         });
 
     });
