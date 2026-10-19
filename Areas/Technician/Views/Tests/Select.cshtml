@@ -288,7 +288,7 @@
                     </h2>
 
                     <small class="text-muted">
-                        Only unclaimed tests with received samples are displayed.
+                        Only unclaimed tests with received samples and an active test-type assignment are displayed.
                     </small>
                 </div>
 
@@ -314,7 +314,7 @@
                                 <th>Patient</th>
                              @*    <th>ID Number</th> *@
                                 <th>Doctor Full Name</th>
-                                <th>Doc\=-0tor Username</th>
+                                <th>Doctor Username</th>
                                 <th>Clinical Notes</th>
                                 <th>Test Type</th>
                                 
@@ -339,7 +339,7 @@
                                             ? "warning"
                                             : "";
 
-                                <tr>
+                                <tr data-search="@($"{test.RequestReference} {test.PatientName} {test.PatientIdNumber} {test.DoctorFullName} {test.DoctorUsername} {test.ClinicalNotes} {test.TestTypeName} {test.Priority} {test.RequestStatus} {test.TestStatus}".ToLowerInvariant())">
 
                                     <!-- REQUEST NUMBER -->
                                     <td>
@@ -482,7 +482,7 @@
                 var query = (this.value || '').toLowerCase();
                 var visible = 0;
                 $('#selectTestsTable tbody tr').each(function() {
-                    var match = $(this).text().toLowerCase().indexOf(query) !== -1;
+                    var match = ($(this).attr('data-search') || $(this).text().toLowerCase()).indexOf(query) !== -1;
                     $(this).toggle(match);
                     if (match) visible++;
                 });
@@ -490,8 +490,8 @@
             });
 
             function updateVerification() {
-                var total = $('.perform-verify').length;
-                var checked = $('.perform-verify:checked').length;
+                var total = $('#performTestModal .perform-verify').length;
+                var checked = $('#performTestModal .perform-verify:checked').length;
                 var complete = total === 5 && checked === total;
                 $('#performCheckText').text(complete ? 'All 5 items verified — ready to start test' : checked + ' of 5 items verified');
                 $('#performCheckStatus').toggleClass('complete', complete);
@@ -520,6 +520,7 @@
                     else $('#' + id).text(values[id] || 'Not available');
                 });
                 var modalElement = document.getElementById('performTestModal');
+                if (!modalElement) { alert('Perform Test modal partial is missing.'); return; }
                 if (window.bootstrap && window.bootstrap.Modal) {
                     window.bootstrap.Modal.getOrCreateInstance(modalElement).show();
                 } else if ($.fn.modal) {
@@ -528,7 +529,7 @@
                     alert('Bootstrap modal JavaScript is not loaded.');
                     return;
                 }
-                $('.perform-verify').prop('checked', false);
+                $('#performTestModal .perform-verify').prop('checked', false);
                 $('#performNormal').removeClass('d-none');
                 $('#performLoading').addClass('d-none');
                 updateVerification();
@@ -541,9 +542,9 @@
                     $('#performTestModal').modal('hide');
                 }
             });
-            $('.perform-verify').on('change', updateVerification);
+            $('#performTestModal .perform-verify').on('change', updateVerification);
             $('#performTestForm').on('submit', function(event) {
-                if (!$('.perform-verify').length || $('.perform-verify:checked').length !== 5 || !$('#performTestId').val()) {
+                if ($('#performTestModal .perform-verify').length !== 5 || $('#performTestModal .perform-verify:checked').length !== 5 || !$('#performTestId').val()) {
                     event.preventDefault();
                     updateVerification();
                     return false;

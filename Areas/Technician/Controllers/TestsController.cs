@@ -227,16 +227,18 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .Include(x => x.TestRequest)
                 .Where(x =>
                     assignedTestTypeIds.Contains(x.TestTypeId) &&
-                    x.Status == "SamplesReceived" &&
+                    (x.Status == "Submitted" || x.Status == "SamplesReceived") &&
                     (x.TechnicianId == null || x.TechnicianId == "") &&
                     x.TestRequest != null &&
-                    (
-                        x.TestRequest.Status ==
-                            TestRequestStatus.SamplesReceived.ToString() ||
-
-                        x.TestRequest.Status ==
-                            TestRequestStatus.InProgress.ToString()
-                    ))
+                    x.TestType != null &&
+                    (x.TestRequest.Status == "Submitted" ||
+                     x.TestRequest.Status == "SamplesReceived" ||
+                     x.TestRequest.Status == "InProgress" ||
+                     x.TestRequest.Status == "In Progress") &&
+                    _context.Samples.Any(sample =>
+                        sample.TestRequestId == x.TestRequestId &&
+                        sample.SampleTypeId == x.TestType.SampleTypeId &&
+                        sample.IsReceived && !sample.IsDeleted))
                 .OrderBy(x => x.TestRequestId)
                 .ThenBy(x => x.TestRequestTestTypeId)
                 .ToListAsync();
@@ -396,10 +398,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 // -----------------------------------------------------
                 // 2. Ensure the sample has been received and test is available
                 // -----------------------------------------------------
-                if (!string.Equals(
-                        requestTest.Status,
-                        "SamplesReceived",
-                        StringComparison.OrdinalIgnoreCase))
+                if (requestTest.Status != "Submitted" &&
+                    requestTest.Status != "SamplesReceived")
                 {
                     TempData["ErrorMessage"] =
                         "This test is no longer available for selection. Its sample must be received and it must not already be in progress.";
@@ -456,12 +456,27 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 var inProgress =
                     TestRequestStatus.InProgress.ToString();
 
-                if (request.Status != samplesReceived &&
-                    request.Status != inProgress)
+                // A request may still be Submitted when only some of its
+                // required sample types have arrived. Check the actual sample
+                // for this test instead of relying solely on request status.
+                if (request.Status != "Submitted" &&
+                    request.Status != samplesReceived &&
+                    request.Status != inProgress &&
+                    request.Status != "In Progress")
                 {
                     TempData["ErrorMessage"] =
-                        "Samples must be received before this test can be selected.";
+                        "This request is not in a selectable workflow state.";
+                    return RedirectToAction(nameof(Select));
+                }
 
+                if (requestTest.TestType == null ||
+                    !await _context.Samples.AnyAsync(sample =>
+                        sample.TestRequestId == requestTest.TestRequestId &&
+                        sample.SampleTypeId == requestTest.TestType.SampleTypeId &&
+                        sample.IsReceived && !sample.IsDeleted))
+                {
+                    TempData["ErrorMessage"] =
+                        "The required sample type has not been received yet.";
                     return RedirectToAction(nameof(Select));
                 }
 
@@ -516,7 +531,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 // -----------------------------------------------------
                 // 9. Update the parent request when testing starts
                 // -----------------------------------------------------
-                if (request.Status == samplesReceived)
+                if (request.Status == samplesReceived ||
+                    request.Status == "Submitted")
                 {
                     request.Status = inProgress;
                 }
