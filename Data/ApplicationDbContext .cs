@@ -596,7 +596,7 @@ namespace NMB_HLabSys.Data
                     Urgency = Urgency.Stat,
                     ClinicalNotes =
                         "Pre-surgery coagulation screen - STAT request.",
-                    Status = TestRequestStatus.SamplesReceived.ToString()
+                    Status = TestRequestStatus.Submitted.ToString()
                 },
 
                 new TestRequestsModel
@@ -1842,12 +1842,18 @@ namespace NMB_HLabSys.Data
             // No real clinical data. Verify IDs against your existing database.
             // ============================================================
 
-            // Four pending requests now each have at least two unreceived samples.
+            // Four Submitted requests (1, 5, 7, 10) each have three unreceived samples.
+            // Request 7 is explicitly set to Submitted above to match ReceiveSamplesController.Index.
+            // All barcodes and sample IDs are unique development-only values.
             builder.Entity<SampleModel>().HasData(
                 new SampleModel { SampleId = 8101, TestRequestId = 1, Barcode = "DEMO-SMP-8101", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
                 new SampleModel { SampleId = 8102, TestRequestId = 5, Barcode = "DEMO-SMP-8102", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
                 new SampleModel { SampleId = 8103, TestRequestId = 7, Barcode = "DEMO-SMP-8103", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8104, TestRequestId = 10, Barcode = "DEMO-SMP-8104", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
+                new SampleModel { SampleId = 8104, TestRequestId = 10, Barcode = "DEMO-SMP-8104", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8201, TestRequestId = 1, Barcode = "DEMO-SMP-8201", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8202, TestRequestId = 5, Barcode = "DEMO-SMP-8202", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8203, TestRequestId = 7, Barcode = "DEMO-SMP-8203", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8204, TestRequestId = 10, Barcode = "DEMO-SMP-8204", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
             );
 
             // Five selected tests awaiting capture; no result rows yet.
@@ -1946,6 +1952,48 @@ namespace NMB_HLabSys.Data
                 new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3212, TestResultId = 2212, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 12, 9, 15, 0, DateTimeKind.Utc) },
                 new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3213, TestResultId = 2213, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 13, 9, 15, 0, DateTimeKind.Utc) },
                 new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3214, TestResultId = 2214, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 14, 9, 15, 0, DateTimeKind.Utc) }
+            );
+
+            // ============================================================
+            // ASSESSMENT: FIVE TESTS AWAITING TECHNICIAN SELECTION
+            // These are unassigned, Submitted tests on requests whose samples
+            // have already been received. Includes Urgent and Stat cases.
+            // ============================================================
+            builder.Entity<TestRequestsModel>().HasData(
+                new TestRequestsModel
+                {
+                    TestRequestId = 11,
+                    RequestNumber = "NMB-REQ-DEMO-000011",
+                    PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
+                    DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
+                    RequestDate = new DateTime(2026, 10, 15, 7, 30, 0),
+                    Urgency = Urgency.Stat,
+                    ClinicalNotes = "DEMO ONLY: urgent assessment workflow.",
+                    Status = TestRequestStatus.SamplesReceived.ToString()
+                }
+            );
+
+            builder.Entity<SampleModel>().HasData(
+                new SampleModel
+                {
+                    SampleId = 8301,
+                    TestRequestId = 11,
+                    Barcode = "DEMO-SMP-8301",
+                    SampleTypeId = 1,
+                    TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                    DateReceived = new DateTime(2026, 10, 15, 7, 45, 0),
+                    Status = "SamplesReceived",
+                    IsReceived = true,
+                    IsDeleted = false
+                }
+            );
+
+            builder.Entity<TestRequestTestTypeModel>().HasData(
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1401, TestRequestId = 2, TestTypeId = 1, TechnicianId = null, Status = "Submitted", StartDateTime = null, CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1402, TestRequestId = 2, TestTypeId = 2, TechnicianId = null, Status = "Submitted", StartDateTime = null, CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1403, TestRequestId = 6, TestTypeId = 3, TechnicianId = null, Status = "Submitted", StartDateTime = null, CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1404, TestRequestId = 11, TestTypeId = 1, TechnicianId = null, Status = "Submitted", StartDateTime = null, CompletionDateTime = null },
+                new TestRequestTestTypeModel { TestRequestTestTypeId = 1405, TestRequestId = 11, TestTypeId = 2, TechnicianId = null, Status = "Submitted", StartDateTime = null, CompletionDateTime = null }
             );
         }
     }

@@ -441,7 +441,7 @@ namespace NMBHLabSys.Migrations
                             PatientId = "953f333d-2e68-46f6-ad26-0412fe75d908",
                             RequestDate = new DateTime(2026, 9, 25, 7, 30, 0, 0, DateTimeKind.Unspecified),
                             RequestNumber = "NMB-REQ-000007",
-                            Status = "SamplesReceived",
+                            Status = "Submitted",
                             Urgency = 3
                         },
                         new
@@ -476,6 +476,17 @@ namespace NMBHLabSys.Migrations
                             RequestNumber = "NMB-REQ-000010",
                             Status = "Submitted",
                             Urgency = 1
+                        },
+                        new
+                        {
+                            TestRequestId = 11,
+                            ClinicalNotes = "DEMO ONLY: urgent assessment workflow.",
+                            DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
+                            PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
+                            RequestDate = new DateTime(2026, 10, 15, 7, 30, 0, 0, DateTimeKind.Unspecified),
+                            RequestNumber = "NMB-REQ-DEMO-000011",
+                            Status = "SamplesReceived",
+                            Urgency = 3
                         });
                 });
 
@@ -1752,6 +1763,46 @@ namespace NMBHLabSys.Migrations
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestId = 6,
                             TestTypeId = 12
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 1401,
+                            IsAbnormal = false,
+                            Status = "Submitted",
+                            TestRequestId = 2,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 1402,
+                            IsAbnormal = false,
+                            Status = "Submitted",
+                            TestRequestId = 2,
+                            TestTypeId = 2
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 1403,
+                            IsAbnormal = false,
+                            Status = "Submitted",
+                            TestRequestId = 6,
+                            TestTypeId = 3
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 1404,
+                            IsAbnormal = false,
+                            Status = "Submitted",
+                            TestRequestId = 11,
+                            TestTypeId = 1
+                        },
+                        new
+                        {
+                            TestRequestTestTypeId = 1405,
+                            IsAbnormal = false,
+                            Status = "Submitted",
+                            TestRequestId = 11,
+                            TestTypeId = 2
                         });
                 });
 
@@ -2679,6 +2730,58 @@ namespace NMBHLabSys.Migrations
                             SampleTypeId = 1,
                             Status = "Submitted",
                             TestRequestId = 10
+                        },
+                        new
+                        {
+                            SampleId = 8201,
+                            Barcode = "DEMO-SMP-8201",
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 2,
+                            Status = "Submitted",
+                            TestRequestId = 1
+                        },
+                        new
+                        {
+                            SampleId = 8202,
+                            Barcode = "DEMO-SMP-8202",
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 1,
+                            Status = "Submitted",
+                            TestRequestId = 5
+                        },
+                        new
+                        {
+                            SampleId = 8203,
+                            Barcode = "DEMO-SMP-8203",
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 1,
+                            Status = "Submitted",
+                            TestRequestId = 7
+                        },
+                        new
+                        {
+                            SampleId = 8204,
+                            Barcode = "DEMO-SMP-8204",
+                            IsDeleted = false,
+                            IsReceived = false,
+                            SampleTypeId = 2,
+                            Status = "Submitted",
+                            TestRequestId = 10
+                        },
+                        new
+                        {
+                            SampleId = 8301,
+                            Barcode = "DEMO-SMP-8301",
+                            DateReceived = new DateTime(2026, 10, 15, 7, 45, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            IsReceived = true,
+                            SampleTypeId = 1,
+                            Status = "SamplesReceived",
+                            TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            TestRequestId = 11
                         });
                 });
 
