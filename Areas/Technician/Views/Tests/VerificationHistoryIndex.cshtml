@@ -17,6 +17,13 @@
     .vh-hero p{margin:0;color:#e3eefb;font-size:.96rem}
     .vh-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:22px}
     .vh-stat{background:#fff;border:1px solid #e1e9f3;border-radius:14px;padding:21px 23px;box-shadow:0 4px 16px rgba(31,62,104,.045)}
+    a.vh-stat-link, a.vh-stat-link:link, a.vh-stat-link:visited, a.vh-stat-link:hover, a.vh-stat-link:focus{display:flex;align-items:center;justify-content:space-between;gap:12px;color:inherit;text-decoration:none!important;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+    a.vh-stat-link{position:relative;z-index:1;pointer-events:auto} a.vh-stat-link:hover{transform:translateY(-5px);box-shadow:0 12px 28px rgba(2,132,199,.18)}
+    a.vh-stat-link:focus-visible{outline:3px solid #0284c7;outline-offset:3px}
+    .vh-stat-icon{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;flex-shrink:0;border-radius:11px;background:#e0f2fe;color:#0284c7;font-size:19px}
+    .vh-stat-icon.green{background:#dcfce7;color:#15803d}
+    .vh-stat-icon.orange{background:#ffedd5;color:#c2410c}
+    .vh-stat-link[aria-current="page"]{outline:2px solid #0284c7;outline-offset:2px}
     .vh-stat-label{font-weight:700;font-size:.88rem;color:#60748d}
     .vh-stat-value{font-size:1.85rem;font-weight:800;color:#163e76;margin-top:7px}
     .vh-card{background:#fff;border:1px solid #e0e8f2;border-radius:15px;box-shadow:0 5px 20px rgba(31,62,104,.05);overflow:hidden}
@@ -59,9 +66,18 @@
    <p>Audit trail of test submissions, corrections, independent verification decisions and returns for review.</p>
   </section>
   <section class="vh-stats" aria-label="History statistics">
-   <div class="vh-stat"><div class="vh-stat-label">Tests with activity</div><div class="vh-stat-value">@testCount</div></div>
-   <div class="vh-stat"><div class="vh-stat-label">Verification approvals</div><div class="vh-stat-value">@verifiedCount</div></div>
-   <div class="vh-stat"><div class="vh-stat-label">Returned for review</div><div class="vh-stat-value">@returnedCount</div></div>
+   <a href="/Technician/Tests/VerificationHistoryIndex#vhTable" class="vh-stat vh-stat-link" data-card-action="" aria-label="View all verification history">
+    <div><div class="vh-stat-label">Tests with activity</div><div class="vh-stat-value">@testCount</div></div>
+    <span class="vh-stat-icon"><i class="fas fa-flask" aria-hidden="true"></i></span>
+   </a>
+   <a href="/Technician/Tests/VerificationHistoryIndex?action=Verified#vhTable" class="vh-stat vh-stat-link" data-card-action="Verified" aria-label="View verification approvals">
+    <div><div class="vh-stat-label">Verification approvals</div><div class="vh-stat-value">@verifiedCount</div></div>
+    <span class="vh-stat-icon green"><i class="fas fa-check-circle" aria-hidden="true"></i></span>
+   </a>
+   <a href="/Technician/Tests/VerificationHistoryIndex?action=ReturnedForReview#vhTable" class="vh-stat vh-stat-link" data-card-action="ReturnedForReview" aria-label="View returned for review events">
+    <div><div class="vh-stat-label">Returned for review</div><div class="vh-stat-value">@returnedCount</div></div>
+    <span class="vh-stat-icon orange"><i class="fas fa-undo-alt" aria-hidden="true"></i></span>
+   </a>
   </section>
   <section class="vh-card">
    <div class="vh-head">
@@ -156,6 +172,12 @@
         count.textContent = visible;
         empty.style.display = rows.length && visible === 0 ? '' : 'none';
     }
+    const selectedAction = new URLSearchParams(window.location.search).get('action') || '';
+    if (Array.from(filter.options).some(option => option.value === selectedAction)) filter.value = selectedAction;
+    document.querySelectorAll('.vh-stat-link').forEach(card => {
+        if (card.dataset.cardAction === filter.value) card.setAttribute('aria-current', 'page');
+    });
+    apply();
     search.addEventListener('input', apply);
     filter.addEventListener('change', apply);
     const overlay = document.getElementById('vhTimelineOverlay');

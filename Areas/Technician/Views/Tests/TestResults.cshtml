@@ -59,26 +59,67 @@
         margin-top: -45px;
     }
 
+    /* Match the My Tests summary-card design and icon badges. */
     .results-summary {
         background: #fff;
-        padding: 20px;
         border-radius: 13px;
+        padding: 20px;
         box-shadow: 0 4px 18px rgba(15,23,42,.07);
         height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
     }
-
-        .results-summary .label {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .results-summary .number {
-            font-size: 28px;
-            font-weight: 700;
-            color: #0f172a;
-            margin: 8px 0 0;
-        }
+    .results-summary .label {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+    .results-summary .number {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .results-summary .symbol {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e0f2fe;
+        color: #0284c7;
+        font-size: 19px;
+    }
+    .results-summary .symbol.green { background: #dcfce7; color: #15803d; }
+    .results-summary .symbol.red { background: #fee2e2; color: #b91c1c; }
+    .results-summary .symbol.orange { background: #ffedd5; color: #c2410c; }
+    a.results-summary-link,
+    a.results-summary-link:link,
+    a.results-summary-link:visited,
+    a.results-summary-link:hover,
+    a.results-summary-link:focus {
+        color: inherit !important;
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+    a.results-summary-link { transition: transform .2s ease, box-shadow .2s ease; }
+    a.results-summary-link:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(2,132,199,.18);
+    }
+    a.results-summary-link:focus-visible {
+        outline: 3px solid #0284c7;
+        outline-offset: 3px;
+    }
+    a.results-summary-link.is-active {
+        box-shadow: 0 0 0 2px #0284c7, 0 4px 18px rgba(15,23,42,.07);
+    }
+    a.results-summary-link * { text-decoration: none !important; }
 
     .results-card {
         margin-top: 24px;
@@ -354,31 +395,60 @@
 
         <div class="row">
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="results-summary">
-                    <div class="label">Total Results</div>
-                    <h2 class="number">@totalResults</h2>
-                </div>
+                <a class="results-summary results-summary-link"
+                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "all" })"
+                   data-result-filter="all"
+                   aria-label="Filter laboratory results: Total Results">
+                    <div>
+                        <div class="label">Total Results</div>
+                        <h2 class="number">@totalResults</h2>
+                    </div>
+                    <div class="symbol" aria-hidden="true">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                </a>
             </div>
-
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="results-summary">
-                    <div class="label">Verified Results</div>
-                    <h2 class="number">@verifiedResults</h2>
-                </div>
+                <a class="results-summary results-summary-link"
+                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "verified" })"
+                   data-result-filter="verified"
+                   aria-label="Filter laboratory results: Verified Results">
+                    <div>
+                        <div class="label">Verified Results</div>
+                        <h2 class="number">@verifiedResults</h2>
+                    </div>
+                    <div class="symbol green" aria-hidden="true">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </a>
             </div>
-
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="results-summary">
-                    <div class="label">Abnormal Results</div>
-                    <h2 class="number">@abnormalResults</h2>
-                </div>
+                <a class="results-summary results-summary-link"
+                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "abnormal" })"
+                   data-result-filter="abnormal"
+                   aria-label="Filter laboratory results: Abnormal Results">
+                    <div>
+                        <div class="label">Abnormal Results</div>
+                        <h2 class="number">@abnormalResults</h2>
+                    </div>
+                    <div class="symbol red" aria-hidden="true">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </a>
             </div>
-
             <div class="col-xl-3 col-md-6 mb-3">
-                <div class="results-summary">
-                    <div class="label">Require Review</div>
-                    <h2 class="number">@reviewResults</h2>
-                </div>
+                <a class="results-summary results-summary-link"
+                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "review" })"
+                   data-result-filter="review"
+                   aria-label="Filter laboratory results: Require Review">
+                    <div>
+                        <div class="label">Require Review</div>
+                        <h2 class="number">@reviewResults</h2>
+                    </div>
+                    <div class="symbol orange" aria-hidden="true">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                </a>
             </div>
         </div>
 
@@ -440,7 +510,10 @@
                                     || string.Equals(status, "To Be Reviewed", StringComparison.OrdinalIgnoreCase));
                             var hasStock = remainingByResultId.TryGetValue(result.TestResultId, out var stockText);
 
-                            <tr class="@(isDeleted ? "result-row-deleted" : "")">
+                            <tr class="@(isDeleted ? "result-row-deleted" : "")"
+                                data-result-verified="@(result.VerifiedDateTime.HasValue && !isDeleted ? "true" : "false")"
+                                data-result-abnormal="@(result.IsAbnormal && !isDeleted ? "true" : "false")"
+                                data-result-review="@((result.RequiresReview || string.Equals(status, "To Be Reviewed", StringComparison.OrdinalIgnoreCase)) && !isDeleted ? "true" : "false")">
                                 <td>
                                     <span class="result-main">
                                         #@result.TestResultId
@@ -810,17 +883,51 @@
                 $button.find('.save-result-loading').removeClass('d-none');
             });
 
+            // Summary cards filter this register without requiring new controller actions.
+            // Query-string URLs also work when the page is opened in a new tab.
             const $rows = $('#resultsTable tbody tr').not('.empty-row');
-            $('#resultsSearch').on('input', function() {
-                const query = (this.value || '').trim().toLowerCase();
+            const allowedFilters = ['all', 'verified', 'abnormal', 'review'];
+            const queryParams = new URLSearchParams(window.location.search);
+            let activeFilter = queryParams.get('resultFilter') || 'all';
+            if (!allowedFilters.includes(activeFilter)) activeFilter = 'all';
+
+            function applyResultFilters() {
+                const query = ($('#resultsSearch').val() || '').trim().toLowerCase();
                 let visible = 0;
                 $rows.each(function() {
-                    const matches = $(this).text().toLowerCase().includes(query);
-                    $(this).toggle(matches);
-                    if (matches) visible++;
+                    const matchesStatus = activeFilter === 'all' ||
+                        this.getAttribute('data-result-' + activeFilter) === 'true';
+                    const matchesSearch = $(this).text().toLowerCase().includes(query);
+                    const show = matchesStatus && matchesSearch;
+                    $(this).toggle(show);
+                    if (show) visible++;
+                });
+                $('.results-summary-link').each(function() {
+                    const selected = this.getAttribute('data-result-filter') === activeFilter;
+                    $(this).toggleClass('is-active', selected)
+                           .attr('aria-current', selected ? 'true' : null);
                 });
                 $('#resultsCount').text('Showing ' + visible + ' matching result(s).');
+            }
+
+            $(document).on('click', '.results-summary-link', function(event) {
+                // Allow Ctrl+click, middle-click, etc. to use the real MVC URL.
+                if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.which !== 1) return;
+                event.preventDefault();
+                activeFilter = this.getAttribute('data-result-filter') || 'all';
+                const url = new URL(this.href, window.location.href);
+                window.history.pushState({ resultFilter: activeFilter }, '', url);
+                applyResultFilters();
+                document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
+            $(window).on('popstate', function() {
+                const params = new URLSearchParams(window.location.search);
+                activeFilter = params.get('resultFilter') || 'all';
+                if (!allowedFilters.includes(activeFilter)) activeFilter = 'all';
+                applyResultFilters();
+            });
+            $('#resultsSearch').on('input', applyResultFilters);
+            applyResultFilters();
         });
     </script>
 }

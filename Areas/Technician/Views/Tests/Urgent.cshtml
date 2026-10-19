@@ -1,5 +1,389 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+
 @{
+    ViewData["Title"] = "Urgent / STAT Tests";
+    Layout = "_TechnicianLayout";
+    var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+    var submittedCount = tests.Count(x => x.Status == "Submitted");
+    var inProgressCount = tests.Count(x => x.Status == "In Progress");
+}
+
+<style>
+    .stat-hero {
+        background: linear-gradient(120deg, #103a76, #1976c9);
+        color: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        margin-bottom: 24px;
+    }
+
+        .stat-hero h2 {
+            font-weight: 750;
+        }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(18,49,85,.08);
+        padding: 22px;
+        margin-bottom: 22px;
+    }
+
+    .stat-summary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin: -48px 0 26px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stat-summary-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        border-radius: 13px;
+        padding: 20px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
+        min-height: 102px;
+        transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+        .stat-summary-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(2,132,199,.18);
+        }
+
+        .stat-summary-item .stat-label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .stat-summary-item .stat-number {
+            display: block;
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .stat-summary-item .stat-symbol {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 44px;
+            border-radius: 11px;
+            background: #e0f2fe;
+            color: #0284c7;
+            font-size: 19px;
+        }
+
+            .stat-summary-item .stat-symbol.orange {
+                background: #ffedd5;
+                color: #c2410c;
+            }
+
+            .stat-summary-item .stat-symbol.red {
+                background: #fee2e2;
+                color: #b91c1c;
+            }
+
+    .stat-summary-link { cursor: pointer; position: relative; z-index: 5; pointer-events: auto; }
+
+    .stat-summary-link[aria-current="page"] {
+        outline: 2px solid #0284c7;
+        outline-offset: 2px;
+    }
+
+    .stat-summary-link, .stat-summary-link:hover, .stat-summary-link:focus {
+        color: inherit;
+        text-decoration: none !important;
+    }
+
+        .stat-summary-link:focus-visible {
+            outline: 3px solid #0284c7;
+            outline-offset: 3px;
+            border-radius: 13px;
+        }
+
+    .stat-hero {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0;
+        padding: 38px 26px 88px;
+        background: linear-gradient(135deg,#073b5c 0%,#075985 45%,#0284c7 100%);
+    }
+
+        .stat-hero:before {
+            content: "";
+            position: absolute;
+            width: 340px;
+            height: 340px;
+            right: -90px;
+            top: -220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.07);
+        }
+
+        .stat-hero h2 {
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+    .stat-page {
+        background: #f4f7fb;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+    .stat-body {
+        padding: 0 24px;
+    }
+
+    .stat-card {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .stat-card-inner {
+        padding: 22px;
+    }
+
+    @@media (max-width: 850px) {
+        .stat-summary {
+            grid-template-columns: 1fr;
+            margin-top: -38px;
+        }
+
+        .stat-body {
+            padding: 0 15px;
+        }
+    }
+
+    .stat-table th {
+        background: #eff5fb;
+        color: #29486a;
+        font-weight: 700;
+        border-top: 0;
+        white-space: nowrap;
+    }
+
+    .stat-table td {
+        vertical-align: middle;
+    }
+
+    .stat-pill {
+        display: inline-block;
+        border-radius: 30px;
+        padding: 5px 11px;
+        font-weight: 700;
+        font-size: .82rem;
+        white-space: nowrap;
+    }
+
+    .stat-pill-urgent {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .stat-pill-submitted {
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .stat-pill-progress {
+        background: #fff3d6;
+        color: #895b00;
+    }
+
+    .stat-btn {
+        background: #1769b2;
+        color: #fff;
+        border: 0;
+        border-radius: 9px;
+        padding: 9px 15px;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        font-weight: 650;
+        white-space: nowrap;
+    }
+
+        .stat-btn:hover, .stat-btn:focus {
+            background: #104e88;
+            color: #fff;
+            text-decoration: none;
+        }
+
+    .stat-empty {
+        text-align: center;
+        padding: 35px 20px;
+        color: #728398;
+    }
+
+        .stat-empty i {
+            font-size: 2rem;
+            margin-bottom: 12px;
+            color: #1976c9;
+        }
+
+    .stat-search {
+        max-width: 450px;
+    }
+
+    .stat-caption {
+        color: #64748b;
+        font-size: .87rem;
+    }
+
+    @@media (max-width: 768px) {
+        .stat-hero {
+            padding: 20px;
+        }
+
+        .stat-card {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="stat-page">
+    <header class="stat-hero">
+        <h2 class="mb-2"><i class="fas fa-bolt mr-2"></i>Urgent / STAT Tests</h2>
+        <p class="mb-0">Priority laboratory tests assigned to your test types that require immediate attention.</p>
+    </header>
+
+    <div class="stat-body">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+        }
+
+        <div class="stat-summary" aria-label="STAT test summary">
+            <a href="/Technician/Tests/Urgent#statTestsTable" class="stat-summary-link stat-summary-item">
+                <div><div class="stat-label">Total STAT Tests</div><span class="stat-number">@tests.Count</span></div>
+                <span class="stat-symbol red"><i class="fas fa-bolt"></i></span>
+            </a>
+            <a href="/Technician/Tests/Urgent?status=Submitted#statTestsTable" class="stat-summary-link stat-summary-item">
+                <div><div class="stat-label">Submitted</div><span class="stat-number">@submittedCount</span></div>
+                <span class="stat-symbol orange"><i class="fas fa-clipboard-list"></i></span>
+            </a>
+            <a href="/Technician/Tests/Urgent?status=In%20Progress#statTestsTable" class="stat-summary-link stat-summary-item">
+                <div><div class="stat-label">In Progress</div><span class="stat-number">@inProgressCount</span></div>
+                <span class="stat-symbol"><i class="fas fa-spinner"></i></span>
+            </a>
+        </div>
+
+        <section class="stat-card" aria-labelledby="statQueueHeading">
+            <div class="stat-card-inner">
+                <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap:12px">
+                    <h4 id="statQueueHeading" class="mb-0"><i class="fas fa-list-alt mr-2 text-primary"></i>STAT Priority Queue</h4>
+                    <span class="stat-pill stat-pill-urgent">@tests.Count urgent test(s)</span>
+                </div>
+                <p class="stat-caption mb-3">Showing submitted and in-progress STAT tests for your assigned test types, ordered by request date.</p>
+
+                @if (tests.Any())
+                {
+                    <div class="form-group stat-search">
+                        <label for="statSearch">Search urgent tests</label>
+                        <input id="statSearch" class="form-control" type="search" autocomplete="off"
+                               placeholder="Request number, patient, test type or ID" aria-controls="statTestsTable" />
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover stat-table" id="statTestsTable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Priority</th>
+                                    <th scope="col">Request Number</th>
+                                    <th scope="col">Test ID</th>
+                                    <th scope="col">Test Type</th>
+                                    <th scope="col">Requested At</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in tests)
+                                {
+                                    <tr class="stat-row" data-status="@item.Status">
+                                        <td><span class="stat-pill stat-pill-urgent"><i class="fas fa-bolt mr-1"></i>STAT</span></td>
+                                        <td><strong>@(item.TestRequest?.RequestNumber ?? "—")</strong></td>
+                                        <td>#@item.TestRequestTestTypeId</td>
+                                        <td>@(item.TestType?.Name ?? "Unknown test")</td>
+                                        <td>@(item.TestRequest?.RequestDate.ToString("dd MMM yyyy, HH:mm") ?? "—")</td>
+                                        <td>
+                                            <span class="stat-pill @(item.Status == "In Progress" ? "stat-pill-progress" : "stat-pill-submitted")">@item.Status</span>
+                                        </td>
+                                        <td>
+                                            @if (item.Status == "Submitted")
+                                            {
+                                                <a class="stat-btn" asp-area="Technician" asp-controller="Tests" asp-action="Select"
+                                                   asp-route-id="@item.TestRequestTestTypeId" aria-label="Select STAT test @item.TestRequestTestTypeId">
+                                                    <i class="fas fa-play mr-1"></i>Select Test
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">In progress</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="stat-empty" id="statNoMatches" style="display:none" role="status">
+                        <i class="fas fa-search d-block"></i><h5>No Matching Tests</h5>
+                        <p class="mb-0">No urgent tests match your search.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="stat-empty" role="status">
+                        <i class="fas fa-check-circle d-block"></i><h5>No Urgent Tests</h5>
+                        <p class="mb-0">There are currently no submitted or in-progress STAT tests for your assigned test types.</p>
+                    </div>
+                }
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function() {
+            "use strict";
+            const search = document.getElementById("statSearch");
+            const rows = document.querySelectorAll("#statTestsTable tbody .stat-row");
+            const empty = document.getElementById("statNoMatches");
+            if (!search || !empty) return;
+            const statusFilter = new URLSearchParams(window.location.search).get("status") || "";
+            const validStatus = statusFilter === "Submitted" || statusFilter === "In Progress" ? statusFilter : "";
+            document.querySelectorAll(".stat-summary-link").forEach(function(card) {
+                const linkStatus = new URL(card.href).searchParams.get("status") || "";
+                if (linkStatus === validStatus) card.setAttribute("aria-current", "page");
+            });
+            function applyFilters() {
+                const term = search.value.trim().toLocaleLowerCase();
+                let visible = 0;
+                rows.forEach(function(row) {
+                    const matches = row.textContent.toLocaleLowerCase().includes(term) && (!validStatus || row.dataset.status === validStatus);
+                    row.style.display = matches ? "" : "none";
+                    if (matches) visible++;
+                });
+                empty.style.display = visible === 0 ? "block" : "none";
+            }
+            search.addEventListener("input", applyFilters);
+            applyFilters();
+        })();
+    </script>
 }

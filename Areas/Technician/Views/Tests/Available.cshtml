@@ -512,34 +512,36 @@
             <!-- SELECT TEST -->
             <!-- SELECT TEST CARD -->
             <div class="col-xl-4 col-md-6 mb-4">
-                <div class="available-summary">
-                    <div>
-                        <div class="label">Select Test</div>
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Available"
+                   class="summary-card-link" title="View available tests and select a patient test">
+                    <div class="available-summary">
+                        <div>
+                            <div class="label">Select Test</div>
 
-                        <h2 class="number">
-                            @testTypes.Count(x => x.IsActive)
-                        </h2>
+                            <h2 class="number">
+                                @testTypes.Count(x => x.IsActive)
+                            </h2>
 
-                        <div class="note mb-3">
-                            Select a patient test matching your active
-                            manager assignments.
+                            <div class="note mb-3">
+                                Select a patient test matching your active
+                                manager assignments.
+                            </div>
+
+                            <!-- SELECT TEST BUTTON -->
+                         @*    <span class="btn btn-primary btn-sm" aria-hidden="true">
+
+                                <i class="fas fa-vial mr-1"></i>
+                                View Available Tests
+                                <i class="fas fa-arrow-right ml-1"></i>
+
+                            </span> *@
                         </div>
 
-                        <!-- SELECT TEST BUTTON -->
-                        <a href="/Technician/Tests/Select"
-                           class="btn btn-primary btn-sm">
-
-                            <i class="fas fa-vial mr-1"></i>
-                            Test To Select
-                            <i class="fas fa-arrow-right ml-1"></i>
-
-                        </a>
+                        <div class="iconbox blue">
+                            <i class="fas fa-vial"></i>
+                        </div>
                     </div>
-
-                    <div class="iconbox blue">
-                        <i class="fas fa-vial"></i>
-                    </div>
-                </div>
+                </a>
             </div>
 
 
@@ -566,8 +568,8 @@
 
             <!-- ASSIGNMENT SOURCE -->
             <div class="col-xl-4 col-md-12 mb-4">
-                <a href="/Technician/Tests/AssignmentDetails"
-                   class="summary-card-link">
+                <a href="@(testTypes.Any() ? Url.Action("AssignmentDetails", "Tests", new { area = "Technician", id = testTypes.First().TestTypeId }) : Url.Action("Available", "Tests", new { area = "Technician" }))"
+                   class="summary-card-link" title="View manager assignment details">
 
                     <div class="available-summary">
                         <div>
@@ -607,8 +609,8 @@
 
             <!-- OVERDUE PATIENT TESTS -->
             <div class="col-xl-6 col-md-6 mb-4">
-                <a href="#assignedTestTypesTable" class="summary-card-link"
-                   title="View overdue selected patient tests">
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Overdue"
+                   class="summary-card-link" title="Open overdue patient tests">
                     <div class="available-summary">
                         <div>
                             <div class="label">Overdue Tests</div>

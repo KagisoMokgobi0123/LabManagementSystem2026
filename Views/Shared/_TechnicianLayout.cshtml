@@ -90,8 +90,8 @@
 
 
             /* =====================================================
-                                                           APPLICATION
-                                                           ===================================================== */
+                                                                       APPLICATION
+                                                                       ===================================================== */
 
             .technician-app {
                 min-height: 100vh;
@@ -99,8 +99,8 @@
 
 
             /* =====================================================
-                                                           SIDEBAR
-                                                           ===================================================== */
+                                                                       SIDEBAR
+                                                                       ===================================================== */
 
             .technician-sidebar {
                 position: fixed;
@@ -120,8 +120,8 @@
 
 
             /* =====================================================
-                                                           LOGO
-                                                           ===================================================== */
+                                                                       LOGO
+                                                                       ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -166,8 +166,8 @@
 
 
             /* =====================================================
-                                                           SIDEBAR CONTROLS
-                                                           ===================================================== */
+                                                                       SIDEBAR CONTROLS
+                                                                       ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -203,8 +203,8 @@
 
 
             /* =====================================================
-                                                           TECHNICIAN USER
-                                                           ===================================================== */
+                                                                       TECHNICIAN USER
+                                                                       ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -257,8 +257,8 @@
 
 
             /* =====================================================
-                                                           NAVIGATION
-                                                           ===================================================== */
+                                                                       NAVIGATION
+                                                                       ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
@@ -333,10 +333,34 @@
                 white-space: nowrap;
             }
 
+            /* Uniform clickable navigation targets and keyboard focus */
+            .sidebar-navigation .sidebar-link {
+                width: 100%;
+                gap: 0;
+                border: 1px solid transparent;
+            }
+
+                .sidebar-navigation .sidebar-link:focus-visible {
+                    outline: 2px solid #7dd3fc;
+                    outline-offset: 2px;
+                    color: #fff !important;
+                }
+
+            .sidebar-navigation .sidebar-link-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .sidebar-navigation .sidebar-link.active {
+                font-weight: 650;
+            }
+
 
             /* =====================================================
-                                                           PRIORITY BADGE
-                                                           ===================================================== */
+                                                                       PRIORITY BADGE
+                                                                       ===================================================== */
 
             .sidebar-count {
                 min-width: 20px;
@@ -351,8 +375,8 @@
 
 
             /* =====================================================
-                                                           SIDEBAR BOTTOM
-                                                           ===================================================== */
+                                                                       SIDEBAR BOTTOM
+                                                                       ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
@@ -388,8 +412,8 @@
 
 
             /* =====================================================
-                                                           MAIN CONTENT
-                                                           ===================================================== */
+                                                                       MAIN CONTENT
+                                                                       ===================================================== */
 
             .technician-main {
                 min-height: 100vh;
@@ -399,8 +423,8 @@
 
 
             /* =====================================================
-                                                           COLLAPSED DESKTOP SIDEBAR
-                                                           ===================================================== */
+                                                                       COLLAPSED DESKTOP SIDEBAR
+                                                                       ===================================================== */
 
             body.sidebar-collapsed
             .technician-sidebar {
@@ -444,9 +468,9 @@
 
 
             /*
-                                                         * Hide full-screen button while sidebar is collapsed.
-                                                         * The arrow remains visible.
-                                                         */
+                                                                     * Hide full-screen button while sidebar is collapsed.
+                                                                     * The arrow remains visible.
+                                                                     */
             body.sidebar-collapsed
             #fullScreenToggle {
                 display: none;
@@ -552,10 +576,10 @@
 
 
             /* =====================================================
-                                                           FULL WIDTH MODE
+                                                                       FULL WIDTH MODE
 
-                                                           Completely removes sidebar from view.
-                                                           ===================================================== */
+                                                                       Completely removes sidebar from view.
+                                                                       ===================================================== */
 
             body.sidebar-hidden
             .technician-sidebar {
@@ -571,8 +595,8 @@
 
 
             /* =====================================================
-                                                           FLOATING RESTORE BUTTON
-                                                           ===================================================== */
+                                                                       FLOATING RESTORE BUTTON
+                                                                       ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -609,8 +633,8 @@
 
 
             /* =====================================================
-                                                           MOBILE TOP BAR
-                                                           ===================================================== */
+                                                                       MOBILE TOP BAR
+                                                                       ===================================================== */
 
             .technician-mobile-header {
                 display: none;
@@ -652,8 +676,8 @@
 
 
             /* =====================================================
-                                                           MOBILE BACKDROP
-                                                           ===================================================== */
+                                                                       MOBILE BACKDROP
+                                                                       ===================================================== */
 
             .sidebar-backdrop {
                 position: fixed;
@@ -665,8 +689,8 @@
 
 
             /* =====================================================
-                                                           RESPONSIVE
-                                                           ===================================================== */
+                                                                       RESPONSIVE
+                                                                       ===================================================== */
 
             @@media(max-width: 991.98px) {
 
@@ -697,16 +721,16 @@
                     display: flex;
                 }
                 /*
-                                                             * Desktop control buttons are unnecessary
-                                                             * on mobile.
-                                                             */
+                                                                         * Desktop control buttons are unnecessary
+                                                                         * on mobile.
+                                                                         */
                 .sidebar-controls {
                     display: none;
                 }
                 /*
-                                                             * Cancel desktop collapsed styling
-                                                             * when switching to mobile.
-                                                             */
+                                                                         * Cancel desktop collapsed styling
+                                                                         * when switching to mobile.
+                                                                         */
                 body.sidebar-collapsed
                 .technician-sidebar {
                     width: 265px;
@@ -830,9 +854,9 @@
                         display: block;
                     }
                 /*
-                                                             * The desktop floating restore button
-                                                             * isn't needed on mobile.
-                                                             */
+                                                                         * The desktop floating restore button
+                                                                         * isn't needed on mobile.
+                                                                         */
                 .sidebar-restore-btn {
                     display: none !important;
                 }
@@ -945,7 +969,7 @@
                         title="Hide sidebar and use full width"
                         aria-label="Hide sidebar">
 
-                    <i class="fas fa-expand-arrows-alt"></i>
+                    <i class="fa-solid fa-expand"></i>
 
                 </button>
 
@@ -1006,7 +1030,7 @@
 
                     <span class="sidebar-link-icon">
 
-                        <i class="fas fa-tachometer-alt"></i>
+                        <i class="fa-solid fa-gauge-high"></i>
 
                     </span>
 
@@ -1109,7 +1133,7 @@
 
                     <span class="sidebar-link-icon">
 
-                        <i class="fas fa-undo-alt"></i>
+                        <i class="fa-solid fa-rotate-left"></i>
 
                     </span>
 
@@ -1118,49 +1142,28 @@
                     </span>
 
                 </a>
-              
 
+              
 
 
                 <!-- ================= VERIFICATION ================= -->
 
-                <div class="sidebar-section">
-                    Verification
-                </div>
-                <a asp-area="Technician"
-   asp-controller="Tests"
-   asp-action="PendingVerification"
-   title="Verify Test Results"
-   class="sidebar-link @(controller == "Tests" &&
-       (action == "PendingVerification" ||
-        action == "VerifyResult") ? "active" : "")">
+              
+                <div class="sidebar-section">Verification</div>
 
-    <span class="sidebar-link-icon">
-        <i class="fas fa-check-circle"></i>
-    </span>
-
-    <span class="sidebar-link-text">
-        Verify Results
-    </span>
-
-</a>
-
-                <a href="/Technician/Tests/PendingVerification"
-                   title="Pending Verification"
-                   class="sidebar-link @(controller == "Tests" && (action == "PendingVerification" || action == "VerifyResult") ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fas fa-user-check"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Pending Verification
-                    </span>
-
+                <a asp-area="Technician" asp-controller="Tests" asp-action="VerifyResultsQueue"
+                   title="Verify Results"
+                   class="sidebar-link @(controller == "Tests" && action == "VerifyResultsQueue" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fas fa-check-circle"></i></span>
+                    <span class="sidebar-link-text">Verify Results</span>
                 </a>
 
+                <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"
+                   title="Pending Verification"
+                   class="sidebar-link @(controller == "Tests" && action == "PendingVerification" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fas fa-user-check"></i></span>
+                    <span class="sidebar-link-text">Pending Verification</span>
+                </a>
 
 
           
@@ -1186,61 +1189,42 @@
 
                 <!-- ================= PRIORITY ================= -->
 
+                
                 <div class="sidebar-section">
                     Priority
                 </div>
 
-
-                <a href="/Technician/Tests/Urgent"
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Urgent"
                    title="Urgent / STAT"
                    class="sidebar-link @(controller == "Tests" && action == "Urgent" ? "active" : "")">
-
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-bolt"></i>
-
                     </span>
-
-                    <span class="sidebar-link-text">
-                        Urgent / STAT
-                    </span>
-
+                    <span class="sidebar-link-text">Urgent / STAT</span>
                 </a>
 
-
-
-                <a href="/Technician/Tests/Overdue"
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Overdue"
                    title="Overdue Tests"
                    class="sidebar-link @(controller == "Tests" && action == "Overdue" ? "active" : "")">
-
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-clock"></i>
-
                     </span>
-
-                    <span class="sidebar-link-text">
-                        Overdue Tests
-                    </span>
-
+                    <span class="sidebar-link-text">Overdue Tests</span>
                 </a>
 
-
-
-                <a href="/Technician/Tests/NearingTat"
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="NearingTat"
                    title="Nearing TAT"
                    class="sidebar-link @(controller == "Tests" && action == "NearingTat" ? "active" : "")">
-
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-hourglass-half"></i>
-
                     </span>
-
-                    <span class="sidebar-link-text">
-                        Nearing TAT
-                    </span>
-
+                    <span class="sidebar-link-text">Nearing TAT</span>
                 </a>
 
 

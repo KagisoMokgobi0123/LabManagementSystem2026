@@ -1,0 +1,94 @@
+﻿@model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
+@{
+    ViewData["Title"] = "Verify Results";
+    Layout = "_TechnicianLayout";
+    var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+}
+<style>
+    .tv-hero { background:linear-gradient(120deg,#103a76,#1976c9);color:#fff;border-radius:16px;padding:28px;margin-bottom:24px; }
+    .tv-hero h2 { font-weight:750; }
+    .tv-card { background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(18,49,85,.08);padding:22px;margin-bottom:22px; }
+    .tv-table th { background:#eff5fb;color:#29486a;font-weight:700;border-top:0;white-space:nowrap; }
+    .tv-table td { vertical-align:middle; }
+    .tv-pill { display:inline-block;border-radius:30px;padding:5px 11px;background:#fff3d6;color:#895b00;font-weight:700;font-size:.82rem;white-space:nowrap; }
+    .tv-btn { background:#1769b2;color:#fff;border:0;border-radius:9px;padding:9px 15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-weight:650;transition:background .2s ease;white-space:nowrap; }
+    .tv-btn:hover,.tv-btn:focus { background:#104e88;color:#fff;text-decoration:none; }
+    .tv-history { display:inline-flex;align-items:center;padding:8px 11px;border:1px solid #cbd5e1;border-radius:9px;color:#29486a;text-decoration:none;white-space:nowrap; }
+    .tv-history:hover { background:#f1f5f9;text-decoration:none; }
+    .tv-actions { display:flex;flex-wrap:wrap;gap:8px; }
+    .tv-empty { text-align:center;padding:35px 20px;color:#728398; }
+    .tv-empty i { font-size:2rem;margin-bottom:12px;color:#1976c9; }
+    .tv-search { max-width:450px; }
+    .tv-count { background:#1769b2;color:#fff;padding:8px 13px;border-radius:9px;font-size:.85rem;font-weight:700; }
+    .tv-caption { color:#64748b;font-size:.87rem; }
+    @@media (max-width:768px) { .tv-hero { padding:20px; } .tv-card { padding:15px; } }
+</style>
+<div class="container-fluid py-4">
+    <header class="tv-hero">
+        <h2 class="mb-2"><i class="fas fa-clipboard-check mr-2"></i>Verify Results</h2>
+        <p class="mb-0">Choose a completed laboratory test captured by another technician to verify independently.</p>
+    </header>
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div> }
+    <section class="tv-card" aria-labelledby="verifyQueueHeading">
+        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3" style="gap:12px">
+            <h4 id="verifyQueueHeading" class="mb-0"><i class="fas fa-list-alt mr-2 text-primary"></i>Tests Ready for Verification</h4>
+            <span class="tv-count">@tests.Count test(s)</span>
+        </div>
+        <p class="tv-caption mb-3">Select a completed test to review its results. Verification must be performed by a different authorised technician.</p>
+        @if (tests.Any())
+        {
+            <div class="form-group tv-search">
+                <label for="verificationSearch">Search tests</label>
+                <input id="verificationSearch" class="form-control" placeholder="Request number, test name or test ID" type="search" autocomplete="off" aria-controls="verifyResultsTable" />
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover tv-table" id="verifyResultsTable">
+                    <thead><tr><th scope="col">Request Number</th><th scope="col">Test ID</th><th scope="col">Test Type</th><th scope="col">Completed At</th><th scope="col">Status</th><th scope="col">Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var item in tests)
+                        {
+                            <tr class="verification-row">
+                                <td><strong>@(item.TestRequest?.RequestNumber ?? "—")</strong></td>
+                                <td>#@item.TestRequestTestTypeId</td>
+                                <td>@(item.TestType?.Name ?? "Unknown test")</td>
+                                <td>@(item.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</td>
+                                <td><span class="tv-pill">Awaiting Verification</span></td>
+                                <td><div class="tv-actions">
+                                    <a class="tv-btn" asp-area="Technician" asp-controller="Tests" asp-action="VerifyResult" asp-route-id="@item.TestRequestTestTypeId" aria-label="Verify results for test @item.TestRequestTestTypeId"><i class="fas fa-user-check mr-1"></i>Verify Results</a>
+                                    <a class="tv-history" asp-area="Technician" asp-controller="Tests" asp-action="VerificationHistory" asp-route-id="@item.TestRequestTestTypeId" aria-label="View verification history for test @item.TestRequestTestTypeId"><i class="fas fa-history mr-1"></i>History</a>
+                                </div></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="tv-empty" id="noSearchResults" style="display:none" role="status"><i class="fas fa-search d-block"></i><h5>No Matching Tests</h5><p class="mb-0">No tests match your search.</p></div>
+        }
+        else
+        {
+            <div class="tv-empty" role="status"><i class="fas fa-check-circle d-block"></i><h5>No Tests Ready for Verification</h5><p class="mb-0">There are currently no eligible completed tests awaiting your independent verification.</p></div>
+        }
+    </section>
+</div>
+@section Scripts {
+    <script>
+        (function () {
+            "use strict";
+            const search = document.getElementById("verificationSearch");
+            const rows = document.querySelectorAll("#verifyResultsTable tbody .verification-row");
+            const empty = document.getElementById("noSearchResults");
+            if (!search || !empty) return;
+            search.addEventListener("input", function () {
+                const term = search.value.trim().toLocaleLowerCase();
+                let visible = 0;
+                rows.forEach(function (row) {
+                    const matches = row.textContent.toLocaleLowerCase().includes(term);
+                    row.style.display = matches ? "" : "none";
+                    if (matches) visible++;
+                });
+                empty.style.display = visible === 0 ? "block" : "none";
+            });
+        })();
+    </script>
+}

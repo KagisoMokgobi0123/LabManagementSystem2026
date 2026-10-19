@@ -1935,7 +1935,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return View("PendingVerification", tests);
         }
 
-     
+
 
         [HttpGet]
         [Authorize(Roles = "LabTechnician")]
@@ -2068,9 +2068,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return PartialView("_VerifyTestModal", test);
         }
         //This is a GET endpoint.Keep your existing CaptureResults POST action.
-[HttpGet]
-[Authorize(Roles = "LabTechnician")]
-public async Task<IActionResult> CorrectTestModal(int id)
+        [HttpGet]
+        [Authorize(Roles = "LabTechnician")]
+        public async Task<IActionResult> CorrectTestModal(int id)
         {
             var technicianId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(technicianId))
@@ -2099,9 +2099,49 @@ public async Task<IActionResult> CorrectTestModal(int id)
             result.TestRequestTestType = test;
             return PartialView("_CorrectTestResultModal", result);
         }
+        // Sidebar GET: /Technician/Tests/VerifyResultsQueue (no test ID).
+        // Displays an independent-verification selection page.
         [HttpGet]
-        public async Task<IActionResult> VerifyResult(int id)
+        public async Task<IActionResult> VerifyResultsQueue()
         {
+            var verifierId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(verifierId))
+                return Challenge();
+
+            var assignedTypeIds = _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(a => a.TechnicianId == verifierId && a.IsActive)
+                .Select(a => a.TestTypeId);
+
+            var tests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestType)
+                .Include(t => t.TestRequest)
+                    .ThenInclude(r => r!.Patient)
+                .Where(t => t.Status == "Completed" &&
+                            t.TechnicianId != null &&
+                            t.TechnicianId != verifierId &&
+                            assignedTypeIds.Contains(t.TestTypeId) &&
+                            _context.TestResults.Count(r =>
+                                r.TestRequestTestTypeId == t.TestRequestTestTypeId) == 1 &&
+                            _context.TestResults.Any(r =>
+                                r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
+                                r.TechnicianId == t.TechnicianId &&
+                                r.ResultValue != null &&
+                                r.ResultValue.Trim() != ""))
+                .OrderBy(t => t.CompletionDateTime)
+                .ToListAsync();
+
+            return View("VerifyResultsQueue", tests);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyResult(int id = 0)
+        {
+            // A sidebar link has no test ID: open the verification queue.
+            if (id <= 0)
+                return RedirectToAction(nameof(VerifyResultsQueue));
+
             var verifierId = _userManager.GetUserId(User);
             if (string.IsNullOrWhiteSpace(verifierId))
                 return Challenge();

@@ -10,7 +10,7 @@
         .Select(group => group.First())
         .ToList()
         ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
-    var now = DateTime.Now;
+    var now = DateTime.UtcNow;
     var inProgress = tests.Count(x => x.Status == "In Progress");
     var completed = tests.Count(x => x.Status == "Completed");
     var toReview = tests.Count(x => x.Status == "To Be Reviewed");
@@ -402,8 +402,8 @@
 
             <!-- IN PROGRESS -->
             <div class="col-lg-3 col-sm-6 mb-3">
-                <a href="/Technician/Tests/InProgress"
-                   class="mytests-card-link">
+                <a href="/Technician/Tests/MyTests?status=In%20Progress#myTestsTable"
+                   class="mytests-card-link" aria-label="View InProgress tests">
                     <div class="mytests-summary">
                         <div>
                             <div class="label">In Progress</div>
@@ -418,8 +418,8 @@
 
             <!-- COMPLETED -->
             <div class="col-lg-3 col-sm-6 mb-3">
-                <a href="/Technician/Tests/Completed"
-                   class="mytests-card-link">
+                <a href="/Technician/Tests/MyTests?status=Completed#myTestsTable"
+                   class="mytests-card-link" aria-label="View Completed tests">
                     <div class="mytests-summary">
                         <div>
                             <div class="label">Completed</div>
@@ -434,8 +434,8 @@
 
             <!-- TO BE REVIEWED -->
             <div class="col-lg-3 col-sm-6 mb-3">
-                <a href="/Technician/Tests/ToBeReviewed"
-                   class="mytests-card-link">
+                <a href="/Technician/Tests/MyTests?status=To%20Be%20Reviewed#myTestsTable"
+                   class="mytests-card-link" aria-label="View ToBeReviewed tests">
                     <div class="mytests-summary">
                         <div>
                             <div class="label">To Be Reviewed</div>
@@ -451,7 +451,7 @@
             <!-- OVERDUE -->
             <div class="col-lg-3 col-sm-6 mb-3">
                 <a href="/Technician/Tests/Overdue"
-                   class="mytests-card-link">
+                   class="mytests-card-link" aria-label="View Overdue tests">
                     <div class="mytests-summary">
                         <div>
                             <div class="label">Overdue</div>
@@ -733,6 +733,11 @@
             });
             if (empty) empty.style.display = count ? 'none' : 'block';
         }
+        const selectedStatus = new URLSearchParams(window.location.search).get('status');
+        if (selectedStatus && Array.from(status.options).some(o => o.value === selectedStatus)) {
+            status.value = selectedStatus;
+        }
+        filterTests();
         search.addEventListener('input', filterTests);
         status.addEventListener('change', filterTests);
     });
