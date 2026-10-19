@@ -2694,7 +2694,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8101,
-                            Barcode = "DEMO-SMP-8101",
+                            Barcode = "SMP-2026-008101",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 1,
@@ -2704,7 +2704,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8102,
-                            Barcode = "DEMO-SMP-8102",
+                            Barcode = "SMP-2026-008102",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 4,
@@ -2714,7 +2714,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8103,
-                            Barcode = "DEMO-SMP-8103",
+                            Barcode = "SMP-2026-008103",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 4,
@@ -2724,7 +2724,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8104,
-                            Barcode = "DEMO-SMP-8104",
+                            Barcode = "SMP-2026-008104",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 1,
@@ -2734,7 +2734,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8201,
-                            Barcode = "DEMO-SMP-8201",
+                            Barcode = "SMP-2026-008201",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 2,
@@ -2744,7 +2744,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8202,
-                            Barcode = "DEMO-SMP-8202",
+                            Barcode = "SMP-2026-008202",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 1,
@@ -2754,7 +2754,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8203,
-                            Barcode = "DEMO-SMP-8203",
+                            Barcode = "SMP-2026-008203",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 1,
@@ -2764,7 +2764,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8204,
-                            Barcode = "DEMO-SMP-8204",
+                            Barcode = "SMP-2026-008204",
                             IsDeleted = false,
                             IsReceived = false,
                             SampleTypeId = 2,
@@ -2774,7 +2774,7 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             SampleId = 8301,
-                            Barcode = "DEMO-SMP-8301",
+                            Barcode = "SMP-2026-008301",
                             DateReceived = new DateTime(2026, 10, 15, 7, 45, 0, 0, DateTimeKind.Unspecified),
                             IsDeleted = false,
                             IsReceived = true,

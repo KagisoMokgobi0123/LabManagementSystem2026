@@ -1846,14 +1846,14 @@ namespace NMB_HLabSys.Data
             // Request 7 is explicitly set to Submitted above to match ReceiveSamplesController.Index.
             // All barcodes and sample IDs are unique development-only values.
             builder.Entity<SampleModel>().HasData(
-                new SampleModel { SampleId = 8101, TestRequestId = 1, Barcode = "DEMO-SMP-8101", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8102, TestRequestId = 5, Barcode = "DEMO-SMP-8102", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8103, TestRequestId = 7, Barcode = "DEMO-SMP-8103", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8104, TestRequestId = 10, Barcode = "DEMO-SMP-8104", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8201, TestRequestId = 1, Barcode = "DEMO-SMP-8201", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8202, TestRequestId = 5, Barcode = "DEMO-SMP-8202", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8203, TestRequestId = 7, Barcode = "DEMO-SMP-8203", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
-                new SampleModel { SampleId = 8204, TestRequestId = 10, Barcode = "DEMO-SMP-8204", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
+                new SampleModel { SampleId = 8101, TestRequestId = 1, Barcode = "SMP-2026-008101", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8102, TestRequestId = 5, Barcode = "SMP-2026-008102", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8103, TestRequestId = 7, Barcode = "SMP-2026-008103", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8104, TestRequestId = 10, Barcode = "SMP-2026-008104", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8201, TestRequestId = 1, Barcode = "SMP-2026-008201", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8202, TestRequestId = 5, Barcode = "SMP-2026-008202", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8203, TestRequestId = 7, Barcode = "SMP-2026-008203", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
+                new SampleModel { SampleId = 8204, TestRequestId = 10, Barcode = "SMP-2026-008204", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
             );
 
             // Five selected tests awaiting capture; no result rows yet.
@@ -1978,7 +1978,7 @@ namespace NMB_HLabSys.Data
                 {
                     SampleId = 8301,
                     TestRequestId = 11,
-                    Barcode = "DEMO-SMP-8301",
+                    Barcode = "SMP-2026-008301",
                     SampleTypeId = 1,
                     TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                     DateReceived = new DateTime(2026, 10, 15, 7, 45, 0),
