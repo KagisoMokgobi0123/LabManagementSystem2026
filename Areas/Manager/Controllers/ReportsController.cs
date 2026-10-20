@@ -109,16 +109,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         // ============================================================
         [HttpGet]
         public async Task<IActionResult> GeneratePdf(
-            DateTime startDate,
-            DateTime endDate)
+    DateTime startDate,
+    DateTime endDate)
         {
-            var manager = await _userManager.GetUserAsync(User);
-
-            if (manager == null)
-            {
-                return Challenge();
-            }
-
             if (startDate == default ||
                 endDate == default ||
                 startDate.Date > endDate.Date)
@@ -129,377 +122,237 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-
-            var managerName = manager.FullName;
-            var managerEmail = manager.Email ?? "Not provided";
-            var managerPhone = manager.PhoneNumber ?? "Not provided";
-            var laboratoryName = _configuration["EmailSettings:FromName"] ?? "NMB Health Laboratory System";
-
-            var generatedAt = DateTime.Now;
-
             var report = await BuildReportData(
                 startDate.Date,
                 endDate.Date);
+
+            var totalTrackedTests =
+                report.TotalCompletedTests + report.TotalInProgressTests;
 
             var pdf = Document.Create(document =>
             {
                 document.Page(page =>
                 {
                     page.Size(PageSizes.A4);
-                    page.MarginHorizontal(38);
-                    page.MarginVertical(32);
+                    page.Margin(35);
 
-                    page.DefaultTextStyle(x => x
-                        .FontFamily("Lato")
-                        .FontSize(9));
+                    // Use Lato because it is registered in your application.
+                    page.DefaultTextStyle(x =>
+                        x.FontFamily("Lato").FontSize(9));
 
-                    // ====================================================
                     // HEADER
-                    // ====================================================
-
-                    page.Header().Column(header =>
+                    page.Header().Column(column =>
                     {
-                        header.Spacing(4);
-
-                        header.Item()
-                            .Text(laboratoryName.ToUpperInvariant())
+                        column.Item()
+                            .Text("NMB HEALTH LABORATORY SYSTEM")
+                            .Bold()
                             .FontSize(17)
-                            .Bold()
-                            .FontColor(Colors.Blue.Darken3);
+                            .FontColor(Colors.Blue.Darken2);
 
-                        header.Item()
-                            .Text("MANAGEMENT REPORT")
-                            .FontSize(11)
-                            .Bold()
-                            .FontColor(Colors.Grey.Darken2);
+                        column.Item()
+                            .Text("Management Test Performance Report")
+                            .SemiBold()
+                            .FontSize(13);
 
-                        header.Item()
+                        column.Item()
                             .PaddingTop(5)
-                            .LineHorizontal(2)
-                            .LineColor(Colors.Blue.Darken2);
+                            .Text(
+                                $"Reporting period: {report.StartDate:dd MMM yyyy} - " +
+                                $"{report.EndDate:dd MMM yyyy}");
 
-                        header.Item()
-                            .PaddingTop(5)
-                            .Row(row =>
-                            {
-                                row.RelativeItem().Column(left =>
-                                {
-                                    left.Item()
-                                        .Text("Prepared by")
-                                        .FontSize(8)
-                                        .FontColor(Colors.Grey.Darken1);
+                        column.Item()
+                            .Text(
+                                $"Generated: {DateTime.Now:dd MMM yyyy HH:mm}");
 
-                                    left.Item()
-                                        .Text(managerName)
-                                        .Bold()
-                                        .FontSize(10);
-                                });
-
-                                row.RelativeItem().AlignRight().Column(right =>
-                                {
-                                    right.Item()
-                                        .Text("REPORT REFERENCE")
-                                        .FontSize(8)
-                                        .FontColor(Colors.Grey.Darken1);
-
-                                    right.Item()
-                                        .Text(
-                                            $"MGT-{report.StartDate:yyyyMMdd}-" +
-                                            $"{report.EndDate:yyyyMMdd}")
-                                        .Bold()
-                                        .FontSize(9);
-                                });
-                            });
-
-                        header.Item()
+                        column.Item()
                             .PaddingTop(4)
                             .Text(
-                                $"Manager email: {managerEmail}  |  " +
-                                $"Telephone: {managerPhone}")
+                                "Completed tests are grouped by completion date; " +
+                                "in-progress tests are grouped by start date.")
                             .FontSize(8)
-                            .FontColor(Colors.Grey.Darken2);
+                            .FontColor(Colors.Grey.Darken1);
                     });
 
-
-                    // ------------------------------------------------
                     // CONTENT
-                    // ------------------------------------------------
                     page.Content()
-                                    .PaddingTop(20)
-                                    .PaddingBottom(12)
-                                    .Column(content =>
+                        .PaddingVertical(20)
+                        .Column(column =>
+                        {
+                            column.Spacing(12);
+
+                            column.Item()
+                                .Border(1)
+                                .BorderColor(Colors.Grey.Lighten2)
+                                .Padding(12)
+                                .Row(row =>
+                                {
+                                    row.RelativeItem().Column(summary =>
                                     {
-                                        content.Spacing(16);
+                                        summary.Item()
+                                            .Text("Completed Tests")
+                                            .FontSize(9);
 
-                                        // REPORT TITLE AND DATE RANGE
-                                        content.Item().Column(title =>
-                                        {
-                                            title.Spacing(5);
-
-                                            title.Item()
-                                                .Text("Test Performance Report")
-                                                .FontSize(19)
-                                                .Bold()
-                                                .FontColor(Colors.Blue.Darken4);
-
-                                            title.Item()
-                                                .Text(
-                                                    $"Reporting period: " +
-                                                    $"{report.StartDate:dd MMMM yyyy} " +
-                                                    $"to {report.EndDate:dd MMMM yyyy}")
-                                                .FontSize(10)
-                                                .FontColor(Colors.Grey.Darken2);
-
-                                            title.Item()
-                                                .Text(
-                                                    $"Generated on " +
-                                                    $"{generatedAt:dd MMMM yyyy 'at' HH:mm}")
-                                                .FontSize(8)
-                                                .FontColor(Colors.Grey.Darken1);
-                                        });
-
-                                        // SUMMARY
-                                        content.Item()
-                                            .Border(1)
-                                            .BorderColor(Colors.Grey.Lighten2)
-                                            .Background(Colors.Grey.Lighten5)
-                                            .Padding(14)
-                                            .Row(row =>
-                                            {
-                                                row.RelativeItem().Column(summary =>
-                                                {
-                                                    summary.Item()
-                                                        .Text("TOTAL COMPLETED TESTS")
-                                                        .FontSize(8)
-                                                        .Bold()
-                                                        .FontColor(Colors.Grey.Darken2);
-
-                                                    summary.Item()
-                                                        .PaddingTop(5)
-                                                        .Text(
-                                                            report.TotalCompletedTests
-                                                                .ToString("N0"))
-                                                        .FontSize(25)
-                                                        .Bold()
-                                                        .FontColor(Colors.Blue.Darken3);
-                                                });
-
-                                                row.ConstantItem(1)
-                                                    .Background(Colors.Grey.Lighten1);
-
-                                                row.RelativeItem().PaddingLeft(15).Column(summary =>
-                                                {
-                                                    summary.Item()
-                                                        .Text("TEST CATEGORIES")
-                                                        .FontSize(8)
-                                                        .Bold()
-                                                        .FontColor(Colors.Grey.Darken2);
-
-                                                    summary.Item()
-                                                        .PaddingTop(5)
-                                                        .Text(
-                                                            report.TotalCategories
-                                                                .ToString("N0"))
-                                                        .FontSize(25)
-                                                        .Bold()
-                                                        .FontColor(Colors.Blue.Darken3);
-                                                });
-                                            });
-
-                                        // CATEGORY BREAKDOWN HEADING
-                                        content.Item().Column(section =>
-                                        {
-                                            section.Spacing(5);
-
-                                            section.Item()
-                                                .Text("Category Breakdown")
-                                                .FontSize(13)
-                                                .Bold()
-                                                .FontColor(Colors.Blue.Darken3);
-
-                                            section.Item()
-                                                .Text(
-                                                    "Distribution of completed tests by " +
-                                                    "laboratory test category.")
-                                                .FontSize(9)
-                                                .FontColor(Colors.Grey.Darken2);
-                                        });
-
-                                        // CATEGORY TABLE
-                                        if (report.CategoryBreakdown.Count == 0)
-                                        {
-                                            content.Item()
-                                                .Border(1)
-                                                .BorderColor(Colors.Grey.Lighten2)
-                                                .Padding(18)
-                                                .AlignCenter()
-                                                .Text(
-                                                    "No completed tests were recorded " +
-                                                    "during the selected reporting period.")
-                                                .FontColor(Colors.Grey.Darken1);
-                                        }
-                                        else
-                                        {
-                                            content.Item().Table(table =>
-                                            {
-                                                table.ColumnsDefinition(columns =>
-                                                {
-                                                    columns.ConstantColumn(35);
-                                                    columns.RelativeColumn(4);
-                                                    columns.RelativeColumn(1.5f);
-                                                    columns.RelativeColumn(1.5f);
-                                                });
-
-                                                table.Header(header =>
-                                                {
-                                                    header.Cell()
-                                                        .Element(HeaderCell)
-                                                        .AlignCenter()
-                                                        .Text("No.");
-
-                                                    header.Cell()
-                                                        .Element(HeaderCell)
-                                                        .Text("Test Category");
-
-                                                    header.Cell()
-                                                        .Element(HeaderCell)
-                                                        .AlignRight()
-                                                        .Text("Tests");
-
-                                                    header.Cell()
-                                                        .Element(HeaderCell)
-                                                        .AlignRight()
-                                                        .Text("Percentage");
-                                                });
-
-                                                var rowNumber = 0;
-
-                                                foreach (var category in
-                                                    report.CategoryBreakdown)
-                                                {
-                                                    rowNumber++;
-
-                                                    table.Cell()
-                                                        .Element(BodyCell)
-                                                        .AlignCenter()
-                                                        .Text(rowNumber.ToString());
-
-                                                    table.Cell()
-                                                        .Element(BodyCell)
-                                                        .Text(category.CategoryName);
-
-                                                    table.Cell()
-                                                        .Element(BodyCell)
-                                                        .AlignRight()
-                                                        .Text(
-                                                            category.TotalTests.ToString("N0"));
-
-                                                    table.Cell()
-                                                        .Element(BodyCell)
-                                                        .AlignRight()
-                                                        .Text(
-                                                            $"{category.Percentage:F2}%");
-                                                }
-
-                                                table.Cell()
-                                                    .Element(TotalCell)
-                                                    .Text("");
-
-                                                table.Cell()
-                                                    .Element(TotalCell)
-                                                    .Text("TOTAL COMPLETED TESTS");
-
-                                                table.Cell()
-                                                    .Element(TotalCell)
-                                                    .AlignRight()
-                                                    .Text(
-                                                        report.TotalCompletedTests
-                                                            .ToString("N0"));
-
-                                                table.Cell()
-                                                    .Element(TotalCell)
-                                                    .AlignRight()
-                                                    .Text(
-                                                        report.TotalCompletedTests > 0
-                                                            ? "100.00%"
-                                                            : "0.00%");
-                                            });
-                                        }
-
-                                        // REPORT NOTES
-                                        content.Item()
-                                            .PaddingTop(5)
-                                            .BorderTop(1)
-                                            .BorderColor(Colors.Grey.Lighten2)
-                                            .PaddingTop(8)
-                                            .Column(notes =>
-                                            {
-                                                notes.Spacing(4);
-
-                                                notes.Item()
-                                                    .Text("Report notes")
-                                                    .Bold()
-                                                    .FontSize(9);
-
-                                                notes.Item()
-                                                    .Text(
-                                                        "This report summarizes tests marked " +
-                                                        $"'{CompletedStatus}' based on their " +
-                                                        "recorded completion dates within the " +
-                                                        "selected reporting period.")
-                                                    .FontSize(8)
-                                                    .FontColor(Colors.Grey.Darken2);
-
-                                                notes.Item()
-                                                    .Text(
-                                                        "This document is intended for " +
-                                                        "laboratory management and operational " +
-                                                        "review.")
-                                                    .FontSize(8)
-                                                    .FontColor(Colors.Grey.Darken2);
-                                            });
+                                        summary.Item()
+                                            .Text(
+                                                report.TotalCompletedTests.ToString("N0"))
+                                            .Bold()
+                                            .FontSize(20)
+                                            .FontColor(Colors.Green.Darken2);
                                     });
 
-                    // ====================================================
-                    // FOOTER
-                    // ====================================================
+                                    row.RelativeItem().Column(summary =>
+                                    {
+                                        summary.Item()
+                                            .Text("In Progress")
+                                            .FontSize(9);
 
-                    page.Footer()
-                        .PaddingTop(8)
-                        .BorderTop(1)
-                        .BorderColor(Colors.Grey.Lighten2)
-                        .Row(row =>
-                        {
-                            row.RelativeItem().Column(footer =>
-                            {
-                                footer.Item()
-                                    .Text(laboratoryName)
-                                    .FontSize(8)
-                                    .Bold()
-                                    .FontColor(Colors.Grey.Darken2);
+                                        summary.Item()
+                                            .Text(
+                                                report.TotalInProgressTests.ToString("N0"))
+                                            .Bold()
+                                            .FontSize(20)
+                                            .FontColor(Colors.Orange.Darken2);
+                                    });
 
-                                footer.Item()
-                                    .Text("Confidential management report")
-                                    .FontSize(7)
-                                    .FontColor(Colors.Grey.Darken1);
-                            });
+                                    row.RelativeItem().Column(summary =>
+                                    {
+                                        summary.Item()
+                                            .Text("Categories")
+                                            .FontSize(9);
 
-                            row.RelativeItem()
-                                .AlignRight()
-                                .AlignMiddle()
-                                .Text(text =>
-                                {
-                                    text.Span("Page ")
-                                        .FontSize(8);
-
-                                    text.CurrentPageNumber();
-
-                                    text.Span(" of ")
-                                        .FontSize(8);
-
-                                    text.TotalPages();
+                                        summary.Item()
+                                            .Text(report.TotalCategories.ToString("N0"))
+                                            .Bold()
+                                            .FontSize(20)
+                                            .FontColor(Colors.Blue.Darken2);
+                                    });
                                 });
+
+                            column.Item()
+                                .Text("Category Breakdown")
+                                .Bold()
+                                .FontSize(13);
+
+                            if (report.CategoryBreakdown.Count == 0)
+                            {
+                                column.Item()
+                                    .Padding(15)
+                                    .Text(
+                                        "No completed or in-progress tests were " +
+                                        "recorded during the selected period.");
+                            }
+                            else
+                            {
+                                column.Item().Table(table =>
+                                {
+                                    table.ColumnsDefinition(columns =>
+                                    {
+                                        columns.RelativeColumn(3);
+                                        columns.RelativeColumn(1.2f);
+                                        columns.RelativeColumn(1.2f);
+                                        columns.RelativeColumn(1.1f);
+                                        columns.RelativeColumn(1.2f);
+                                    });
+
+                                    table.Header(header =>
+                                    {
+                                        header.Cell()
+                                            .Element(HeaderCell)
+                                            .Text("Test Category");
+
+                                        header.Cell()
+                                            .Element(HeaderCell)
+                                            .AlignRight()
+                                            .Text("Completed");
+
+                                        header.Cell()
+                                            .Element(HeaderCell)
+                                            .AlignRight()
+                                            .Text("In Progress");
+
+                                        header.Cell()
+                                            .Element(HeaderCell)
+                                            .AlignRight()
+                                            .Text("Total");
+
+                                        header.Cell()
+                                            .Element(HeaderCell)
+                                            .AlignRight()
+                                            .Text("% Total");
+                                    });
+
+                                    foreach (var category in report.CategoryBreakdown)
+                                    {
+                                        table.Cell()
+                                            .Element(BodyCell)
+                                            .Text(category.CategoryName);
+
+                                        table.Cell()
+                                            .Element(BodyCell)
+                                            .AlignRight()
+                                            .Text(category.CompletedTests.ToString("N0"));
+
+                                        table.Cell()
+                                            .Element(BodyCell)
+                                            .AlignRight()
+                                            .Text(category.InProgressTests.ToString("N0"));
+
+                                        table.Cell()
+                                            .Element(BodyCell)
+                                            .AlignRight()
+                                            .Text(category.TotalTests.ToString("N0"));
+
+                                        table.Cell()
+                                            .Element(BodyCell)
+                                            .AlignRight()
+                                            .Text($"{category.Percentage:F1}%");
+                                    }
+
+                                    table.Cell()
+                                        .Element(TotalCell)
+                                        .Text("TOTAL");
+
+                                    table.Cell()
+                                        .Element(TotalCell)
+                                        .AlignRight()
+                                        .Text(report.TotalCompletedTests.ToString("N0"));
+
+                                    table.Cell()
+                                        .Element(TotalCell)
+                                        .AlignRight()
+                                        .Text(report.TotalInProgressTests.ToString("N0"));
+
+                                    table.Cell()
+                                        .Element(TotalCell)
+                                        .AlignRight()
+                                        .Text(totalTrackedTests.ToString("N0"));
+
+                                    table.Cell()
+                                        .Element(TotalCell)
+                                        .AlignRight()
+                                        .Text(totalTrackedTests > 0 ? "100.0%" : "0.0%");
+                                });
+                            }
                         });
+
+                    // FOOTER
+                    page.Footer().Row(row =>
+                    {
+                        row.RelativeItem()
+                            .Text("NMB Health Laboratory System")
+                            .FontSize(8)
+                            .FontColor(Colors.Grey.Darken1);
+
+                        row.RelativeItem()
+                            .AlignRight()
+                            .Text(text =>
+                            {
+                                text.Span("Page ");
+                                text.CurrentPageNumber();
+                                text.Span(" of ");
+                                text.TotalPages();
+                            });
+                    });
                 });
             }).GeneratePdf();
 
@@ -510,71 +363,86 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 $"{report.EndDate:yyyyMMdd}.pdf");
         }
 
-
         // ============================================================
         // BUILD REPORT DATA
         // ============================================================
 
         private async Task<ManagementReportViewModel> BuildReportData(
-            DateTime startDate,
-            DateTime endDate)
+           DateTime startDate,
+           DateTime endDate)
         {
             var start = startDate.Date;
-            var endExclusive = endDate.Date.AddDays(1);
+            var end = endDate.Date;
+            var endExclusive = end.AddDays(1);
 
             // --------------------------------------------------------
-            // COMPLETED TESTS
+            // TEST ASSIGNMENTS STARTED WITHIN THE SELECTED PERIOD
+            // Include only Completed and In Progress.
             // --------------------------------------------------------
-
-            var completedTests = _context.TestRequestTestTypes
+            var reportTests = _context.TestRequestTestTypes
                 .AsNoTracking()
                 .Where(x =>
-                    x.Status == CompletedStatus &&
-                    x.CompletionDateTime.HasValue &&
-                    x.CompletionDateTime.Value >= start &&
-                    x.CompletionDateTime.Value < endExclusive &&
+                    (x.Status == "Completed" ||
+                     x.Status == "In Progress") &&
+                    x.StartDateTime.HasValue &&
+                    x.StartDateTime.Value >= start &&
+                    x.StartDateTime.Value < endExclusive &&
                     x.TestType != null &&
                     x.TestType.TestCategory != null);
 
             // --------------------------------------------------------
-            // TOTAL COMPLETED TESTS
+            // TOTALS BY STATUS
             // --------------------------------------------------------
 
-            var totalCompletedTests =
-                await completedTests.CountAsync();
+            var totalCompletedTests = await reportTests
+                .CountAsync(x => x.Status == "Completed");
+
+            var totalInProgressTests = await reportTests
+                .CountAsync(x => x.Status == "In Progress");
+
+            var totalEligibleTests =
+                totalCompletedTests + totalInProgressTests;
 
             // --------------------------------------------------------
-            // CATEGORY TOTALS
+            // CATEGORY TOTALS BY STATUS
             // --------------------------------------------------------
 
-            var categoryTotals = await completedTests
+            var categoryTotals = await reportTests
                 .GroupBy(x => new
                 {
                     x.TestType!.TestCategoryId,
-                    CategoryName =
-                        x.TestType.TestCategory!.Description
+                    CategoryName = x.TestType.TestCategory!.Description
                 })
                 .Select(g => new CategoryReportItem
                 {
                     TestCategoryId = g.Key.TestCategoryId,
                     CategoryName = g.Key.CategoryName,
-                    TotalTests = g.Count()
+
+                    CompletedTests = g.Count(
+                        x => x.Status == "Completed"),
+
+                    InProgressTests = g.Count(
+                        x => x.Status == "In Progress")
                 })
-                .OrderByDescending(x => x.TotalTests)
+                .OrderByDescending(x => x.CompletedTests + x.InProgressTests)
                 .ThenBy(x => x.CategoryName)
                 .ToListAsync();
 
+            // --------------------------------------------------------
+            // CATEGORY COMPLETION PERCENTAGES
+            // Completed / (Completed + In Progress)
+            // --------------------------------------------------------
+
             foreach (var category in categoryTotals)
             {
-                category.Percentage =
-                    totalCompletedTests == 0
-                        ? 0
-                        : (decimal)category.TotalTests /
-                          totalCompletedTests * 100;
+                category.Percentage = category.TotalTests == 0
+                    ? 0
+                    : (decimal)category.CompletedTests /
+                      category.TotalTests * 100;
             }
 
             // --------------------------------------------------------
-            // TOP CATEGORIES
+            // TOP CATEGORIES FOR THE CHART
             // --------------------------------------------------------
 
             var topCategories = categoryTotals
@@ -587,16 +455,18 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             // --------------------------------------------------------
             // DAILY COUNTS FOR TOP CATEGORIES
+            // Count both statuses using StartDateTime.
             // --------------------------------------------------------
 
-            var dailyCounts = await completedTests
+            var dailyCounts = await reportTests
                 .Where(x =>
                     topCategoryIds.Contains(
                         x.TestType!.TestCategoryId))
                 .GroupBy(x => new
                 {
-                    Date = x.CompletionDateTime!.Value.Date,
-                    x.TestType!.TestCategoryId
+                    Date = x.StartDateTime!.Value.Date,
+                    x.TestType!.TestCategoryId,
+                    x.Status
                 })
                 .Select(g => new DailyCategoryCount
                 {
@@ -619,11 +489,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             if (otherCategoryIds.Count > 0)
             {
-                otherDailyCounts = await completedTests
+                otherDailyCounts = await reportTests
                     .Where(x =>
                         otherCategoryIds.Contains(
                             x.TestType!.TestCategoryId))
-                    .GroupBy(x => x.CompletionDateTime!.Value.Date)
+                    .GroupBy(x => x.StartDateTime!.Value.Date)
                     .Select(g => new DailyCategoryCount
                     {
                         Date = g.Key,
@@ -639,8 +509,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             var chartLabels = new List<string>();
 
-            for (var date = start; date <= endDate.Date;
-                 date = date.AddDays(1))
+            for (var date = start; date <= end; date = date.AddDays(1))
             {
                 chartLabels.Add(date.ToString("dd MMM"));
             }
@@ -666,8 +535,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     Label = category.CategoryName
                 };
 
-                for (var date = start; date <= endDate.Date;
-                     date = date.AddDays(1))
+                for (var date = start; date <= end; date = date.AddDays(1))
                 {
                     series.Data.Add(
                         countsByDate.TryGetValue(date, out var count)
@@ -679,7 +547,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
             // --------------------------------------------------------
-            // OTHER CHART SERIES
+            // OTHER CATEGORY CHART SERIES
             // --------------------------------------------------------
 
             if (otherCategoryIds.Count > 0)
@@ -695,8 +563,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     Label = "Other"
                 };
 
-                for (var date = start; date <= endDate.Date;
-                     date = date.AddDays(1))
+                for (var date = start; date <= end; date = date.AddDays(1))
                 {
                     otherSeries.Data.Add(
                         otherCountsByDate.TryGetValue(date, out var count)
@@ -707,13 +574,21 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 chartSeries.Add(otherSeries);
             }
 
+            // --------------------------------------------------------
+            // RETURN REPORT
+            // --------------------------------------------------------
+
             return new ManagementReportViewModel
             {
                 StartDate = start,
-                EndDate = endDate.Date,
+                EndDate = end,
+
                 TotalCompletedTests = totalCompletedTests,
+                TotalInProgressTests = totalInProgressTests,
+
                 TotalCategories = categoryTotals.Count,
                 CategoryBreakdown = categoryTotals,
+
                 ChartLabels = chartLabels,
                 ChartSeries = chartSeries
             };

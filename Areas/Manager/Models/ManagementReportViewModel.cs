@@ -13,6 +13,15 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public int TotalCompletedTests { get; set; }
 
         public int TotalCategories { get; set; }
+        public int TotalInProgressTests { get; set; }
+
+        public int TotalTests =>
+            TotalCompletedTests + TotalInProgressTests;
+
+        public decimal CompletionPercentage =>
+            TotalTests == 0
+                ? 0
+                : (decimal)TotalCompletedTests / TotalTests * 100;
 
         public decimal AverageTestsPerDay { get; set; }
 
