@@ -1005,11 +1005,7 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-
-            // ============================================================
-            // SUPPLIER SEED DATA
-            // ============================================================
-
+            // supplier seeded data
             builder.Entity<SupplierModel>().HasData(
 
                 new SupplierModel
@@ -1379,13 +1375,7 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-
-            // ============================================================
-            // TEST REQUEST TEST TYPES SEED DATA
-            // Individual tests requested by doctors
-            // ============================================================
-
-
+            // TEST REQUEST TEST TYPES SEED DATA Individual tests requested by doctors
             builder.Entity<TestRequestTestTypeModel>().HasData(
 
                 // Request 1 - Awaiting samples
@@ -1737,17 +1727,7 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-            // ============================================================
-            // DEVELOPMENT DEMO: PATIENT MEDICAL HISTORY
-            // Lerato Patient (AspNetUsers.LastName = "Patient")
-            // AspNetUsers.Id = c0fbfbb4-daf5-44e3-bf57-acfded7baceb; patient profile ID = f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15
-            // Lookup IDs 1 and 2 are seeded below in the patient-model lookup tables.
-            // These are fictional demonstration records only.
-            // ============================================================
-            // Lookup records required by the patient-history foreign keys.
-            // AllergyCategories(1) and MedicationCategories(1) already exist
-            // in the development database; do not re-seed those parent rows.
-            // Category 9001 is new: verify it is unused before migration.
+
             builder.Entity<MedicalConditionCategory>().HasData(
                 new MedicalConditionCategory
                 {
@@ -1954,11 +1934,6 @@ namespace NMB_HLabSys.Data
                 new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3214, TestResultId = 2214, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 14, 9, 15, 0, DateTimeKind.Utc) }
             );
 
-            // ============================================================
-            // ASSESSMENT: FIVE TESTS AWAITING TECHNICIAN SELECTION
-            // These are unassigned, Submitted tests on requests whose samples
-            // have already been received. Includes Urgent and Stat cases.
-            // ============================================================
             builder.Entity<TestRequestsModel>().HasData(
                 new TestRequestsModel
                 {

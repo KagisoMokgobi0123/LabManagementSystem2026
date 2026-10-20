@@ -593,14 +593,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
-        // =========================================================
-        // MY TESTS
-        //
-        // Tests currently assigned to logged-in technician.
-        //
-        // GET: /Technician/Tests/MyTests
-        // =========================================================
-
+  
         [HttpGet]
         public async Task<IActionResult> MyTests()
         {
@@ -652,13 +645,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return View(tests);
         }
 
-
-        // =========================================================
-        // TEST DETAILS
-        //
-        // GET:
-        // /Technician/Tests/Details/5
-        // =========================================================
 
 
         [HttpGet]
@@ -794,13 +780,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
-        // =========================================================
-        // TESTS TO BE REVIEWED
-        //
-        // Returned by verifier to original technician.
-        //
-        // GET: /Technician/Tests/Review
-        // =========================================================
+        // test to be reviewed
 
 
 
@@ -879,11 +859,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // =========================================================
-        // URGENT / STAT TESTS
-        //
-        // GET: /Technician/Tests/Urgent
-        // =========================================================
 
         [HttpGet]
         public async Task<IActionResult> Urgent()
@@ -953,14 +928,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // =========================================================
-        // OVERDUE TESTS
-        //
-        // Due date =
-        // StartDateTime + TestType.TurnAroundTimeHours
-        //
-        // GET: /Technician/Tests/Overdue
-        // =========================================================
+        //over due tests
 
         private void RecordResultHistory(
             TestResultModel result,
@@ -1119,16 +1087,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             // STEP 6: Supply clinical notes
             ViewData["ClinicalNotes"] = test.TestRequest?.ClinicalNotes;
 
-            // STEP 7: Supply the patient's medical record
-            // PatientMedicalRecord must be the PatientModel associated
-            // with this patient's identity/user ID in your existing schema.
-            //
-            // If your existing action already retrieves PatientModel,
-            // retain that query and assign the result here.
-            //
-            // ViewData["PatientMedicalRecord"] = patientRecord;
-
-            // STEP 8: Return the existing model expected by the Razor view
             return View(test);
         }
 
@@ -1222,13 +1180,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // ============================================================
-        // GET - LOAD EDIT RESULTS MODAL
-        // ============================================================
-
-        // ============================================================
-        // GET - LOAD EDIT RESULTS MODAL
-        // ============================================================
+        // load Edit results
         [HttpGet]
         [Authorize(Roles = "LabTechnician")]
         public async Task<IActionResult> EditResult(int id)
@@ -1321,9 +1273,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-        // ============================================================
-        // GET - EDIT MODAL ALIAS
-        // ============================================================
         [HttpGet]
         [Authorize(Roles = "LabTechnician")]
         public Task<IActionResult> EditResultModal(int id)
