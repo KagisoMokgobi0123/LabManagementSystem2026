@@ -16,9 +16,7 @@
 
 <div class="container-fluid py-4">
 
-    <!-- =========================================================
-         PAGE HEADER
-    ========================================================= -->
+    <!-- page header -->
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
@@ -36,7 +34,7 @@
 
         <div class="d-flex gap-2">
 
-            <!-- ADD DOCTOR -->
+            <!-- adding a doctor -->
             <button type="button"
                     class="btn btn-primary"
                     data-bs-toggle="modal"
@@ -48,7 +46,7 @@
 
             </button>
 
-            <!-- ADD TECHNICIAN -->
+            <!-- adding technician -->
             <button type="button"
                     class="btn btn-success"
                     data-bs-toggle="modal"
@@ -65,9 +63,7 @@
     </div>
 
 
-    <!-- =========================================================
-         ERROR MESSAGE
-    ========================================================= -->
+    <!-- error handling messages -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -86,9 +82,7 @@
     }
 
 
-    <!-- =========================================================
-         VALIDATION ERRORS
-    ========================================================= -->
+    <!-- validations -->
     @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -134,10 +128,6 @@
     }
 
 
-    <!-- =========================================================
-         INFORMATION
-    ========================================================= -->
-
     <div class="alert alert-info border-0 shadow-sm">
 
         <div class="d-flex">
@@ -165,9 +155,7 @@
     </div>
 
 
-    <!-- =========================================================
-         USER TABLE
-    ========================================================= -->
+    <!-- users -->
 
     <div class="card border-0 shadow-sm">
 
@@ -189,7 +177,7 @@
 
                 <div class="d-flex align-items-center gap-2">
 
-                    <!-- SEARCH -->
+                    <!-- searching -->
 
                     <div class="input-group input-group-sm"
                          style="width:320px;">
@@ -208,8 +196,6 @@
 
                     </div>
 
-
-                    <!-- RECORD COUNT -->
 
                     <span class="badge bg-primary-subtle text-primary"
                           id="recordCount">
@@ -260,10 +246,6 @@
 
 
                     <tbody id="usersTableBody">
-
-                        <!-- =================================================
-                             DOCTORS
-                        ================================================= -->
                         @foreach (var doctor in doctors)
                         {
                             var user = doctor.User;
@@ -512,9 +494,6 @@
                         }
 
 
-                        <!-- =================================================
-                             TECHNICIANS
-                        ================================================= -->
                         @foreach (var technician in technicians)
                         {
                             var user = technician.User;
@@ -770,10 +749,6 @@
                             </tr>
                         }
 
-
-                        <!-- =================================================
-                             NO USERS
-                        ================================================= -->
                         @if (!doctors.Any() && !technicians.Any())
                         {
                             <tr id="noUsersRow">
@@ -801,10 +776,6 @@
                             </tr>
                         }
 
-
-                        <!-- =================================================
-                             SEARCH EMPTY
-                        ================================================= -->
 
                         <tr id="noSearchResultsRow"
                             style="display:none;">
@@ -846,9 +817,7 @@
 </div>
 
 
-<!-- =============================================================
-     ADD / EDIT USER MODAL
-============================================================= -->
+<!-- adding and editing -->
 
 <div class="modal fade"
      id="userModal"
@@ -896,11 +865,6 @@
                            id="UserType"
                            name="UserType"
                            value="" />
-
-
-                    <!-- =================================================
-                         PERSONAL INFORMATION
-                    ================================================= -->
 
                     <div class="mb-3">
 
@@ -959,9 +923,6 @@
                     </div>
 
 
-                    <!-- =================================================
-                         DOCTOR INFORMATION
-                    ================================================= -->
 
                     <div id="doctorFields"
                          style="display:none;">
@@ -993,7 +954,7 @@
                                    name="HPCSANumber"
                                    class="form-control"
                                    maxlength="50"
-                                   autocomplete="off" />
+                                   autocomplete="off" placeholder="MP0000000.." />
 
                             <div class="form-text">
                                 The HPCSA number must be unique.
@@ -1004,9 +965,7 @@
                     </div>
 
 
-                    <!-- =================================================
-                         TECHNICIAN INFORMATION
-                    ================================================= -->
+                    <!-- technician -->
 
                     <div id="technicianFields"
                          style="display:none;">
@@ -1065,7 +1024,7 @@
                                        name="EmployeeNumber"
                                        class="form-control"
                                        maxlength="50"
-                                       autocomplete="off" />
+                                       autocomplete="off" placeholder="TECH001.." />
 
                             </div>
 
@@ -1074,9 +1033,7 @@
                     </div>
 
 
-                    <!-- =================================================
-                         CONTACT INFORMATION
-                    ================================================= -->
+                    <!-- Contact details -->
 
                     <div class="mb-3">
 
@@ -1107,7 +1064,7 @@
                                    name="Email"
                                    class="form-control"
                                    required
-                                   autocomplete="email" />
+                                   autocomplete="email" placeholder="john@example.com.."/>
 
                             <div class="form-text">
                                 The e-mail address is used as the user's username.
@@ -1130,16 +1087,13 @@
                                    name="PhoneNumber"
                                    class="form-control"
                                    required
-                                   autocomplete="tel" />
+                                   autocomplete="tel" placeholder="0631233345"/>
 
                         </div>
 
                     </div>
 
 
-                    <!-- =================================================
-                         PASSWORD INFORMATION
-                    ================================================= -->
 
                     <div id="passwordInformation"
                          class="alert alert-info border-0 mb-0">
@@ -1174,10 +1128,6 @@
                 </div>
 
 
-                <!-- =================================================
-                     MODAL FOOTER
-                ================================================= -->
-
                 <div class="modal-footer">
 
                     <button type="button"
@@ -1211,9 +1161,7 @@
 </div>
 
 
-<!-- =============================================================
-     VIEW USER MODAL
-============================================================= -->
+<!-- view user details -->
 
 <div class="modal fade"
      id="viewUserModal"
@@ -1390,9 +1338,7 @@
 </div>
 
 
-<!-- =============================================================
-     DELETE USER MODAL
-============================================================= -->
+<!-- delete user-->
 
 <div class="modal fade"
      id="deleteUserModal"
@@ -1493,9 +1439,7 @@
 </div>
 
 
-<!-- =============================================================
-     SUCCESS MESSAGE MODAL
-============================================================= -->
+<!-- successful message once action completed -->
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="modal fade"
@@ -1582,9 +1526,7 @@
 
     <script>
 
-        /* =========================================================
-           SUCCESS MESSAGE
-        ========================================================= */
+        /* message */
 
         document.addEventListener("DOMContentLoaded", function () {
 
@@ -1602,9 +1544,7 @@
         });
 
 
-        /* =========================================================
-           RESET FORM
-        ========================================================= */
+        /* reset form*/
 
         function resetUserForm() {
 
@@ -1633,9 +1573,7 @@
         }
 
 
-        /* =========================================================
-           CREATE DOCTOR
-        ========================================================= */
+        /* adding doctor*/
 
         function openCreateDoctorModal() {
 
@@ -1668,9 +1606,7 @@
         }
 
 
-        /* =========================================================
-           CREATE TECHNICIAN
-        ========================================================= */
+        /* Adding Technician*/
 
         function openCreateTechnicianModal() {
 
@@ -1703,9 +1639,7 @@
         }
 
 
-        /* =========================================================
-           EDIT DOCTOR
-        ========================================================= */
+        /* edit Doctor*/
 
         function editDoctor(
             id,
@@ -1720,14 +1654,6 @@
                 document.getElementById("userForm");
 
             resetUserForm();
-
-            /*
-             * This is a POST action.
-             *
-             * No EditDoctor.cshtml page is required.
-             * The controller should process the update and
-             * redirect back to Index.
-             */
 
             form.method = "post";
 
@@ -1779,9 +1705,7 @@
         }
 
 
-        /* =========================================================
-           EDIT TECHNICIAN
-        ========================================================= */
+        /* Edit technician*/
 
         function editTechnician(
             id,
@@ -1797,18 +1721,6 @@
                 document.getElementById("userForm");
 
             resetUserForm();
-
-            /*
-             * IMPORTANT:
-             *
-             * There is NO EditTechnician.cshtml.
-             *
-             * This form sends a POST request to the
-             * EditTechnician controller action.
-             *
-             * The controller must save the changes and
-             * RedirectToAction("Index").
-             */
 
             form.method = "post";
 
@@ -1863,9 +1775,7 @@
         }
 
 
-        /* =========================================================
-           VIEW USER
-        ========================================================= */
+        /* to view details of user */
 
         function viewUser(
             id,
@@ -2013,9 +1923,7 @@
         }
 
 
-        /* =========================================================
-           SOFT DELETE
-        ========================================================= */
+        /* deleting */
 
         function deleteUser(
             id,
@@ -2049,9 +1957,7 @@
         }
 
 
-        /* =========================================================
-           SEARCH
-        ========================================================= */
+        /* searchin*/
 
         document.addEventListener("DOMContentLoaded", function () {
 
