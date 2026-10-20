@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="Areas\Technician\Views\Profile\Index.cshtml" />
     <Content Remove="Views\Shared\_AdminManagerLayout.cshtml" />
   </ItemGroup>
 

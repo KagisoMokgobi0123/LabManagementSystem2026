@@ -74,24 +74,23 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             // STEP 4: Return profile view
             return View(model);
         }
-
         // =========================================================
-        // CHANGE PASSWORD
-        // GET: /Technician/Profile/ChangePassword
+        // CHANGE PASSWORD - GET
         // =========================================================
-
         [HttpGet]
-        public IActionResult ChangePassword()
+        public async Task<IActionResult> ChangePassword()
         {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+                return Challenge();
+
             return View(new ChangePasswordViewModel());
         }
 
-
         // =========================================================
-        // CHANGE PASSWORD
-        // POST: /Technician/Profile/ChangePassword
+        // CHANGE PASSWORD - POST
         // =========================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(
@@ -99,141 +98,219 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         {
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] =
+                    GetValidationErrors();
+
                 return View(model);
             }
 
             var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
+                return Challenge();
+
+            if (model.CurrentPassword == model.NewPassword)
             {
-                return NotFound();
+                ModelState.AddModelError(
+                    nameof(model.NewPassword),
+                    "The new password must differ from the current password.");
+
+                TempData["ErrorMessage"] =
+                    "Choose a different new password.";
+
+                return View(model);
             }
 
+            // Identity verifies the current password and enforces
+            // the password policy configured in Program.cs.
             var result = await _userManager.ChangePasswordAsync(
                 user,
                 model.CurrentPassword,
                 model.NewPassword);
 
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                // Refresh authentication cookie
-                await _signInManager.RefreshSignInAsync(user);
+                var errors = result.Errors
+                    .Select(e => e.Description)
+                    .ToList();
 
-                TempData["SuccessMessage"] =
-                    "Your password has been changed successfully.";
+                foreach (var error in errors)
+                    ModelState.AddModelError(string.Empty, error);
 
-                return RedirectToAction(nameof(ChangePassword));
+                TempData["ErrorMessage"] =
+                    string.Join(" ", errors);
+
+                _logger.LogWarning(
+                    "Identity password change failed for {UserId}: {Codes}",
+                    user.Id,
+                    string.Join(", ", result.Errors.Select(e => e.Code)));
+
+                return View(model);
             }
 
-            foreach (var error in result.Errors)
+            // Password has already been changed by Identity.
+            if (user.MustChangePassword)
             {
-                ModelState.AddModelError("", error.Description);
+                user.MustChangePassword = false;
+
+                var updateResult =
+                    await _userManager.UpdateAsync(user);
+
+                if (!updateResult.Succeeded)
+                {
+                    _logger.LogError(
+                        "Password changed, but first-login flag update failed for {UserId}",
+                        user.Id);
+                }
             }
 
-            return View(model);
+            await _signInManager.RefreshSignInAsync(user);
+
+            TempData["SuccessMessage"] =
+                "Your password has been changed successfully.";
+
+            return RedirectToAction(nameof(ChangePassword));
         }
-        // =========================================================
-        // CHANGE PHONE NUMBER
-        // GET: /Technician/Profile/ChangePhoneNumber
-        // =========================================================
 
+        // =========================================================
+        // CHANGE PHONE NUMBER - GET
+        // =========================================================
         [HttpGet]
         public async Task<IActionResult> ChangePhoneNumber()
         {
-            var user =
-                await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
+                return Challenge();
+
+            return View(new UpdatePhoneNumberViewModel
             {
-                return NotFound();
-            }
-
-            var model =
-                new UpdatePhoneNumberViewModel
-                {
-                    PhoneNumber =
-                        user.PhoneNumber ?? ""
-                };
-
-            return View(model);
+                PhoneNumber = user.PhoneNumber ?? string.Empty
+            });
         }
 
-
         // =========================================================
-        // CHANGE PHONE NUMBER
-        // POST: /Technician/Profile/ChangePhoneNumber
+        // CHANGE PHONE NUMBER - POST
         // =========================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePhoneNumber(
             UpdatePhoneNumberViewModel model)
         {
+            // Normalize before validating the number's format.
+            var phone = (model.PhoneNumber ?? string.Empty)
+                .Trim()
+                .Replace(" ", "")
+                .Replace("-", "");
+
+            // Remove earlier PhoneNumber validation results
+            // so the normalized value can be checked.
+            ModelState.Remove(nameof(model.PhoneNumber));
+
+            model.PhoneNumber = phone;
+
+            if (string.IsNullOrWhiteSpace(phone) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(
+                    phone,
+                    @"^(0[6-8][0-9]{8}|\+27[6-8][0-9]{8})$"))
+            {
+                ModelState.AddModelError(
+                    nameof(model.PhoneNumber),
+                    "Enter a valid South African cellphone number.");
+            }
+
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] =
+                    GetValidationErrors();
+
                 return View(model);
             }
 
-
-            var user =
-                await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
-            {
-                return NotFound();
-            }
+                return Challenge();
 
-
-            var phoneNumber =
-                model.PhoneNumber.Trim();
-
-
-            // No change
-            if (user.PhoneNumber == phoneNumber)
+            if (user.PhoneNumber == phone)
             {
                 TempData["InfoMessage"] =
-                    "Your phone number has not changed.";
+                    "This is already your current cellphone number.";
 
-                return RedirectToAction(
-                    nameof(ChangePhoneNumber)
-                );
+                return RedirectToAction(nameof(ChangePhoneNumber));
             }
 
-
-            // Update through Identity
+            // ASP.NET Core Identity persists the cellphone number.
             var result =
-                await _userManager.SetPhoneNumberAsync(
-                    user,
-                    phoneNumber
-                );
-
+                await _userManager.SetPhoneNumberAsync(user, phone);
 
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(
-                        "",
-                        error.Description
-                    );
-                }
+                var errors = result.Errors
+                    .Select(e => e.Description)
+                    .ToList();
+
+                foreach (var error in errors)
+                    ModelState.AddModelError(string.Empty, error);
+
+                TempData["ErrorMessage"] =
+                    string.Join(" ", errors);
+
+                _logger.LogWarning(
+                    "Identity phone update failed for {UserId}: {Codes}",
+                    user.Id,
+                    string.Join(", ", result.Errors.Select(e => e.Code)));
 
                 return View(model);
             }
 
+            // Independently verify the persisted value using
+            // a no-tracking database query.
+            var savedPhone = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.Id == user.Id)
+                .Select(u => u.PhoneNumber)
+                .SingleOrDefaultAsync();
 
-            // Refresh authentication cookie
+            if (savedPhone != phone)
+            {
+                _logger.LogError(
+                    "Phone persistence verification failed for {UserId}",
+                    user.Id);
+
+                TempData["ErrorMessage"] =
+                    "Identity reported success, but the saved number could not be verified.";
+
+                return View(model);
+            }
+
             await _signInManager.RefreshSignInAsync(user);
 
-
             TempData["SuccessMessage"] =
-                "Your phone number has been updated successfully.";
+                "Your cellphone number has been updated successfully.";
 
-
-            return RedirectToAction(
-                nameof(ChangePhoneNumber)
-            );
+            return RedirectToAction(nameof(ChangePhoneNumber));
         }
+
+        // =========================================================
+        // SHARED VALIDATION HELPER
+        // Place this inside ProfileController, outside all actions.
+        // =========================================================
+        private string GetValidationErrors()
+        {
+            var errors = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .Where(e => !string.IsNullOrWhiteSpace(e))
+                .ToList();
+
+            return errors.Count > 0
+                ? string.Join(" ", errors)
+                : "Please check the information entered.";
+        }
+
+
+
         // =========================================================
         // LOGOUT
         // POST: /Technician/Profile/Logout

@@ -67,6 +67,23 @@
 }
 
 <style>
+
+    /* Header account controls */
+    .tech-header-tools { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-bottom:18px; position:relative; z-index:30; }
+    .tech-tool { position:relative; }
+    .tech-tool > summary { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border:1px solid rgba(255,255,255,.35); border-radius:12px; background:rgba(255,255,255,.12); color:#fff; }
+    .tech-tool > summary::-webkit-details-marker { display:none; }
+    .tech-tool > summary:hover, .tech-tool[open] > summary { background:rgba(255,255,255,.24); }
+    .tech-tool .tool-count { position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 4px; border-radius:12px; background:#dc2626; color:#fff; font-size:11px; font-weight:700; text-align:center; line-height:19px; pointer-events:none; }
+    .tech-tool-menu { position:absolute; right:0; top:calc(100% + 9px); width:280px; max-width:calc(100vw - 32px); padding:14px; background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.18); z-index:50; overflow-wrap:anywhere; }
+    .tech-tool-menu h3 { font-size:14px; font-weight:700; margin:0 0 8px; color:#0f172a; }
+    .tech-tool-menu p { font-size:12px; margin:0 0 12px; }
+    .tech-tool-menu a { display:block; font-size:12px; padding:9px; border-radius:7px; text-decoration:none; color:#075985; }
+    .tech-tool-menu a:hover { background:#eff6ff; }
+    .tech-profile-trigger { width:auto !important; padding:0 12px; gap:9px; }
+    .tech-profile-trigger .tech-avatar { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#fff; color:#075985; font-weight:700; }
+    @@media(max-width:575.98px) { .tech-header-tools { flex-wrap:wrap; } .tech-profile-trigger .tech-profile-label { display:none; } }
+
     /* =========================================================
                PAGE
                ========================================================= */
@@ -744,6 +761,55 @@
         <div class="container-fluid">
 
             <div class="tech-hero-content">
+
+                <!-- Header tools: accessible native dropdowns, no JavaScript dependency -->
+                <div class="tech-header-tools" aria-label="Technician account tools">
+                    <details class="tech-tool">
+                        <summary aria-label="Email account" title="Email account">
+                            <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </summary>
+                        <div class="tech-tool-menu">
+                            <h3><i class="fas fa-envelope mr-2"></i>Email</h3>
+                            <p>Signed-in account: <strong>@technicianEmail</strong></p>
+                            @if (!string.IsNullOrWhiteSpace(technicianEmail))
+                            {
+                                <a href="mailto:@technicianEmail"><i class="fas fa-paper-plane mr-2"></i>Compose email to this address</a>
+                            }
+                            <p class="text-muted mb-0">This opens your default email application; an internal inbox is not yet configured.</p>
+                        </div>
+                    </details>
+
+                    <details class="tech-tool">
+                        <summary aria-label="Notifications: @waitingVerificationCount tests awaiting verification" title="Notifications">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            @if (waitingVerificationCount > 0)
+                            {
+                                <span class="tool-count">@(waitingVerificationCount > 99 ? "99+" : waitingVerificationCount.ToString())</span>
+                            }
+                        </summary>
+                        <div class="tech-tool-menu">
+                            <h3><i class="fas fa-bell mr-2"></i>Notifications</h3>
+                            <p>@waitingVerificationCount test(s) waiting for verification.</p>
+                            <a href="/Technician/Tests/PendingVerification"><i class="fas fa-user-check mr-2"></i>View pending verification</a>
+                            <a href="/Technician/Tests/Review"><i class="fas fa-rotate-left mr-2"></i>Tests to review (@toReviewCount)</a>
+                        </div>
+                    </details>
+
+                    <details class="tech-tool">
+                        <summary class="tech-profile-trigger" aria-label="Open my profile menu" title="My profile">
+                            <span class="tech-avatar">@technicianInitial</span>
+                            <span class="tech-profile-label">@technicianName</span>
+                            <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                        </summary>
+                        <div class="tech-tool-menu">
+                            <h3>@technicianName</h3>
+                            <p class="text-muted">Lab Technician · @technicianEmail</p>
+                            <a href="/Technician/Profile/ProfileIndex"><i class="fas fa-user mr-2"></i>My profile</a>
+                            <a href="/Technician/Profile/ChangePhoneNumber"><i class="fas fa-phone mr-2"></i>Change phone number</a>
+                            <a href="/Technician/Profile/ChangePassword"><i class="fas fa-key mr-2"></i>Change password</a>
+                        </div>
+                    </details>
+                </div>
 
                 <div class="row align-items-center">
 
@@ -2015,7 +2081,7 @@
 
                     <div class="col-md-6 text-md-right mt-3 mt-md-0">
 
-                        <a href="/Technician/Profile/Index"
+                        <a href="/Technician/Profile/ProfileIndex"
                            class="btn btn-outline-primary btn-sm mr-2">
 
                             <i class="fas fa-user mr-1"></i>

@@ -3,10 +3,13 @@
 @{
     ViewData["Title"] = "Change Phone Number";
     Layout = "_TechnicianLayout";
+
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+    var infoMessage = TempData["InfoMessage"]?.ToString();
+    var errorMessage = TempData["ErrorMessage"]?.ToString();
 }
 
 <style>
-
     .phone-page {
         padding: 35px 0 60px;
         background: #f4f7fb;
@@ -28,24 +31,20 @@
 
     .phone-header {
         padding: 25px 30px;
-        background: linear-gradient(
-            135deg,
-            #073b5c,
-            #0284c7
-        );
+        background: linear-gradient(135deg, #073b5c, #0284c7);
         color: white;
     }
 
-    .phone-header h4 {
-        margin: 0;
-        font-weight: 700;
-    }
+        .phone-header h4 {
+            margin: 0;
+            font-weight: 700;
+        }
 
-    .phone-header p {
-        margin: 7px 0 0;
-        font-size: 13px;
-        opacity: .85;
-    }
+        .phone-header p {
+            margin: 7px 0 0;
+            font-size: 13px;
+            opacity: .85;
+        }
 
     .phone-body {
         padding: 30px;
@@ -54,18 +53,13 @@
     .phone-icon {
         width: 65px;
         height: 65px;
-
         margin: 0 auto 20px;
-
         display: flex;
         align-items: center;
         justify-content: center;
-
         border-radius: 50%;
-
         background: #e0f2fe;
         color: #0284c7;
-
         font-size: 24px;
     }
 
@@ -77,17 +71,15 @@
 
     .form-control {
         height: 46px;
-
         border: 1px solid #dbe3ec;
         border-radius: 9px;
-
         font-size: 14px;
     }
 
-    .form-control:focus {
-        border-color: #0284c7;
-        box-shadow: 0 0 0 .15rem rgba(2, 132, 199, .12);
-    }
+        .form-control:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 .15rem rgba(2, 132, 199, .12);
+        }
 
     .phone-help {
         margin-top: 7px;
@@ -98,155 +90,126 @@
     .validation-summary-errors {
         margin-bottom: 20px;
         padding: 12px 15px;
-
         border-radius: 8px;
-
         background: #fef2f2;
         color: #b91c1c;
-
         font-size: 13px;
     }
 
+    .update-btn {
+        background: #0284c7;
+        border-color: #0284c7;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 9px;
+    }
+
+        .update-btn:hover {
+            background: #0369a1;
+            border-color: #0369a1;
+        }
+
+        .update-btn:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+        }
 </style>
 
-
 <div class="phone-page">
-
     <div class="container">
-
         <div class="phone-container">
 
+            <!-- BACK BUTTON -->
             <div class="mb-3">
-
-                <a href="/Technician/Profile/Index"
+                <a href="/Technician/Profile/ProfileIndex"
                    class="btn btn-outline-secondary btn-sm">
 
                     <i class="fas fa-arrow-left mr-1"></i>
-
                     Back to Profile
 
                 </a>
-
             </div>
-
-
+            <!-- PHONE CARD -->
             <div class="phone-card">
 
+                <!-- HEADER -->
                 <div class="phone-header">
 
                     <h4>
-
                         <i class="fas fa-phone-alt mr-2"></i>
-
                         Change Phone Number
-
                     </h4>
 
                     <p>
-                        Update the phone number associated with your
-                        Lab Technician account.
+                        Update the cellphone number associated
+                        with your Lab Technician account.
                     </p>
 
                 </div>
 
-
+                <!-- BODY -->
                 <div class="phone-body">
 
                     <div class="phone-icon">
-
                         <i class="fas fa-mobile-alt"></i>
-
                     </div>
 
-
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="alert alert-success">
-
-                            <i class="fas fa-check-circle mr-2"></i>
-
-                            @TempData["SuccessMessage"]
-
-                        </div>
-                    }
-
-
-                    @if (TempData["InfoMessage"] != null)
-                    {
-                        <div class="alert alert-info">
-
-                            <i class="fas fa-info-circle mr-2"></i>
-
-                            @TempData["InfoMessage"]
-
-                        </div>
-                    }
-
-
-                    <form asp-area="Technician"
+                    <!-- UPDATE FORM -->
+                    <form id="changePhoneForm"
+                          asp-area="Technician"
                           asp-controller="Profile"
                           asp-action="ChangePhoneNumber"
                           method="post">
 
                         @Html.AntiForgeryToken()
 
-
+                        <!-- SERVER VALIDATION ERRORS -->
                         <div asp-validation-summary="ModelOnly"
-                             class="text-danger">
+                             class="text-danger small mb-3">
                         </div>
 
-
+                        <!-- PHONE NUMBER -->
                         <div class="form-group">
 
                             <label asp-for="PhoneNumber"
                                    class="form-label">
+                                Cellphone Number
                             </label>
-
 
                             <div class="input-group">
 
                                 <div class="input-group-prepend">
-
                                     <span class="input-group-text">
-
                                         <i class="fas fa-phone"></i>
-
                                     </span>
-
                                 </div>
-
 
                                 <input asp-for="PhoneNumber"
                                        type="tel"
                                        class="form-control"
                                        placeholder="e.g. 0712345678"
-                                       autocomplete="tel" />
+                                       autocomplete="tel"
+                                       required />
 
                             </div>
-
 
                             <span asp-validation-for="PhoneNumber"
                                   class="text-danger small">
                             </span>
 
-
                             <div class="phone-help">
-
                                 <i class="fas fa-info-circle mr-1"></i>
-
-                                Enter the phone number you would like
-                                associated with your account.
-
+                                Enter a valid South African cellphone number.
                             </div>
 
                         </div>
 
-
+                        <!-- SUBMIT BUTTON -->
                         <button type="submit"
-                                class="btn btn-primary btn-block mt-4">
+                                id="updatePhoneBtn"
+                                class="btn btn-primary update-btn btn-block mt-4">
 
                             <i class="fas fa-save mr-1"></i>
-
                             Update Phone Number
 
                         </button>
@@ -254,18 +217,35 @@
                     </form>
 
                 </div>
-
             </div>
 
         </div>
-
     </div>
-
 </div>
-
 
 @section Scripts {
 
     <partial name="_ValidationScriptsPartial" />
 
-}
+    <!-- Remove this if already loaded in _TechnicianLayout -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const errorMessage =
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                TempData["ErrorMessage"]?.ToString()));
+
+        if (errorMessage) {
+            Swal.fire({
+                icon: "error",
+                title: "Cellphone Update Failed",
+                text: errorMessage,
+                confirmButtonColor: "#0284c7"
+            });
+        }
+    });
+</script>}
