@@ -1,0 +1,266 @@
+﻿@model List<NMB_HLabSys.Areas.Technician.Models.TechnicianNotificationModel>
+
+@{
+    ViewData["Title"] = "My Notifications";
+    Layout = "_TechnicianLayout";
+
+    var unreadCount = Model.Count(n => !n.IsRead);
+    var showTestButton = false;
+
+#if DEBUG
+    showTestButton = true;
+#endif
+
+}
+
+<style>
+    .notifications-page {
+        max-width: 1050px;
+        margin: 30px auto;
+        padding: 0 15px;
+    }
+
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .notifications-title {
+        font-size: 25px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .notification-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 12px;
+        box-shadow: 0 3px 12px rgba(0,0,0,.04);
+    }
+
+        .notification-card.unread {
+            background: #eff6ff;
+            border-left: 4px solid #0284c7;
+        }
+
+    .notification-title {
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 6px;
+    }
+
+    .notification-message {
+        font-size: 14px;
+        color: #475569;
+    }
+
+    .notification-date {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 10px;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .empty-notifications {
+        text-align: center;
+        padding: 70px 20px;
+        background: #fff;
+        border-radius: 12px;
+        color: #64748b;
+    }
+
+    .test-notification-panel {
+        background: #eaf5ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .notification-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="notifications-page">
+
+    @* Development-only notification test *@
+    @if (showTestButton)
+    {
+        <div class="test-notification-panel">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <strong>
+                        <i class="fas fa-flask mr-1"></i>
+                        Notification Testing
+                    </strong>
+
+                    <p class="text-muted mb-0">
+                        Create a test notification for the logged-in technician.
+                    </p>
+                </div>
+
+                <form action="/Technician/Notifications/CreateTestNotification"
+                      method="post"
+                      class="mt-2">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit"
+                            class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus-circle mr-1"></i>
+                        Create Test Notification
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
+
+    <div class="notifications-header">
+
+        <div>
+            <h2 class="notifications-title">
+                <i class="fas fa-bell text-primary mr-2"></i>
+                My Notifications
+            </h2>
+
+            <p class="text-muted mb-0">
+                Laboratory updates and important alerts
+            </p>
+        </div>
+
+        <div>
+            <span class="notification-status">
+                @unreadCount Unread
+            </span>
+
+            <a href="/Technician/Home/Index"
+               class="btn btn-outline-secondary btn-sm ml-2">
+                <i class="fas fa-arrow-left mr-1"></i>
+                Dashboard
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            <i class="fas fa-check-circle mr-1"></i>
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="empty-notifications">
+
+            <i class="far fa-bell fa-3x mb-3"></i>
+
+            <h5>No Notifications Yet</h5>
+
+            <p>
+                New laboratory notifications will appear here.
+            </p>
+
+        </div>
+    }
+    else
+    {
+        @foreach (var notification in Model)
+        {
+            <div class="notification-card @(notification.IsRead ? "" : "unread")">
+
+                <div class="d-flex justify-content-between align-items-start">
+
+                    <div>
+                        <div class="notification-title">
+                            @notification.Title
+
+                            @if (!notification.IsRead)
+                            {
+                                <span class="badge badge-primary ml-2">
+                                    New
+                                </span>
+                            }
+                        </div>
+
+                        <div class="notification-message">
+                            @notification.Message
+                        </div>
+
+                        <div class="notification-date">
+                            <i class="far fa-clock mr-1"></i>
+                            @notification.CreatedAt.ToString("dd MMM yyyy HH:mm") UTC
+                        </div>
+                    </div>
+
+                    <i class="fas fa-bell text-primary"></i>
+
+                </div>
+
+                <div class="notification-actions">
+
+                    @if (!notification.IsRead)
+                    {
+                        <form action="/Technician/Notifications/MarkAsRead"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="id"
+                                   value="@notification.NotificationId" />
+
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm">
+                                <i class="fas fa-check mr-1"></i>
+                                Mark as Read
+                            </button>
+                        </form>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(notification.ActionUrl)
+                         && notification.ActionUrl.StartsWith(
+                             "/Technician/",
+                             StringComparison.OrdinalIgnoreCase)
+                         && !notification.ActionUrl.StartsWith("//"))
+                    {
+                        <a href="@notification.ActionUrl"
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt mr-1"></i>
+                            View Details
+                        </a>
+                    }
+
+                </div>
+            </div>
+        }
+    }
+</div>

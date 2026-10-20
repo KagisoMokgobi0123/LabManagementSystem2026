@@ -73,9 +73,11 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-
+builder.Services.AddScoped<TechnicianNotificationService>();
+builder.Services.AddScoped<NMB_HLabSys.Services.EmailService>();
+builder.Services.AddScoped<NMB_HLabSys.Services.LaboratoryPdfService>();
+builder.Services.AddScoped<NMB_HLabSys.Services.LaboratoryReportDeliveryService>();
 var app = builder.Build();
-
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

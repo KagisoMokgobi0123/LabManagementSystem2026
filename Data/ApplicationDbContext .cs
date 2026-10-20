@@ -34,8 +34,10 @@ namespace NMB_HLabSys.Data
         public DbSet<DoctorProfile> DoctorProfiles { get; set; }
 
         public DbSet<TechnicianProfile> TechnicianProfiles { get; set; }
-
-
+        public DbSet<TechnicianSentEmailModel> TechnicianSentEmails
+        { get; set; }
+        public DbSet<TechnicianNotificationModel> TechnicianNotifications
+        { get; set; }
         // ============================================================
         // TEST REQUESTS
         // ============================================================
@@ -150,7 +152,9 @@ namespace NMB_HLabSys.Data
                 entity.Property(x => x.NewReferenceMax)
                     .HasPrecision(18, 4);
             });
-
+            builder.Entity<TechnicianSentEmailModel>()
+    .HasIndex(x => x.TestRequestId)
+    .IsUnique();
             builder.Entity<TestResultVerificationHistoryModel>(entity =>
             {
                 entity.Property(x => x.PreviousReferenceMin)

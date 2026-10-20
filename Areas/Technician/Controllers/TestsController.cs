@@ -1766,6 +1766,32 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 test.Status = "Completed";
                 test.CompletionDateTime = now;
 
+                // Notify other active technicians authorised to verify this test.
+                // The technician who completed it cannot verify their own work.
+                var verifierIds = await _context.TechnicianTestTypes
+                    .AsNoTracking()
+                    .Where(a =>
+                        a.TestTypeId == test.TestTypeId &&
+                        a.IsActive &&
+                        a.TechnicianId != technicianId)
+                    .Select(a => a.TechnicianId)
+                    .Distinct()
+                    .ToListAsync();
+
+                foreach (var verifierId in verifierIds)
+                {
+                    _context.Set<TechnicianNotificationModel>().Add(
+                        new TechnicianNotificationModel
+                        {
+                            TechnicianId = verifierId,
+                            Title = "Test Awaiting Verification",
+                            Message = $"A completed laboratory test (ID: {test.TestRequestTestTypeId}) is ready for independent verification.",
+                            ActionUrl = "/Technician/Tests/VerifyResultsQueue",
+                            IsRead = false,
+                            CreatedAt = now
+                        });
+                }
+
                 // IMPORTANT: Do NOT update the parent TestRequest.Status here.
                 // Do NOT send the doctor's PDF/email here.
                 // The verification workflow must do that only after ALL tests
@@ -2363,6 +2389,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
         // C# cannot overload GET and POST by HTTP attributes alone.
         // Use a different C# method name and map it to the same action name.
+
         [HttpPost]
         [ActionName("VerifyResult")]
         [ValidateAntiForgeryToken]
@@ -2372,6 +2399,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             string? notes)
         {
             var verifierId = _userManager.GetUserId(User);
+
             if (string.IsNullOrWhiteSpace(verifierId))
                 return Challenge();
 
@@ -2380,17 +2408,24 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             if (decision != "Verify" && decision != "ReturnForReview")
             {
-                TempData["ErrorMessage"] = "Invalid verification decision.";
-                return RedirectToAction(nameof(VerifyResult),
+                TempData["ErrorMessage"] =
+                    "Invalid verification decision.";
+
+                return RedirectToAction(
+                    nameof(VerifyResult),
                     new { id = testRequestTestTypeId });
             }
 
             notes = notes?.Trim();
-            if (decision == "ReturnForReview" && string.IsNullOrWhiteSpace(notes))
+
+            if (decision == "ReturnForReview" &&
+                string.IsNullOrWhiteSpace(notes))
             {
                 TempData["ErrorMessage"] =
                     "Review notes are required when returning results.";
-                return RedirectToAction(nameof(VerifyResult),
+
+                return RedirectToAction(
+                    nameof(VerifyResult),
                     new { id = testRequestTestTypeId });
             }
 
@@ -2398,62 +2433,107 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             {
                 TempData["ErrorMessage"] =
                     "Verification notes cannot exceed 2000 characters.";
-                return RedirectToAction(nameof(VerifyResult),
+
+                return RedirectToAction(
+                    nameof(VerifyResult),
                     new { id = testRequestTestTypeId });
             }
 
-            await using var transaction = await _context.Database.BeginTransactionAsync(
-                System.Data.IsolationLevel.Serializable);
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync(
+                    System.Data.IsolationLevel.Serializable);
 
             try
             {
+                // ==========================================
+                // 1. LOAD THE REQUESTED TEST
+                // ==========================================
+
                 var test = await _context.TestRequestTestTypes
                     .Include(x => x.TestRequest)
-                    .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == testRequestTestTypeId);
+                    .FirstOrDefaultAsync(x =>
+                        x.TestRequestTestTypeId ==
+                        testRequestTestTypeId);
 
                 if (test == null)
+                {
+                    await transaction.RollbackAsync();
                     return NotFound();
+                }
 
                 if (test.Status != "Completed")
                 {
+                    await transaction.RollbackAsync();
+
                     TempData["ErrorMessage"] =
                         "This test is no longer awaiting verification.";
-                    return RedirectToAction(nameof(PendingVerification));
+
+                    return RedirectToAction(
+                        nameof(PendingVerification));
                 }
+
+                // ==========================================
+                // 2. INDEPENDENT VERIFICATION
+                // ==========================================
 
                 if (string.IsNullOrWhiteSpace(test.TechnicianId) ||
                     test.TechnicianId == verifierId)
+                {
+                    await transaction.RollbackAsync();
                     return Forbid();
+                }
 
                 var authorised = await _context.TechnicianTestTypes
-                    .AnyAsync(x => x.TechnicianId == verifierId &&
-                                   x.TestTypeId == test.TestTypeId &&
-                                   x.IsActive);
+                    .AnyAsync(x =>
+                        x.TechnicianId == verifierId &&
+                        x.TestTypeId == test.TestTypeId &&
+                        x.IsActive);
+
                 if (!authorised)
+                {
+                    await transaction.RollbackAsync();
                     return Forbid();
+                }
+
+                // ==========================================
+                // 3. LOAD THE SAVED TEST RESULT
+                // ==========================================
 
                 var results = await _context.TestResults
-                    .Where(x => x.TestRequestTestTypeId == testRequestTestTypeId &&
-                                x.TechnicianId == test.TechnicianId)
+                    .Where(x =>
+                        x.TestRequestTestTypeId ==
+                            testRequestTestTypeId &&
+                        x.TechnicianId == test.TechnicianId)
                     .ToListAsync();
 
-                if (results.Count != 1 || string.IsNullOrWhiteSpace(results[0].ResultValue))
+                if (results.Count != 1 ||
+                    string.IsNullOrWhiteSpace(results[0].ResultValue))
                 {
+                    await transaction.RollbackAsync();
+
                     TempData["ErrorMessage"] =
                         "Exactly one saved result is required before verification.";
-                    return RedirectToAction(nameof(PendingVerification));
+
+                    return RedirectToAction(
+                        nameof(PendingVerification));
                 }
 
                 var result = results[0];
                 var now = DateTime.UtcNow;
+
+                // ==========================================
+                // 4. APPLY THE VERIFICATION DECISION
+                // ==========================================
 
                 if (decision == "Verify")
                 {
                     result.VerifiedByTechnicianId = verifierId;
                     result.VerifiedDateTime = now;
                     result.VerificationNotes = notes;
+
                     result.RequiresReview = false;
                     result.ReviewNotes = null;
+
                     test.Status = "Verified";
                 }
                 else
@@ -2461,62 +2541,153 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     result.VerifiedByTechnicianId = null;
                     result.VerifiedDateTime = null;
                     result.VerificationNotes = null;
+
                     result.RequiresReview = true;
                     result.ReviewNotes = notes;
+
                     test.Status = "To Be Reviewed";
                 }
+
+                // ==========================================
+                // 5. RECORD VERIFICATION HISTORY
+                // ==========================================
 
                 _context.TestResultVerificationHistories.Add(
                     new TestResultVerificationHistoryModel
                     {
                         TestResultId = result.TestResultId,
                         ActionByTechnicianId = verifierId,
-                        Action = decision == "Verify" ? "Verified" : "ReturnedForReview",
+
+                        Action = decision == "Verify"
+                            ? "Verified"
+                            : "ReturnedForReview",
+
                         Notes = notes,
                         ActionDateTime = now
                     });
 
-                // Save both the decision and its history atomically.
                 await _context.SaveChangesAsync();
 
-                // The final-delivery condition is ALL tests Verified, not merely Completed.
-                // Do NOT send email here until a reliable PDF/email workflow is integrated.
-                // A notification service/outbox should run after the transaction commits.
-                var allTestsVerified = decision == "Verify" &&
-                    !await _context.TestRequestTestTypes.AnyAsync(x =>
-                        x.TestRequestId == test.TestRequestId &&
-                        x.TestRequestTestTypeId != testRequestTestTypeId &&
-                        x.Status != "Verified");
+                // ==========================================
+                // 6. CHECK ALL TESTS ON THE REQUEST
+                // ==========================================
+
+                // A request is completed only when every
+                // requested test has been verified.
+
+                var allTestsVerified =
+                    decision == "Verify" &&
+                    !await _context.TestRequestTestTypes
+                        .AnyAsync(x =>
+                            x.TestRequestId == test.TestRequestId &&
+                            x.Status != "Verified");
+
+                // ==========================================
+                // 7. COMPLETE REQUEST AND QUEUE REPORT
+                // ==========================================
 
                 if (allTestsVerified && test.TestRequest != null)
                 {
-                    test.TestRequest.Status = TestRequestStatus.Completed.ToString();
+                    test.TestRequest.Status =
+                        TestRequestStatus.Completed.ToString();
+
+                    // Prevent duplicate outgoing email records.
+                    // The database also has a unique index
+                    // on TestRequestId.
+
+                    var alreadyQueued =
+                        await _context.TechnicianSentEmails
+                            .AnyAsync(x =>
+                                x.TestRequestId ==
+                                test.TestRequestId);
+
+                    if (!alreadyQueued)
+                    {
+                        var outgoingEmail =
+                            new TechnicianSentEmailModel
+                            {
+                                TestRequestId =
+                                    test.TestRequestId,
+
+                                // Resolved by the future delivery
+                                // service, not used for SMTP yet.
+                                RecipientEmail =
+                                    "Pending recipient resolution",
+
+                                Subject =
+                                    $"Laboratory Results - Request #{test.TestRequestId}",
+
+                                Body =
+                                    "Your verified laboratory results report is ready.",
+
+                                PdfFileName =
+                                    $"LaboratoryReport_{test.TestRequestId}.pdf",
+
+                                PdfAttachment = null,
+
+                                Status = "Pending",
+
+                                CreatedAt = now,
+
+                                SentAt = null,
+
+                                ErrorMessage = null
+                            };
+
+                        _context.TechnicianSentEmails.Add(
+                            outgoingEmail);
+                    }
                 }
-                else if (decision == "ReturnForReview" && test.TestRequest != null &&
-                         test.TestRequest.Status == TestRequestStatus.Completed.ToString())
+                else if (
+                    decision == "ReturnForReview" &&
+                    test.TestRequest != null &&
+                    test.TestRequest.Status ==
+                        TestRequestStatus.Completed.ToString())
                 {
-                    test.TestRequest.Status = TestRequestStatus.InProgress.ToString();
+                    test.TestRequest.Status =
+                        TestRequestStatus.InProgress.ToString();
                 }
+
+                // ==========================================
+                // 8. SAVE EVERYTHING ATOMICALLY
+                // ==========================================
 
                 await _context.SaveChangesAsync();
+
                 await transaction.CommitAsync();
 
-                TempData["SuccessMessage"] = decision == "Verify"
-                    ? (allTestsVerified
-                        ? "Test verified. All tests on this request are verified and the request is completed; doctor notification is still pending integration."
-                        : "Test result verified successfully.")
-                    : "Test result returned to the original technician for review.";
+                // ==========================================
+                // 9. DISPLAY SUCCESS MESSAGE
+                // ==========================================
 
-                return RedirectToAction(nameof(PendingVerification));
+                if (decision == "Verify")
+                {
+                    TempData["SuccessMessage"] =
+                        allTestsVerified
+                            ? "Test verified successfully. All tests on this request are verified. The laboratory report has been queued for delivery."
+                            : "Test result verified successfully.";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] =
+                        "Test result returned to the original technician for review.";
+                }
+
+                return RedirectToAction(
+                    nameof(PendingVerification));
             }
             catch (Exception)
             {
                 await transaction.RollbackAsync();
+
                 TempData["ErrorMessage"] =
                     "Verification could not be saved. Please try again.";
-                return RedirectToAction(nameof(PendingVerification));
+
+                return RedirectToAction(
+                    nameof(PendingVerification));
             }
         }
+
 
 
 

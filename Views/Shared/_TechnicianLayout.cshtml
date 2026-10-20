@@ -90,8 +90,8 @@
 
 
             /* =====================================================
-                                                                       APPLICATION
-                                                                       ===================================================== */
+                                                                                   APPLICATION
+                                                                                   ===================================================== */
 
             .technician-app {
                 min-height: 100vh;
@@ -99,8 +99,8 @@
 
 
             /* =====================================================
-                                                                       SIDEBAR
-                                                                       ===================================================== */
+                                                                                   SIDEBAR
+                                                                                   ===================================================== */
 
             .technician-sidebar {
                 position: fixed;
@@ -120,8 +120,8 @@
 
 
             /* =====================================================
-                                                                       LOGO
-                                                                       ===================================================== */
+                                                                                   LOGO
+                                                                                   ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -166,8 +166,8 @@
 
 
             /* =====================================================
-                                                                       SIDEBAR CONTROLS
-                                                                       ===================================================== */
+                                                                                   SIDEBAR CONTROLS
+                                                                                   ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -203,8 +203,8 @@
 
 
             /* =====================================================
-                                                                       TECHNICIAN USER
-                                                                       ===================================================== */
+                                                                                   TECHNICIAN USER
+                                                                                   ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -257,8 +257,8 @@
 
 
             /* =====================================================
-                                                                       NAVIGATION
-                                                                       ===================================================== */
+                                                                                   NAVIGATION
+                                                                                   ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
@@ -359,8 +359,8 @@
 
 
             /* =====================================================
-                                                                       PRIORITY BADGE
-                                                                       ===================================================== */
+                                                                                   PRIORITY BADGE
+                                                                                   ===================================================== */
 
             .sidebar-count {
                 min-width: 20px;
@@ -375,8 +375,8 @@
 
 
             /* =====================================================
-                                                                       SIDEBAR BOTTOM
-                                                                       ===================================================== */
+                                                                                   SIDEBAR BOTTOM
+                                                                                   ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
@@ -412,8 +412,8 @@
 
 
             /* =====================================================
-                                                                       MAIN CONTENT
-                                                                       ===================================================== */
+                                                                                   MAIN CONTENT
+                                                                                   ===================================================== */
 
             .technician-main {
                 min-height: 100vh;
@@ -423,8 +423,8 @@
 
 
             /* =====================================================
-                                                                       COLLAPSED DESKTOP SIDEBAR
-                                                                       ===================================================== */
+                                                                                   COLLAPSED DESKTOP SIDEBAR
+                                                                                   ===================================================== */
 
             body.sidebar-collapsed
             .technician-sidebar {
@@ -468,9 +468,9 @@
 
 
             /*
-                                                                     * Hide full-screen button while sidebar is collapsed.
-                                                                     * The arrow remains visible.
-                                                                     */
+                                                                                 * Hide full-screen button while sidebar is collapsed.
+                                                                                 * The arrow remains visible.
+                                                                                 */
             body.sidebar-collapsed
             #fullScreenToggle {
                 display: none;
@@ -576,10 +576,10 @@
 
 
             /* =====================================================
-                                                                       FULL WIDTH MODE
+                                                                                   FULL WIDTH MODE
 
-                                                                       Completely removes sidebar from view.
-                                                                       ===================================================== */
+                                                                                   Completely removes sidebar from view.
+                                                                                   ===================================================== */
 
             body.sidebar-hidden
             .technician-sidebar {
@@ -595,8 +595,8 @@
 
 
             /* =====================================================
-                                                                       FLOATING RESTORE BUTTON
-                                                                       ===================================================== */
+                                                                                   FLOATING RESTORE BUTTON
+                                                                                   ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -633,8 +633,8 @@
 
 
             /* =====================================================
-                                                                       MOBILE TOP BAR
-                                                                       ===================================================== */
+                                                                                   MOBILE TOP BAR
+                                                                                   ===================================================== */
 
             .technician-mobile-header {
                 display: none;
@@ -676,8 +676,8 @@
 
 
             /* =====================================================
-                                                                       MOBILE BACKDROP
-                                                                       ===================================================== */
+                                                                                   MOBILE BACKDROP
+                                                                                   ===================================================== */
 
             .sidebar-backdrop {
                 position: fixed;
@@ -689,8 +689,8 @@
 
 
             /* =====================================================
-                                                                       RESPONSIVE
-                                                                       ===================================================== */
+                                                                                   RESPONSIVE
+                                                                                   ===================================================== */
 
             @@media(max-width: 991.98px) {
 
@@ -721,16 +721,16 @@
                     display: flex;
                 }
                 /*
-                                                                         * Desktop control buttons are unnecessary
-                                                                         * on mobile.
-                                                                         */
+                                                                                     * Desktop control buttons are unnecessary
+                                                                                     * on mobile.
+                                                                                     */
                 .sidebar-controls {
                     display: none;
                 }
                 /*
-                                                                         * Cancel desktop collapsed styling
-                                                                         * when switching to mobile.
-                                                                         */
+                                                                                     * Cancel desktop collapsed styling
+                                                                                     * when switching to mobile.
+                                                                                     */
                 body.sidebar-collapsed
                 .technician-sidebar {
                     width: 265px;
@@ -854,9 +854,9 @@
                         display: block;
                     }
                 /*
-                                                                         * The desktop floating restore button
-                                                                         * isn't needed on mobile.
-                                                                         */
+                                                                                     * The desktop floating restore button
+                                                                                     * isn't needed on mobile.
+                                                                                     */
                 .sidebar-restore-btn {
                     display: none !important;
                 }
@@ -881,6 +881,90 @@
                 .technician-sidebar {
                     width: 280px;
                     max-width: 86vw;
+                }
+            }
+
+
+            /* Technician top toolbar and notification badge */
+            .technician-top-toolbar {
+                min-height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 12px;
+                padding: 10px 24px;
+                background: #fff;
+                border-bottom: 1px solid #e2e8f0;
+            }
+
+            .technician-notification-link {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+                color: #075985;
+                background: #f8fafc;
+                text-decoration: none;
+            }
+
+                .technician-notification-link:hover,
+                .technician-notification-link:focus-visible {
+                    color: #fff;
+                    background: #075985;
+                    text-decoration: none;
+                }
+
+            .technician-notification-badge {
+                position: absolute;
+                top: -7px;
+                right: -8px;
+                min-width: 19px;
+                padding: 2px 5px;
+                border-radius: 999px;
+                background: #dc2626;
+                color: white;
+                font-size: 10px;
+                font-weight: 700;
+                text-align: center;
+            }
+
+            .technician-toolbar-profile {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: #334155;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+                .technician-toolbar-profile:hover {
+                    color: #075985;
+                    text-decoration: none;
+                }
+
+            .technician-toolbar-avatar {
+                width: 34px;
+                height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: #075985;
+                color: #fff;
+            }
+
+            @@media (max-width: 575.98px) {
+                .technician-top-toolbar {
+                    padding: 8px 16px;
+                }
+
+                .technician-toolbar-name {
+                    display: none;
                 }
             }
 
@@ -1039,7 +1123,23 @@
                     </span>
 
                 </a>
+                <!-- ================= SENT EMAILS ================= -->
 
+                <a asp-area="Technician"
+                   asp-controller="SentEmails"
+                   asp-action="Index"
+                   title="Sent Emails"
+                   class="sidebar-link @(controller == "SentEmails" ? "active" : "")">
+
+                    <span class="sidebar-link-icon">
+                        <i class="fa-solid fa-envelope-circle-check"></i>
+                    </span>
+
+                    <span class="sidebar-link-text">
+                        Sent Emails
+                    </span>
+
+                </a>
 
 
                 <a href="/Technician/ReceiveSamples/Index"
@@ -1227,6 +1327,7 @@
                     <span class="sidebar-link-text">Nearing TAT</span>
                 </a>
 
+        
 
 
                 <!-- ================= REPORTS / ACCOUNT ================= -->
@@ -1430,6 +1531,26 @@
             <!-- =================================================
              PAGE CONTENT
              ================================================= -->
+            <!-- Shared technician toolbar: visible on every page -->
+            <div class="technician-top-toolbar">
+                <a href="/Technician/Notifications"
+                   class="technician-notification-link"
+                   title="My Notifications"
+                   aria-label="Open my notifications">
+                    <i class="fa-solid fa-bell" aria-hidden="true"></i>
+                    <span id="technicianNotificationCount"
+                          class="technician-notification-badge"
+                          style="display:none;"
+                          aria-live="polite">0</span>
+                </a>
+                <a href="/Technician/Profile/ProfileIndex"
+                   class="technician-toolbar-profile"
+                   title="My Profile">
+                    <span class="technician-toolbar-avatar" aria-hidden="true">@technicianInitial</span>
+                    <span class="technician-toolbar-name">@technicianName</span>
+                </a>
+            </div>
+
             @RenderBody()
 
 
@@ -1971,6 +2092,36 @@
     </script>
 
 
+
+    <script>
+            // Poll the existing NotificationsController.UnreadCount action.
+            document.addEventListener("DOMContentLoaded", function() {
+                const badge = document.getElementById("technicianNotificationCount");
+                if (!badge) return;
+
+                async function refreshTechnicianNotificationCount() {
+                    try {
+                        const response = await fetch("/Technician/Notifications/UnreadCount", {
+                            credentials: "same-origin",
+                            headers: { "Accept": "application/json" },
+                            cache: "no-store"
+                        });
+                        if (!response.ok) return;
+
+                        const data = await response.json();
+                        const count = Math.max(0, Number(data.count) || 0);
+                        badge.textContent = count > 99 ? "99+" : String(count);
+                        badge.style.display = count > 0 ? "inline-block" : "none";
+                        badge.setAttribute("aria-label", count + " unread notifications");
+                    } catch (error) {
+                        console.error("Unable to load notification count:", error);
+                    }
+                }
+
+                refreshTechnicianNotificationCount();
+                setInterval(refreshTechnicianNotificationCount, 30000);
+            });
+    </script>
 
     @await RenderSectionAsync(
         "Scripts",
