@@ -2568,6 +2568,39 @@ namespace NMBHLabSys.Migrations
                         });
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleDeactivationAuditModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DeactivatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("SampleId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TechnicianId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SampleId");
+
+                    b.HasIndex("TechnicianId");
+
+                    b.ToTable("SampleDeactivationAudits");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>
                 {
                     b.Property<int>("SampleId")
@@ -2583,6 +2616,17 @@ namespace NMBHLabSys.Migrations
 
                     b.Property<DateTime?>("DateReceived")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeactivatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeactivatedByTechnicianId")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("DeactivationReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -4388,6 +4432,25 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleDeactivationAuditModel", b =>
+                {
+                    b.HasOne("NMB_HLabSys.Areas.Technician.Models.SampleModel", "Sample")
+                        .WithMany()
+                        .HasForeignKey("SampleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "Technician")
+                        .WithMany()
+                        .HasForeignKey("TechnicianId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sample");
+
+                    b.Navigation("Technician");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Technician.Models.SampleModel", b =>

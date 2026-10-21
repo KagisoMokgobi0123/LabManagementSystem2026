@@ -100,7 +100,9 @@ namespace NMB_HLabSys.Data
         public DbSet<PatientDoctorConsentModel> PatientDoctorConsents { get; set; }
 
         public DbSet<ConsentRequestItemModel> ConsentRequestItems { get; set; }
-
+        public DbSet<SampleDeactivationAuditModel>
+    SampleDeactivationAudits
+        { get; set; }
 
         // ============================================================
         // ADMINISTRATOR
@@ -335,7 +337,21 @@ namespace NMB_HLabSys.Data
                 .WithMany()
                 .HasForeignKey(x => x.TestCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<SampleDeactivationAuditModel>(entity =>
+            {
+                entity.HasOne(a => a.Sample)
+                    .WithMany()
+                    .HasForeignKey(a => a.SampleId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(a => a.Technician)
+                    .WithMany()
+                    .HasForeignKey(a => a.TechnicianId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(a => a.SampleId);
+                entity.HasIndex(a => a.TechnicianId);
+            });
 
             // ============================================================
             // TEST TYPE -> SAMPLE TYPE

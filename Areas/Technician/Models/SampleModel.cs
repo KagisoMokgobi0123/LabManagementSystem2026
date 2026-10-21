@@ -98,5 +98,17 @@ namespace NMB_HLabSys.Areas.Technician.Models
         // ============================================================
 
         public bool IsDeleted { get; set; } = false;
+        // ============================================================
+        // SOFT DELETE AND DE-ACTIVATION AUDIT
+        // ============================================================
+
+        [StringLength(500)]
+        [Display(Name = "De-Activation Reason")]
+        public string? DeactivationReason { get; set; }
+
+        [StringLength(450)]
+        public string? DeactivatedByTechnicianId { get; set; }
+
+        public DateTime? DeactivatedAt { get; set; }
     }
 }

@@ -467,6 +467,94 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             }
         }
         // =========================================================
+        // POST - DE-ACTIVATE SAMPLE (SOFT DELETE + AUDIT TRAIL)
+        // POST: /Technician/ReceiveSamples/DeactivateSample
+        // =========================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateSample(int sampleId, string? reason)
+        {
+            if (sampleId <= 0)
+                return BadRequest(new { success = false, message = "Invalid sample selected." });
+
+            reason = reason?.Trim();
+            if (string.IsNullOrWhiteSpace(reason))
+                return BadRequest(new { success = false, message = "A de-activation reason is required." });
+
+            if (reason.Length > 500)
+                return BadRequest(new { success = false, message = "The reason must not exceed 500 characters." });
+
+            var technician = await _userManager.GetUserAsync(User);
+            if (technician == null)
+                return Unauthorized(new { success = false, message = "Your session has expired. Please sign in again." });
+
+            // Keep the sample update and audit entry atomic.
+            await using var transaction = await _context.Database.BeginTransactionAsync(
+                System.Data.IsolationLevel.Serializable);
+
+            try
+            {
+                var sample = await _context.Samples
+                    .Include(s => s.TestRequest)
+                    .FirstOrDefaultAsync(s => s.SampleId == sampleId);
+
+                if (sample == null)
+                    return NotFound(new { success = false, message = "Sample not found." });
+
+                if (sample.IsDeleted)
+                    return Conflict(new { success = false, message = "This sample has already been de-activated." });
+
+                if (sample.IsReceived)
+                    return Conflict(new { success = false, message = "Received samples cannot be de-activated from this page." });
+
+                if (sample.TestRequest == null ||
+                    sample.TestRequest.Status != TestRequestStatus.Submitted.ToString())
+                    return Conflict(new { success = false, message = "Only samples belonging to submitted requests can be de-activated." });
+
+                var now = DateTime.UtcNow;
+                sample.IsDeleted = true;
+                sample.DeactivationReason = reason;
+                sample.DeactivatedByTechnicianId = technician.Id;
+                sample.DeactivatedAt = now;
+
+                _context.SampleDeactivationAudits.Add(new SampleDeactivationAuditModel
+                {
+                    SampleId = sample.SampleId,
+                    TechnicianId = technician.Id,
+                    Reason = reason,
+                    DeactivatedAt = now
+                });
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Sample {sample.Barcode} was de-activated successfully. The reason was recorded in the audit trail."
+                });
+            }
+            catch (DbUpdateException)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "The sample could not be de-activated due to a database error."
+                });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "An unexpected error occurred while de-activating the sample."
+                });
+            }
+        }
+
+        // =========================================================
         // VERIFIED / RECEIVED SAMPLES
         // GET: /Technician/ReceiveSamples/VerifiedSamples
         // =========================================================
