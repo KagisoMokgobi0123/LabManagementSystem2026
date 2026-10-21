@@ -18,9 +18,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -31,9 +28,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -60,10 +54,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             });
         }
 
-
-        // ============================================================
-        // CREATE
-        // ============================================================
+=
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -77,9 +68,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateCategory(model);
 
 
-            // --------------------------------------------------------
             // DUPLICATE CATEGORY CHECK
-            // --------------------------------------------------------
 
             bool duplicateCategory =
                 await _context.TestCategories
@@ -104,9 +93,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // NEW ENTITY
-            // --------------------------------------------------------
 
             model.TestCategoryId = 0;
 
@@ -128,10 +114,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT
-        // ============================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -140,10 +122,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             model.Description =
                 model.Description?.Trim() ?? string.Empty;
 
-
-            // --------------------------------------------------------
             // FIND EXISTING CATEGORY
-            // --------------------------------------------------------
 
             var existing =
                 await _context.TestCategories
@@ -157,10 +136,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             await ValidateCategory(model);
 
-
-            // --------------------------------------------------------
             // DUPLICATE CATEGORY CHECK
-            // --------------------------------------------------------
 
             bool duplicateCategory =
                 await _context.TestCategories
@@ -187,11 +163,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return View("Index", categories);
             }
 
-
-            // --------------------------------------------------------
-            // UPDATE EDITABLE FIELDS
-            // --------------------------------------------------------
-
             existing.Description =
                 model.Description;
 
@@ -207,10 +178,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(Index));
         }
 
-
-        // ============================================================
-        // DELETE
-        // ============================================================
+        //soft delete
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -234,9 +202,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // TEST TYPES CHECK
-            // --------------------------------------------------------
 
             bool hasTestTypes =
                 await _context.TestTypes
@@ -254,9 +219,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SOFT DELETE
-            // --------------------------------------------------------
 
             category.IsActive =
                 TestCategoryModel.RecordStatus.Inactive;
@@ -273,16 +235,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // VALIDATION
-        // ============================================================
 
         private async Task ValidateCategory(
             TestCategoryModel model)
         {
-            // --------------------------------------------------------
-            // REQUIRED
-            // --------------------------------------------------------
+
 
             if (string.IsNullOrWhiteSpace(
                 model.Description))
@@ -293,10 +250,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // MAXIMUM LENGTH
-            // --------------------------------------------------------
-
+            // Max length
             if (model.Description.Length > 100)
             {
                 ModelState.AddModelError(
@@ -305,10 +259,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
-        // ============================================================
-        // LOAD ACTIVE CATEGORIES
-        // ============================================================
 
         private async Task<List<TestCategoryModel>>
             GetActiveCategories()

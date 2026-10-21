@@ -18,9 +18,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
+
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -31,9 +29,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -61,9 +56,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -77,9 +69,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateSampleType(model);
 
 
-            // --------------------------------------------------------
-            // DUPLICATE SAMPLE TYPE CHECK
-            // --------------------------------------------------------
+            // duplicate sample check
 
             bool duplicateSampleType =
                 await _context.SampleTypes
@@ -104,9 +94,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // NEW ENTITY
-            // --------------------------------------------------------
 
             model.SampleTypeId = 0;
 
@@ -127,10 +114,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT
-        // ============================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
@@ -140,9 +123,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.Name?.Trim() ?? string.Empty;
 
 
-            // --------------------------------------------------------
-            // FIND EXISTING SAMPLE TYPE
-            // --------------------------------------------------------
+            // Find Existing sample
 
             var existing =
                 await _context.SampleTypes
@@ -157,9 +138,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateSampleType(model);
 
 
-            // --------------------------------------------------------
-            // DUPLICATE SAMPLE TYPE CHECK
-            // --------------------------------------------------------
+            //duplicate Check
 
             bool duplicateSampleType =
                 await _context.SampleTypes
@@ -187,9 +166,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // UPDATE EDITABLE FIELDS
-            // --------------------------------------------------------
 
             existing.Name =
                 model.Name;
@@ -206,11 +182,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(Index));
         }
 
-
-        // ============================================================
-        // DELETE
-        // ============================================================
-
+//soft delete
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(
@@ -233,10 +205,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SAMPLES CHECK
-            // --------------------------------------------------------
-
             bool hasSamples =
                 await _context.Samples
                     .AnyAsync(s =>
@@ -253,10 +221,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SOFT DELETE
-            // --------------------------------------------------------
-
             sampleType.IsActive = false;
 
             await _context.SaveChangesAsync();
@@ -271,16 +235,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // VALIDATION
-        // ============================================================
+     
 
         private async Task ValidateSampleType(
             SampleTypeModel model)
         {
-            // --------------------------------------------------------
-            // REQUIRED
-            // --------------------------------------------------------
+
 
             if (string.IsNullOrWhiteSpace(
                 model.Name))
@@ -291,9 +251,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // MAXIMUM LENGTH
-            // --------------------------------------------------------
+            // max Length
 
             if (model.Name.Length > 100)
             {
@@ -303,10 +261,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
-        // ============================================================
-        // LOAD ACTIVE SAMPLE TYPES
-        // ============================================================
 
         private async Task<List<SampleTypeModel>>
             GetActiveSampleTypes()

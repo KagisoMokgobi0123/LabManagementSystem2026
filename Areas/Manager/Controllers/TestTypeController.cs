@@ -19,9 +19,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -35,9 +32,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -102,10 +96,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE
-        // ============================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -118,9 +108,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateTestType(model);
 
 
-            // --------------------------------------------------------
+
             // DUPLICATE TEST TYPE CHECK
-            // --------------------------------------------------------
 
             bool duplicateTestType =
                 await _context.TestTypes
@@ -136,10 +125,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // VALIDATION
-            // --------------------------------------------------------
-
             if (!ModelState.IsValid)
             {
                 await LoadDropdowns(model);
@@ -151,9 +136,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // NEW ENTITY
-            // --------------------------------------------------------
+ 
 
             model.TestTypeId = 0;
 
@@ -175,9 +158,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT
-        // ============================================================
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -188,9 +169,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.Name?.Trim() ?? string.Empty;
 
 
-            // --------------------------------------------------------
             // FIND EXISTING TEST TYPE
-            // --------------------------------------------------------
 
             var existing =
                 await _context.TestTypes
@@ -206,9 +185,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateTestType(model);
 
 
-            // --------------------------------------------------------
             // DUPLICATE TEST TYPE CHECK
-            // --------------------------------------------------------
 
             bool duplicateTestType =
                 await _context.TestTypes
@@ -228,9 +205,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // VALIDATION
-            // --------------------------------------------------------
 
             if (!ModelState.IsValid)
             {
@@ -243,9 +217,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // UPDATE EDITABLE FIELDS
-            // --------------------------------------------------------
+
 
             existing.Name =
                 model.Name;
@@ -281,9 +253,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DELETE / SOFT DELETE
-        // ============================================================
+       //Soft delete
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -306,9 +276,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // TECHNICIAN ASSIGNMENT CHECK
-            // --------------------------------------------------------
+            // Tech assign check
 
             bool hasTechnicians =
                 await _context.TechnicianTestTypes
@@ -326,9 +294,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SOFT DELETE
-            // --------------------------------------------------------
 
             testType.IsActive =
                 TestTypeModel.RecordStatus.Inactive;
@@ -346,16 +311,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // VALIDATION
-        // ============================================================
-
         private async Task ValidateTestType(
             TestTypeModel model)
         {
-            // --------------------------------------------------------
-            // TEST NAME
-            // --------------------------------------------------------
+
 
             if (string.IsNullOrWhiteSpace(model.Name))
             {
@@ -372,10 +331,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "Test name cannot exceed 150 characters.");
             }
 
-
-            // --------------------------------------------------------
-            // TEST CATEGORY
-            // --------------------------------------------------------
 
             if (model.TestCategoryId <= 0)
             {
@@ -404,10 +359,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SAMPLE TYPE
-            // --------------------------------------------------------
-
             if (model.SampleTypeId <= 0)
             {
                 ModelState.AddModelError(
@@ -434,10 +385,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // MEASUREMENT UNIT
-            // --------------------------------------------------------
-
             if (model.MeasurementUnit <= 0)
             {
                 ModelState.AddModelError(
@@ -462,10 +409,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // NORMAL RANGE
-            // --------------------------------------------------------
-
             if (model.NormalMin >
                 model.NormalMax)
             {
@@ -475,12 +418,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // TURNAROUND TIME
-            //
-            // Stored in minutes even though the property name
-            // remains TurnAroundTimeHours.
-            // --------------------------------------------------------
+
+            // Stored in minutes even though the property name remains TurnAroundTimeHours.
 
             if (model.TurnAroundTimeHours < 1)
             {
@@ -499,9 +438,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD ACTIVE TEST TYPES
-        // ============================================================
 
         private async Task<List<TestTypeModel>>
             GetActiveTestTypes()
@@ -530,26 +466,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD DROPDOWN DATA
-        // ============================================================
-        //
-        // IMPORTANT:
-        //
-        // TestCategoryModel uses RecordStatus.
-        // SampleTypeModel uses bool IsActive.
-        // MeasurementUnitModel DOES NOT have IsActive.
-        //
-        // Therefore the three queries intentionally use
-        // different status conditions.
-        // ============================================================
+
 
         private async Task LoadDropdowns(
             TestTypeModel? model = null)
         {
-            // --------------------------------------------------------
-            // TEST CATEGORIES
-            // --------------------------------------------------------
+
 
             var testCategories =
                 await _context.TestCategories
@@ -564,11 +486,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
                     .ToListAsync();
 
-
-            // --------------------------------------------------------
-            // SAMPLE TYPES
-            // --------------------------------------------------------
-
             var sampleTypes =
                 await _context.SampleTypes
 
@@ -582,13 +499,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToListAsync();
 
 
-            // --------------------------------------------------------
-            // MEASUREMENT UNITS
-            // --------------------------------------------------------
-            //
-            // MeasurementUnitModel has no IsActive property.
-            // Therefore all measurement units are loaded.
-            // --------------------------------------------------------
 
             var measurementUnits =
                 await _context.MeasurementUnits
@@ -600,9 +510,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToListAsync();
 
 
-            // --------------------------------------------------------
-            // SEND DATA TO VIEW
-            // --------------------------------------------------------
 
             ViewBag.TestCategories =
                 testCategories;
