@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using NMB_HLabSys.Areas.Technician.Models;
 using QuestPDF.Fluent;
@@ -21,211 +20,232 @@ namespace NMB_HLabSys.Services
             if (results == null || results.Count == 0)
             {
                 throw new InvalidOperationException(
-                    "Cannot generate a report without results.");
+                    "Cannot generate a laboratory report without results.");
             }
 
-            if (results.Any(r =>
-                !r.VerifiedDateTime.HasValue ||
-                string.IsNullOrWhiteSpace(
-                    r.VerifiedByTechnicianId) ||
-                r.RequiresReview))
-            {
-                throw new InvalidOperationException(
-                    "Cannot generate a report containing unverified results.");
-            }
+            var reportDate = DateTime.Now;
 
-            return Document.Create(container =>
+            var document = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4);
-                    page.Margin(30);
+                    page.Margin(35);
+                    page.DefaultTextStyle(x =>
+                        x.FontSize(10).FontColor(Colors.Grey.Darken3));
 
-                    page.DefaultTextStyle(x => x.FontSize(9));
-
+                    // ================================
                     // HEADER
+                    // ================================
                     page.Header().Column(column =>
                     {
-                        column.Item()
-                            .Text("NMB-HLabSys")
-                            .FontSize(20)
+                        column.Item().Text(
+                            "NMB HEALTH LABORATORY SYSTEM")
                             .Bold()
+                            .FontSize(19)
                             .FontColor(Colors.Blue.Darken3);
 
-                        column.Item()
-                            .Text("VERIFIED LABORATORY RESULTS")
+                        column.Item().PaddingTop(4).Text(
+                            "VERIFIED LABORATORY RESULTS REPORT")
+                            .SemiBold()
                             .FontSize(12)
-                            .Bold();
+                            .FontColor(Colors.Blue.Medium);
 
                         column.Item()
-                            .PaddingTop(8)
-                            .LineHorizontal(1);
+                            .PaddingTop(10)
+                            .LineHorizontal(1)
+                            .LineColor(Colors.Grey.Lighten1);
                     });
 
-                    // REPORT CONTENT
-                    page.Content()
-                        .PaddingVertical(15)
-                        .Column(column =>
-                        {
-                            column.Spacing(12);
+                    // ================================
+                    // MAIN CONTENT
+                    // ================================
+                    page.Content().PaddingVertical(20).Column(column =>
+                    {
+                        column.Spacing(15);
 
-                            column.Item().Text(
-                                $"Test Request: #{testRequestId}");
-
-                            column.Item().Text(
-                                $"Patient: {patientName}");
-
-                            column.Item().Text(
-                                $"Requesting Doctor: {doctorName}");
-
-                            column.Item().Text(
-                                $"Generated: {DateTime.UtcNow:dd MMM yyyy HH:mm} UTC");
-
-                            column.Item()
-                                .PaddingTop(10)
-                                .Text("LABORATORY RESULTS")
-                                .Bold()
-                                .FontSize(11);
-
-                            column.Item().Table(table =>
+                        // PATIENT AND REQUEST DETAILS
+                        column.Item()
+                            .Background(Colors.Grey.Lighten4)
+                            .Padding(14)
+                            .Column(info =>
                             {
-                                table.ColumnsDefinition(columns =>
-                                {
-                                    columns.RelativeColumn(3);
-                                    columns.RelativeColumn(2);
-                                    columns.RelativeColumn(1);
-                                    columns.RelativeColumn(2);
-                                    columns.RelativeColumn(1);
-                                });
+                                info.Spacing(6);
 
-                                table.Header(header =>
-                                {
-                                    header.Cell().Text("Test").Bold();
-                                    header.Cell().Text("Result").Bold();
-                                    header.Cell().Text("Unit").Bold();
-                                    header.Cell().Text("Reference").Bold();
-                                    header.Cell().Text("Flag").Bold();
-                                });
+                                info.Item().Text("REPORT INFORMATION")
+                                    .Bold()
+                                    .FontSize(11);
 
-                                foreach (var result in results)
-                                {
-                                    table.Cell().Text(
-                                        result.ResultName);
+                                info.Item().Text(
+                                    $"Request ID: {testRequestId}");
 
-                                    table.Cell().Text(
-                                        result.ResultValue);
+                                info.Item().Text(
+                                    $"Patient: {patientName}");
 
-                                    table.Cell().Text(
-                                        result.MeasurementUnit ?? "-");
+                                info.Item().Text(
+                                    $"Requesting Doctor: {doctorName}");
 
-                                    table.Cell().Text(
-                                        FormatReferenceRange(result));
-
-                                    table.Cell().Text(
-                                        result.ResultFlag);
-                                }
+                                info.Item().Text(
+                                    $"Report Generated: {reportDate:dd MMM yyyy HH:mm}");
                             });
 
-                            column.Item()
-                                .PaddingTop(12)
-                                .Text("VERIFICATION DETAILS")
-                                .Bold()
-                                .FontSize(11);
+                        // TEST RESULTS
+                        column.Item().Text("LABORATORY TEST RESULTS")
+                            .Bold()
+                            .FontSize(13)
+                            .FontColor(Colors.Blue.Darken3);
+
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(2.2f);
+                                columns.RelativeColumn(1.4f);
+                                columns.RelativeColumn(1.1f);
+                                columns.RelativeColumn(1.6f);
+                                columns.RelativeColumn(1.1f);
+                            });
+
+                            table.Header(header =>
+                            {
+                                void HeaderCell(string value)
+                                {
+                                    header.Cell()
+                                        .Background(Colors.Blue.Darken3)
+                                        .Padding(7)
+                                        .Text(value)
+                                        .Bold()
+                                        .FontSize(8)
+                                        .FontColor(Colors.White);
+                                }
+
+                                HeaderCell("Test / Result");
+                                HeaderCell("Value");
+                                HeaderCell("Unit");
+                                HeaderCell("Reference");
+                                HeaderCell("Flag");
+                            });
 
                             foreach (var result in results)
                             {
-                                column.Item().Column(detail =>
+                                var reference =
+                                    result.ReferenceMin.HasValue &&
+                                    result.ReferenceMax.HasValue
+                                        ? $"{result.ReferenceMin} - {result.ReferenceMax}"
+                                        : "N/A";
+
+                                var flag = !string.IsNullOrWhiteSpace(
+                                    result.ResultFlag)
+                                        ? result.ResultFlag
+                                        : result.IsAbnormal
+                                            ? "Abnormal"
+                                            : "Normal";
+
+                                var background = result.IsAbnormal
+                                    ? Colors.Red.Lighten5
+                                    : Colors.White;
+
+                                void ResultCell(string value)
                                 {
-                                    detail.Spacing(3);
+                                    table.Cell()
+                                        .Background(background)
+                                        .BorderBottom(0.5f)
+                                        .BorderColor(Colors.Grey.Lighten2)
+                                        .Padding(7)
+                                        .Text(value)
+                                        .FontSize(8);
+                                }
 
-                                    detail.Item()
-                                        .Text(result.ResultName)
-                                        .Bold();
+                                ResultCell(
+                                    result.ResultName ?? "Laboratory Result");
 
-                                    detail.Item().Text(
-                                        "Captured by: " +
-                                        FormatTechnicianName(
-                                            result.Technician));
+                                ResultCell(
+                                    result.ResultValue ?? "N/A");
 
-                                    detail.Item().Text(
-                                        "Verified by: " +
-                                        FormatTechnicianName(
-                                            result.VerifiedByTechnician));
+                                ResultCell(
+                                    result.MeasurementUnit ?? "-");
 
-                                    detail.Item().Text(
-                                        "Verified on: " +
-                                        result.VerifiedDateTime!
-                                            .Value.ToString(
-                                                "dd MMM yyyy HH:mm"));
+                                ResultCell(reference);
 
-                                    if (!string.IsNullOrWhiteSpace(
-                                        result.Notes))
-                                    {
-                                        detail.Item().Text(
-                                            "Technician Notes: " +
-                                            result.Notes);
-                                    }
-
-                                    if (!string.IsNullOrWhiteSpace(
-                                        result.VerificationNotes))
-                                    {
-                                        detail.Item().Text(
-                                            "Verification Notes: " +
-                                            result.VerificationNotes);
-                                    }
-                                });
+                                ResultCell(flag);
                             }
                         });
 
+                        // NOTES
+                        column.Item().Text("RESULT NOTES")
+                            .Bold()
+                            .FontSize(11)
+                            .FontColor(Colors.Blue.Darken3);
+
+                        foreach (var result in results)
+                        {
+                            if (!string.IsNullOrWhiteSpace(result.Notes))
+                            {
+                                column.Item().Text(
+                                    $"{result.ResultName}: {result.Notes}")
+                                    .FontSize(9);
+                            }
+                        }
+
+                        // VERIFICATION DETAILS
+                        column.Item().Text("VERIFICATION DETAILS")
+                            .Bold()
+                            .FontSize(11)
+                            .FontColor(Colors.Blue.Darken3);
+
+                        foreach (var result in results)
+                        {
+                            var verifier =
+                                result.VerifiedByTechnician?.FullName
+                                ?? result.VerifiedByTechnicianId
+                                ?? "Unknown";
+
+                            var verifiedDate =
+                                result.VerifiedDateTime.HasValue
+                                    ? result.VerifiedDateTime.Value
+                                        .ToString("dd MMM yyyy HH:mm")
+                                    : "Not recorded";
+
+                            column.Item().Text(
+                                $"{result.ResultName} — " +
+                                $"Verified by: {verifier} | " +
+                                $"Date: {verifiedDate}")
+                                .FontSize(9);
+                        }
+
+                        // DISCLAIMER
+                        column.Item()
+                            .PaddingTop(15)
+                            .LineHorizontal(1)
+                            .LineColor(Colors.Grey.Lighten2);
+
+                        column.Item().Text(
+                            "This report contains confidential medical " +
+                            "information intended only for the authorized " +
+                            "requesting healthcare professional.")
+                            .Italic()
+                            .FontSize(8)
+                            .FontColor(Colors.Grey.Darken1);
+                    });
+
+                    // ================================
                     // FOOTER
-                    page.Footer()
-                        .AlignCenter()
-                        .Text("CONFIDENTIAL LABORATORY REPORT")
-                        .FontSize(8);
+                    // ================================
+                    page.Footer().AlignCenter().Text(text =>
+                    {
+                        text.Span(
+                            "NMB Health Laboratory System | Page ");
+
+                        text.CurrentPageNumber();
+
+                        text.Span(" of ");
+
+                        text.TotalPages();
+                    });
                 });
-            }).GeneratePdf();
-        }
+            });
 
-        private static string FormatReferenceRange(
-            TestResultModel result)
-        {
-            var min = result.ReferenceMin;
-            var max = result.ReferenceMax;
-
-            if (min.HasValue && max.HasValue)
-            {
-                return
-                    $"{min.Value.ToString(CultureInfo.InvariantCulture)}" +
-                    $" - {max.Value.ToString(CultureInfo.InvariantCulture)}";
-            }
-
-            if (min.HasValue)
-            {
-                return
-                    $">= {min.Value.ToString(CultureInfo.InvariantCulture)}";
-            }
-
-            if (max.HasValue)
-            {
-                return
-                    $"<= {max.Value.ToString(CultureInfo.InvariantCulture)}";
-            }
-
-            return "Not provided";
-        }
-
-        private static string FormatTechnicianName(
-            NMB_HLabSys.Models.Identity.ApplicationUser? technician)
-        {
-            if (technician == null)
-                return "Not available";
-
-            var name =
-                $"{technician.FirstName} {technician.LastName}".Trim();
-
-            return string.IsNullOrWhiteSpace(name)
-                ? technician.UserName ?? "Not available"
-                : name;
+            return document.GeneratePdf();
         }
     }
 }

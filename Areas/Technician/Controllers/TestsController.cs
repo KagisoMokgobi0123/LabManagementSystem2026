@@ -2793,6 +2793,17 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     return NotFound();
                 }
 
+                // A deactivated test must never be verified.
+                if (test.IsDeleted)
+                {
+                    await transaction.RollbackAsync();
+
+                    TempData["ErrorMessage"] =
+                        "Deactivated tests cannot be verified.";
+
+                    return RedirectToAction(nameof(PendingVerification));
+                }
+
                 if (test.Status != "Completed")
                 {
                     await transaction.RollbackAsync();
@@ -2904,14 +2915,21 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 // 6. CHECK ALL TESTS ON THE REQUEST
                 // ==========================================
 
-                // A request is completed only when every
-                // requested test has been verified.
+                // A request is completed only when at least one active
+                // requested test exists and all active tests are verified.
+                // Soft-deactivated tests remain in the audit trail but do
+                // not block report generation.
 
                 var allTestsVerified =
                     decision == "Verify" &&
+                    await _context.TestRequestTestTypes
+                        .AnyAsync(x =>
+                            x.TestRequestId == test.TestRequestId &&
+                            !x.IsDeleted) &&
                     !await _context.TestRequestTestTypes
                         .AnyAsync(x =>
                             x.TestRequestId == test.TestRequestId &&
+                            !x.IsDeleted &&
                             x.Status != "Verified");
 
                 // ==========================================
