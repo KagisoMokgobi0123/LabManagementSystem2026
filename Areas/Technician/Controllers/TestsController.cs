@@ -996,6 +996,63 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
+        // Returned test soft-deactivation: assigned technician only; reason and audit required.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateReviewTest(int testRequestTestTypeId, string? reason)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Unauthorized(new { success = false, message = "Please sign in again." });
+
+            reason = reason?.Trim();
+            if (testRequestTestTypeId <= 0 || string.IsNullOrWhiteSpace(reason) || reason.Length > 500)
+                return BadRequest(new { success = false, message = "Enter a reason of 1–500 characters." });
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(t => t.TestRequest)
+                    .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == testRequestTestTypeId);
+
+                if (test == null || test.TechnicianId != technicianId)
+                    return NotFound(new { success = false, message = "Your returned test was not found." });
+                if (test.IsDeleted)
+                    return Conflict(new { success = false, message = "Test is already de-activated." });
+                if (test.Status != "To Be Reviewed")
+                    return Conflict(new { success = false, message = "Only tests returned to you for correction may be de-activated here." });
+                if (test.TestRequest == null || test.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                    return BadRequest(new { success = false, message = "This test is not eligible for de-activation." });
+
+                var now = DateTime.UtcNow;
+                test.IsDeleted = true;
+                test.DeactivationReason = reason;
+                test.DeactivatedByTechnicianId = technicianId;
+                test.DeactivatedAt = now;
+                _context.Set<RequestedTestDeactivationAuditModel>().Add(new RequestedTestDeactivationAuditModel
+                {
+                    TestRequestTestTypeId = test.TestRequestTestTypeId,
+                    TechnicianId = technicianId,
+                    Reason = reason,
+                    DeactivatedAt = now
+                });
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Json(new { success = true, message = "Test de-activated and audit recorded." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
+                return Conflict(new { success = false, message = "Test changed while processing. Refresh and try again." });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { success = false, message = "Unable to de-activate the test." });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> Review()
         {
@@ -1483,6 +1540,92 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             );
         }
 
+
+        // Save corrections from the AJAX Edit Laboratory Result modal.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditResult(int id, string resultValue, string? notes)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Unauthorized(new { success = false, message = "Please sign in again." });
+
+            resultValue = resultValue?.Trim() ?? string.Empty;
+            notes = notes?.Trim();
+            if (id <= 0 || string.IsNullOrWhiteSpace(resultValue) ||
+                resultValue.Length > 200 || (notes?.Length ?? 0) > 2000)
+                return BadRequest(new { success = false, message = "Enter a result (up to 200 characters) and notes (up to 2000 characters)." });
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var result = await _context.TestResults
+                    .Include(r => r.TestRequestTestType)
+                        .ThenInclude(t => t!.TestType)
+                    .FirstOrDefaultAsync(r => r.TestResultId == id);
+
+                if (result == null) return NotFound(new { success = false, message = "Result not found." });
+                var test = result.TestRequestTestType;
+                if (result.TechnicianId != technicianId || test?.TechnicianId != technicianId)
+                    return StatusCode(403, new { success = false, message = "Only the capturing technician may edit this result." });
+                if (test.IsDeleted || result.VerifiedDateTime.HasValue ||
+                    !string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) ||
+                    (test.Status != "In Progress" && test.Status != "To Be Reviewed"))
+                    return Conflict(new { success = false, message = "This result is locked or not eligible for correction." });
+
+                var previousValue = result.ResultValue;
+                var previousNotes = result.Notes;
+                if (previousValue == resultValue && previousNotes == notes)
+                    return Json(new { success = true, message = "No changes were necessary." });
+
+                // Recalculate the clinical flag when the corrected value is numeric.
+                var min = result.ReferenceMin;
+                var max = result.ReferenceMax;
+                if (min == 0m && max == 0m) { min = null; max = null; }
+                bool abnormal = false;
+                string flag = "Not Evaluated";
+                if (decimal.TryParse(resultValue, System.Globalization.NumberStyles.Number,
+                    System.Globalization.CultureInfo.CurrentCulture, out var numericValue))
+                {
+                    if (min.HasValue && numericValue < min.Value) { abnormal = true; flag = "Low"; }
+                    else if (max.HasValue && numericValue > max.Value) { abnormal = true; flag = "High"; }
+                    else if (min.HasValue || max.HasValue) flag = "Normal";
+                }
+
+                var oldFlag = result.ResultFlag;
+                var oldAbnormal = result.IsAbnormal;
+                result.ResultValue = resultValue;
+                result.Notes = notes;
+                result.ResultFlag = flag;
+                result.IsAbnormal = abnormal;
+                result.CapturedDateTime = DateTime.UtcNow;
+                RecordResultHistory(result, technicianId, "Corrected",
+                    "Result corrected using Edit Laboratory Result modal.", previousValue, resultValue);
+                // Preserve the detailed audit fields used by the capture workflow.
+                var history = _context.ChangeTracker.Entries<TestResultVerificationHistoryModel>()
+                    .Last().Entity;
+                history.PreviousResultNotes = previousNotes;
+                history.NewResultNotes = notes;
+                history.PreviousResultFlag = oldFlag;
+                history.NewResultFlag = flag;
+                history.PreviousIsAbnormal = oldAbnormal;
+                history.NewIsAbnormal = abnormal;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Json(new { success = true, message = "Laboratory result updated and audit history recorded." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
+                return Conflict(new { success = false, message = "Result changed by another user. Reload and try again." });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { success = false, message = "Unable to save the result. Check the server logs." });
+            }
+        }
 
         [HttpGet]
         [Authorize(Roles = "LabTechnician")]
@@ -2469,7 +2612,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
         [HttpGet]
 
-        [HttpGet]
         public async Task<IActionResult> VerificationTimelineModal(int id)
         {
             // 1. Identify the logged-in technician.

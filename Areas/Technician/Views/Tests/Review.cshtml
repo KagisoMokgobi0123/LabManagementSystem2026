@@ -7,8 +7,8 @@
 
     var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
     var total = tests.Count;
-    var pendingVerificationCount = tests.Count(t => t.Status == "Completed");
-    var returnedCount = tests.Count(t => t.Status == "To Be Reviewed");
+    var pendingVerificationCount = tests.Count(t => t.Status == "Completed" && !t.IsDeleted);
+    var returnedCount = tests.Count(t => t.Status == "To Be Reviewed" && !t.IsDeleted);
     var savedResults = ViewData["SavedResults"] as IEnumerable<NMB_HLabSys.Areas.Technician.Models.TestResultModel>
         ?? Enumerable.Empty<NMB_HLabSys.Areas.Technician.Models.TestResultModel>();
     var resultByTest = savedResults.GroupBy(r => r.TestRequestTestTypeId)
@@ -239,10 +239,31 @@
             border-color: #f59e0b;
         }
 
+    .review-action.view { background: #0e7490; }
+    .review-action.deactivate { background: #b91c1c; border: 0; cursor: pointer; }
+    .review-action.deactivate:hover { background: #991b1b; }
+    .review-action:disabled { opacity: .6; cursor: not-allowed; }
     .review-actions {
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        gap: 9px;
+        min-width: 145px;
+    }
+
+    .review-actions .review-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 39px;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    .review-actions .review-status {
+        text-align: center;
     }
 
     .review-action.verify {
@@ -378,6 +399,7 @@
                                 resultByTest.TryGetValue(test.TestRequestTestTypeId, out var savedResult);
                                 var feedback = savedResult?.ReviewNotes;
                                 var isCompleted = test.Status == "Completed";
+                                var isDeactivated = test.IsDeleted;
                                 var urgency = test.TestRequest?.Urgency.ToString() ?? "Not specified";
                                 var urgencyClass = urgency.Trim().ToLowerInvariant().Replace(" ", "-");
                                 var searchText = $"{test.TestRequest?.RequestNumber} {test.TestType?.Name} {test.TestType?.TestCategory?.Description} {urgency} {feedback} {test.Status}";
@@ -392,7 +414,7 @@
                                     </td>
                                     <td><span class="review-urgency review-urgency-@urgencyClass">@urgency</span></td>
                                     <td>@(test.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not started")</td>
-                                    <td><span class="review-status @(isCompleted ? "completed" : "returned")">@test.Status</span></td>
+                                    <td><span class="review-status @(isDeactivated ? "returned" : (isCompleted ? "completed" : "returned"))">@(isDeactivated ? "De-Activated" : test.Status)</span></td>
                                     <td>
                                         <div class="review-note @(string.IsNullOrWhiteSpace(feedback) ? "missing" : "")">
                                             @(isCompleted ? "Awaiting independent verification." : (string.IsNullOrWhiteSpace(feedback) ? "No verifier note recorded. Check the history." : feedback))
@@ -400,7 +422,23 @@
                                     </td>
                                     <td>
                                         <div class="review-actions">
-                                            @if (isCompleted)
+                                            <button type="button" class="review-action view js-view-review"
+                                                    data-request="@(test.TestRequest?.RequestNumber ?? "N/A")"
+                                                    data-test="@(test.TestType?.Name ?? "Unknown test")"
+                                                    data-category="@(test.TestType?.TestCategory?.Description ?? "N/A")"
+                                                    data-urgency="@urgency"
+                                                    data-status="@(isDeactivated ? "De-Activated" : test.Status)"
+                                                    data-started="@(test.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not started")"
+                                                    data-feedback="@(feedback ?? "No verifier feedback recorded")"
+                                                    data-result="@(savedResult?.ResultValue ?? "No result recorded")"
+                                                    data-notes="@(savedResult?.Notes ?? "No notes recorded")">
+                                                <i class="fas fa-eye mr-1"></i> View
+                                            </button>
+                                            @if (isDeactivated)
+                                            {
+                                                <span class="review-status returned">De-Activated</span>
+                                            }
+                                            else if (isCompleted)
                                             {
                                                 <button type="button" class="review-action verify js-open-verify"
                                                         data-url="@Url.Action("VerifyTestModal", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">
@@ -414,8 +452,16 @@
                                                     <i class="fas fa-edit mr-1"></i> Correct Result
                                                 </button>
                                             }
-                                            <a class="review-action secondary" asp-area="Technician" asp-controller="Tests"
-                                               asp-action="VerificationHistory" asp-route-id="@test.TestRequestTestTypeId">
+                                            @if (!isCompleted && !isDeactivated)
+                                            {
+                                                <button type="button" class="review-action deactivate js-review-deactivate"
+                                                        data-id="@test.TestRequestTestTypeId"
+                                                        data-test="@(test.TestType?.Name ?? "Test")">
+                                                    <i class="fas fa-ban mr-1"></i> De-Activate
+                                                </button>
+                                            }
+                                            <a class="review-action secondary"
+                                               href="@Url.Action("VerificationHistory", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">
                                                 <i class="fas fa-history mr-1"></i> Full History
                                             </a>
                                         </div>
@@ -434,6 +480,53 @@
     </div>
 </div>
 
+<div class="modal fade" id="reviewDetailsModal" tabindex="-1" role="dialog" aria-labelledby="reviewDetailsTitle" aria-hidden="true">
+ <div class="modal-dialog modal-lg modal-dialog-centered" role="document"><div class="modal-content">
+  <div class="modal-header" style="background:#176ab0;color:white"><h5 class="modal-title" id="reviewDetailsTitle">Test Details</h5><button type="button" class="close text-white js-close-review-dialog" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+  <div class="modal-body"><dl class="row mb-0">
+   <dt class="col-sm-4">Request</dt><dd class="col-sm-8" id="rvRequest"></dd>
+   <dt class="col-sm-4">Test</dt><dd class="col-sm-8" id="rvTest"></dd>
+   <dt class="col-sm-4">Category</dt><dd class="col-sm-8" id="rvCategory"></dd>
+   <dt class="col-sm-4">Urgency</dt><dd class="col-sm-8" id="rvUrgency"></dd>
+   <dt class="col-sm-4">Status</dt><dd class="col-sm-8" id="rvStatus"></dd>
+   <dt class="col-sm-4">Started</dt><dd class="col-sm-8" id="rvStarted"></dd>
+   <dt class="col-sm-4">Result</dt><dd class="col-sm-8" id="rvResult"></dd>
+   <dt class="col-sm-4">Result notes</dt><dd class="col-sm-8" id="rvNotes" style="white-space:pre-wrap"></dd>
+   <dt class="col-sm-4">Verifier feedback</dt><dd class="col-sm-8" id="rvFeedback" style="white-space:pre-wrap"></dd>
+  </dl></div>
+  <div class="modal-footer"><button type="button" class="btn btn-secondary js-close-review-dialog">Close</button></div>
+ </div></div>
+</div>
+<div class="modal fade" id="reviewDeactivateModal" tabindex="-1" role="dialog" aria-labelledby="reviewDeactivateTitle" aria-hidden="true">
+ <div class="modal-dialog modal-dialog-centered" role="document"><div class="modal-content">
+  <div class="modal-header bg-danger text-white"><h5 class="modal-title" id="reviewDeactivateTitle">De-Activate Returned Test</h5><button type="button" class="close text-white js-close-review-dialog" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>
+  <form id="reviewDeactivateForm" action="@Url.Action("DeactivateReviewTest", "Tests", new { area = "Technician" })" method="post">
+   @Html.AntiForgeryToken()
+   <input type="hidden" name="testRequestTestTypeId" id="reviewDeactivateId" />
+   <div class="modal-body"><p id="reviewDeactivateName"></p><label for="reviewDeactivateReason">Reason for de-activation <span class="text-danger">*</span></label><textarea id="reviewDeactivateReason" name="reason" class="form-control" maxlength="500" rows="3" required></textarea><small class="text-muted">This action is recorded in the audit trail. Only your returned tests can be de-activated.</small><div class="alert alert-danger mt-3 d-none" id="reviewDeactivateError" role="alert"></div></div>
+   <div class="modal-footer"><button type="button" class="btn btn-light js-close-review-dialog">Cancel</button><button type="submit" class="btn btn-danger" id="reviewDeactivateSubmit">De-Activate</button></div>
+  </form>
+ </div></div>
+</div>
+<script>
+(function(){
+ function showModal(el){ if(window.bootstrap?.Modal){bootstrap.Modal.getOrCreateInstance(el).show();}else if(window.jQuery?.fn?.modal){window.jQuery(el).modal('show');}else{el.style.display='block';el.classList.add('show');el.removeAttribute('aria-hidden');document.body.classList.add('modal-open');} }
+ function hideModal(el){if(window.bootstrap?.Modal){bootstrap.Modal.getOrCreateInstance(el).hide();}else if(window.jQuery?.fn?.modal){window.jQuery(el).modal('hide');}else{el.style.display='none';el.classList.remove('show');el.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');}}
+ document.addEventListener('click',function(e){
+  const view=e.target.closest('.js-view-review');
+  if(view){e.preventDefault();const fields={rvRequest:'request',rvTest:'test',rvCategory:'category',rvUrgency:'urgency',rvStatus:'status',rvStarted:'started',rvResult:'result',rvNotes:'notes',rvFeedback:'feedback'};Object.entries(fields).forEach(([id,key])=>document.getElementById(id).textContent=view.dataset[key]||'—');showModal(document.getElementById('reviewDetailsModal'));return;}
+  const deactivate=e.target.closest('.js-review-deactivate');
+  if(deactivate){e.preventDefault();document.getElementById('reviewDeactivateId').value=deactivate.dataset.id;document.getElementById('reviewDeactivateName').textContent='De-activate '+(deactivate.dataset.test||'this test')+'?';document.getElementById('reviewDeactivateReason').value='';document.getElementById('reviewDeactivateError').classList.add('d-none');showModal(document.getElementById('reviewDeactivateModal'));return;}
+  const close=e.target.closest('.js-close-review-dialog');if(close){e.preventDefault();hideModal(close.closest('.modal'));}
+ });
+ document.getElementById('reviewDeactivateForm').addEventListener('submit',async function(e){
+  e.preventDefault();const form=this;const reason=document.getElementById('reviewDeactivateReason');if(!reason.value.trim()){reason.focus();return;}
+  const submit=document.getElementById('reviewDeactivateSubmit');const error=document.getElementById('reviewDeactivateError');submit.disabled=true;error.classList.add('d-none');
+  try{const response=await fetch(form.action,{method:'POST',body:new FormData(form),credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'}});const body=await response.json().catch(()=>null);if(!response.ok||!body?.success)throw new Error(body?.message||'De-activation failed (HTTP '+response.status+').');window.location.reload();}
+  catch(ex){error.textContent=ex.message;error.classList.remove('d-none');submit.disabled=false;}
+ });
+})();
+</script>
 <div id="verifyModalHost"></div>
 <div id="correctionModalHost"></div>
 
