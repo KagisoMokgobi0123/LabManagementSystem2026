@@ -691,9 +691,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                       category.TotalTests * 100;
             }
 
-            // --------------------------------------------------------
-            // TOP CATEGORIES FOR THE CHART
-            // --------------------------------------------------------
+           
 
             var topCategories = categoryTotals
                 .Take(TopCategoryLimit)

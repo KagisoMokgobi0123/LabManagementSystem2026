@@ -17,10 +17,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             _context = context;
         }
 
-
-        // ============================================================
-        // INDEX
-        // ============================================================
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -36,9 +32,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
 
 
-        // ============================================================
-        // DETAILS - POPUP
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -57,9 +50,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE - POPUP
-        // ============================================================
 
         [HttpGet]
         public IActionResult Create()
@@ -68,9 +58,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE - POST
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -134,10 +121,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT - POPUP
-        // ============================================================
-
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
@@ -156,9 +139,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT - POST
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -251,10 +231,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DELETE - POPUP
-        // ============================================================
-
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -272,10 +248,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             return PartialView("_Delete", supplier);
         }
 
-
-        // ============================================================
-        // DELETE - SOFT DELETE
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -300,7 +272,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Do not allow deletion when active consumables
+            // Does not allow deletion when active consumables
             // reference this supplier.
             bool hasActiveConsumables =
                 await _context.Consumables
@@ -336,10 +308,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // VALIDATION
-        // ============================================================
-
         private async Task ValidateSupplier(
             SupplierModel model)
         {
@@ -362,7 +330,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Contact person is optional, but if supplied,
+
             // remove unnecessary whitespace through trimming above.
             if (model.ContactPerson.Length > 150)
             {
@@ -372,7 +340,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // Email is optional, but if supplied it must be valid.
             if (!string.IsNullOrWhiteSpace(model.Email))
             {
                 var emailAttribute =
@@ -399,9 +366,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD ACTIVE SUPPLIERS
-        // ============================================================
+
 
         private async Task<List<SupplierModel>>
             GetActiveSuppliers()

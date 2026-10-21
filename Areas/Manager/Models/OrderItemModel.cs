@@ -14,48 +14,25 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [ForeignKey(nameof(OrderId))]
         public virtual OrderModel? Order { get; set; }
 
-
-        // ============================================================
-        // CONSUMABLE
-        // ============================================================
-
         [Required]
         public int ConsumableId { get; set; }
 
         [ForeignKey(nameof(ConsumableId))]
         public virtual ConsumableModel? Consumable { get; set; }
 
-
-        // ============================================================
-        // QUANTITY
-        // ============================================================
-
         [Required]
         [Range(1, int.MaxValue)]
         [Display(Name = "Quantity Ordered")]
         public int QuantityOrdered { get; set; }
-
-
-        // ============================================================
-        // ITEM STATUS
-        // ============================================================
 
         [Required]
         [Display(Name = "Item Status")]
         public OrderItemStatus Status { get; set; } = OrderItemStatus.Ordered;
 
 
-        // ============================================================
-        // RECEIVED
-        // ============================================================
-
         [Display(Name = "Date Received")]
         public DateTime? DateReceived { get; set; }
 
-
-        // ============================================================
-        // CANCELLATION
-        // ============================================================
 
         [StringLength(500)]
         [Display(Name = "Cancellation Reason")]

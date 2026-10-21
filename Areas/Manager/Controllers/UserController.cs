@@ -40,9 +40,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -53,13 +50,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // GET EDIT DOCTOR
-        // ============================================================
-        // Editing is performed inside Index.cshtml using a modal.
-        // This action exists only to prevent a 404 if the URL is
-        // accessed directly.
-        // ============================================================
+ 
 
         [HttpGet]
         public IActionResult EditDoctor()
@@ -67,25 +58,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-        // ============================================================
-        // GET EDIT TECHNICIAN
-        // ============================================================
-        // Editing is performed inside Index.cshtml using a modal.
-        // This action exists only to prevent a 404 if the URL is
-        // accessed directly.
-        // ============================================================
-
         [HttpGet]
         public IActionResult EditTechnician()
         {
             return RedirectToAction(nameof(Index));
         }
-
-
-        // ============================================================
-        // DOCTOR DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> DoctorDetails(string id)
@@ -147,11 +124,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
             });
         }
-
-
-        // ============================================================
-        // TECHNICIAN DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> TechnicianDetails(string id)
@@ -216,9 +188,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE DOCTOR
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -352,9 +321,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE TECHNICIAN
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -494,9 +460,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT DOCTOR
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -504,14 +467,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             string UserId,
             CreateDoctorViewModel model)
         {
-            // IMPORTANT:
-            // The Index.cshtml form sends:
-            //
-            // <input type="hidden"
-            //        id="UserId"
-            //        name="UserId" />
-            //
-            // Therefore this action receives UserId directly.
 
             UserId =
                 UserId?.Trim() ?? string.Empty;
@@ -533,10 +488,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.PhoneNumber?.Trim() ?? string.Empty;
 
 
-            // --------------------------------------------------------
-            // USER ID VALIDATION
-            // --------------------------------------------------------
-
             if (string.IsNullOrWhiteSpace(UserId))
             {
                 TempData["ErrorMessage"] =
@@ -547,9 +498,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // FIND DOCTOR
-            // --------------------------------------------------------
+
 
             var doctor =
                 await _context.DoctorProfiles
@@ -569,9 +518,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // VALIDATION
-            // --------------------------------------------------------
 
             await ValidateDoctor(
                 model,
@@ -590,9 +536,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 doctor.User;
 
 
-            // --------------------------------------------------------
-            // UPDATE APPLICATION USER
-            // --------------------------------------------------------
 
             user.FirstName =
                 model.FirstName;
@@ -610,17 +553,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.PhoneNumber;
 
 
-            // --------------------------------------------------------
-            // UPDATE DOCTOR PROFILE
-            // --------------------------------------------------------
+
 
             doctor.HPCSANumber =
                 model.HPCSANumber;
 
 
-            // --------------------------------------------------------
-            // SAVE USER
-            // --------------------------------------------------------
 
             var updateResult =
                 await _userManager.UpdateAsync(user);
@@ -636,9 +574,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SAVE PROFILE
-            // --------------------------------------------------------
 
             await _context.SaveChangesAsync();
 
@@ -652,9 +587,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT TECHNICIAN
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -662,14 +594,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             string UserId,
             CreateTechnicianViewModel model)
         {
-            // IMPORTANT:
-            // The Index.cshtml form sends:
-            //
-            // <input type="hidden"
-            //        id="UserId"
-            //        name="UserId" />
-            //
-            // Therefore this action receives UserId directly.
+
 
             UserId =
                 UserId?.Trim() ?? string.Empty;
@@ -694,9 +619,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.PhoneNumber?.Trim() ?? string.Empty;
 
 
-            // --------------------------------------------------------
-            // USER ID VALIDATION
-            // --------------------------------------------------------
 
             if (string.IsNullOrWhiteSpace(UserId))
             {
@@ -708,9 +630,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // FIND TECHNICIAN
-            // --------------------------------------------------------
 
             var technician =
                 await _context.TechnicianProfiles
@@ -730,9 +649,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // VALIDATION
-            // --------------------------------------------------------
 
             await ValidateTechnician(
                 model,
@@ -751,9 +667,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 technician.User;
 
 
-            // --------------------------------------------------------
-            // UPDATE APPLICATION USER
-            // --------------------------------------------------------
+
 
             user.FirstName =
                 model.FirstName;
@@ -771,9 +685,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.PhoneNumber;
 
 
-            // --------------------------------------------------------
-            // UPDATE TECHNICIAN PROFILE
-            // --------------------------------------------------------
 
             technician.IdNumber =
                 model.IdNumber;
@@ -782,9 +693,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.EmployeeNumber;
 
 
-            // --------------------------------------------------------
-            // SAVE USER
-            // --------------------------------------------------------
 
             var updateResult =
                 await _userManager.UpdateAsync(user);
@@ -800,10 +708,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SAVE PROFILE
-            // --------------------------------------------------------
-
             await _context.SaveChangesAsync();
 
 
@@ -815,10 +719,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(Index));
         }
 
-
-        // ============================================================
-        // DELETE / SOFT DELETE
-        // ============================================================
+//soft delte
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -876,9 +777,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // REACTIVATE
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -936,9 +834,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // VALIDATE DOCTOR
-        // ============================================================
+
 
         private async Task ValidateDoctor(
             CreateDoctorViewModel model,
@@ -1018,10 +914,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
-        // ============================================================
-        // VALIDATE TECHNICIAN
-        // ============================================================
 
         private async Task ValidateTechnician(
             CreateTechnicianViewModel model,
@@ -1130,10 +1022,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD USERS
-        // ============================================================
-
         private async Task LoadUsers()
         {
             ViewBag.Doctors =
@@ -1144,9 +1032,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD ACTIVE DOCTORS
-        // ============================================================
+
 
         private async Task<List<DoctorProfile>>
             GetActiveDoctors()
@@ -1165,9 +1051,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD ACTIVE TECHNICIANS
-        // ============================================================
+
 
         private async Task<List<TechnicianProfile>>
             GetActiveTechnicians()
@@ -1186,9 +1070,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // ENSURE ROLE EXISTS
-        // ============================================================
 
         private async Task EnsureRoleExists(
             string roleName)
@@ -1219,9 +1100,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // GENERATE TEMPORARY PASSWORD
-        // ============================================================
 
         private string GenerateTemporaryPassword()
         {
@@ -1271,10 +1149,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // RANDOM CHARACTER
-        // ============================================================
-
         private char GetRandomCharacter(
             string characters)
         {
@@ -1286,9 +1160,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // SEND TEMPORARY PASSWORD EMAIL
-        // ============================================================
 
         private async Task SendTemporaryPasswordEmail(
             ApplicationUser user,
@@ -1350,10 +1221,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 body);
         }
 
-
-        // ============================================================
-        // ADD IDENTITY ERRORS
-        // ============================================================
 
         private void AddIdentityErrors(
             IdentityResult result)
