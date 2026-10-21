@@ -8,11 +8,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Key]
         public int OrderItemId { get; set; }
 
-
-        // ============================================================
-        // ORDER
-        // ============================================================
-
         [Required]
         public int OrderId { get; set; }
 

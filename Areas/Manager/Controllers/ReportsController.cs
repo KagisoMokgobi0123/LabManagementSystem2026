@@ -35,10 +35,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
-
         [HttpGet]
         public async Task<IActionResult> Index(
             DateTime? startDate,
@@ -66,9 +62,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // REPORT DATA FOR THE GRAPH
-        // ============================================================
+        // A small visual representation of the relationship between test processed and categories.
 
         [HttpGet]
         public async Task<IActionResult> GetReportData(
@@ -104,14 +98,12 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // GENERATE PDF
-        // ============================================================
+        // To be printed report, in a PDF format
         [HttpGet]
-        public async Task<IActionResult> GeneratePdf(
-    DateTime startDate,
-    DateTime endDate)
+        public async Task<IActionResult> GeneratePdf(DateTime startDate, DateTime endDate)
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+
             if (startDate == default ||
                 endDate == default ||
                 startDate.Date > endDate.Date)
@@ -122,250 +114,518 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var report = await BuildReportData(
-                startDate.Date,
-                endDate.Date);
+      
+
+            var managerName = currentUser?.FullName ?? "Unknown Manager";
+
+            var managerEmail = currentUser?.Email ?? "No email available";
+
+            var report = await BuildReportData(startDate.Date,endDate.Date);
 
             var totalTrackedTests =
                 report.TotalCompletedTests + report.TotalInProgressTests;
+
+            var logoPath = Path.Combine(Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "assets","img",
+                "logo.png");
+
 
             var pdf = Document.Create(document =>
             {
                 document.Page(page =>
                 {
                     page.Size(PageSizes.A4);
-                    page.Margin(35);
 
-                    // Use Lato because it is registered in your application.
+                    page.MarginTop(25);
+                    page.MarginBottom(30);
+                    page.MarginLeft(35);
+                    page.MarginRight(35);
+
                     page.DefaultTextStyle(x =>
-                        x.FontFamily("Lato").FontSize(9));
+                        x.FontFamily("Lato")
+                         .FontSize(9)
+                         .FontColor(Colors.Grey.Darken3));
 
-                    // HEADER
-                    page.Header().Column(column =>
-                    {
-                        column.Item()
-                            .Text("NMB HEALTH LABORATORY SYSTEM")
-                            .Bold()
-                            .FontSize(17)
-                            .FontColor(Colors.Blue.Darken2);
+                    //The top of the report look
 
-                        column.Item()
-                            .Text("Management Test Performance Report")
-                            .SemiBold()
-                            .FontSize(13);
+                    page.Header()
+                        .Column(header =>
+                        {
+                            header.Spacing(0);
 
-                        column.Item()
-                            .PaddingTop(5)
-                            .Text(
-                                $"Reporting period: {report.StartDate:dd MMM yyyy} - " +
-                                $"{report.EndDate:dd MMM yyyy}");
+                            header.Item()
+                                .Background(Colors.Blue.Darken4)
+                                .PaddingHorizontal(18)
+                                .PaddingVertical(14)
+                                .Row(row =>
+                                {
+                                    row.ConstantItem(125)
+                                        .Height(58)
+                                        .AlignMiddle()
+                                        .Image(logoPath)
+                                        .FitArea();
 
-                        column.Item()
-                            .Text(
-                                $"Generated: {DateTime.Now:dd MMM yyyy HH:mm}");
+                                    row.ConstantItem(15);
 
-                        column.Item()
-                            .PaddingTop(4)
-                            .Text(
-                                "Completed tests are grouped by completion date; " +
-                                "in-progress tests are grouped by start date.")
-                            .FontSize(8)
-                            .FontColor(Colors.Grey.Darken1);
-                    });
+                                    // Organisation information
+                                    row.RelativeItem()
+                                        .AlignMiddle()
+                                        .Column(info =>
+                                        {
+                                            info.Item()
+                                                .Text("NMB HEALTH LABORATORY SYSTEM")
+                                                .Bold()
+                                                .FontSize(15)
+                                                .FontColor(Colors.White);
 
-                    // CONTENT
+                                            info.Item()
+                                                .PaddingTop(3)
+                                                .Text("Management & Laboratory Services")
+                                                .FontSize(8)
+                                                .FontColor(Colors.Grey.Lighten2);
+                                        });
+
+                                    // Report information
+                                    row.ConstantItem(165)
+                                        .AlignMiddle()
+                                        .Column(info =>
+                                        {
+                                            info.Item()
+                                                .AlignRight()
+                                                .Text("MANAGEMENT REPORT")
+                                                .Bold()
+                                                .FontSize(10)
+                                                .FontColor(Colors.White);
+
+                                            info.Item()
+                                                .PaddingTop(3)
+                                                .AlignRight()
+                                                .Text($"Generated: {DateTime.Now:dd MMM yyyy}")
+                                                .FontSize(7.5f)
+                                                .FontColor(Colors.Grey.Lighten2);
+
+                                            info.Item()
+                                                .AlignRight()
+                                                .Text($"Time: {DateTime.Now:HH:mm}")
+                                                .FontSize(7.5f)
+                                                .FontColor(Colors.Grey.Lighten2);
+                                        });
+                                });
+
+
+                            // Report title area
+                            header.Item()
+                                .PaddingTop(13)
+                                .PaddingBottom(8)
+                                .Column(title =>
+                                {
+                                    title.Item()
+                                        .Text("MANAGEMENT TEST PERFORMANCE REPORT BY CATEGORY")
+                                        .Bold()
+                                        .FontSize(16)
+                                        .FontColor(Colors.Blue.Darken4);
+
+                                    title.Item()
+                                        .PaddingTop(4)
+                                        .Text(
+                                            $"Reporting Period: {report.StartDate:dd MMMM yyyy} - " +
+                                            $"{report.EndDate:dd MMMM yyyy}")
+                                        .FontSize(9)
+                                        .FontColor(Colors.Grey.Darken1);
+
+                                    title.Item()
+                                        .PaddingTop(7)
+                                        .Row(row =>
+                                        {
+                                            row.RelativeItem()
+                                                .Column(manager =>
+                                                {
+                                                    manager.Item()
+                                                        .Text("REPORT PREPARED BY")
+                                                        .Bold()
+                                                        .FontSize(7)
+                                                        .FontColor(Colors.Grey.Darken1);
+
+                                                    manager.Item()
+                                                        .PaddingTop(2)
+                                                        .Text(managerName)
+                                                        .Bold()
+                                                        .FontSize(9)
+                                                        .FontColor(Colors.Blue.Darken3);
+
+                                                    manager.Item()
+                                                        .PaddingTop(1)
+                                                        .Text(managerEmail)
+                                                        .FontSize(7.5f)
+                                                        .FontColor(Colors.Grey.Darken1);
+                                                });
+
+                                            row.ConstantItem(1)
+                                                .Background(Colors.Grey.Lighten1);
+
+                                            row.RelativeItem()
+                                                .PaddingLeft(12)
+                                                .Column(details =>
+                                                {
+                                                    details.Item()
+                                                        .Text("REPORT TYPE")
+                                                        .Bold()
+                                                        .FontSize(7)
+                                                        .FontColor(Colors.Grey.Darken1);
+
+                                                    details.Item()
+                                                        .PaddingTop(2)
+                                                        .Text("Management Test Performance")
+                                                        .FontSize(8)
+                                                        .FontColor(Colors.Grey.Darken2);
+
+                                                    details.Item()
+                                                        .PaddingTop(1)
+                                                        .Text(
+                                                            $"Generated: {DateTime.Now:dd MMM yyyy HH:mm}")
+                                                        .FontSize(7.5f)
+                                                        .FontColor(Colors.Grey.Darken1);
+                                                });
+                                        });
+
+                                    title.Item()
+                                        .PaddingTop(6)
+                                        .Text("Completed tests are grouped by completion date")
+                                        .FontSize(7.5f)
+                                        .FontColor(Colors.Grey.Darken1);
+                                });
+
+                            header.Item()
+                                .Height(1)
+                                .Background(Colors.Grey.Lighten1);
+                        });
+
+
+                    //The report Details and Table
+
                     page.Content()
-                        .PaddingVertical(20)
+                        .PaddingTop(14)
                         .Column(column =>
                         {
                             column.Spacing(12);
 
+
+                            // Small Summary in boxes/div format
+
                             column.Item()
-                                .Border(1)
-                                .BorderColor(Colors.Grey.Lighten2)
-                                .Padding(12)
+                                .Text("REPORT SUMMARY")
+                                .Bold()
+                                .FontSize(11)
+                                .FontColor(Colors.Blue.Darken4);
+
+                            column.Item()
                                 .Row(row =>
                                 {
-                                    row.RelativeItem().Column(summary =>
-                                    {
-                                        summary.Item()
-                                            .Text("Completed Tests")
-                                            .FontSize(9);
+                                    row.ConstantItem(8);
 
-                                        summary.Item()
-                                            .Text(
-                                                report.TotalCompletedTests.ToString("N0"))
-                                            .Bold()
-                                            .FontSize(20)
-                                            .FontColor(Colors.Green.Darken2);
-                                    });
+                                    // Categories
+                                    row.RelativeItem()
+                                        .Border(1)
+                                        .BorderColor(Colors.Grey.Lighten2)
+                                        .Background(Colors.White)
+                                        .Padding(11)
+                                        .Column(summary =>
+                                        {
+                                            summary.Item()
+                                                .Text("TEST CATEGORIES")
+                                                .Bold()
+                                                .FontSize(7.5f)
+                                                .FontColor(Colors.Grey.Darken1);
 
-                                    row.RelativeItem().Column(summary =>
-                                    {
-                                        summary.Item()
-                                            .Text("In Progress")
-                                            .FontSize(9);
+                                            summary.Item()
+                                                .PaddingTop(4)
+                                                .Text(
+                                                    report.TotalCategories.ToString("N0"))
+                                                .Bold()
+                                                .FontSize(20)
+                                                .FontColor(Colors.Blue.Darken2);
 
-                                        summary.Item()
-                                            .Text(
-                                                report.TotalInProgressTests.ToString("N0"))
-                                            .Bold()
-                                            .FontSize(20)
-                                            .FontColor(Colors.Orange.Darken2);
-                                    });
-
-                                    row.RelativeItem().Column(summary =>
-                                    {
-                                        summary.Item()
-                                            .Text("Categories")
-                                            .FontSize(9);
-
-                                        summary.Item()
-                                            .Text(report.TotalCategories.ToString("N0"))
-                                            .Bold()
-                                            .FontSize(20)
-                                            .FontColor(Colors.Blue.Darken2);
-                                    });
+                                            summary.Item()
+                                                .PaddingTop(2)
+                                                .Text("Categories represented")
+                                                .FontSize(7)
+                                                .FontColor(Colors.Grey.Darken1);
+                                        });
                                 });
 
+
+                            // break down in table format
+
                             column.Item()
-                                .Text("Category Breakdown")
+                                .PaddingTop(3)
+                                .Text("CATEGORY BREAKDOWN")
                                 .Bold()
-                                .FontSize(13);
+                                .FontSize(11)
+                                .FontColor(Colors.Blue.Darken4);
+
+                            column.Item()
+                                .Text(
+                                    "Summary of laboratory testing activity by test category " +
+                                    "for the selected reporting period.")
+                                .FontSize(7.5f)
+                                .FontColor(Colors.Grey.Darken1);
+
 
                             if (report.CategoryBreakdown.Count == 0)
                             {
                                 column.Item()
-                                    .Padding(15)
-                                    .Text(
-                                        "No completed or in-progress tests were " +
-                                        "recorded during the selected period.");
+                                    .Padding(20)
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Background(Colors.Grey.Lighten4)
+                                    .AlignCenter()
+                                    .Column(empty =>
+                                    {
+                                        empty.Item()
+                                            .Text("NO TEST RECORDS FOUND")
+                                            .Bold()
+                                            .FontSize(11)
+                                            .FontColor(Colors.Blue.Darken3);
+
+                                        empty.Item()
+                                            .PaddingTop(5)
+                                            .Text(
+                                                "No completed or in-progress tests were " +
+                                                "recorded during the selected reporting period.")
+                                            .FontSize(8)
+                                            .FontColor(Colors.Grey.Darken1);
+                                    });
                             }
                             else
                             {
-                                column.Item().Table(table =>
-                                {
-                                    table.ColumnsDefinition(columns =>
+                                column.Item()
+                                    .Border(1)
+                                    .BorderColor(Colors.Grey.Lighten2)
+                                    .Table(table =>
                                     {
-                                        columns.RelativeColumn(3);
-                                        columns.RelativeColumn(1.2f);
-                                        columns.RelativeColumn(1.2f);
-                                        columns.RelativeColumn(1.1f);
-                                        columns.RelativeColumn(1.2f);
+                                        table.ColumnsDefinition(columns =>
+                                        {
+                                            columns.RelativeColumn(3.2f);
+                                            columns.RelativeColumn(1.2f);
+                                            columns.RelativeColumn(1.2f);
+                                            columns.RelativeColumn(1.2f);
+                                            columns.RelativeColumn(1.2f);
+                                        });
+
+
+                                        table.Header(header =>
+                                        {
+                                            header.Cell()
+                                                .Element(HeaderCell)
+                                                .Text("TEST CATEGORY");
+
+                                            header.Cell()
+                                                .Element(HeaderCell)
+                                                .AlignRight()
+                                                .Text("COMPLETED");
+
+                                            header.Cell()
+                                                .Element(HeaderCell)
+                                                .AlignRight()
+                                                .Text("IN PROGRESS");
+
+                                            header.Cell()
+                                                .Element(HeaderCell)
+                                                .AlignRight()
+                                                .Text("TOTAL");
+
+                                            header.Cell()
+                                                .Element(HeaderCell)
+                                                .AlignRight()
+                                                .Text("% TOTAL");
+                                        });
+
+
+                                        //body of the table
+
+                                        foreach (var category in report.CategoryBreakdown)
+                                        {
+                                            table.Cell()
+                                                .Element(BodyCell)
+                                                .Text(category.CategoryName);
+
+                                            table.Cell()
+                                                .Element(BodyCell)
+                                                .AlignRight()
+                                                .Text(
+                                                    category.CompletedTests.ToString("N0"));
+
+                                            table.Cell()
+                                                .Element(BodyCell)
+                                                .AlignRight()
+                                                .Text(
+                                                    category.InProgressTests.ToString("N0"));
+
+                                            table.Cell()
+                                                .Element(BodyCell)
+                                                .AlignRight()
+                                                .Text(
+                                                    category.TotalTests.ToString("N0"));
+
+                                            table.Cell()
+                                                .Element(BodyCell)
+                                                .AlignRight()
+                                                .Text(
+                                                    $"{category.Percentage:F1}%");
+                                        }
+
+
+                                        //Rows
+
+                                        table.Cell()
+                                            .Element(TotalCell)
+                                            .Text("TOTAL");
+
+                                        table.Cell()
+                                            .Element(TotalCell)
+                                            .AlignRight()
+                                            .Text(
+                                                report.TotalCompletedTests.ToString("N0"));
+
+                                        table.Cell()
+                                            .Element(TotalCell)
+                                            .AlignRight()
+                                            .Text(
+                                                report.TotalInProgressTests.ToString("N0"));
+
+                                        table.Cell()
+                                            .Element(TotalCell)
+                                            .AlignRight()
+                                            .Text(
+                                                totalTrackedTests.ToString("N0"));
+
+                                        table.Cell()
+                                            .Element(TotalCell)
+                                            .AlignRight()
+                                            .Text(
+                                                totalTrackedTests > 0
+                                                    ? "100.0%"
+                                                    : "0.0%");
                                     });
-
-                                    table.Header(header =>
-                                    {
-                                        header.Cell()
-                                            .Element(HeaderCell)
-                                            .Text("Test Category");
-
-                                        header.Cell()
-                                            .Element(HeaderCell)
-                                            .AlignRight()
-                                            .Text("Completed");
-
-                                        header.Cell()
-                                            .Element(HeaderCell)
-                                            .AlignRight()
-                                            .Text("In Progress");
-
-                                        header.Cell()
-                                            .Element(HeaderCell)
-                                            .AlignRight()
-                                            .Text("Total");
-
-                                        header.Cell()
-                                            .Element(HeaderCell)
-                                            .AlignRight()
-                                            .Text("% Total");
-                                    });
-
-                                    foreach (var category in report.CategoryBreakdown)
-                                    {
-                                        table.Cell()
-                                            .Element(BodyCell)
-                                            .Text(category.CategoryName);
-
-                                        table.Cell()
-                                            .Element(BodyCell)
-                                            .AlignRight()
-                                            .Text(category.CompletedTests.ToString("N0"));
-
-                                        table.Cell()
-                                            .Element(BodyCell)
-                                            .AlignRight()
-                                            .Text(category.InProgressTests.ToString("N0"));
-
-                                        table.Cell()
-                                            .Element(BodyCell)
-                                            .AlignRight()
-                                            .Text(category.TotalTests.ToString("N0"));
-
-                                        table.Cell()
-                                            .Element(BodyCell)
-                                            .AlignRight()
-                                            .Text($"{category.Percentage:F1}%");
-                                    }
-
-                                    table.Cell()
-                                        .Element(TotalCell)
-                                        .Text("TOTAL");
-
-                                    table.Cell()
-                                        .Element(TotalCell)
-                                        .AlignRight()
-                                        .Text(report.TotalCompletedTests.ToString("N0"));
-
-                                    table.Cell()
-                                        .Element(TotalCell)
-                                        .AlignRight()
-                                        .Text(report.TotalInProgressTests.ToString("N0"));
-
-                                    table.Cell()
-                                        .Element(TotalCell)
-                                        .AlignRight()
-                                        .Text(totalTrackedTests.ToString("N0"));
-
-                                    table.Cell()
-                                        .Element(TotalCell)
-                                        .AlignRight()
-                                        .Text(totalTrackedTests > 0 ? "100.0%" : "0.0%");
-                                });
                             }
+
+
+
+
                         });
 
-                    // FOOTER
-                    page.Footer().Row(row =>
-                    {
-                        row.RelativeItem()
-                            .Text("NMB Health Laboratory System")
-                            .FontSize(8)
-                            .FontColor(Colors.Grey.Darken1);
 
-                        row.RelativeItem()
-                            .AlignRight()
-                            .Text(text =>
-                            {
-                                text.Span("Page ");
-                                text.CurrentPageNumber();
-                                text.Span(" of ");
-                                text.TotalPages();
-                            });
-                    });
+                    // Footer of The report for purpose of having more pages of the report
+
+                    page.Footer()
+                        .PaddingTop(8)
+                        .Column(footer =>
+                        {
+                            footer.Item()
+                                .Height(1)
+                                .Background(Colors.Grey.Lighten1);
+
+                            footer.Item()
+                                .PaddingTop(6)
+                                .Row(row =>
+                                {
+                                    row.RelativeItem()
+                                        .Text("NMB Health Laboratory System")
+                                        .FontSize(7)
+                                        .FontColor(Colors.Grey.Darken1);
+
+                                    row.RelativeItem()
+                                        .AlignCenter()
+                                        .Text("CONFIDENTIAL MANAGEMENT REPORT")
+                                        .Bold()
+                                        .FontSize(6.5f)
+                                        .FontColor(Colors.Grey.Darken1);
+
+                                    row.RelativeItem()
+                                        .AlignRight()
+                                        .Text(text =>
+                                        {
+                                            text.Span("Page ")
+                                                .FontSize(7)
+                                                .FontColor(Colors.Grey.Darken1);
+
+                                            text.CurrentPageNumber()
+                                                .FontSize(7)
+                                                .FontColor(Colors.Grey.Darken1);
+
+                                            text.Span(" of ")
+                                                .FontSize(7)
+                                                .FontColor(Colors.Grey.Darken1);
+
+                                            text.TotalPages()
+                                                .FontSize(7)
+                                                .FontColor(Colors.Grey.Darken1);
+                                        });
+                                });
+
+                            footer.Item()
+                                .PaddingTop(3)
+                                .AlignCenter()
+                                .Text("@ 2026 NMB-HLabSys")
+                                .FontSize(6.5f)
+                                .FontColor(Colors.Grey.Darken1);
+                        });
                 });
-            }).GeneratePdf();
+            })
+            .GeneratePdf();
 
             return File(
                 pdf,
                 "application/pdf",
                 $"TestPerformanceReport_{report.StartDate:yyyyMMdd}_" +
                 $"{report.EndDate:yyyyMMdd}.pdf");
+
+
+            // style of The tables
+
+            static IContainer HeaderCell(IContainer container)
+            {
+                return container
+                    .Background(Colors.Blue.Darken4)
+                    .BorderBottom(1)
+                    .BorderColor(Colors.Blue.Darken3)
+                    .PaddingVertical(7)
+                    .PaddingHorizontal(7)
+                    .DefaultTextStyle(text =>
+                        text.Bold()
+                            .FontSize(7.5f)
+                            .FontColor(Colors.White));
+            }
+
+            static IContainer BodyCell(IContainer container)
+            {
+                return container
+                    .BorderBottom(1)
+                    .BorderColor(Colors.Grey.Lighten2)
+                    .PaddingVertical(7)
+                    .PaddingHorizontal(7)
+                    .DefaultTextStyle(text =>
+                        text.FontSize(8)
+                            .FontColor(Colors.Grey.Darken3));
+            }
+
+            static IContainer TotalCell(IContainer container)
+            {
+                return container
+                    .Background(Colors.Grey.Lighten3)
+                    .BorderTop(1)
+                    .BorderColor(Colors.Blue.Darken2)
+                    .PaddingVertical(8)
+                    .PaddingHorizontal(7)
+                    .DefaultTextStyle(text =>
+                        text.Bold()
+                            .FontSize(8)
+                            .FontColor(Colors.Blue.Darken4));
+            }
         }
 
-        // ============================================================
-        // BUILD REPORT DATA
-        // ============================================================
+        // generate the report according to the selected dates.
 
         private async Task<ManagementReportViewModel> BuildReportData(
            DateTime startDate,
@@ -375,10 +635,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             var end = endDate.Date;
             var endExclusive = end.AddDays(1);
 
-            // --------------------------------------------------------
-            // TEST ASSIGNMENTS STARTED WITHIN THE SELECTED PERIOD
-            // Include only Completed and In Progress.
-            // --------------------------------------------------------
+            // select according to the requirements.
             var reportTests = _context.TestRequestTestTypes
                 .AsNoTracking()
                 .Where(x =>
@@ -390,9 +647,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     x.TestType != null &&
                     x.TestType.TestCategory != null);
 
-            // --------------------------------------------------------
-            // TOTALS BY STATUS
-            // --------------------------------------------------------
+            //calculation to display all total completed and in progress.
 
             var totalCompletedTests = await reportTests
                 .CountAsync(x => x.Status == "Completed");
@@ -403,9 +658,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             var totalEligibleTests =
                 totalCompletedTests + totalInProgressTests;
 
-            // --------------------------------------------------------
-            // CATEGORY TOTALS BY STATUS
-            // --------------------------------------------------------
+            //number of categories
 
             var categoryTotals = await reportTests
                 .GroupBy(x => new
@@ -428,10 +681,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 .ThenBy(x => x.CategoryName)
                 .ToListAsync();
 
-            // --------------------------------------------------------
-            // CATEGORY COMPLETION PERCENTAGES
-            // Completed / (Completed + In Progress)
-            // --------------------------------------------------------
+            //show total in percentages
 
             foreach (var category in categoryTotals)
             {
@@ -453,10 +703,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 .Select(x => x.TestCategoryId)
                 .ToList();
 
-            // --------------------------------------------------------
-            // DAILY COUNTS FOR TOP CATEGORIES
-            // Count both statuses using StartDateTime.
-            // --------------------------------------------------------
+            //it will only count the top 10 categories.
 
             var dailyCounts = await reportTests
                 .Where(x =>
@@ -476,9 +723,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 })
                 .ToListAsync();
 
-            // --------------------------------------------------------
-            // REMAINING CATEGORIES
-            // --------------------------------------------------------
+            // number of Remaining categories
 
             var otherCategoryIds = categoryTotals
                 .Skip(TopCategoryLimit)
@@ -503,9 +748,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToListAsync();
             }
 
-            // --------------------------------------------------------
-            // DATE LABELS
-            // --------------------------------------------------------
+            //Including date labeling.
 
             var chartLabels = new List<string>();
 
@@ -514,9 +757,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 chartLabels.Add(date.ToString("dd MMM"));
             }
 
-            // --------------------------------------------------------
-            // TOP CATEGORY CHART SERIES
-            // --------------------------------------------------------
+            // show the top categories within the chart
 
             var chartSeries = new List<ChartSeriesViewModel>();
 
@@ -546,9 +787,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 chartSeries.Add(series);
             }
 
-            // --------------------------------------------------------
-            // OTHER CATEGORY CHART SERIES
-            // --------------------------------------------------------
+            // Other categories
 
             if (otherCategoryIds.Count > 0)
             {
@@ -574,9 +813,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 chartSeries.Add(otherSeries);
             }
 
-            // --------------------------------------------------------
-            // RETURN REPORT
-            // --------------------------------------------------------
+            // return the report
 
             return new ManagementReportViewModel
             {
@@ -595,9 +832,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // PDF TABLE FORMATTING
-        // ============================================================
+        // how the table should be like int the report
 
         private static IContainer HeaderCell(IContainer container)
         {
