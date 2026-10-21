@@ -10,22 +10,21 @@ namespace NMB_HLabSys.Services
     {
         private readonly ApplicationDbContext _context;
         private readonly LaboratoryPdfService _pdfService;
+        private readonly ILogger<LaboratoryReportDeliveryService> _logger;
 
         public LaboratoryReportDeliveryService(
             ApplicationDbContext context,
-            LaboratoryPdfService pdfService)
+            LaboratoryPdfService pdfService,
+            ILogger<LaboratoryReportDeliveryService> logger)
         {
             _context = context;
             _pdfService = pdfService;
+            _logger = logger;
         }
 
-        public async Task<bool> PrepareReportAsync(
-            int testRequestId)
+        public async Task<bool> PrepareReportAsync(int testRequestId)
         {
-            // ==========================================
-            // 1. LOAD REQUEST, PATIENT AND DOCTOR
-            // ==========================================
-
+            // 1. Load the laboratory request.
             var request = await _context.TestRequests
                 .AsNoTracking()
                 .Include(x => x.Patient)
@@ -33,42 +32,51 @@ namespace NMB_HLabSys.Services
                 .FirstOrDefaultAsync(x =>
                     x.TestRequestId == testRequestId);
 
-            if (request == null ||
-                request.Status !=
-                    TestRequestStatus.Completed.ToString())
+            if (request == null)
+                return Block(testRequestId, "Request not found.");
+
+            if (request.Status !=
+                TestRequestStatus.Completed.ToString())
             {
-                return false;
+                return Block(
+                    testRequestId,
+                    $"Request status is '{request.Status}', not Completed.");
             }
 
-            if (request.Doctor == null ||
-                string.IsNullOrWhiteSpace(request.Doctor.Email) ||
-                request.Patient == null)
+            if (request.Patient == null)
+                return Block(testRequestId, "Patient record is missing.");
+
+            if (request.Doctor == null)
+                return Block(testRequestId, "Doctor record is missing.");
+
+            if (string.IsNullOrWhiteSpace(request.Doctor.Email))
             {
-                return false;
+                return Block(
+                    testRequestId,
+                    "Requesting doctor has no email address.");
             }
 
-            // ==========================================
-            // 2. LOAD ALL REQUESTED TESTS
-            // ==========================================
+            // 2. Load every requested test.
+            var requestedTests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Where(x => x.TestRequestId == testRequestId)
+                .ToListAsync();
 
-            var requestedTests =
-                await _context.TestRequestTestTypes
-                    .AsNoTracking()
-                    .Where(x =>
-                        x.TestRequestId == testRequestId)
-                    .ToListAsync();
+            if (requestedTests.Count == 0)
+                return Block(testRequestId, "No requested tests found.");
 
-            if (requestedTests.Count == 0 ||
-                requestedTests.Any(x =>
-                    x.Status != "Verified"))
+            foreach (var test in requestedTests)
             {
-                return false;
+                if (test.Status != "Verified")
+                {
+                    return Block(
+                        testRequestId,
+                        $"Test {test.TestRequestTestTypeId} " +
+                        $"has status '{test.Status}', not Verified.");
+                }
             }
 
-            // ==========================================
-            // 3. LOAD ALL VERIFIED RESULTS
-            // ==========================================
-
+            // 3. Load saved results.
             var testIds = requestedTests
                 .Select(x => x.TestRequestTestTypeId)
                 .ToList();
@@ -78,15 +86,17 @@ namespace NMB_HLabSys.Services
                 .Include(x => x.Technician)
                 .Include(x => x.VerifiedByTechnician)
                 .Where(x =>
-                    testIds.Contains(
-                        x.TestRequestTestTypeId))
+                    testIds.Contains(x.TestRequestTestTypeId))
                 .OrderBy(x => x.TestRequestTestTypeId)
                 .ToListAsync();
 
-            // Each requested test must have exactly one
-            // saved, independently verified result.
             if (results.Count != requestedTests.Count)
-                return false;
+            {
+                return Block(
+                    testRequestId,
+                    $"Expected {requestedTests.Count} results, " +
+                    $"but found {results.Count}.");
+            }
 
             foreach (var test in requestedTests)
             {
@@ -97,57 +107,73 @@ namespace NMB_HLabSys.Services
                     .ToList();
 
                 if (matching.Count != 1)
-                    return false;
+                {
+                    return Block(
+                        testRequestId,
+                        $"Test {test.TestRequestTestTypeId} " +
+                        $"has {matching.Count} saved results; expected 1.");
+                }
 
                 var result = matching[0];
+                var testId = test.TestRequestTestTypeId;
 
-                if (string.IsNullOrWhiteSpace(result.ResultValue) ||
-                    string.IsNullOrWhiteSpace(
-                        result.VerifiedByTechnicianId) ||
-                    !result.VerifiedDateTime.HasValue ||
-                    result.RequiresReview ||
-                    string.IsNullOrWhiteSpace(test.TechnicianId) ||
-                    result.TechnicianId != test.TechnicianId ||
-                    result.VerifiedByTechnicianId ==
-                        result.TechnicianId)
+                if (string.IsNullOrWhiteSpace(result.ResultValue))
+                    return Block(testRequestId,
+                        $"Test {testId}: Result value is missing.");
+
+                if (string.IsNullOrWhiteSpace(
+                    result.VerifiedByTechnicianId))
                 {
-                    return false;
+                    return Block(testRequestId,
+                        $"Test {testId}: Verifying technician is missing.");
+                }
+
+                if (!result.VerifiedDateTime.HasValue)
+                    return Block(testRequestId,
+                        $"Test {testId}: Verification date is missing.");
+
+                if (result.RequiresReview)
+                    return Block(testRequestId,
+                        $"Test {testId}: Result still requires review.");
+
+                if (string.IsNullOrWhiteSpace(test.TechnicianId))
+                    return Block(testRequestId,
+                        $"Test {testId}: Assigned technician is missing.");
+
+                if (result.TechnicianId != test.TechnicianId)
+                    return Block(testRequestId,
+                        $"Test {testId}: Result technician does not match assigned technician.");
+
+                if (result.VerifiedByTechnicianId ==
+                    result.TechnicianId)
+                {
+                    return Block(testRequestId,
+                        $"Test {testId}: Result was not independently verified.");
                 }
             }
 
-            // ==========================================
-            // 4. LOCATE PENDING EMAIL
-            // ==========================================
-
+            // 4. Locate the pending email record.
             var email = await _context.TechnicianSentEmails
                 .FirstOrDefaultAsync(x =>
                     x.TestRequestId == testRequestId &&
                     x.Status == "Pending");
 
             if (email == null)
-                return false;
+                return Block(testRequestId,
+                    "No Pending outgoing email record exists.");
 
-            // ==========================================
-            // 5. GENERATE VERIFIED PDF
-            // ==========================================
+            // 5. Generate the combined laboratory PDF.
+            var pdfBytes = _pdfService.GenerateLaboratoryReport(
+                testRequestId,
+                request.Patient.FullName,
+                request.Doctor.FullName,
+                results);
 
-            var patientName =
-                request.Patient.FullName;
+            if (pdfBytes == null || pdfBytes.Length == 0)
+                return Block(testRequestId,
+                    "PDF generation returned an empty document.");
 
-            var doctorName =
-                request.Doctor.FullName;
-
-            var pdfBytes =
-                _pdfService.GenerateLaboratoryReport(
-                    testRequestId,
-                    patientName,
-                    doctorName,
-                    results);
-
-            // ==========================================
-            // 6. UPDATE OUTGOING EMAIL RECORD
-            // ==========================================
-
+            // 6. Prepare the outgoing email record.
             email.RecipientEmail = request.Doctor.Email;
 
             email.Subject =
@@ -161,15 +187,26 @@ namespace NMB_HLabSys.Services
                 $"LaboratoryReport_{request.RequestNumber}.pdf";
 
             email.PdfAttachment = pdfBytes;
-
-            // Still pending. SMTP delivery is not enabled.
             email.Status = "Pending";
-
             email.ErrorMessage = null;
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInformation(
+                "Laboratory PDF prepared successfully for request {RequestId}.",
+                testRequestId);
+
             return true;
+        }
+
+        private bool Block(int testRequestId, string reason)
+        {
+            _logger.LogWarning(
+                "Laboratory report preparation blocked for request {RequestId}: {Reason}",
+                testRequestId,
+                reason);
+
+            return false;
         }
     }
 }

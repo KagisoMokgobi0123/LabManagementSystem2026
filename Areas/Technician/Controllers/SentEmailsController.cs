@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Data;
+using NMB_HLabSys.Services;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
@@ -11,30 +12,43 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
     public class SentEmailsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<SentEmailsController> _logger;
 
-        public SentEmailsController(ApplicationDbContext context)
+        public SentEmailsController(
+            ApplicationDbContext context,
+            ILogger<SentEmailsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
 #if DEBUG
+        // GET: Technician/SentEmails/PrepareReport
+        [HttpGet]
+        public IActionResult PrepareReport()
+        {
+            return View();
+        }
+
+        // POST: Technician/SentEmails/PrepareReport
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PrepareReport(
             int testRequestId,
             [FromServices]
-    NMB_HLabSys.Services.LaboratoryReportDeliveryService
-                reportDeliveryService)
+            LaboratoryReportDeliveryService reportDeliveryService)
         {
             if (testRequestId <= 0)
-                return BadRequest();
+            {
+                TempData["ErrorMessage"] =
+                    "Please enter a valid Test Request ID.";
 
-            // Development testing only.
-            // This action does not send an email.
+                return RedirectToAction(nameof(PrepareReport));
+            }
 
             try
             {
-                var prepared =
+                bool prepared =
                     await reportDeliveryService.PrepareReportAsync(
                         testRequestId);
 
@@ -55,8 +69,13 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         "and a Pending email record exists.";
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "PDF preparation failed for request {TestRequestId}",
+                    testRequestId);
+
                 TempData["ErrorMessage"] =
                     "PDF preparation failed. Check the application logs.";
             }
@@ -65,6 +84,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 #endif
 
+        // GET: Technician/SentEmails
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -76,23 +96,33 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             return View(emails);
         }
 
+        // GET: Technician/SentEmails/DownloadPdf/5
         [HttpGet]
         public async Task<IActionResult> DownloadPdf(int id)
         {
+            if (id <= 0)
+                return BadRequest();
+
             var email = await _context.TechnicianSentEmails
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.SentEmailId == id);
 
-            if (email == null || email.PdfAttachment == null ||
+            if (email == null ||
+                email.PdfAttachment == null ||
                 email.PdfAttachment.Length == 0)
             {
                 return NotFound();
             }
 
+            var fileName =
+                string.IsNullOrWhiteSpace(email.PdfFileName)
+                    ? $"LaboratoryReport_{email.TestRequestId}.pdf"
+                    : email.PdfFileName;
+
             return File(
                 email.PdfAttachment,
                 "application/pdf",
-                email.PdfFileName);
+                fileName);
         }
     }
 }

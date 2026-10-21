@@ -63,7 +63,14 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<
+    NMB_HLabSys.Filters.RequirePasswordChangeFilter>();
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.AddService<
+        NMB_HLabSys.Filters.RequirePasswordChangeFilter>();
+}); 
 builder.Services.AddScoped<DoctorEmailService>();
 builder.Services.AddDistributedMemoryCache();
 
