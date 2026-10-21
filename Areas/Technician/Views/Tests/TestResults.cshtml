@@ -244,6 +244,14 @@
         color: #0369a1;
     }
 
+    .consumable-pill-group { display:flex; flex-wrap:wrap; gap:6px; min-width:190px; }
+    .consumable-pill { display:inline-flex; align-items:center; padding:6px 11px; border-radius:50rem; font-size:11px; font-weight:700; line-height:1.45; white-space:normal; border:1px solid transparent; }
+    .consumable-pill.c-blue { background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
+    .consumable-pill.c-green { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
+    .consumable-pill.c-orange { background:#ffedd5; color:#9a3412; border-color:#fed7aa; }
+    .consumable-pill.c-purple { background:#f3e8ff; color:#6b21a8; border-color:#e9d5ff; }
+    .consumable-pill.c-teal { background:#ccfbf1; color:#115e59; border-color:#99f6e4; }
+    .consumable-pill.c-pink { background:#fce7f3; color:#9d174d; border-color:#fbcfe8; }
     .consumable-stock {
         display: block;
         color: #334155;
@@ -465,7 +473,7 @@
                         </h4>
                         <p class="results-card-subtitle">
                             Search by result, test, patient, flag or status.
-                            Consumable balances and soft-deleted records are shown when supplied by the controller.
+                            Current consumable stock balances are shown for each test type.
                         </p>
                     </div>
 
@@ -490,7 +498,7 @@
                             <th>Result Value</th>
                             <th>Reference Range</th>
                             <th>Flag</th>
-                            <th>Consumable Remaining</th>
+                            <th>Consumables / Current Stock</th>
                             <th>Test Status</th>
                             <th>Record Status</th>
                             <th>Captured</th>
@@ -512,6 +520,8 @@
                                 && (string.Equals(status, "In Progress", StringComparison.OrdinalIgnoreCase)
                                     || string.Equals(status, "To Be Reviewed", StringComparison.OrdinalIgnoreCase));
                             var hasStock = remainingByResultId.TryGetValue(result.TestResultId, out var stockText);
+                            var stockColors = new[] { "c-blue", "c-green", "c-orange", "c-purple", "c-teal", "c-pink" };
+                            var stockColor = stockColors[(int)((uint)(test?.TestTypeId ?? 0) % (uint)stockColors.Length)];
 
                             <tr class="@(isDeleted ? "result-row-deleted" : "")"
                                 data-result-verified="@(result.VerifiedDateTime.HasValue && !isDeleted ? "true" : "false")"
@@ -583,13 +593,21 @@
                                 <td>
                                     @if (hasStock)
                                     {
-                                        <span class="consumable-stock">@stockText</span>
+                                        <div class="consumable-pill-group">
+                                            @foreach (var consumableText in (stockText ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries))
+                                            {
+                                                <span class="badge rounded-pill consumable-pill @stockColor" title="Current stock and quantity required per test">
+                                                    <i class="fas fa-vial mr-1" aria-hidden="true"></i>
+                                                    @consumableText.Trim()
+                                                </span>
+                                            }
+                                        </div>
                                     }
                                     else
                                     {
                                         <span class="consumable-unavailable"
-                                              title="No consumable balance was supplied for this result.">
-                                            Not available
+                                              title="No consumables configured for this test, or stock data unavailable.">
+                                            No stock configuration
                                         </span>
                                     }
                                 </td>

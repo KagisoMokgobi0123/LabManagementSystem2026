@@ -331,9 +331,23 @@
                                                     <i class="fas fa-play mr-1"></i>Select Test
                                                 </a>
                                             }
+                                            else if (item.Status == "In Progress")
+                                            {
+                                              
+<a href="@Url.Action("Details", "Tests", new {
+    area = "Technician",
+    id = item.TestRequestTestTypeId
+})"
+   class="stat-btn"
+   title="View test details">
+    <i class="fas fa-eye mr-1"></i>
+    View Test
+</a>
+
+                                            }
                                             else
                                             {
-                                                <span class="text-muted">In progress</span>
+                                                <span class="text-muted">@item.Status</span>
                                             }
                                         </td>
                                     </tr>

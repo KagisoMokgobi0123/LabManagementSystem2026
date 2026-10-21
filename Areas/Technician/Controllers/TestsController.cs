@@ -1395,6 +1395,36 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                 .ToListAsync();
 
+            // Current inventory balance for each test result's configured consumables.
+            // This is live stock, not the historical balance at test selection.
+            var testTypeIds = results
+                .Where(r => r.TestRequestTestType != null)
+                .Select(r => r.TestRequestTestType!.TestTypeId)
+                .Distinct()
+                .ToList();
+
+            var stockRows = await _context.TestTypeConsumables
+                .AsNoTracking()
+                .Include(x => x.Consumable)
+                .Where(x => testTypeIds.Contains(x.TestTypeId))
+                .ToListAsync();
+
+            var stockByType = stockRows
+                .GroupBy(x => x.TestTypeId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => string.Join("; ", g.Select(x =>
+                        x.Consumable == null
+                            ? "Consumable missing"
+                            : $"{x.Consumable.Name}: {x.Consumable.QuantityOnHand} left (uses {x.QuantityRequired}/test)")));
+
+            ViewData["ConsumableRemainingByResultId"] = results
+                .Where(r => r.TestRequestTestType != null &&
+                            stockByType.ContainsKey(r.TestRequestTestType.TestTypeId))
+                .ToDictionary(
+                    r => r.TestResultId,
+                    r => stockByType[r.TestRequestTestType!.TestTypeId]);
+
             return View(results);
         }
 

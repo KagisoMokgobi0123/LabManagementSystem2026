@@ -76,6 +76,8 @@
         text-decoration: none !important
     }
 
+    .details-hero .container-fluid { position: relative; z-index: 5; }
+    .details-hero .details-back { position: relative; z-index: 10; pointer-events: auto; }
     .details-content {
         position: relative;
         z-index: 2;
@@ -269,8 +271,11 @@
                     <p>Review the selected test, patient information, and turnaround deadline.</p>
                 </div>
                 <div class="col-md-4 text-md-right">
-                    <a asp-area="Technician" asp-controller="Tests" asp-action="@(canVerify ? "PendingVerification" : "MyTests")" class="details-back"><i class="fas fa-arrow-left mr-1"></i> @(canVerify ? "Pending Verification" : "My Tests")</a>
-                </div>
+<a href="@Url.Action(canVerify ? "PendingVerification" : "MyTests", "Tests", new { area = "Technician" })"
+   class="details-back">
+    <i class="fas fa-arrow-left mr-1"></i>
+    @(canVerify ? "Pending Verification" : "My Tests")
+</a>                </div>
             </div>
         </div>
     </section>
