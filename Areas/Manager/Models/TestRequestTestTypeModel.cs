@@ -36,5 +36,18 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         public bool IsAbnormal { get; set; }
 
+        // Soft-delete status
+        public bool IsDeleted { get; set; } = false;
+
+        // Mandatory de-activation reason
+        [StringLength(500)]
+        public string? DeactivationReason { get; set; }
+
+        // Technician who de-activated the test
+        [StringLength(450)]
+        public string? DeactivatedByTechnicianId { get; set; }
+
+        // UTC de-activation timestamp
+        public DateTime? DeactivatedAt { get; set; }
     }
 }

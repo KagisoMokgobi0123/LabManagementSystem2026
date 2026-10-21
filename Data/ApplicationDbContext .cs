@@ -103,6 +103,9 @@ namespace NMB_HLabSys.Data
         public DbSet<SampleDeactivationAuditModel>
     SampleDeactivationAudits
         { get; set; }
+        public DbSet<RequestedTestDeactivationAuditModel>
+    RequestedTestDeactivationAudits
+        { get; set; }
 
         // ============================================================
         // ADMINISTRATOR

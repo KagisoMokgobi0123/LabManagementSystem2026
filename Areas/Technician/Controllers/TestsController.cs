@@ -236,10 +236,10 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                      x.TestRequest.Status == "SamplesReceived" ||
                      x.TestRequest.Status == "InProgress" ||
                      x.TestRequest.Status == "In Progress") &&
-                    _context.Samples.Any(sample =>
+                    (x.IsDeleted || _context.Samples.Any(sample =>
                         sample.TestRequestId == x.TestRequestId &&
                         sample.SampleTypeId == x.TestType.SampleTypeId &&
-                        sample.IsReceived && !sample.IsDeleted))
+                        sample.IsReceived && !sample.IsDeleted)))
                 // Highest clinical priority first: Stat, Urgent, Routine.
                 .OrderByDescending(x => x.TestRequest!.Urgency)
                 .ThenBy(x => x.TestRequestId)
@@ -356,7 +356,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         request?.Status
                         ?? "Unknown",
 
-                    TestStatus = x.Status
+                    TestStatus = x.Status,
+                    IsDeactivated = x.IsDeleted,
+                    DeactivationReason = x.DeactivationReason
                 };
             }).ToList();
 
@@ -365,6 +367,117 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
+
+        // Edit clinical notes on an eligible, unclaimed patient request.
+        // ClinicalNotes belongs to the parent request, so changes affect all tests on it.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateSelectedTestDetails(int testRequestTestTypeId, string? clinicalNotes)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Unauthorized(new { success = false, message = "Please sign in again." });
+
+            clinicalNotes = clinicalNotes?.Trim() ?? string.Empty;
+            if (testRequestTestTypeId <= 0 || clinicalNotes.Length > 2000)
+                return BadRequest(new { success = false, message = "Clinical notes must be at most 2000 characters." });
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(t => t.TestRequest)
+                    .Include(t => t.TestType)
+                    .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == testRequestTestTypeId);
+
+                if (test == null) return NotFound(new { success = false, message = "Test not found." });
+                if (test.IsDeleted || !string.IsNullOrEmpty(test.TechnicianId) ||
+                    (test.Status != "Submitted" && test.Status != "SamplesReceived") ||
+                    test.TestRequest == null || test.TestType == null ||
+                    test.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                    return Conflict(new { success = false, message = "This test can no longer be edited." });
+
+                bool authorised = await _context.TechnicianTestTypes.AnyAsync(a =>
+                    a.TechnicianId == technicianId && a.TestTypeId == test.TestTypeId && a.IsActive);
+                if (!authorised)
+                    return StatusCode(403, new { success = false, message = "You are not assigned to this test type." });
+
+                test.TestRequest.ClinicalNotes = clinicalNotes;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Json(new { success = true, message = "Clinical notes updated successfully." });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { success = false, message = "Unable to update the test details." });
+            }
+        }
+
+        // Soft de-activate a requested patient test, preserving it for audit.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateRequestedTest(int testRequestTestTypeId, string? reason)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Unauthorized(new { success = false, message = "Session expired. Please sign in again." });
+
+            reason = reason?.Trim();
+            if (testRequestTestTypeId <= 0 || string.IsNullOrWhiteSpace(reason) || reason.Length > 500)
+                return BadRequest(new { success = false, message = "A reason between 1 and 500 characters is required." });
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(x => x.TestRequest)
+                    .Include(x => x.TestType)
+                    .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == testRequestTestTypeId);
+
+                if (test == null)
+                    return NotFound(new { success = false, message = "Requested test was not found." });
+
+                if (test.IsDeleted)
+                    return Conflict(new { success = false, message = "This test is already de-activated." });
+
+                if (!string.IsNullOrWhiteSpace(test.TechnicianId) ||
+                    (test.Status != "Submitted" && test.Status != "SamplesReceived"))
+                    return Conflict(new { success = false, message = "Only unclaimed tests may be de-activated." });
+
+                if (test.TestRequest == null || test.TestType == null ||
+                    test.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                    return Conflict(new { success = false, message = "This test is not eligible for de-activation." });
+
+                var assigned = await _context.TechnicianTestTypes.AnyAsync(x =>
+                    x.TechnicianId == technicianId && x.TestTypeId == test.TestTypeId && x.IsActive);
+                if (!assigned)
+                    return StatusCode(403, new { success = false, message = "You are not assigned to this test type." });
+
+                var now = DateTime.UtcNow;
+                test.IsDeleted = true;
+                test.DeactivationReason = reason;
+                test.DeactivatedByTechnicianId = technicianId;
+                test.DeactivatedAt = now;
+
+                _context.Set<RequestedTestDeactivationAuditModel>().Add(new RequestedTestDeactivationAuditModel
+                {
+                    TestRequestTestTypeId = test.TestRequestTestTypeId,
+                    TechnicianId = technicianId,
+                    Reason = reason,
+                    DeactivatedAt = now
+                });
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Json(new { success = true, message = "Test de-activated successfully. Audit recorded." });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { success = false, message = "Unable to de-activate the test." });
+            }
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -395,6 +508,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     TempData["ErrorMessage"] =
                         "The selected patient test could not be found.";
 
+                    return RedirectToAction(nameof(Select));
+                }
+
+                if (requestTest.IsDeleted)
+                {
+                    TempData["ErrorMessage"] = "This test has been de-activated and cannot be selected.";
                     return RedirectToAction(nameof(Select));
                 }
 
@@ -593,7 +712,99 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
-  
+
+
+        // Update request-level clinical notes for a test currently assigned to this technician.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateMyTestDetails(int testRequestTestTypeId, string? clinicalNotes)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Unauthorized(new { success = false, message = "Please sign in again." });
+
+            clinicalNotes = clinicalNotes?.Trim() ?? string.Empty;
+            if (testRequestTestTypeId <= 0 || clinicalNotes.Length > 2000)
+                return BadRequest(new { success = false, message = "Invalid test or notes exceed 2000 characters." });
+
+            var test = await _context.TestRequestTestTypes
+                .Include(x => x.TestRequest)
+                .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == testRequestTestTypeId
+                    && x.TechnicianId == technicianId && !x.IsDeleted && x.Status == "In Progress");
+            if (test?.TestRequest == null)
+                return NotFound(new { success = false, message = "Editable assigned test was not found." });
+            if (test.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                return BadRequest(new { success = false, message = "Demo tests cannot be edited." });
+
+            // ClinicalNotes is shared by the whole request; retain a separate audit trail in production.
+            test.TestRequest.ClinicalNotes = clinicalNotes;
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, message = "Test notes updated." });
+        }
+
+        // Soft-deactivate a test already claimed by the current technician.
+        // Does not reverse consumed stock or delete the patient request.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateMyTest(int testRequestTestTypeId, string? reason)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId))
+                return Unauthorized(new { success = false, message = "Please sign in again." });
+
+            reason = reason?.Trim();
+            if (testRequestTestTypeId <= 0 || string.IsNullOrWhiteSpace(reason) || reason.Length > 500)
+                return BadRequest(new { success = false, message = "A reason between 1 and 500 characters is required." });
+
+            await using var transaction = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
+            try
+            {
+                var test = await _context.TestRequestTestTypes
+                    .Include(x => x.TestRequest)
+                    .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == testRequestTestTypeId);
+
+                if (test == null || test.TechnicianId != technicianId)
+                    return NotFound(new { success = false, message = "Assigned test not found." });
+
+                if (test.IsDeleted)
+                    return Conflict(new { success = false, message = "This test is already de-activated." });
+
+                if (test.Status != "In Progress")
+                    return Conflict(new { success = false, message = "Only in-progress tests may be de-activated. Completed or reviewed tests cannot be de-activated." });
+
+                if (test.TestRequest == null || test.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                    return BadRequest(new { success = false, message = "This test is not eligible for de-activation." });
+
+                var now = DateTime.UtcNow;
+                test.IsDeleted = true;
+                test.DeactivationReason = reason;
+                test.DeactivatedByTechnicianId = technicianId;
+                test.DeactivatedAt = now;
+
+                _context.Set<RequestedTestDeactivationAuditModel>().Add(new RequestedTestDeactivationAuditModel
+                {
+                    TestRequestTestTypeId = test.TestRequestTestTypeId,
+                    TechnicianId = technicianId,
+                    Reason = reason,
+                    DeactivatedAt = now
+                });
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return Json(new { success = true, message = "Assigned test de-activated. The audit record has been saved." });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
+                return Conflict(new { success = false, message = "This test was changed by another user. Refresh and try again." });
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new { success = false, message = "Unable to de-activate this test." });
+            }
+        }
+
         [HttpGet]
         public async Task<IActionResult> MyTests()
         {
