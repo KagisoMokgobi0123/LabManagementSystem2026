@@ -3088,6 +3088,11 @@ namespace NMBHLabSys.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
+                    b.Property<string>("ReportType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<DateTime?>("SentAt")
                         .HasColumnType("datetime2");
 
@@ -3104,10 +3109,19 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestRequestId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TestRequestTestTypeId")
+                        .HasColumnType("int");
+
                     b.HasKey("SentEmailId");
 
                     b.HasIndex("TestRequestId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasDatabaseName("IX_TechnicianSentEmails_OneFinalPerRequest")
+                        .HasFilter("[ReportType] = 'Final'");
+
+                    b.HasIndex("TestRequestTestTypeId", "ReportType")
+                        .IsUnique()
+                        .HasFilter("[TestRequestTestTypeId] IS NOT NULL");
 
                     b.ToTable("TechnicianSentEmails");
                 });
