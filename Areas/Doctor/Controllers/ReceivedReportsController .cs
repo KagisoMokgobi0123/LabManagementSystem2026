@@ -38,7 +38,16 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 join request in _db.TestRequests.AsNoTracking()
                     on sent.TestRequestId equals request.TestRequestId
                 where request.DoctorId == doctor.Id && sent.Status == "Sent" &&
-                      sent.PdfAttachment != null && sent.SentAt != null
+                      sent.PdfAttachment != null && sent.SentAt != null &&
+                      request.Status == "Completed" &&
+                      _db.TestRequestTestTypes.Any(t => t.TestRequestId == request.TestRequestId && !t.IsDeleted) &&
+                      !_db.TestRequestTestTypes.Any(t => t.TestRequestId == request.TestRequestId && !t.IsDeleted &&
+                          (t.Status != "Verified" || !_db.TestResults.Any(r =>
+                              r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
+                              r.ResultValue != null && r.ResultValue != "" &&
+                              r.VerifiedByTechnicianId != null && r.VerifiedByTechnicianId != "" &&
+                              r.VerifiedDateTime != null))) &&
+                      sent.ReportType != "PartialVerified" && sent.ReportType != "Preliminary"
                 orderby sent.SentAt descending
                 select new
                 {
@@ -63,7 +72,15 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 join request in _db.TestRequests.AsNoTracking()
                     on sent.TestRequestId equals request.TestRequestId
                 where sent.SentEmailId == id && request.DoctorId == doctor.Id &&
-                      sent.Status == "Sent"
+                      sent.Status == "Sent" && request.Status == "Completed" &&
+                      sent.ReportType != "PartialVerified" && sent.ReportType != "Preliminary" &&
+                      _db.TestRequestTestTypes.Any(t => t.TestRequestId == request.TestRequestId && !t.IsDeleted) &&
+                      !_db.TestRequestTestTypes.Any(t => t.TestRequestId == request.TestRequestId && !t.IsDeleted &&
+                          (t.Status != "Verified" || !_db.TestResults.Any(r =>
+                              r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
+                              r.ResultValue != null && r.ResultValue != "" &&
+                              r.VerifiedByTechnicianId != null && r.VerifiedByTechnicianId != "" &&
+                              r.VerifiedDateTime != null)))
                 select new { sent.PdfAttachment }).FirstOrDefaultAsync(ct);
             if (report?.PdfAttachment == null || report.PdfAttachment.Length == 0)
                 return NotFound();
@@ -76,27 +93,87 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
         public async Task<IActionResult> PortalRecent(CancellationToken ct)
         {
             var doctor = await _users.GetUserAsync(User);
-            if (doctor == null) return Unauthorized();
-            var requests = await _db.TestRequests.AsNoTracking()
-                .Where(q => q.DoctorId == doctor.Id && q.Status == "Completed")
-                .Where(q => _db.TestRequestTestTypes.Any(t =>
-                    t.TestRequestId == q.TestRequestId && t.Status == "Verified" &&
-                    _db.TestResults.Any(r => r.TestRequestTestTypeId == t.TestRequestTestTypeId &&
-                        r.ResultValue != null && r.ResultValue != "" &&
-                        r.VerifiedByTechnicianId != null && r.VerifiedDateTime != null)))
-                .OrderByDescending(q => q.TestRequestId)
-                .Select(q => new {
-                    id = q.TestRequestId,
-                    testRequestId = q.TestRequestId,
-                    reportType = "PartialVerified",
-                    source = "Portal",
-                    downloadUrl = "/Doctor/ReceivedReports/PortalDownload/" + q.TestRequestId
-                })
-                .Take(10).ToListAsync(ct);
-            NoCache();
-            return Json(requests);
-        }
+            if (doctor == null)
+                return Unauthorized();
 
+            // Get this doctor's latest completed requests.
+            var requestIds = await _db.TestRequests
+                .AsNoTracking()
+                .Where(r => r.DoctorId == doctor.Id &&
+                            r.Status == "Completed")
+                .OrderByDescending(r => r.TestRequestId)
+                .Select(r => r.TestRequestId)
+                .Take(50)
+                .ToListAsync(ct);
+
+            if (requestIds.Count == 0)
+            {
+                NoCache();
+                return Json(Array.Empty<object>());
+            }
+
+            // Load active tests only.
+            var tests = await _db.TestRequestTestTypes
+                .AsNoTracking()
+                .Where(t => requestIds.Contains(t.TestRequestId)
+                            && !t.IsDeleted)
+                .Select(t => new
+                {
+                    t.TestRequestId,
+                    t.TestRequestTestTypeId,
+                    t.Status
+                })
+                .ToListAsync(ct);
+
+            var testIds = tests
+                .Select(t => t.TestRequestTestTypeId)
+                .ToList();
+
+            if (testIds.Count == 0)
+            {
+                NoCache();
+                return Json(Array.Empty<object>());
+            }
+
+            // Get tests with a saved and verified result.
+            var verifiedIds = await _db.TestResults
+                .AsNoTracking()
+                .Where(r =>
+                    testIds.Contains(r.TestRequestTestTypeId) &&
+                    r.ResultValue != null &&
+                    r.ResultValue != "" &&
+                    r.VerifiedByTechnicianId != null &&
+                    r.VerifiedDateTime != null)
+                .Select(r => r.TestRequestTestTypeId)
+                .Distinct()
+                .ToListAsync(ct);
+
+            var verifiedSet = verifiedIds.ToHashSet();
+
+            var eligibleIds = tests
+                .GroupBy(t => t.TestRequestId)
+                .Where(group =>
+                    group.All(t =>
+                        t.Status == "Verified" &&
+                        verifiedSet.Contains(t.TestRequestTestTypeId)))
+                .Select(group => group.Key)
+                .OrderByDescending(id => id)
+                .Take(10)
+                .ToList();
+
+            var reports = eligibleIds.Select(id => new
+            {
+                id,
+                testRequestId = id,
+                reportType = "FinalVerified",
+                source = "Portal",
+                downloadUrl =
+                    "/Doctor/ReceivedReports/PortalDownload/" + id
+            });
+
+            NoCache();
+            return Json(reports);
+        }
         [HttpGet]
         public async Task<IActionResult> PortalDownload(int id, CancellationToken ct)
         {
@@ -107,10 +184,13 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                     q.DoctorId == doctor.Id && q.Status == "Completed", ct);
             if (request == null) return NotFound();
 
+            // Ignore deactivated tests when evaluating final-report readiness.
             var tests = await _db.TestRequestTestTypes.AsNoTracking()
-                .Where(t => t.TestRequestId == id)
+                .Where(t => t.TestRequestId == id && !t.IsDeleted)
                 .ToListAsync(ct);
             if (tests.Count == 0) return NotFound();
+            if (tests.Any(t => t.Status != "Verified"))
+                return NotFound("A final report is not available until every active test is verified.");
 
             var testIds = tests.Select(t => t.TestRequestTestTypeId).ToList();
             var results = await _db.TestResults.AsNoTracking()
@@ -119,21 +199,14 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 .ToListAsync(ct);
 
             var verified = results.Where(r =>
-                tests.Any(t => t.TestRequestTestTypeId == r.TestRequestTestTypeId &&
-                    t.Status == "Verified") &&
                 !string.IsNullOrWhiteSpace(r.ResultValue) &&
                 !string.IsNullOrWhiteSpace(r.VerifiedByTechnicianId) &&
                 r.VerifiedDateTime.HasValue).ToList();
 
-            if (verified.Count == 0) return NotFound("No verified results available.");
-
-            var verifiedIds = verified.Select(r => r.TestRequestTestTypeId).ToHashSet();
-            var missing = tests.Where(t => !verifiedIds.Contains(t.TestRequestTestTypeId))
-                .Select(t => t.TestRequestTestTypeId).ToList();
-
-            // A fully complete request belongs to the existing final-report workflow.
-            if (missing.Count == 0)
-                return Conflict("This request is complete. Use the verified final-report workflow.");
+            // Every active test must have at least one verified result.
+            if (tests.Any(t => !verified.Any(r =>
+                    r.TestRequestTestTypeId == t.TestRequestTestTypeId)))
+                return NotFound("The final report is not yet available.");
 
             // Use the patient record for the name, not user-supplied parameters.
             var patientName = await _db.Patients.AsNoTracking()
@@ -141,8 +214,8 @@ namespace NMB_HLabSys.Areas.Doctor.Controllers
                 .Select(p => p.Name + " " + p.Surname)
                 .FirstOrDefaultAsync(ct) ?? "Patient record unavailable";
 
-            var pdf = _pdf.GeneratePartialVerifiedReport(id, patientName,
-                doctor.FullName, verified, missing);
+            var pdf = _pdf.GenerateLaboratoryReport(id, patientName,
+                doctor.FullName, verified);
             NoCache();
             return File(pdf, "application/pdf");
         }

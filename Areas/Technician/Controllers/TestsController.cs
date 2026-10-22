@@ -2968,11 +2968,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                             });
                     }
                 }
-                else if (decision == "ReturnForReview" &&
-                         test.TestRequest != null &&
+                else if (test.TestRequest != null &&
                          test.TestRequest.Status ==
                              TestRequestStatus.Completed.ToString())
                 {
+                    // A parent cannot remain Completed while any active child
+                    // test is not Verified, regardless of the current decision.
                     test.TestRequest.Status =
                         TestRequestStatus.InProgress.ToString();
                 }
