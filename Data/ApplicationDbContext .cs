@@ -503,9 +503,9 @@ namespace NMB_HLabSys.Data
 
 
             // ============================================================
-            // DEVELOPMENT DEMO: LERATO PATIENT PROFILE
+            // SYNTHETIC TRAINING PATIENT PROFILE - NOT A REAL PERSON
             // PatientId is distinct from AspNetUsers.Id (UserId).
-            // All demographic values below are fictional test data.
+            // All demographic and medical histories are fictional; never use for clinical care.
             // ============================================================
             builder.Entity<PatientModel>().HasData(
                 new PatientModel
@@ -1769,29 +1769,31 @@ namespace NMB_HLabSys.Data
             );
 
 
+            // SYNTHETIC CLINICAL TRAINING DATA: medically plausible examples, not verified patient records.
+            // Replace through authorised patient intake workflows, not by editing seed text in production.
             builder.Entity<MedicalConditionCategory>().HasData(
                 new MedicalConditionCategory
                 {
                     MedicalConditionCategoryId = 9001,
-                    Name = "Demo chronic conditions",
-                    Description = "DEMO DATA ONLY - laboratory assessment",
+                    Name = "Chronic medical conditions",
+                    Description = "Long-term conditions relevant to laboratory investigations",
                     Status = (NMB_HLabSys.Areas.Administrator.Models.Enums.Status)1
                 }
             );
 
             builder.Entity<AllergyModel>().HasData(
-                new AllergyModel { AllergyId = 1, AllergyName = "Penicillin", Description = "DEMO DATA ONLY", AllergyCategoryId = 1 },
-                new AllergyModel { AllergyId = 2, AllergyName = "Peanuts", Description = "DEMO DATA ONLY", AllergyCategoryId = 1 }
+                new AllergyModel { AllergyId = 1, AllergyName = "Penicillin", Description = "Reported beta-lactam antibiotic allergy", AllergyCategoryId = 1 },
+                new AllergyModel { AllergyId = 2, AllergyName = "Peanuts", Description = "Reported food allergy to peanuts", AllergyCategoryId = 1 }
             );
 
             builder.Entity<MedicalConditionModel>().HasData(
-                new MedicalConditionModel { MedicalConditionId = 1, ConditionName = "Hypertension", Description = "DEMO DATA ONLY", MedicalConditionCategoryId = 9001 },
-                new MedicalConditionModel { MedicalConditionId = 2, ConditionName = "Type 2 diabetes", Description = "DEMO DATA ONLY", MedicalConditionCategoryId = 9001 }
+                new MedicalConditionModel { MedicalConditionId = 1, ConditionName = "Hypertension", Description = "Chronic elevated blood pressure", MedicalConditionCategoryId = 9001 },
+                new MedicalConditionModel { MedicalConditionId = 2, ConditionName = "Type 2 diabetes mellitus", Description = "Chronic disorder of glucose regulation", MedicalConditionCategoryId = 9001 }
             );
 
             builder.Entity<MedicationModel>().HasData(
-                new MedicationModel { MedicationId = 1, MedicationName = "Metformin", Description = "DEMO DATA ONLY", MedicationCategoryId = 1 },
-                new MedicationModel { MedicationId = 2, MedicationName = "Amlodipine", Description = "DEMO DATA ONLY", MedicationCategoryId = 1 }
+                new MedicationModel { MedicationId = 1, MedicationName = "Metformin", Description = "Oral antihyperglycaemic medicine", MedicationCategoryId = 1 },
+                new MedicationModel { MedicationId = 2, MedicationName = "Amlodipine", Description = "Calcium channel blocker used for blood pressure management", MedicationCategoryId = 1 }
             );
 
             builder.Entity<PatientConditionModel>().HasData(
@@ -1801,7 +1803,7 @@ namespace NMB_HLabSys.Data
                     PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                     MedicalConditionId = 1,
                     DateDiagnosed = new DateTime(2024, 3, 12),
-                    Notes = "DEMO DATA ONLY - example medical condition."
+                    Notes = "Recorded history: blood pressure monitoring recommended."
                 },
                 new PatientConditionModel
                 {
@@ -1809,7 +1811,7 @@ namespace NMB_HLabSys.Data
                     PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                     MedicalConditionId = 2,
                     DateDiagnosed = new DateTime(2025, 6, 18),
-                    Notes = "DEMO DATA ONLY - example medical condition."
+                    Notes = "Recorded history: periodic HbA1c and fasting glucose monitoring."
                 }
             );
 
@@ -1820,7 +1822,7 @@ namespace NMB_HLabSys.Data
                     PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                     AllergyId = 1,
                     Severity = "Moderate",
-                    Notes = "DEMO DATA ONLY - fictional allergy history."
+                    Notes = "Reported rash after previous penicillin exposure; confirmation pending."
                 },
                 new PatientAllergyModel
                 {
@@ -1828,7 +1830,7 @@ namespace NMB_HLabSys.Data
                     PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                     AllergyId = 2,
                     Severity = "Mild",
-                    Notes = "DEMO DATA ONLY - fictional allergy history."
+                    Notes = "Reported itching after peanut exposure; confirmation pending."
                 }
             );
 
@@ -1842,7 +1844,7 @@ namespace NMB_HLabSys.Data
                     Frequency = "Twice daily",
                     StartDate = new DateTime(2026, 1, 10),
                     EndDate = null,
-                    Notes = "DEMO DATA ONLY - fictional medication history."
+                    Notes = "Medication history entered for training; verify at every encounter."
                 },
                 new PatientMedicationModel
                 {
@@ -1853,7 +1855,7 @@ namespace NMB_HLabSys.Data
                     Frequency = "Once daily",
                     StartDate = new DateTime(2026, 2, 15),
                     EndDate = null,
-                    Notes = "DEMO DATA ONLY - fictional medication history."
+                    Notes = "Medication history entered for training; verify at every encounter."
                 }
             );
 

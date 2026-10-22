@@ -1,762 +1,286 @@
 ﻿@model IEnumerable<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianAssignmentRowViewModel>
-
 @{
-    ViewData["Title"] = "My Assigned Test Types";
+    ViewData["Title"] = "My Manager-Assigned Test Types";
     Layout = "_TechnicianLayout";
-
-    var testTypes = Model?.ToList()
-        ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianAssignmentRowViewModel>();
-
-    var selectedTests = ViewBag.SelectedTests as List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianDeadlineRowViewModel>
-        ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianDeadlineRowViewModel>();
-    var nowUtc = DateTime.UtcNow;
-    var totalSelected = selectedTests.Count;
-    var inProgressCount = selectedTests.Count(x =>
-        string.Equals(x.Status, "In Progress", StringComparison.OrdinalIgnoreCase) ||
-        string.Equals(x.Status, "InProgress", StringComparison.OrdinalIgnoreCase));
-    var overdueCount = selectedTests.Count(x =>
-        !string.Equals(x.Status, "Completed", StringComparison.OrdinalIgnoreCase) &&
-        !string.Equals(x.Status, "Verified", StringComparison.OrdinalIgnoreCase) &&
-        x.StartDateTimeUtc.HasValue && x.TurnaroundHours.HasValue &&
-        x.StartDateTimeUtc.Value.AddHours(x.TurnaroundHours.Value) < nowUtc);
+    var testTypes = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianAssignmentRowViewModel>();
+    var managerNames = ViewBag.ManagerNamesByTestType as Dictionary<int, string> ?? new Dictionary<int, string>();
+    var requestNumbers = ViewBag.RequestNumbersByTestType as Dictionary<int, List<string>> ?? new Dictionary<int, List<string>>();
+    var assignmentDates = ViewBag.AssignmentDatesByTestType as Dictionary<int, DateTime> ?? new Dictionary<int, DateTime>();
+    var requestTechnicians = ViewBag.TechniciansByTestTypeRequest as Dictionary<int, Dictionary<string, List<string>>>
+        ?? new Dictionary<int, Dictionary<string, List<string>>>();
 }
 <style>
-    .available-page {
-        min-height: 100vh;
-        background: #f4f7fb;
+    .assigned-page { min-height:100vh; background:#f4f7fb; padding-bottom:55px; }
+    .assigned-hero { background:linear-gradient(135deg,#073b5c,#075985,#0284c7); color:white; padding:40px 24px 75px; }
+    .assigned-hero h1 { font-size:29px; font-weight:750; margin:0 0 8px; color:white; }
+    .assigned-hero p { font-size:13px; color:rgba(255,255,255,.85); margin:0; }
+    .assigned-body { position:relative; margin-top:-42px; padding:0 18px; }
+    .assigned-card { background:white; border-radius:13px; box-shadow:0 5px 22px rgba(15,23,42,.09); overflow:hidden; margin-bottom:22px; }
+    .assigned-stat { padding:23px 26px; }
+    .assigned-stat .count { font-size:31px; font-weight:750; color:#075985; }
+    .assigned-stat .label { font-size:12px; font-weight:650; color:#64748b; }
+    .assigned-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px; padding:22px 24px; border-bottom:1px solid #e2e8f0; }
+    .assigned-head h2 { font-size:17px; font-weight:750; color:#0f172a; margin:0; }
+    .assigned-head p { color:#64748b; font-size:12px; margin:5px 0 0; }
+    .assigned-search { max-width:330px; width:100%; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:12px; }
+    .assigned-table { width:100%; border-collapse:separate; border-spacing:0; table-layout:auto; }
+    .assigned-table th:nth-child(1) { min-width:155px; }
+    .assigned-table th:nth-child(2) { min-width:165px; }
+    .assigned-table th:nth-child(3) { min-width:175px; }
+    .assigned-table th:nth-child(4), .assigned-table th:nth-child(5) { min-width:105px; }
+    .assigned-table th:nth-child(6) { min-width:135px; }
+    .assigned-table th:nth-child(7) { min-width:135px; }
+    .assigned-table th:nth-child(8) { min-width:195px; }
+    .assigned-table td { vertical-align:middle; }
+    .assigned-table .name { max-width:200px; line-height:1.55; }
+    .assigned-table .assignment-row:hover td { background:#f7fbff; }
+    .assigned-meta { display:flex; flex-direction:column; gap:5px; }
+    .assigned-muted { color:#94a3b8; font-size:11px; }
+    .assigned-count-pill { display:inline-flex; align-items:center; gap:6px; border-radius:7px; padding:6px 9px; background:#eff6ff; color:#075985; font-size:11px; font-weight:750; width:max-content; }
+    .assigned-count-pill.team-pill { background:#f5f3ff; color:#6d28d9; }
+    .assigned-preview { font-size:11px; color:#64748b; line-height:1.5; overflow-wrap:anywhere; }
+    .assigned-more { font-size:11px; font-weight:700; color:#0369a1; border:0; background:transparent; padding:0; text-align:left; cursor:pointer; width:max-content; }
+    .assigned-more:hover { text-decoration:underline; }
+    .assigned-actions { display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr)); min-width:190px!important; max-width:220px; gap:7px!important; }
+    .assigned-action { justify-content:center; white-space:nowrap; }
+    .assigned-foot { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+    .assigned-help { font-size:11px; color:#94a3b8; }
+    @@media (max-width:1200px) { .assigned-table { min-width:1120px; } }
+    @@media (max-width:600px) {
+        .assigned-hero { padding:28px 15px 68px; }
+        .assigned-hero h1 { font-size:23px; }
+        .assigned-body { padding:0 10px; }
+        .assigned-head { padding:18px 15px; }
+        .assigned-search { max-width:none; }
+        .assigned-table { min-width:1050px; }
     }
-
-    .available-hero {
-        position: relative;
-        overflow: hidden;
-        padding: 38px 0 82px;
-        background: linear-gradient(135deg,#073b5c 0%,#075985 45%,#0284c7 100%);
-    }
-
-        .available-hero::before {
-            content: "";
-            position: absolute;
-            width: 280px;
-            height: 280px;
-            right: 200px;
-            bottom: -210px;
-            border-radius: 50%;
-            background: rgba(255,255,255,.05);
-        }
-
-        .available-hero::after {
-            content: "";
-            position: absolute;
-            width: 380px;
-            height: 380px;
-            right: -100px;
-            top: -220px;
-            border-radius: 50%;
-            background: rgba(255,255,255,.06);
-        }
-
-        .available-hero .hero-inner {
-            position: relative;
-            z-index: 1;
-        }
-
-        .available-hero h1 {
-            color: #fff;
-            font-size: 30px;
-            font-weight: 700;
-            margin: 0 0 8px;
-        }
-
-        .available-hero p {
-            color: rgba(255,255,255,.82);
-            font-size: 14px;
-            margin: 0;
-            max-width: 720px;
-        }
-
-        .available-hero .eyebrow {
-            display: inline-flex;
-            gap: 7px;
-            align-items: center;
-            color: #fff;
-            font-size: 12px;
-            font-weight: 600;
-            background: rgba(255,255,255,.13);
-            border: 1px solid rgba(255,255,255,.2);
-            border-radius: 30px;
-            padding: 7px 13px;
-            margin-bottom: 14px;
-        }
-
-        .available-hero .hero-actions {
-            display: flex;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-    .summary-card-link {
-        display: block;
-        height: 100%;
-        text-decoration: none !important;
-        color: inherit;
-        cursor: pointer;
-    }
-
-        .summary-card-link:hover {
-            text-decoration: none !important;
-            color: inherit;
-        }
-
-        .summary-card-link .available-summary {
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-            border: 1px solid transparent;
-        }
-
-        .summary-card-link:hover .available-summary {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(2,132,199,0.16);
-            border-color: #0284c7;
-        }
-
-        .summary-card-link:focus-visible {
-            outline: 3px solid #0284c7;
-            outline-offset: 3px;
-            border-radius: 13px;
-        }
-
-        .summary-card-link:hover .iconbox {
-            transform: scale(1.08);
-        }
-
-        .summary-card-link .iconbox {
-            transition: transform 0.25s ease;
-        }
-
-    .available-hero .hero-link {
-        padding: 10px 16px;
-        border-radius: 8px;
-        text-decoration: none !important;
-        font-size: 13px;
-        font-weight: 600;
-        display: inline-flex;
-        gap: 7px;
-        align-items: center;
-    }
-
-        .available-hero .hero-link.primary {
-            background: #fff;
-            color: #075985 !important;
-        }
-
-        .available-hero .hero-link.outline {
-            background: rgba(255,255,255,.08);
-            border: 1px solid rgba(255,255,255,.5);
-            color: #fff !important;
-        }
-
-    .available-content {
-        position: relative;
-        z-index: 2;
-        margin-top: -48px;
-        padding-bottom: 50px;
-    }
-
-    .available-summary {
-        background: #fff;
-        border-radius: 13px;
-        padding: 20px;
-        box-shadow: 0 4px 18px rgba(15,23,42,.07);
-        height: 100%;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-    }
-
-        .available-summary .label {
-            color: #64748b;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 7px;
-        }
-
-        .available-summary .number {
-            color: #0f172a;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .available-summary .note {
-            color: #94a3b8;
-            font-size: 11px;
-            margin-top: 7px;
-        }
-
-        .available-summary .iconbox {
-            width: 44px;
-            height: 44px;
-            flex: 0 0 44px;
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-    .iconbox.blue {
-        background: #e0f2fe;
-        color: #0284c7;
-    }
-
-    .iconbox.cyan {
-        background: #cffafe;
-        color: #0891b2;
-    }
-
-    .iconbox.orange {
-        background: #ffedd5;
-        color: #ea580c;
-    }
-
-    .iconbox.red {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-
-    .available-card {
-        margin-top: 24px;
-        background: #fff;
-        border-radius: 13px;
-        box-shadow: 0 4px 18px rgba(15,23,42,.06);
-        overflow: hidden;
-    }
-
-    .available-card-header {
-        padding: 18px 20px;
-        border-bottom: 1px solid #eef2f7;
-    }
-
-    .available-card-title {
-        color: #0f172a;
-        font-size: 15px;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .available-card-subtitle {
-        color: #94a3b8;
-        font-size: 11px;
-        margin: 4px 0 0;
-    }
-
-    .available-filter {
-        height: 37px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 11px;
-        color: #334155;
-    }
-
-    .available-table {
-        margin: 0;
-    }
-
-        .available-table thead th {
-            background: #f8fafc;
-            border-top: 0;
-            border-bottom: 1px solid #e2e8f0;
-            padding: 12px 13px;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-            white-space: nowrap;
-        }
-
-        .available-table tbody td {
-            padding: 14px 13px;
-            vertical-align: middle;
-            border-color: #f1f5f9;
-            color: #334155;
-            font-size: 12px;
-        }
-
-        .available-table tbody tr:hover {
-            background: #f8fcff;
-        }
-
-    .available-main {
-        display: block;
-        color: #075985;
-        font-weight: 700;
-    }
-
-    .available-sub {
-        display: block;
-        color: #94a3b8;
-        font-size: 10px;
-        margin-top: 3px;
-    }
-
-    .available-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        border-radius: 30px;
-        padding: 5px 9px;
-        font-size: 10px;
-        font-weight: 700;
-        white-space: nowrap;
-    }
-
-        .available-pill.routine {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-
-        .available-pill.urgent {
-            background: #ffedd5;
-            color: #c2410c;
-        }
-
-        .available-pill.stat {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .available-pill.status {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-
-    .available-select {
-        background: #0284c7;
-        color: #fff;
-        border: 0;
-        border-radius: 7px;
-        padding: 8px 12px;
-        font-size: 11px;
-        font-weight: 600;
-        white-space: nowrap;
-    }
-
-        .available-select:hover {
-            background: #0369a1;
-            color: #fff;
-        }
-
-        .available-select:disabled {
-            opacity: .6;
-            cursor: wait;
-        }
-
-    .available-empty {
-        text-align: center;
-        padding: 65px 20px;
-    }
-
-        .available-empty .empty-icon {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            background: #e0f2fe;
-            color: #0284c7;
-            font-size: 24px;
-        }
-
-        .available-empty h5 {
-            font-size: 15px;
-            color: #334155;
-            font-weight: 700;
-        }
-
-        .available-empty p {
-            font-size: 12px;
-            color: #94a3b8;
-            max-width: 470px;
-            margin: 0 auto;
-        }
-
-    .deadline-overdue {
-        background: #fff1f2 !important;
-    }
-
-    .deadline-pill {
-        display: inline-block;
-        border-radius: 20px;
-        padding: 5px 10px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-
-        .deadline-pill.overdue {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .deadline-pill.ontime {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .deadline-pill.done {
-            background: #e2e8f0;
-            color: #334155;
-        }
-
-        .deadline-pill.pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-    .deadline-meta {
-        font-size: 11px;
-        color: #64748b;
-    }
-
-    @@media(max-width:768px) {
-        .available-hero {
-            padding-top: 25px;
-        }
-
-            .available-hero h1 {
-                font-size: 24px;
-            }
-
-            .available-hero .hero-actions {
-                justify-content: flex-start;
-                margin-top: 20px;
-            }
-    }
+    .assigned-table th { background:#f8fafc; font-size:11px; text-transform:uppercase; letter-spacing:.35px; color:#64748b; padding:14px; white-space:nowrap; }
+    .assigned-table td { border-top:1px solid #edf2f7; padding:16px 14px; font-size:12px; color:#334155; }
+    .assigned-table tr:hover td { background:#f8fcff; }
+    .assigned-table .name { font-weight:750; color:#075985; }
+    .assigned-active { background:#dcfce7; color:#166534; font-size:11px; font-weight:700; border-radius:18px; padding:6px 10px; white-space:nowrap; }
+    .assigned-view { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border-radius:7px; background:#e0f2fe; color:#0369a1; font-weight:650; text-decoration:none!important; }
+    .assigned-view:hover { background:#0284c7; color:white; }
+    .request-number { display:inline-block; background:#eff6ff; color:#075985; border-radius:6px; padding:5px 8px; margin:2px 4px 2px 0; font-size:11px; font-weight:650; }
+    .request-team { margin-bottom:8px; }
+    .request-team .team-number { font-weight:700; color:#075985; }
+    .request-team .team-name { display:block; font-size:11px; color:#334155; margin:3px 0; }
+    .assigned-actions { display:flex; flex-wrap:wrap; gap:6px; min-width:255px; }
+    .assigned-action { border:0; border-radius:7px; padding:7px 9px; font-size:11px; font-weight:650; cursor:pointer; text-decoration:none!important; display:inline-flex; align-items:center; gap:5px; }
+    .action-details { background:#e0f2fe; color:#075985; }
+    .action-requests { background:#f1f5f9; color:#334155; }
+    .action-team { background:#ede9fe; color:#5b21b6; }
+    .action-select { background:#dcfce7; color:#166534; }
+    .assigned-action:hover { filter:brightness(.94); }
+    .assigned-modal[hidden] { display:none!important; }
+    .assigned-modal { position:fixed; inset:0; z-index:1055; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(15,23,42,.65); }
+    .assigned-modal-panel { background:white; border-radius:12px; width:min(650px,100%); max-height:85vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+    .assigned-modal-header { padding:18px 22px; background:#075985; color:white; display:flex; justify-content:space-between; align-items:center; }
+    .assigned-modal-header h3 { font-size:17px; margin:0; color:white; }
+    .assigned-modal-close { border:0; background:transparent; color:white; font-size:24px; cursor:pointer; }
+    .assigned-modal-content { padding:22px; }
+    .assigned-modal-content dt { font-weight:700; color:#334155; margin-top:10px; }
+    .assigned-modal-content dd { margin:3px 0 12px; }
+    .assigned-empty { text-align:center; color:#64748b; padding:50px 18px!important; }
+    .assigned-foot { padding:13px 24px; font-size:12px; color:#64748b; border-top:1px solid #edf2f7; }
 </style>
-
-
-<style>
-    .available-pill.assigned {
-        background: #dcfce7;
-        color: #166534;
-    }
-
-    .available-pill.revoked {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .assignment-view-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 35px;
-        height: 35px;
-        border-radius: 8px;
-        background: #e0f2fe;
-        color: #0369a1;
-        text-decoration: none;
-        transition: background .2s ease, color .2s ease;
-    }
-
-        .assignment-view-btn:hover,
-        .assignment-view-btn:focus-visible {
-            background: #0284c7;
-            color: #fff;
-            text-decoration: none;
-        }
-
-    .assigned-count-note {
-        color: #64748b;
-        font-size: 12px;
-    }
-
-    .available-filter:focus {
-        border-color: #0284c7;
-        box-shadow: 0 0 0 3px rgba(2,132,199,.1);
-    }
-</style>
-<div class="available-page">
-    <section class="available-hero">
-        <div class="container-fluid hero-inner">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="eyebrow"><i class="fas fa-shield-alt"></i> Laboratory Manager Authorization</div>
-                    <h1>My Assigned Test Types</h1>
-                    <p>View your active and revoked Laboratory Manager assignments, even when no patient tests are awaiting processing.</p>
+<div class="assigned-page">
+    <div class="assigned-hero">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap:16px">
+                <div>
+                    <h1><i class="fas fa-user-shield mr-2"></i> My Manager-Assigned Test Types</h1>
+                    <p>Only test types authorized for you by the Laboratory Manager are displayed here. You can perform multiple authorized tests; other technicians can independently perform different tests within the same patient request.</p>
                 </div>
-                <div class="col-md-4">
-                    <div class="hero-actions">
-                        <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" class="hero-link primary"><i class="fas fa-flask"></i> My Selected Tests</a>
-                        <a asp-area="Technician" asp-controller="Home" asp-action="Index" class="hero-link outline"><i class="fas fa-gauge-high"></i> Dashboard</a>
-                    </div>
-                </div>
+                <a asp-area="Technician" asp-controller="Home" asp-action="Index" class="btn btn-light btn-sm">Dashboard</a>
             </div>
         </div>
-    </section>
-
-    <div class="container-fluid available-content">
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
-        }
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success" role="status">@TempData["SuccessMessage"]</div>
-        }
-
-        <div class="row">
-
-
-            <!-- SELECT TEST -->
-            <!-- SELECT TEST CARD -->
-            <div class="col-xl-4 col-md-6 mb-4">
-                <a asp-area="Technician" asp-controller="Tests" asp-action="Available"
-                   class="summary-card-link" title="View available tests and select a patient test">
-                    <div class="available-summary">
-                        <div>
-                            <div class="label">Select Test</div>
-
-                            <h2 class="number">
-                                @testTypes.Count(x => x.IsActive)
-                            </h2>
-
-                            <div class="note mb-3">
-                                Select a patient test matching your active
-                                manager assignments.
-                            </div>
-
-                            <!-- SELECT TEST BUTTON -->
-                         @*    <span class="btn btn-primary btn-sm" aria-hidden="true">
-
-                                <i class="fas fa-vial mr-1"></i>
-                                View Available Tests
-                                <i class="fas fa-arrow-right ml-1"></i>
-
-                            </span> *@
-                        </div>
-
-                        <div class="iconbox blue">
-                            <i class="fas fa-vial"></i>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-
-
-            <!-- AUTHORIZED TEST TYPES -->
-            <div class="col-xl-4 col-md-6 mb-4">
-                <a href="/Technician/Tests/Available"
-                   class="summary-card-link">
-
-                    <div class="available-summary">
-                        <div>
-                            <div class="label">Authorized Test Types</div>
-                            <h2 class="number">@testTypes.Count(x => x.IsActive)</h2>
-                            <div class="note">View your authorized test types</div>
-                        </div>
-
-                        <div class="iconbox cyan">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-
-            <!-- ASSIGNMENT SOURCE -->
-            <div class="col-xl-4 col-md-12 mb-4">
-                <a href="@(testTypes.Any() ? Url.Action("AssignmentDetails", "Tests", new { area = "Technician", id = testTypes.First().TestTypeId }) : Url.Action("Available", "Tests", new { area = "Technician" }))"
-                   class="summary-card-link" title="View manager assignment details">
-
-                    <div class="available-summary">
-                        <div>
-                            <div class="label">Assignment Source</div>
-
-                            <h2 class="number" style="font-size:20px">
-                                Laboratory Manager
-                            </h2>
-
-                            <div class="note">
-                                View your assignment information
-                            </div>
-                        </div>
-
-                        <div class="iconbox orange">
-                            <i class="fas fa-user-shield"></i>
-                        </div>
-                    </div>
-
-                </a>
-            </div>
-
-            <!-- IN PROGRESS / TOTAL SELECTED -->
-            <div class="col-xl-6 col-md-6 mb-4">
-                <a href="/Technician/Tests/MyTests" class="summary-card-link"
-                   title="View selected patient tests">
-                    <div class="available-summary">
-                        <div>
-                            <div class="label">In Progress (Total Selected)</div>
-                            <h2 class="number">@inProgressCount <small style="font-size:16px;color:#64748b">/ @totalSelected</small></h2>
-                            <div class="note">@inProgressCount currently in progress out of @totalSelected selected patient test(s)</div>
-                        </div>
-                        <div class="iconbox blue"><i class="fas fa-flask"></i></div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- OVERDUE PATIENT TESTS -->
-            <div class="col-xl-6 col-md-6 mb-4">
-                <a asp-area="Technician" asp-controller="Tests" asp-action="Overdue"
-                   class="summary-card-link" title="Open overdue patient tests">
-                    <div class="available-summary">
-                        <div>
-                            <div class="label">Overdue Tests</div>
-                            <h2 class="number">@overdueCount</h2>
-                            <div class="note">Unfinished selected tests past their expected completion time</div>
-                        </div>
-                        <div class="iconbox red"><i class="fas fa-exclamation-triangle"></i></div>
-                    </div>
-                </a>
-            </div>
+    </div>
+    <div class="container-fluid assigned-body">
+        @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+        @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+        <div class="assigned-card assigned-stat">
+            <div class="label">Active Test Types Assigned by Manager</div>
+            <div class="count">@testTypes.Count</div>
+            <div class="label">Your authorization list — not patient-request tests</div>
         </div>
-
-        <!-- ONE UNIFIED TABLE: manager assignments and selected patient tests -->
-        <div class="available-card">
-            <div class="available-card-header">
-                <div class="row align-items-center">
-                    <div class="col-lg-7">
-                        <h4 class="available-card-title"><i class="fas fa-list-check text-primary mr-2"></i> Manager-Assigned Test Types &amp; Selected Tests</h4>
-                        <p class="available-card-subtitle">Manager authorizations and your selected patient-test deadlines, in one table. All times shown in SAST.</p>
-                    </div>
-                    <div class="col-lg-5 mt-3 mt-lg-0">
-                        <input id="availableSearch" type="search" class="form-control available-filter" placeholder="Search assignments, patients, requests or status..." aria-label="Search records" />
-                    </div>
+        <div class="assigned-card">
+            <div class="assigned-head">
+                <div>
+                    <h2>Authorized Laboratory Test Types</h2>
+                    <p>Only active manager authorizations appear. Request numbers are shown for unclaimed tests or tests assigned to you. For requests you participate in, see the technicians performing its different tests.</p>
                 </div>
+                <input id="assignedSearch" type="search" class="assigned-search" placeholder="Search test type, request, category or manager..." aria-label="Search assigned test types" />
             </div>
-            <div class="table-responsive">
-                <table id="assignedTestTypesTable" class="table available-table">
-                    <thead>
-                        <tr>
-                            <th>Record</th>
-                            <th>Test Type</th>
-                            <th>Category / Sample</th>
-                            <th>Patient / Request</th>
-                            <th>Authorization / Test Status</th>
-                            <th>Started (SAST)</th>
-                            <th>Turnaround</th>
-                            <th>Deadline (SAST)</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+            <div class="table-responsive" style="overflow-x:auto">
+                <table class="assigned-table" id="managerAssignmentsTable">
+                    <thead><tr>
+                        <th>Test Type</th><th>Associated Request Number(s)</th><th>Technicians Per Request</th><th>Category</th><th>Sample Type</th><th>Manager Full Name</th><th>Authorization Status</th><th>Action</th>
+                    </tr></thead>
                     <tbody>
-                        @foreach (var test in testTypes)
-                        {
-                            <tr>
-                                <td><span class="available-pill status">Manager Assignment</span></td>
-                                <td><span class="available-main">@test.Name</span></td>
-                                <td>@(test.Category ?? "Uncategorised")<span class="available-sub">Sample: @(test.SampleType ?? "Not specified")</span></td>
-                                <td><span class="text-muted">Not yet performed</span></td>
-                                <td>
-                                    @if (test.IsActive)
-                                    {
-                                        <span class="available-pill assigned"><i class="fas fa-check-circle"></i> Manager Assigned</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="available-pill revoked"><i class="fas fa-ban"></i> Revoked by Manager</span>
-                                    }
-                                </td>
-                                <td><span class="text-muted">Not yet performed</span></td>
-                                <td><span class="text-muted">Not yet performed</span></td>
-                                <td><span class="text-muted">Not yet performed</span></td>
-                                <td>
-                                    <a href="@Url.Action("AssignmentDetails", "Tests", new { area = "Technician", id = test.TestTypeId })"
-                                       class="assignment-view-btn" title="View assignment details" aria-label="View assignment details for @test.Name">
-                                        <i class="fas fa-eye" aria-hidden="true"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                        @foreach (var item in selectedTests)
-                        {
-                            var matchingAssignment = testTypes.FirstOrDefault(t => string.Equals(t.Name, item.TestTypeName, StringComparison.OrdinalIgnoreCase));
-                            var deadlineUtc = item.StartDateTimeUtc.HasValue && item.TurnaroundHours.HasValue
-                                ? item.StartDateTimeUtc.Value.AddHours(item.TurnaroundHours.Value)
-                                : (DateTime?)null;
-                            var finished = item.Status == "Completed" || item.Status == "Verified";
-                            var overdue = !finished && deadlineUtc.HasValue && nowUtc > deadlineUtc.Value;
-                            var startedLocal = item.StartDateTimeUtc?.AddHours(2);
-                            var deadlineLocal = deadlineUtc?.AddHours(2);
-                            <tr class="@(overdue ? "deadline-overdue" : "")">
-                                <td><span class="available-pill status">Selected Patient Test</span></td>
-                                <td><span class="available-main">@item.TestTypeName</span></td>
-                                <td>@(matchingAssignment?.Category ?? "Not specified")<span class="available-sub">Sample: @(matchingAssignment?.SampleType ?? "Not specified")</span></td>
-                                <td>@item.PatientName<span class="available-sub">@item.RequestReference</span></td>
-                                <td>
-                                    <span class="available-main">@item.Status</span>
-                                    @if (overdue)
-                                    {
-                                        <span class="deadline-pill overdue">Overdue</span>
-                                    }
-                                    else if (finished)
-                                    {
-
-                                        <span class="deadline-pill done">Finished</span>
-                                    }
-                                    else if (!deadlineUtc.HasValue)
-                                    {
-
-                                        <span class="deadline-pill pending">Deadline unavailable</span>
-                                    }
-                                    else
-                                    {
-
-                                        <span class="deadline-pill ontime">On track</span>
-                                    }
-                                </td>
-                                <td>@(startedLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not yet performed")</td>
-                                <td>@(item.TurnaroundHours.HasValue ? $"{item.TurnaroundHours.Value:g} hours" : "Not set")</td>
-                                <td>@(deadlineLocal?.ToString("dd MMM yyyy HH:mm") ?? "Not yet performed")</td>
-
-                                <td class="text-center">
-                                    <a href="/Technician/Tests/MyTests"
-                                       class="assignment-view-btn"
-                                       title="View my selected tests"
-                                       aria-label="View my selected tests">
-                                        <i class="fas fa-flask" aria-hidden="true"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                        @if (!testTypes.Any() && !selectedTests.Any())
-                        {
-                            <tr class="empty-row"><td colspan="9" class="text-center py-5">No manager assignments or selected patient tests found.</td></tr>
-                        }
+                    @foreach (var test in testTypes)
+                    {
+                        <tr class="assignment-row">
+                            <td class="name">@test.Name</td>
+                            <td>
+                                @if (requestNumbers.TryGetValue(test.TestTypeId, out var numbers) && numbers.Any())
+                                {
+                                    <div class="assigned-meta">
+                                        <span class="assigned-count-pill"><i class="fas fa-file-medical"></i> @numbers.Count request@(numbers.Count == 1 ? "" : "s")</span>
+                                        <span class="assigned-preview">Latest shown: @numbers.Last()</span>
+                                        <button type="button" class="assigned-more" data-modal-target="requests-@test.TestTypeId">
+                                            View all requests <i class="fas fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="assigned-muted">No associated requests</span>
+                                }
+                            </td>
+                            <td>
+                                @if (requestTechnicians.TryGetValue(test.TestTypeId, out var perRequest) && perRequest.Any())
+                                {
+                                    var participatingNames = perRequest.Values.SelectMany(names => names).Distinct().ToList();
+                                    <div class="assigned-meta">
+                                        <span class="assigned-count-pill team-pill"><i class="fas fa-users"></i> @participatingNames.Count technician@(participatingNames.Count == 1 ? "" : "s")</span>
+                                        <span class="assigned-preview">Across @perRequest.Count request@(perRequest.Count == 1 ? "" : "s")</span>
+                                        <button type="button" class="assigned-more" data-modal-target="team-@test.TestTypeId">
+                                            View request teams <i class="fas fa-arrow-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="assigned-muted">No team information</span>
+                                }
+                            </td>
+                            <td>@(test.Category ?? "Not specified")</td>
+                            <td>@(test.SampleType ?? "Not specified")</td>
+                            <td>@(managerNames.TryGetValue(test.TestTypeId, out var manager) ? manager : "Manager not recorded")</td>
+                            <td><span class="assigned-active"><i class="fas fa-check-circle mr-1"></i> Manager Assigned</span></td>
+                            <td>
+                                <div class="assigned-actions">
+                                    <button type="button" class="assigned-action action-details" data-modal-target="details-@test.TestTypeId" title="View authorization details"><i class="fas fa-eye"></i> Details</button>
+                                    <button type="button" class="assigned-action action-requests" data-modal-target="requests-@test.TestTypeId" title="View associated requests"><i class="fas fa-clipboard-list"></i> Requests</button>
+                                    <button type="button" class="assigned-action action-team" data-modal-target="team-@test.TestTypeId" title="View participating technicians"><i class="fas fa-users"></i> Technicians</button>
+                                    <a asp-area="Technician" asp-controller="Tests" asp-action="Select" asp-route-testTypeId="@test.TestTypeId" class="assigned-action action-select" title="Select an eligible patient test"><i class="fas fa-flask"></i> Select Test</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    @if (!testTypes.Any())
+                    {
+                        <tr class="empty-row"><td colspan="8" class="assigned-empty">No active test types have been assigned to you by the Laboratory Manager.</td></tr>
+                    }
                     </tbody>
                 </table>
             </div>
-            <div class="px-3 py-3 assigned-count-note" id="assignedVisibleCount" aria-live="polite">Showing @(testTypes.Count + selectedTests.Count) record(s).</div>
+            <div class="assigned-foot"><span id="assignedCount">Showing @testTypes.Count authorized test type(s).</span><span class="assigned-help"><i class="fas fa-info-circle mr-1"></i> Select “View all requests” or “View request teams” for the full details.</span></div>
         </div>
     </div>
-</div>
 
+    @foreach (var test in testTypes)
+    {
+        var hasRequests = requestNumbers.TryGetValue(test.TestTypeId, out var numbersForModal) && numbersForModal.Any();
+        var hasTeams = requestTechnicians.TryGetValue(test.TestTypeId, out var teamsForModal) && teamsForModal.Any();
+        <div class="assigned-modal" id="details-@test.TestTypeId" role="dialog" aria-modal="true" aria-label="Assignment details for @test.Name" hidden>
+            <div class="assigned-modal-panel">
+                <div class="assigned-modal-header"><h3>Assignment Details — @test.Name</h3><button type="button" class="assigned-modal-close" aria-label="Close dialog">&times;</button></div>
+                <div class="assigned-modal-content">
+                    <dl>
+                        <dt>Test Type</dt><dd>@test.Name</dd>
+                        <dt>Category</dt><dd>@(test.Category ?? "Not specified")</dd>
+                        <dt>Sample Type</dt><dd>@(test.SampleType ?? "Not specified")</dd>
+                        <dt>Laboratory Manager</dt><dd>@(managerNames.TryGetValue(test.TestTypeId, out var assignedManager) ? assignedManager : "Manager not recorded")</dd>
+                        <dt>Assigned Date (UTC)</dt><dd>@(assignmentDates.TryGetValue(test.TestTypeId, out var assignedOn) ? assignedOn.ToString("dd MMM yyyy HH:mm") : "Not recorded")</dd>
+                        <dt>Authorization Status</dt><dd><span class="assigned-active">Manager Assigned</span></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="assigned-modal" id="requests-@test.TestTypeId" role="dialog" aria-modal="true" aria-label="Associated requests for @test.Name" hidden>
+            <div class="assigned-modal-panel">
+                <div class="assigned-modal-header"><h3>Associated Requests — @test.Name</h3><button type="button" class="assigned-modal-close" aria-label="Close dialog">&times;</button></div>
+                <div class="assigned-modal-content">
+                    @if (hasRequests)
+                    {
+                        <p>Requests with an unclaimed test of this authorized type, or a test assigned to you:</p>
+                        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                            @foreach (var number in numbersForModal!) { <span class="request-number">@number</span> }
+                        </div>
+                    }
+                    else { <p class="text-muted">No associated requests currently visible to you.</p> }
+                </div>
+            </div>
+        </div>
+        <div class="assigned-modal" id="team-@test.TestTypeId" role="dialog" aria-modal="true" aria-label="Request technicians for @test.Name" hidden>
+            <div class="assigned-modal-panel">
+                <div class="assigned-modal-header"><h3>Technicians Per Request — @test.Name</h3><button type="button" class="assigned-modal-close" aria-label="Close dialog">&times;</button></div>
+                <div class="assigned-modal-content">
+                    @if (hasTeams)
+                    {
+                        <p class="text-muted">Other technicians are shown only for requests you already participate in.</p>
+                        @foreach (var entry in teamsForModal!.OrderBy(x => x.Key))
+                        {
+                            <div class="request-team" style="padding:12px 14px;border:1px solid #e2e8f0;border-radius:9px;margin-bottom:10px;background:#f8fafc"><strong class="team-number">@entry.Key</strong>
+                                @if (entry.Value.Any())
+                                {
+                                    @foreach (var technicianName in entry.Value) { <span class="team-name"><i class="fas fa-user mr-1"></i>@technicianName</span> }
+                                }
+                                else { <span class="team-name text-muted">No technicians shown for this request</span> }
+                            </div>
+                        }
+                    }
+                    else { <p class="text-muted">No request team information currently available.</p> }
+                </div>
+            </div>
+        </div>
+    }
+</div>
 @section Scripts {
     <script>
-        $(function() {
-            var $rows = $('#assignedTestTypesTable tbody tr').not('.empty-row');
-            $('#availableSearch').on('input', function() {
-                var query = (this.value || '').trim().toLowerCase();
-                var visible = 0;
-                $rows.each(function() {
-                    var match = $(this).text().toLowerCase().includes(query);
-                    $(this).toggle(match);
-                    if (match) visible++;
+        (function () {
+            var search = document.getElementById('assignedSearch');
+            var rows = Array.from(document.querySelectorAll('#managerAssignmentsTable .assignment-row'));
+            var count = document.getElementById('assignedCount');
+            var dialogs = Array.from(document.querySelectorAll('.assigned-modal'));
+            var previousFocus = null;
+            function closeDialog(dialog) {
+                dialog.hidden = true;
+                document.body.style.overflow = '';
+                if (previousFocus) previousFocus.focus();
+            }
+            document.querySelectorAll('[data-modal-target]').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var dialog = document.getElementById(button.getAttribute('data-modal-target'));
+                    if (!dialog) return;
+                    previousFocus = button;
+                    dialog.hidden = false;
+                    document.body.style.overflow = 'hidden';
+                    dialog.querySelector('.assigned-modal-close').focus();
                 });
-                $('#assignedVisibleCount').text('Showing ' + visible + ' matching record(s).');
             });
-        });
+            dialogs.forEach(function (dialog) {
+                dialog.querySelector('.assigned-modal-close').addEventListener('click', function () { closeDialog(dialog); });
+                dialog.addEventListener('click', function (event) { if (event.target === dialog) closeDialog(dialog); });
+            });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    var active = dialogs.find(function (dialog) { return !dialog.hidden; });
+                    if (active) closeDialog(active);
+                }
+            });
+            if (!search) return;
+            search.addEventListener('input', function () {
+                var q = search.value.trim().toLowerCase(), visible = 0;
+                rows.forEach(function (row) {
+                    var show = row.textContent.toLowerCase().includes(q);
+                    row.style.display = show ? '' : 'none';
+                    if (show) visible++;
+                });
+                count.textContent = 'Showing ' + visible + ' authorized test type(s).';
+            });
+        })();
     </script>
 }

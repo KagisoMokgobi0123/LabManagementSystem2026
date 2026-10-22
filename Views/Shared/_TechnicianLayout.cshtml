@@ -1036,14 +1036,15 @@
                 </a>
 
 
-                <a href="/Technician/ReceiveSamples/Index"
+              
+                <a asp-area="Technician"
+                   asp-controller="ReceiveSamples"
+                   asp-action="Index"
                    title="Receive Samples"
                    class="sidebar-link @(controller == "ReceiveSamples" && action == "Index" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-vials"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1051,14 +1052,16 @@
                     </span>
 
                 </a>
-                <a href="/Technician/Tests/Select"
+
+              
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Select"
                    title="Select Tests"
                    class="sidebar-link @(controller == "Tests" && action == "Select" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-plus-circle"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1066,6 +1069,7 @@
                     </span>
 
                 </a>
+
 
                 <div class="sidebar-section">
                     Test Processing

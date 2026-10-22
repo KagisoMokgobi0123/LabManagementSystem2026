@@ -10,16 +10,18 @@
     var requests = Model?.ToList()
         ?? new List<TestRequestsModel>();
 
-    var totalRequests = requests.Count;
+    // Count physical specimens (table rows), not parent requests.
+    // Includes de-activated, unreceived specimens shown in the table.
+    var pendingSamples = requests
+        .SelectMany(r => r.Samples
+            .Where(sample => !sample.IsReceived)
+            .Select(sample => new { r.Urgency, sample.SampleId }))
+        .ToList();
 
-    var routineRequests = requests.Count(r =>
-        r.Urgency == Urgency.Routine);
-
-    var urgentRequests = requests.Count(r =>
-        r.Urgency == Urgency.Urgent);
-
-    var statRequests = requests.Count(r =>
-        r.Urgency == Urgency.Stat);
+    var totalRequests = pendingSamples.Count;
+    var routineRequests = pendingSamples.Count(s => s.Urgency == Urgency.Routine);
+    var urgentRequests = pendingSamples.Count(s => s.Urgency == Urgency.Urgent);
+    var statRequests = pendingSamples.Count(s => s.Urgency == Urgency.Stat);
 
     var selectedUrgency = ViewBag.SelectedUrgency as string ?? "";
 }
@@ -27,8 +29,8 @@
 <style>
 
     /* =========================================================
-                                   PAGE
-                                   ========================================================= */
+                                       PAGE
+                                       ========================================================= */
 
     .receive-page {
         min-height: 100vh;
@@ -37,8 +39,8 @@
 
 
     /* =========================================================
-                                   HERO
-                                   ========================================================= */
+                                       HERO
+                                       ========================================================= */
 
     .receive-hero {
         position: relative;
@@ -104,8 +106,8 @@
 
 
     /* =========================================================
-                                   HERO BUTTONS
-                                   ========================================================= */
+                                       HERO BUTTONS
+                                       ========================================================= */
 
     .hero-actions {
         display: flex;
@@ -143,8 +145,8 @@
 
 
     /* =========================================================
-                                   CONTENT
-                                   ========================================================= */
+                                       CONTENT
+                                       ========================================================= */
 
     .receive-content {
         position: relative;
@@ -155,8 +157,8 @@
 
 
     /* =========================================================
-                                   SUMMARY CARDS
-                                   ========================================================= */
+                                       SUMMARY CARDS
+                                       ========================================================= */
 
     .summary-card {
         height: 100%;
@@ -252,8 +254,8 @@
 
 
     /* =========================================================
-                                   TABLE CARD
-                                   ========================================================= */
+                                       TABLE CARD
+                                       ========================================================= */
 
     .requests-card {
         margin-top: 24px;
@@ -285,8 +287,8 @@
 
 
     /* =========================================================
-                                   FILTERS
-                                   ========================================================= */
+                                       FILTERS
+                                       ========================================================= */
 
     .filter-control {
         height: 37px;
@@ -320,8 +322,8 @@
 
 
     /* =========================================================
-                                   TABLE
-                                   ========================================================= */
+                                       TABLE
+                                       ========================================================= */
 
     .requests-table {
         margin-bottom: 0;
@@ -384,8 +386,8 @@
 
 
     /* =========================================================
-                                   REQUEST
-                                   ========================================================= */
+                                       REQUEST
+                                       ========================================================= */
 
     .request-number {
         color: #075985;
@@ -401,8 +403,8 @@
 
 
     /* =========================================================
-                                   PERSON
-                                   ========================================================= */
+                                       PERSON
+                                       ========================================================= */
 
     .person-name {
         display: block;
@@ -420,8 +422,8 @@
 
 
     /* =========================================================
-                                   BARCODE
-                                   ========================================================= */
+                                       BARCODE
+                                       ========================================================= */
 
     .barcode-value {
         display: inline-flex;
@@ -444,8 +446,8 @@
 
 
     /* =========================================================
-                                   SAMPLE TYPE
-                                   ========================================================= */
+                                       SAMPLE TYPE
+                                       ========================================================= */
 
     .sample-type {
         display: flex;
@@ -468,8 +470,8 @@
 
 
     /* =========================================================
-                                   URGENCY
-                                   ========================================================= */
+                                       URGENCY
+                                       ========================================================= */
 
     .urgency-badge {
         display: inline-flex;
@@ -499,8 +501,8 @@
 
 
     /* =========================================================
-                                   STATUS
-                                   ========================================================= */
+                                       STATUS
+                                       ========================================================= */
 
     .status-badge {
         display: inline-flex;
@@ -517,8 +519,8 @@
 
 
     /* =========================================================
-                                   RECEIVE BUTTON
-                                   ========================================================= */
+                                       RECEIVE BUTTON
+                                       ========================================================= */
 
     .btn-receive {
         display: inline-flex;
@@ -556,8 +558,8 @@
 
 
     /* =========================================================
-                                   EMPTY STATE
-                                   ========================================================= */
+                                       EMPTY STATE
+                                       ========================================================= */
 
     .empty-state {
         padding: 65px 20px;
@@ -593,8 +595,8 @@
 
 
     /* =========================================================
-                                   MODAL
-                                   ========================================================= */
+                                       MODAL
+                                       ========================================================= */
 
     #receiveSampleModal .modal-content {
         overflow: hidden;
@@ -605,8 +607,8 @@
 
 
     /* =========================================================
-                                   RESPONSIVE
-                                   ========================================================= */
+                                       RESPONSIVE
+                                       ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -759,7 +761,7 @@
                                 </h2>
 
                                 <div class="summary-note">
-                                    Submitted laboratory requests
+                                    Unreceived physical samples
                                 </div>
 
                             </div>
@@ -799,7 +801,7 @@
                                 </h2>
 
                                 <div class="summary-note">
-                                    Standard priority requests
+                                    Routine samples awaiting reception
                                 </div>
 
                             </div>
@@ -839,7 +841,7 @@
                                 </h2>
 
                                 <div class="summary-note">
-                                    High-priority requests
+                                    Urgent samples awaiting reception
                                 </div>
 
                             </div>
@@ -879,7 +881,7 @@
                                 </h2>
 
                                 <div class="summary-note">
-                                    Immediate laboratory priority
+                                    STAT samples awaiting reception
                                 </div>
 
                             </div>
@@ -990,7 +992,7 @@
             </div>
 
 
-            @if (requests.Any(r => string.IsNullOrWhiteSpace(selectedUrgency) || r.Urgency.ToString().Equals(selectedUrgency, StringComparison.OrdinalIgnoreCase)))
+            @if (requests.Any(r => r.Samples.Any(s => !s.IsReceived)))
             {
                 <div class="table-responsive">
 
@@ -1040,14 +1042,13 @@
 
                         <tbody>
 
-                            @foreach (var request in requests.Where(r => string.IsNullOrWhiteSpace(selectedUrgency) || r.Urgency.ToString().Equals(selectedUrgency, StringComparison.OrdinalIgnoreCase)))
+                            @foreach (var request in requests)
                             {
-                                // Each physical specimen must be received separately.
-                                // Show active and de-activated unreceived samples; received samples appear in Received Samples.
-                                var pendingSamples = request.Samples
-                                    .Where(s => !s.IsReceived)
-                                    .OrderBy(s => s.SampleId)
-                                    .ToList();
+                                
+                               var requestPendingSamples = request.Samples
+    .Where(s => !s.IsReceived)
+    .OrderBy(s => s.SampleId)
+    .ToList();
 
 
                                 var urgencyClass =
@@ -1058,7 +1059,7 @@
                                             : "urgency-routine";
 
 
-                                @foreach (var sample in pendingSamples)
+                                @foreach (var sample in requestPendingSamples)
                                 {
                                     <tr data-urgency="@request.Urgency">
 
@@ -1173,7 +1174,7 @@
 
                                         <!-- URGENCY -->
 
-                                        <td>
+                                        <td data-search="@request.Urgency.ToString()">
 
                                             <span class="urgency-badge @urgencyClass">
 
@@ -1868,13 +1869,13 @@
                             "No matching sample requests were found.",
 
                         info:
-                            "Showing _START_ to _END_ of _TOTAL_ requests",
+                            "Showing _START_ to _END_ of _TOTAL_ samples",
 
                         infoEmpty:
-                            "Showing 0 requests",
+                            "Showing 0 samples",
 
                         infoFiltered:
-                            "(filtered from _MAX_ total requests)",
+                            "(filtered from _MAX_ total samples)",
 
                         lengthMenu:
                             "Show _MENU_ records",
@@ -1918,33 +1919,32 @@
                 // Column 5 = Urgency
                 // ========================================================
 
-                $("#urgencyFilter").on(
-                    "change",
-                    function() {
+                // DataTables reads the exact urgency from the cell's data-search
+                // attribute, so icons and whitespace do not break matching.
+                function applyUrgencyFilter(value) {
+                    const allowed = ["Routine", "Urgent", "Stat"];
+                    const selected = allowed.find(x => x.toLowerCase() === String(value || "").toLowerCase());
+                    table.column(5).search(selected ? "^" + selected + "$" : "", true, false).draw();
+                }
 
-                        const value =
-                            $(this).val();
+                applyUrgencyFilter($("#urgencyFilter").val());
 
-                        if (!value) {
-
-                            table
-                                .column(5)
-                                .search("")
-                                .draw();
-
-                            return;
+                $("#urgencyFilter").on("change", function() {
+                    const value = $(this).val() || "";
+                    applyUrgencyFilter(value);
+                    // Keep the card highlight and selected urgency in sync on refresh.
+                    const url = new URL(window.location.href);
+                    if (value) url.searchParams.set("urgency", value);
+                    else url.searchParams.delete("urgency");
+                    window.history.replaceState({}, "", url);
+                    $(".summary-card-link").removeClass("active");
+                    $(".summary-card-link").each(function() {
+                        const cardUrl = new URL(this.href, window.location.href);
+                        if ((cardUrl.searchParams.get("urgency") || "").toLowerCase() === value.toLowerCase()) {
+                            $(this).addClass("active");
                         }
-
-                        table
-                            .column(5)
-                            .search(
-                                "^" + value + "$",
-                                true,
-                                false
-                            )
-                            .draw();
-                    }
-                );
+                    });
+                });
             }
 
 
@@ -2170,37 +2170,37 @@
                     $("#receiveSampleModalContent")
                         .html(`
 
-                                                                                <div class="modal-body text-center py-5">
+                                                                                        <div class="modal-body text-center py-5">
 
-                                                                                    <div
-                                                                                        class="spinner-border text-primary"
-                                                                                        role="status">
+                                                                                            <div
+                                                                                                class="spinner-border text-primary"
+                                                                                                role="status">
 
-                                                                                        <span class="sr-only">
-                                                                                            Loading...
-                                                                                        </span>
+                                                                                                <span class="sr-only">
+                                                                                                    Loading...
+                                                                                                </span>
 
-                                                                                    </div>
+                                                                                            </div>
 
-                                                                                    <h6 class="mt-3 mb-1">
+                                                                                            <h6 class="mt-3 mb-1">
 
-                                                                                        Loading Sample
+                                                                                                Loading Sample
 
-                                                                                    </h6>
+                                                                                            </h6>
 
-                                                                                    <p class="text-muted mb-0">
+                                                                                            <p class="text-muted mb-0">
 
-                                                                                        ${requestNumber || "Request"}
+                                                                                                ${requestNumber || "Request"}
 
-                                                                                        <br />
+                                                                                                <br />
 
-                                                                                        ${barcode || ""}
+                                                                                                ${barcode || ""}
 
-                                                                                    </p>
+                                                                                            </p>
 
-                                                                                </div>
+                                                                                        </div>
 
-                                                                            `);
+                                                                                    `);
 
 
                     // ====================================================
@@ -2217,8 +2217,8 @@
 
                     const receiveUrl =
                         '@Url.Action(
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "Receive",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "ReceiveSamples",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "Receive",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            "ReceiveSamples",
                                     new { area = "Technician" })';
 
 
@@ -2521,27 +2521,27 @@
                         $("#receiveSampleModalContent")
                             .html(`
 
-                                                                                    <div class="modal-body text-center py-5">
+                                                                                            <div class="modal-body text-center py-5">
 
-                                                                                        <div
-                                                                                            class="spinner-border text-primary"
-                                                                                            role="status">
+                                                                                                <div
+                                                                                                    class="spinner-border text-primary"
+                                                                                                    role="status">
 
-                                                                                            <span class="sr-only">
-                                                                                                Loading...
-                                                                                            </span>
+                                                                                                    <span class="sr-only">
+                                                                                                        Loading...
+                                                                                                    </span>
 
-                                                                                        </div>
+                                                                                                </div>
 
-                                                                                        <p class="mt-3 text-muted mb-0">
+                                                                                                <p class="mt-3 text-muted mb-0">
 
-                                                                                            Loading sample information...
+                                                                                                    Loading sample information...
 
-                                                                                        </p>
+                                                                                                </p>
 
-                                                                                    </div>
+                                                                                            </div>
 
-                                                                                `);
+                                                                                        `);
                     }
                 );
 

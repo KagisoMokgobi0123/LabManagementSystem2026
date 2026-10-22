@@ -201,24 +201,25 @@
                                 <td>@(item.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</td>
                                 <td><span class="tv-pill">Awaiting Verification</span></td>
                                 <td>
-                                    <div class="tv-actions">
-                                        <a class="tv-btn"
-                                           asp-area="Technician"
-                                           asp-controller="Tests"
-                                           asp-action="VerifyResult"
-                                           asp-route-id="@item.TestRequestTestTypeId"
-                                           aria-label="Verify results for test @item.TestRequestTestTypeId">
-                                            <i class="fas fa-user-check mr-1"></i>Verify Results
-                                        </a>
-                                        <a class="tv-history"
-                                           asp-area="Technician"
-                                           asp-controller="Tests"
-                                           asp-action="VerificationHistory"
-                                           asp-route-id="@item.TestRequestTestTypeId"
-                                           aria-label="View verification history for test @item.TestRequestTestTypeId">
-                                            <i class="fas fa-history mr-1"></i>History
-                                        </a>
-                                    </div>
+                               <div class="tv-actions">
+
+    <!-- Verify Results -->
+    <a class="tv-btn"
+       href="@Url.Action("VerifyResult", "Tests", new { area = "Technician", id = item.TestRequestTestTypeId })"
+       aria-label="Verify results for test @item.TestRequestTestTypeId">
+        <i class="fas fa-user-check mr-1"></i>
+        Verify Results
+    </a>
+
+    <!-- Verification History -->
+    <a class="tv-history"
+       href="@Url.Action("VerificationHistory", "Tests", new { area = "Technician", id = item.TestRequestTestTypeId })"
+       aria-label="View verification history for test @item.TestRequestTestTypeId">
+        <i class="fas fa-history mr-1"></i>
+        History
+    </a>
+
+</div>
                                 </td>
                             </tr>
                         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
+using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Data;
 
 namespace NMB_HLabSys.Services
@@ -100,47 +101,43 @@ namespace NMB_HLabSys.Services
                     if (email == null)
                         continue;
 
-                    // Prepare the correct report (preliminary or final) for this email.
-                    if (email.PdfAttachment == null ||
-                        email.PdfAttachment.Length == 0)
-                    {
-                        bool prepared =
-                            await deliveryService.PrepareReportForEmailAsync(
-                                email.SentEmailId);
-
-                        if (!prepared)
-                        {
-                            email.Status = "Failed";
-                            email.ErrorMessage =
-                                "Report preparation blocked. " +
-                                "Check the individual test status, result, " +
-                                "recipient and report type.";
-
-                            await context.SaveChangesAsync(
-                                cancellationToken);
-
-                            _logger.LogWarning(
-                                "Preparation blocked for email {EmailId}.",
-                                emailId);
-
-                            continue;
-                        }
-
-                        // Reload the generated PDF and resolved doctor email.
-                        await context.Entry(email).ReloadAsync(
-                            cancellationToken);
-                    }
-
-                    if (email.PdfAttachment == null ||
-                        email.PdfAttachment.Length == 0)
+                    // Never trust a previously stored PDF on a Pending email.
+                    // It may have been generated before results or recipient details changed.
+                    // Hold it for review rather than risk sending stale clinical data.
+                    if (email.PdfAttachment is { Length: > 0 })
                     {
                         email.Status = "Failed";
                         email.ErrorMessage =
-                            "Generated PDF attachment is missing.";
+                            "Existing PDF requires review before delivery; " +
+                            "a previously generated attachment was not revalidated.";
+                        await context.SaveChangesAsync(cancellationToken);
+                        _logger.LogWarning(
+                            "Held email {EmailId} because its PDF was already attached.",
+                            emailId);
+                        continue;
+                    }
 
-                        await context.SaveChangesAsync(
-                            cancellationToken);
+                    // Prepare and validate a fresh report from the current records.
+                    bool prepared = await deliveryService.PrepareReportForEmailAsync(
+                        email.SentEmailId, cancellationToken);
 
+                    if (!prepared)
+                    {
+                        email.Status = "Failed";
+                        email.ErrorMessage =
+                            "Report preparation blocked: check the result records, " +
+                            "verification, request status, and doctor's address.";
+                        await context.SaveChangesAsync(cancellationToken);
+                        _logger.LogWarning("Preparation blocked for email {EmailId}.", emailId);
+                        continue;
+                    }
+
+                    await context.Entry(email).ReloadAsync(cancellationToken);
+                    if (email.PdfAttachment == null || email.PdfAttachment.Length == 0)
+                    {
+                        email.Status = "Failed";
+                        email.ErrorMessage = "Generated PDF attachment is missing.";
+                        await context.SaveChangesAsync(cancellationToken);
                         continue;
                     }
 
@@ -263,3 +260,4 @@ namespace NMB_HLabSys.Services
         }
     }
 }
+
