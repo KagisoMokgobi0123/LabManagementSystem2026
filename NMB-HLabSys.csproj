@@ -8,9 +8,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="Areas\Administrator\Data\**" />
 		<Compile Remove="Areas\Manager\Data\**" />
+		<Content Remove="Areas\Administrator\Data\**" />
 		<Content Remove="Areas\Manager\Data\**" />
+		<EmbeddedResource Remove="Areas\Administrator\Data\**" />
 		<EmbeddedResource Remove="Areas\Manager\Data\**" />
+		<None Remove="Areas\Administrator\Data\**" />
 		<None Remove="Areas\Manager\Data\**" />
 	</ItemGroup>
 
@@ -43,12 +47,10 @@
 		<PackageReference Include="NuGet.Packaging" Version="6.13.2" />
 		<PackageReference Include="NuGet.Protocol" Version="6.13.1" />
 		<PackageReference Include="QuestPDF" Version="2026.9.1" />
-		<PackageReference Include="System.Security.Cryptography.Pkcs"
-                  Version="10.0.13" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Areas\Administrator\Data\" />
 		<Folder Include="Areas\Doctor\Data\" />
 		<Folder Include="Areas\Patient\Data\" />
 		<Folder Include="Migrations\" />
