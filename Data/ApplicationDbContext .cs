@@ -157,9 +157,27 @@ namespace NMB_HLabSys.Data
                 entity.Property(x => x.NewReferenceMax)
                     .HasPrecision(18, 4);
             });
-            builder.Entity<TechnicianSentEmailModel>()
-    .HasIndex(x => x.TestRequestId)
-    .IsUnique();
+            builder.Entity<TechnicianSentEmailModel>(entity =>
+            {
+                // Multiple reports can belong to one request.
+                entity.HasIndex(x => x.TestRequestId)
+                    .IsUnique(false);
+
+                // One preliminary report per individual test.
+                entity.HasIndex(x => new
+                {
+                    x.TestRequestTestTypeId,
+                    x.ReportType
+                })
+                .IsUnique()
+                .HasFilter("[TestRequestTestTypeId] IS NOT NULL");
+
+                // Preserve one combined final report per request.
+                entity.HasIndex(x => x.TestRequestId)
+                    .IsUnique()
+                    .HasDatabaseName("IX_TechnicianSentEmails_OneFinalPerRequest")
+                    .HasFilter("[ReportType] = 'Final'");
+            });
             builder.Entity<TestResultVerificationHistoryModel>(entity =>
             {
                 entity.Property(x => x.PreviousReferenceMin)

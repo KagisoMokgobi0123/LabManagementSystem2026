@@ -2568,6 +2568,12 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             if (test == null)
                 return NotFound();
 
+            if (test.IsDeleted)
+            {
+                TempData["ErrorMessage"] = "Deactivated tests cannot be verified.";
+                return RedirectToAction(nameof(VerifyResultsQueue));
+            }
+
             if (test.Status != "Completed")
             {
                 TempData["ErrorMessage"] = "Only completed tests can be verified.";
@@ -2606,7 +2612,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
             }
 
             ViewData["TestResults"] = results;
-            return View("VerifyResult", test);
+            return View("~/Areas/Technician/Views/Tests/VerifyResults.cshtml", test);
         }
         // Add inside TestsController, alongside the existing VerificationHistory(int id) action.
         // Add INSIDE Areas/Technician/Controllers/TestsController.cs
@@ -2912,88 +2918,62 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 await _context.SaveChangesAsync();
 
                 // ==========================================
-                // 6. CHECK ALL TESTS ON THE REQUEST
+                // 6. CHECK ALL ACTIVE TESTS ON THE REQUEST
                 // ==========================================
-
-                // A request is completed only when at least one active
-                // requested test exists and all active tests are verified.
-                // Soft-deactivated tests remain in the audit trail but do
-                // not block report generation.
 
                 var allTestsVerified =
                     decision == "Verify" &&
-                    await _context.TestRequestTestTypes
-                        .AnyAsync(x =>
-                            x.TestRequestId == test.TestRequestId &&
-                            !x.IsDeleted) &&
-                    !await _context.TestRequestTestTypes
-                        .AnyAsync(x =>
-                            x.TestRequestId == test.TestRequestId &&
-                            !x.IsDeleted &&
-                            x.Status != "Verified");
+                    await _context.TestRequestTestTypes.AnyAsync(x =>
+                        x.TestRequestId == test.TestRequestId && !x.IsDeleted) &&
+                    !await _context.TestRequestTestTypes.AnyAsync(x =>
+                        x.TestRequestId == test.TestRequestId &&
+                        !x.IsDeleted && x.Status != "Verified");
 
                 // ==========================================
-                // 7. COMPLETE REQUEST AND QUEUE REPORT
+                // 7. UPDATE THE REQUEST AND QUEUE FINAL REPORT
                 // ==========================================
+                // Individual verified results are exposed directly through
+                // Doctor/ReceivedReports/PortalRecent and PortalDownload.
+                // No outgoing email is created for portal-only reports.
 
                 if (allTestsVerified && test.TestRequest != null)
                 {
                     test.TestRequest.Status =
                         TestRequestStatus.Completed.ToString();
 
-                    // Prevent duplicate outgoing email records.
-                    // The database also has a unique index
-                    // on TestRequestId.
+                    // A Final report must not be confused with other
+                    // report types for the same request.
+                    var finalAlreadyQueued =
+                        await _context.TechnicianSentEmails.AnyAsync(x =>
+                            x.TestRequestId == test.TestRequestId &&
+                            x.ReportType == "Final");
 
-                    var alreadyQueued =
-                        await _context.TechnicianSentEmails
-                            .AnyAsync(x =>
-                                x.TestRequestId ==
-                                test.TestRequestId);
-
-                    if (!alreadyQueued)
+                    if (!finalAlreadyQueued)
                     {
-                        var outgoingEmail =
+                        _context.TechnicianSentEmails.Add(
                             new TechnicianSentEmailModel
                             {
-                                TestRequestId =
-                                    test.TestRequestId,
-
-                                // Resolved by the future delivery
-                                // service, not used for SMTP yet.
-                                RecipientEmail =
-                                    "Pending recipient resolution",
-
-                                Subject =
-                                    $"Laboratory Results - Request #{test.TestRequestId}",
-
-                                Body =
-                                    "Your verified laboratory results report is ready.",
-
-                                PdfFileName =
-                                    $"LaboratoryReport_{test.TestRequestId}.pdf",
-
+                                TestRequestId = test.TestRequestId,
+                                TestRequestTestTypeId = null,
+                                ReportType = "Final",
+                                RecipientEmail = "Pending recipient resolution",
+                                Subject = $"Laboratory Results - Request #{test.TestRequestId}",
+                                Body = "Your verified laboratory results report is ready.",
+                                PdfFileName = $"LaboratoryReport_{test.TestRequestId}.pdf",
                                 PdfAttachment = null,
-
                                 Status = "Pending",
-
                                 CreatedAt = now,
-
                                 SentAt = null,
-
                                 ErrorMessage = null
-                            };
-
-                        _context.TechnicianSentEmails.Add(
-                            outgoingEmail);
+                            });
                     }
                 }
-                else if (
-                    decision == "ReturnForReview" &&
-                    test.TestRequest != null &&
-                    test.TestRequest.Status ==
-                        TestRequestStatus.Completed.ToString())
+                else if (test.TestRequest != null &&
+                         test.TestRequest.Status ==
+                             TestRequestStatus.Completed.ToString())
                 {
+                    // A parent cannot remain Completed while any active child
+                    // test is not Verified, regardless of the current decision.
                     test.TestRequest.Status =
                         TestRequestStatus.InProgress.ToString();
                 }
@@ -3014,8 +2994,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 {
                     TempData["SuccessMessage"] =
                         allTestsVerified
-                            ? "Test verified successfully. All tests on this request are verified. The laboratory report has been queued for delivery."
-                            : "Test result verified successfully.";
+                            ? "Test verified successfully. All active tests are verified; the final-report workflow has been checked."
+                            : "Test result verified successfully. It is available to the authorised doctor through the portal when the request is Completed.";
                 }
                 else
                 {
