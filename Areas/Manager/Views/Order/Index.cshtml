@@ -570,10 +570,7 @@
     </div>
 }
 
-<!-- ============================================================
-     CANCEL ORDER MODALS
-     Posts to OrderController.Cancel.
-     ============================================================ -->
+<!-- Cancelling order form-->
 @foreach (var order in orders.Where(o =>
     o.Status != OrderStatus.Complete &&
     o.Status != OrderStatus.Cancelled))
@@ -777,9 +774,7 @@
     <script>
         "use strict";
 
-        /* =========================================================
-           REORDER DATA
-           ========================================================= */
+        /*Order details*/
 
         const reorderConsumables = @Html.Raw(JsonSerializer.Serialize(
                                     consumablesNeedingOrder.Select(c => new
@@ -796,9 +791,7 @@
                                     })
                     ));
 
-        /* =========================================================
-           PAGE INITIALIZATION
-           ========================================================= */
+        /* Pagenation Below the tables*/
 
         document.addEventListener("DOMContentLoaded", function () {
             initializePagination({
@@ -821,9 +814,7 @@
             initializeCreateOrderDiagnostics();
         });
 
-        /* =========================================================
-           SEARCH
-           ========================================================= */
+        /* Search */
 
         function initializeSearch() {
             const input = document.getElementById("orderSearch");
@@ -864,9 +855,7 @@
             });
         }
 
-        /* =========================================================
-           TABLE PAGINATION
-           ========================================================= */
+        /* How the pagination will work */
 
         window.orderTablePagers = window.orderTablePagers || {};
 
@@ -989,10 +978,7 @@
             render(false);
         }
 
-        /* =========================================================
-           CREATE FORM DIAGNOSTICS
-           Does not prevent or alter normal MVC form submission.
-           ========================================================= */
+        /* for debugging purpose */
 
         function initializeCreateOrderDiagnostics() {
             const form = document.getElementById("createOrderForm");
@@ -1018,13 +1004,10 @@
                     console.log(key + ":", value);
                 }
 
-                // Intentionally no preventDefault().
             });
         }
 
-        /* =========================================================
-           CREATE ORDER INITIALIZATION
-           ========================================================= */
+        /* create order*/
 
         function initializeCreateOrder() {
             const supplier = document.getElementById("createSupplierId");
@@ -1089,9 +1072,7 @@
             updateAddButton();
         }
 
-        /* =========================================================
-           ADD ORDER ITEM
-           ========================================================= */
+        /* Add Items into the order*/
 
         function addItem() {
             const supplier = document.getElementById("createSupplierId");
@@ -1207,9 +1188,7 @@
             updateAddButton();
         }
 
-        /* =========================================================
-           ORDER ITEM EVENTS
-           ========================================================= */
+  
 
         function attachItemEvents() {
             document.querySelectorAll(".remove-order-item").forEach(function (button) {
@@ -1312,9 +1291,7 @@
             button.disabled = selected.length >= available.length;
         }
 
-        /* =========================================================
-           CREATE MODAL RESET
-           ========================================================= */
+        /* Reset model */
 
         document.getElementById("createOrderModal")
             ?.addEventListener("hidden.bs.modal", function () {
@@ -1337,9 +1314,7 @@
                 if (validation) validation.classList.add("d-none");
             });
 
-        /* =========================================================
-           HTML ESCAPING FOR DYNAMIC OPTION LABELS
-           ========================================================= */
+
 
         function escapeHtml(value) {
             const div = document.createElement("div");

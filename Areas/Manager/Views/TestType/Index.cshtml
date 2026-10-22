@@ -19,9 +19,7 @@
 }
 
 <div class="container-fluid py-4">
-    <!-- =========================================================
-     PAGE HEADER
-     ========================================================= -->
+
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
@@ -58,9 +56,7 @@
 
     </div>
 
-    <!-- =========================================================
-     ERROR MESSAGE
-     ========================================================= -->
+
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -78,9 +74,6 @@
         </div>
     }
 
-    <!-- =========================================================
-     VALIDATION ERRORS
-     ========================================================= -->
     @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -125,9 +118,7 @@
         </div>
     }
 
-    <!-- =========================================================
-     INFORMATION
-     ========================================================= -->
+
 
     <div class="alert alert-info border-0 shadow-sm">
 
@@ -155,9 +146,7 @@
 
     </div>
 
-    <!-- =========================================================
-     TEST TYPE TABLE
-     ========================================================= -->
+    <!-- Table -->
 
     <div class="card border-0 shadow-sm">
 
@@ -314,10 +303,7 @@
                                     data-measurement-unit="@measurementUnitName"
                                     data-status="@status">
 
-                                    <!-- =================================================
-                                     TEST NAME
-                                     ================================================= -->
-
+         
                                     <td>
 
                                         <div class="fw-semibold">
@@ -328,9 +314,6 @@
 
                                     </td>
 
-                                    <!-- =================================================
-                                     CATEGORY
-                                     ================================================= -->
 
                                     <td>
 
@@ -342,30 +325,21 @@
 
                                     </td>
 
-                                    <!-- =================================================
-                                     SAMPLE TYPE
-                                     ================================================= -->
-
+     
                                     <td>
 
                                         @sampleTypeName
 
                                     </td>
 
-                                    <!-- =================================================
-                                     MEASUREMENT UNIT
-                                     ================================================= -->
-
+                                    
                                     <td>
 
                                         @measurementUnitName
 
                                     </td>
 
-                                    <!-- =================================================
-                                     NORMAL RANGE
-                                     ================================================= -->
-
+           
                                     <td>
 
                                         <span class="fw-semibold">
@@ -382,10 +356,6 @@
 
                                     </td>
 
-                                    <!-- =================================================
-                                     TURNAROUND
-                                     ================================================= -->
-
                                     <td>
 
                                         <span class="badge bg-secondary-subtle text-secondary">
@@ -396,10 +366,7 @@
 
                                     </td>
 
-                                    <!-- =================================================
-                                     STATUS
-                                     ================================================= -->
-
+                               
                                     <td>
 
                                         @if (isActive)
@@ -425,16 +392,12 @@
 
                                     </td>
 
-                                    <!-- =================================================
-                                     ACTIONS
-                                     ================================================= -->
-
                                     <td class="text-end">
 
                                         <div class="btn-group btn-group-sm"
                                              role="group">
 
-                                            <!-- VIEW -->
+                               
 
                                             <button type="button"
                                                     class="btn btn-outline-info"
@@ -457,7 +420,7 @@
 
                                             </button>
 
-                                            <!-- EDIT -->
+                                 
                                             @if (isActive)
                                             {
                                                 <button type="button"
@@ -481,7 +444,7 @@
                                                 </button>
                                             }
 
-                                            <!-- DELETE -->
+                             
                                             @if (isActive)
                                             {
                                                 <button type="button"
@@ -535,10 +498,6 @@
                             </tr>
                         }
 
-                        <!-- =================================================
-                         SEARCH EMPTY
-                         ================================================= -->
-
                         <tr id="noSearchResultsRow"
                             style="display:none;">
 
@@ -578,7 +537,8 @@
 
     </div>
 
-</div> <!-- ============================================================= ADD / EDIT TEST TYPE MODAL ============================================================= --> <div class="modal fade" id="testTypeModal" tabindex="-1" aria-hidden="true">
+</div>
+<div class="modal fade" id="testTypeModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-lg modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
@@ -591,9 +551,7 @@
 
             @Html.AntiForgeryToken()
 
-            <!-- =================================================
-                 HEADER
-                 ================================================= -->
+            
 
             <div class="modal-header">
 
@@ -613,10 +571,7 @@
 
             </div>
 
-            <!-- =================================================
-                 BODY
-                 ================================================= -->
-
+   
             <div class="modal-body">
 
                 <input type="hidden"
@@ -624,7 +579,7 @@
                        name="TestTypeId"
                        value="0" />
 
-                <!-- TEST NAME -->
+             
 
                 <div class="mb-3">
 
@@ -651,13 +606,10 @@
 
                 </div>
 
-                <!-- =================================================
-                     DROPDOWNS
-                     ================================================= -->
-
+   
                 <div class="row">
 
-                    <!-- TEST CATEGORY -->
+                
 
                     <div class="col-md-4 mb-3">
 
@@ -690,7 +642,7 @@
 
                     </div>
 
-                    <!-- SAMPLE TYPE -->
+           
 
                     <div class="col-md-4 mb-3">
 
@@ -723,7 +675,7 @@
 
                     </div>
 
-                    <!-- MEASUREMENT UNIT -->
+             
 
                     <div class="col-md-4 mb-3">
 
@@ -758,10 +710,7 @@
 
                 </div>
 
-                <!-- =================================================
-                     NORMAL RANGE
-                     ================================================= -->
-
+         
                 <div class="row">
 
                     <div class="col-md-6 mb-3">
@@ -804,10 +753,7 @@
 
                 </div>
 
-                <!-- =================================================
-                     TURNAROUND TIME
-                     ================================================= -->
-
+                
                 <div class="mb-3">
 
                     <label class="form-label fw-semibold"
@@ -844,10 +790,6 @@
 
             </div>
 
-            <!-- =================================================
-                 FOOTER
-                 ================================================= -->
-
             <div class="modal-footer">
 
                 <button type="button"
@@ -877,7 +819,8 @@
 
 </div>
 
-</div> <!-- ============================================================= VIEW TEST TYPE MODAL ============================================================= --> <div class="modal fade" id="viewTestTypeModal" tabindex="-1" aria-hidden="true">
+</div>
+<div class="modal fade" id="viewTestTypeModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-lg modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
@@ -1027,7 +970,8 @@
 
 </div>
 
-</div> <!-- ============================================================= DELETE TEST TYPE MODAL ============================================================= --> <div class="modal fade" id="deleteTestTypeModal" tabindex="-1" aria-hidden="true">
+</div>
+<div class="modal fade" id="deleteTestTypeModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
@@ -1114,7 +1058,8 @@
 
 </div>
 
-</div> <!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+</div> 
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
@@ -1197,9 +1142,7 @@
 @section Scripts {
 
     <script>
-        /* =========================================================
-           SUCCESS MESSAGE
-           ========================================================= */
+        /* Success Message */
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -1285,9 +1228,7 @@
 
         }
 
-        /* =========================================================
-           VIEW
-           ========================================================= */
+        /* View details form pop up */
 
         function viewTestType(
             id,
@@ -1367,9 +1308,7 @@
 
         }
 
-        /* =========================================================
-           EDIT
-           ========================================================= */
+        /* Edit details */
 
         function editTestType(
             id,
@@ -1427,15 +1366,8 @@
             ).value =
                 measurementUnitId;
 
-            /*
-             * IMPORTANT:
-             *
-             * Convert the values explicitly to JavaScript numbers
-             * before assigning them to the HTML number inputs.
-             *
-             * This prevents values such as "24.0000" from being
-             * treated as an invalid string by model binding.
-             */
+      
+
 
             document.getElementById(
                 "NormalMin"
@@ -1459,10 +1391,6 @@
             ).show();
 
         }
-
-        /* =========================================================
-           SOFT DELETE
-           ========================================================= */
 
         function deleteTestType(
             id,
@@ -1496,9 +1424,7 @@
 
         }
 
-        /* =========================================================
-           SEARCH
-           ========================================================= */
+        /* Searching */
 
         const searchInput =
             document.getElementById(

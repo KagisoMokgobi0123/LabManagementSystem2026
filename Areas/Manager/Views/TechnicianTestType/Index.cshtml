@@ -19,13 +19,7 @@
         Model?.ToList()
         ?? new List<TechnicianTestTypeModel>();
 
-    /*
-     * Build a lookup of active assignments by technician.
-     *
-     * This allows the page to display technicians who have
-     * ZERO assignments as well as technicians who have
-     * one or more assignments.
-     */
+
     var assignmentsByTechnician =
         assignments
             .Where(a =>
@@ -56,9 +50,7 @@
 
 <div class="container-fluid py-4">
 
-    <!-- =========================================================
-         PAGE HEADER
-         ========================================================= -->
+
 
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
@@ -97,9 +89,6 @@
     </div>
 
 
-    <!-- =========================================================
-         MESSAGES
-         ========================================================= -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -154,9 +143,7 @@
     }
 
 
-    <!-- =========================================================
-         SUMMARY CARDS
-         ========================================================= -->
+    <!-- Small summary Cards -->
 
     <div class="row g-3 mb-4">
 
@@ -344,9 +331,7 @@
     </div>
 
 
-    <!-- =========================================================
-         REQUIREMENT INFORMATION
-         ========================================================= -->
+    <!-- Required information -->
     @if (techniciansWithoutAssignments > 0)
     {
         <div class="alert alert-warning border-0 shadow-sm">
@@ -383,9 +368,7 @@
     }
 
 
-    <!-- =========================================================
-         ASSIGNMENT TABLE
-         ========================================================= -->
+    <!-- Table -->
 
     <div class="card border-0 shadow-sm">
 
@@ -500,12 +483,7 @@
                                         technician.Id,
                                         out var technicianAssignments);
 
-                                /*
-                                 * =====================================================
-                                 * TECHNICIAN HAS NO ACTIVE ASSIGNMENTS
-                                 * =====================================================
-                                 */
-
+        
                                 if (!hasAssignments ||
                                     technicianAssignments == null ||
                                     !technicianAssignments.Any())
@@ -638,11 +616,7 @@
                                 }
 
 
-                                /*
-                                 * =====================================================
-                                 * TECHNICIAN HAS ACTIVE ASSIGNMENTS
-                                 * =====================================================
-                                 */
+  
 
                                 foreach (var assignment in technicianAssignments)
                                 {
@@ -875,10 +849,6 @@
                         }
 
 
-                        <!-- =================================================
-                             SEARCH EMPTY
-                             ================================================= -->
-
                         <tr id="noSearchResultsRow"
                             style="display:none;">
 
@@ -925,9 +895,7 @@
 </div>
 
 
-<!-- =============================================================
-     ADD / EDIT ASSIGNMENT MODAL
-     ============================================================= -->
+<!-- Add form -->
 
 <div class="modal fade"
      id="technicianTestTypeModal"
@@ -1113,9 +1081,7 @@
 </div>
 
 
-<!-- =============================================================
-     VIEW ASSIGNMENT MODAL
-     ============================================================= -->
+
 
 <div class="modal fade"
      id="viewTechnicianTestTypeModal"
@@ -1236,9 +1202,6 @@
 </div>
 
 
-<!-- =============================================================
-     DELETE / SOFT DELETE MODAL
-     ============================================================= -->
 
 <div class="modal fade"
      id="deleteTechnicianTestTypeModal"
@@ -1348,9 +1311,7 @@
 </div>
 
 
-<!-- =============================================================
-     SUCCESS MESSAGE MODAL
-     ============================================================= -->
+<!--Pop up success message-->
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="modal fade"
@@ -1444,9 +1405,7 @@
 
     <script>
 
-        /* =========================================================
-           SUCCESS MESSAGE
-           ========================================================= */
+        /*Success message*/
 
         document.addEventListener(
             "DOMContentLoaded",
@@ -1472,9 +1431,7 @@
         );
 
 
-        /* =========================================================
-           CREATE
-           ========================================================= */
+        /* Create pop up form*/
 
         function openCreateModal() {
 
@@ -1526,9 +1483,7 @@
         }
 
 
-        /* =========================================================
-           CREATE FOR SPECIFIC TECHNICIAN
-           ========================================================= */
+      
 
         function openCreateModalForTechnician(
             technicianId,
@@ -1556,9 +1511,7 @@
         }
 
 
-        /* =========================================================
-           VIEW
-           ========================================================= */
+        /* view */
 
         function viewTechnicianTestType(
             id,
@@ -1627,9 +1580,6 @@
         }
 
 
-        /* =========================================================
-           EDIT
-           ========================================================= */
 
         function editTechnicianTestType(
             id,
@@ -1693,10 +1643,6 @@
         }
 
 
-        /* =========================================================
-           SOFT DELETE
-           ========================================================= */
-
         function deleteTechnicianTestType(
             id,
             technicianName,
@@ -1742,9 +1688,7 @@
         }
 
 
-        /* =========================================================
-           SEARCH
-           ========================================================= */
+        /* Search */
 
         const searchInput =
             document.getElementById(
