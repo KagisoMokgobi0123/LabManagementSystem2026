@@ -244,6 +244,14 @@
         color: #0369a1;
     }
 
+    .consumable-pill-group { display:flex; flex-wrap:wrap; gap:6px; min-width:190px; }
+    .consumable-pill { display:inline-flex; align-items:center; padding:6px 11px; border-radius:50rem; font-size:11px; font-weight:700; line-height:1.45; white-space:normal; border:1px solid transparent; }
+    .consumable-pill.c-blue { background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
+    .consumable-pill.c-green { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
+    .consumable-pill.c-orange { background:#ffedd5; color:#9a3412; border-color:#fed7aa; }
+    .consumable-pill.c-purple { background:#f3e8ff; color:#6b21a8; border-color:#e9d5ff; }
+    .consumable-pill.c-teal { background:#ccfbf1; color:#115e59; border-color:#99f6e4; }
+    .consumable-pill.c-pink { background:#fce7f3; color:#9d174d; border-color:#fbcfe8; }
     .consumable-stock {
         display: block;
         color: #334155;
@@ -279,6 +287,9 @@
         text-decoration: none;
     }
 
+    .result-action-edit { background: #fff3df; color: #a95400; }
+    .result-action-edit:hover { background: #d97706; color: #fff; }
+
     .result-action-delete {
         background: #fee2e2;
         color: #991b1b;
@@ -303,7 +314,7 @@
         display: flex;
         align-items: center;
         flex-wrap: nowrap;
-        gap: 6px;
+        gap: 12px;
         width: max-content;
     }
 
@@ -318,7 +329,7 @@
 
     .results-table th:last-child,
     .results-table td:last-child {
-        min-width: 375px;
+        min-width: 480px;
         white-space: nowrap;
     }
 
@@ -462,7 +473,7 @@
                         </h4>
                         <p class="results-card-subtitle">
                             Search by result, test, patient, flag or status.
-                            Consumable balances and soft-deleted records are shown when supplied by the controller.
+                            Current consumable stock balances are shown for each test type.
                         </p>
                     </div>
 
@@ -487,7 +498,7 @@
                             <th>Result Value</th>
                             <th>Reference Range</th>
                             <th>Flag</th>
-                            <th>Consumable Remaining</th>
+                            <th>Consumables / Current Stock</th>
                             <th>Test Status</th>
                             <th>Record Status</th>
                             <th>Captured</th>
@@ -509,6 +520,8 @@
                                 && (string.Equals(status, "In Progress", StringComparison.OrdinalIgnoreCase)
                                     || string.Equals(status, "To Be Reviewed", StringComparison.OrdinalIgnoreCase));
                             var hasStock = remainingByResultId.TryGetValue(result.TestResultId, out var stockText);
+                            var stockColors = new[] { "c-blue", "c-green", "c-orange", "c-purple", "c-teal", "c-pink" };
+                            var stockColor = stockColors[(int)((uint)(test?.TestTypeId ?? 0) % (uint)stockColors.Length)];
 
                             <tr class="@(isDeleted ? "result-row-deleted" : "")"
                                 data-result-verified="@(result.VerifiedDateTime.HasValue && !isDeleted ? "true" : "false")"
@@ -580,13 +593,21 @@
                                 <td>
                                     @if (hasStock)
                                     {
-                                        <span class="consumable-stock">@stockText</span>
+                                        <div class="consumable-pill-group">
+                                            @foreach (var consumableText in (stockText ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries))
+                                            {
+                                                <span class="badge rounded-pill consumable-pill @stockColor" title="Current stock and quantity required per test">
+                                                    <i class="fas fa-vial mr-1" aria-hidden="true"></i>
+                                                    @consumableText.Trim()
+                                                </span>
+                                            }
+                                        </div>
                                     }
                                     else
                                     {
                                         <span class="consumable-unavailable"
-                                              title="No consumable balance was supplied for this result.">
-                                            Not available
+                                              title="No consumables configured for this test, or stock data unavailable.">
+                                            No stock configuration
                                         </span>
                                     }
                                 </td>
@@ -641,7 +662,7 @@
                                         @if (canModifyResult)
                                         {
                                             <button type="button"
-                                                    class="result-action js-result-modal"
+                                                    class="result-action result-action-edit js-result-modal"
                                                     data-url="@Url.Action("EditResult", "Tests", new { area = "Technician", id = result.TestResultId })"
                                                     data-result-id="@result.TestResultId"
                                                     data-modal-title="Edit Result"
@@ -651,12 +672,11 @@
 
                                             <form asp-area="Technician" asp-controller="Tests"
                                                   asp-action="DeleteResult" asp-route-id="@result.TestResultId"
-                                                  method="post" class="d-inline"
-                                                  onsubmit="return confirm('Soft delete this result? The audit history must be retained.');">
+                                                  method="post" class="d-inline js-deactivate-result-form">
                                                 @Html.AntiForgeryToken()
                                                 <button type="submit" class="result-action result-action-delete"
-                                                        title="Soft delete result" aria-label="Delete result">
-                                                    <i class="fas fa-trash-alt" aria-hidden="true"></i> Delete
+                                                        title="De-activate result" aria-label="De-activate result">
+                                                    <i class="fas fa-ban" aria-hidden="true"></i> De-Activate
                                                 </button>
                                             </form>
 
@@ -729,12 +749,79 @@
     </div>
 </div>
 
+@* Confirmation modal for the existing soft-delete endpoint. *@
+<div class="modal fade" id="deactivateResultModal" tabindex="-1" role="dialog"
+     aria-labelledby="deactivateResultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deactivateResultModalLabel">
+                    <i class="fas fa-ban mr-2"></i>De-Activate Laboratory Result
+                </h5>
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">De-activate result <strong id="deactivateResultNumber"></strong>?</p>
+                <p class="text-muted small mb-0">This uses the existing DeleteResult soft-delete action. The result remains in the register marked Soft Deleted. Audit recording depends on the controller implementation.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id="confirmDeactivateResult" class="btn btn-danger">
+                    <i class="fas fa-ban mr-1"></i>De-Activate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @* Modal is outside the table and rendered only once. *@
 @await Html.PartialAsync("_CompleteTestModal")
 
 @section Scripts {
     <script>
         $(function() {
+            // Confirm before submitting the existing soft-delete form.
+            let pendingDeactivateForm = null;
+            $(document).on('submit', '.js-deactivate-result-form', function(event) {
+                event.preventDefault();
+                pendingDeactivateForm = this;
+                const row = $(this).closest('tr');
+                $('#deactivateResultNumber').text(row.find('td:first .result-main').text().trim());
+                const modal = document.getElementById('deactivateResultModal');
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(modal).show();
+                } else if ($.fn.modal) {
+                    $('#deactivateResultModal').modal('show');
+                } else if (window.confirm('De-activate this laboratory result?')) {
+                    this.submit();
+                }
+            });
+            $('#confirmDeactivateResult').on('click', function() {
+                if (!pendingDeactivateForm) return;
+                const form = pendingDeactivateForm;
+                pendingDeactivateForm = null;
+                $(this).prop('disabled', true);
+                form.submit();
+            });
+            $('#deactivateResultModal').on('hidden.bs.modal', function() {
+                pendingDeactivateForm = null;
+                $('#confirmDeactivateResult').prop('disabled', false);
+            });
+
+            // Cross-version Bootstrap modal close controls (Bootstrap 4 and 5).
+            $(document).on('click', '#testResultModal [data-dismiss="modal"], #testResultModal [data-bs-dismiss="modal"], #deactivateResultModal [data-dismiss="modal"], #deactivateResultModal [data-bs-dismiss="modal"]', function(event) {
+                event.preventDefault();
+                const element = $(this).closest('.modal')[0];
+                if (!element) return;
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(element).hide();
+                } else if ($.fn.modal) {
+                    $(element).modal('hide');
+                }
+            });
+
             // Complete link: show a confirmation modal, never submit on first click.
             $(document).on('click', '.js-complete-test', function(event) {
                 event.preventDefault();
@@ -838,7 +925,22 @@
                 const sequence = ++requestSequence;
                 $button.prop('disabled', true);
                 showLoading(title);
-                $modal.modal('show');
+                const resultModalElement = $modal[0];
+                if (window.bootstrap && window.bootstrap.Modal) {
+                    window.bootstrap.Modal.getOrCreateInstance(resultModalElement).show();
+                } else if ($.fn.modal) {
+                    if (window.bootstrap && window.bootstrap.Modal) {
+                        window.bootstrap.Modal.getOrCreateInstance($modal[0]).show();
+                    } else if ($.fn.modal) {
+                        $modal.modal('show');
+                    } else {
+                        alert('Bootstrap modal JavaScript is missing.');
+                    }
+                } else {
+                    alert('Bootstrap modal JavaScript is missing.');
+                    $button.prop('disabled', false);
+                    return;
+                }
 
                 activeRequest = $.ajax({ url: url, method: 'GET', cache: false })
                     .done(function(html) {
@@ -856,7 +958,7 @@
                         else if (xhr.status === 409) message = xhr.responseText || 'This result cannot be edited in its current state.';
                         else if (xhr.status === 0) message = 'Unable to reach the server. Check your connection.';
                         $content.html('<div class="modal-body"><div class="alert alert-danger mb-3" role="alert"></div>' +
-                            '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div>');
+                            '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>');
                         $content.find('.alert').text(message);
                     })
                     .always(function() {
@@ -872,15 +974,34 @@
                 showLoading('Loading test result information...');
             });
 
-            // The existing EditResult POST returns a redirect to TestResults.
-            // Use normal form submission so anti-forgery, TempData and redirects work.
+            // Save Edit Result via AJAX; never navigate to a POST-only endpoint.
             $(document).on('submit', '#editTestResultForm', function(event) {
-                if (!this.checkValidity()) return;
-                const $button = $(this).find('#saveResultChanges');
-                if ($button.prop('disabled')) { event.preventDefault(); return; }
+                event.preventDefault();
+                const form = this;
+                if (!form.checkValidity()) { form.reportValidity(); return; }
+                const $button = $(form).find('#saveResultChanges');
+                if ($button.prop('disabled')) return;
                 $button.prop('disabled', true);
                 $button.find('.save-result-normal').addClass('d-none');
                 $button.find('.save-result-loading').removeClass('d-none');
+                $.ajax({
+                    url: form.action,
+                    type: 'POST',
+                    data: $(form).serialize(),
+                    dataType: 'json'
+                }).done(function(response) {
+                    if (response.success) {
+                        window.location.reload();
+                    } else {
+                        alert(response.message || 'Unable to save result.');
+                    }
+                }).fail(function(xhr) {
+                    alert(xhr.responseJSON?.message || ('Save failed (HTTP ' + xhr.status + ').'));
+                }).always(function() {
+                    $button.prop('disabled', false);
+                    $button.find('.save-result-normal').removeClass('d-none');
+                    $button.find('.save-result-loading').addClass('d-none');
+                });
             });
 
             // Summary cards filter this register without requiring new controller actions.

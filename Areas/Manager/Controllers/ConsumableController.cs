@@ -17,11 +17,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             _context = context;
         }
 
-
-        // ============================================================
-        // INDEX
-        // ============================================================
-
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -36,10 +31,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             return View(consumables);
         }
 
-
-        // ============================================================
-        // DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -74,10 +65,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE
-        // ============================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
@@ -99,9 +86,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // DUPLICATE NAME CHECK
-            // --------------------------------------------------------
+            // Check duplicated names
 
             bool duplicateName =
                 await _context.Consumables
@@ -125,10 +110,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // NEW ENTITY
-            // --------------------------------------------------------
-
             model.ConsumableId = 0;
             model.IsDeleted = false;
 
@@ -136,9 +117,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 Math.Max(0, model.QuantityOnHand);
 
 
-            // --------------------------------------------------------
-            // DETERMINE INITIAL STATUS
-            // --------------------------------------------------------
+            // determine Initail status
 
             model.StockStatus =
                 DetermineStockStatus(
@@ -151,9 +130,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await _context.SaveChangesAsync();
 
 
-            // --------------------------------------------------------
-            // CREATE INITIAL HISTORY RECORD
-            // --------------------------------------------------------
+            //create history
 
             var initialHistory =
                 new StockStatusHistoryModel
@@ -183,9 +160,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // EDIT
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -211,9 +185,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await ValidateConsumable(model);
 
 
-            // --------------------------------------------------------
-            // DUPLICATE NAME CHECK
-            // --------------------------------------------------------
 
             bool duplicateName =
                 await _context.Consumables
@@ -244,10 +215,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // UPDATE EDITABLE FIELDS
-            // --------------------------------------------------------
-
             existing.Name =
                 model.Name;
 
@@ -257,15 +224,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             existing.SupplierId =
                 model.SupplierId;
 
-
-            // QuantityOnHand is deliberately NOT changed here.
-            //
-            // Stock changes must go through AdjustStock.
-
-
-            // --------------------------------------------------------
-            // RE-CALCULATE STATUS
-            // --------------------------------------------------------
 
             await UpdateStockStatusAndHistory(
                 existing);
@@ -282,10 +240,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(Index));
         }
 
-
-        // ============================================================
-        // ADJUST STOCK
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -325,9 +279,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 consumable.QuantityOnHand;
 
 
-            // --------------------------------------------------------
-            // CALCULATE NEW QUANTITY
-            // --------------------------------------------------------
+            // calculate new quantity
 
             switch (
                 adjustmentType?.ToLower())
@@ -378,9 +330,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // UPDATE STATUS + HISTORY
-            // --------------------------------------------------------
+            // update status 
 
             await UpdateStockStatusAndHistory(
                 consumable);
@@ -400,9 +350,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DELETE
-        // ============================================================
+        //soft delete
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -426,9 +374,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // ACTIVE ORDERS CHECK
-            // --------------------------------------------------------
+            // check status
 
             bool hasActiveOrders =
                 await _context.OrderItems
@@ -449,10 +395,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SOFT DELETE
-            // --------------------------------------------------------
-
             consumable.IsDeleted = true;
 
 
@@ -467,10 +409,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(Index));
         }
 
-
-        // ============================================================
-        // REORDER LIST
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Reorder()
@@ -501,31 +439,18 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // STOCK STATUS CALCULATION
-        // ============================================================
 
         private StockStatus DetermineStockStatus(
             int quantityOnHand,
             int reorderLevel)
         {
-            // --------------------------------------------------------
-            // OUT OF STOCK
-            // --------------------------------------------------------
+            // out of stock
 
             if (quantityOnHand <= 0)
             {
                 return StockStatus.OutOfStock;
             }
 
-
-            // --------------------------------------------------------
-            // REORDER NOW
-            //
-            // Includes:
-            //   Quantity <= Reorder Level
-            //   Quantity <= 110% of Reorder Level
-            // --------------------------------------------------------
 
             decimal reorderThreshold =
                 reorderLevel * 1.10m;
@@ -538,17 +463,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SUFFICIENT
-            // --------------------------------------------------------
-
             return StockStatus.Sufficient;
         }
 
-
-        // ============================================================
-        // UPDATE STATUS + HISTORY
-        // ============================================================
 
         private async Task UpdateStockStatusAndHistory(
             ConsumableModel consumable)
@@ -560,8 +477,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
 
             // No status change.
-            //
-            // Do not create another history record.
 
             if (consumable.StockStatus ==
                 newStatus)
@@ -570,17 +485,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // UPDATE CURRENT STATUS
-            // --------------------------------------------------------
-
             consumable.StockStatus =
                 newStatus;
 
 
-            // --------------------------------------------------------
-            // ADD HISTORY RECORD
-            // --------------------------------------------------------
+            // add records
 
             var history =
                 new StockStatusHistoryModel
@@ -600,10 +509,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 .Add(history);
         }
 
-
-        // ============================================================
-        // VALIDATION
-        // ============================================================
 
         private async Task ValidateConsumable(
             ConsumableModel model)
@@ -668,10 +573,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD SUPPLIERS
-        // ============================================================
-
         private async Task LoadSuppliers()
         {
             ViewBag.Suppliers =
@@ -683,9 +584,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD ACTIVE CONSUMABLES
-        // ============================================================
 
         private async Task<List<ConsumableModel>> GetActiveConsumables()
         {

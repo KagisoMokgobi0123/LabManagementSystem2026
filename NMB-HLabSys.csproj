@@ -7,49 +7,60 @@
     <RootNamespace>NMB_HLabSys</RootNamespace>
     <UserSecretsId>69a676ed-da31-4534-ad78-2aa5f91eac5b</UserSecretsId>
   </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>NMB_HLabSys</RootNamespace>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Areas\Manager\Data\**" />
-    <Content Remove="Areas\Manager\Data\**" />
-    <EmbeddedResource Remove="Areas\Manager\Data\**" />
-    <None Remove="Areas\Manager\Data\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Areas\Administrator\Data\**" />
+		<Compile Remove="Areas\Manager\Data\**" />
+		<Content Remove="Areas\Administrator\Data\**" />
+		<Content Remove="Areas\Manager\Data\**" />
+		<EmbeddedResource Remove="Areas\Administrator\Data\**" />
+		<EmbeddedResource Remove="Areas\Manager\Data\**" />
+		<None Remove="Areas\Administrator\Data\**" />
+		<None Remove="Areas\Manager\Data\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="Areas\Technician\Views\Profile\Index.cshtml" />
-    <Content Remove="Views\Shared\_AdminManagerLayout.cshtml" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="Areas\Technician\Views\Profile\Index.cshtml" />
+		<Content Remove="Views\Shared\_AdminManagerLayout.cshtml" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Areas\Technician\Models\SampleTypeModel.cs~RFa68e002.TMP" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Areas\Technician\Models\SampleTypeModel.cs~RFa68e002.TMP" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Properties\launchSettings.json" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Include="Properties\launchSettings.json" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.20.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.2" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NuGet.Common" Version="7.3.0" />
-    <PackageReference Include="NuGet.Packaging" Version="6.13.2" />
-    <PackageReference Include="NuGet.Protocol" Version="6.13.1" />
-    <PackageReference Include="QuestPDF" Version="2026.9.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.20.0" />
+		<PackageReference Include="MailKit" Version="4.18.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.13" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.13">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+		<PackageReference Include="NuGet.Common" Version="7.3.0" />
+		<PackageReference Include="NuGet.Packaging" Version="6.13.2" />
+		<PackageReference Include="NuGet.Protocol" Version="6.13.1" />
+		<PackageReference Include="QuestPDF" Version="2026.9.1" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Areas\Administrator\Data\" />
-    <Folder Include="Areas\Doctor\Data\" />
-    <Folder Include="Areas\Patient\Data\" />
-    <Folder Include="Migrations\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Areas\Doctor\Data\" />
+		<Folder Include="Areas\Patient\Data\" />
+		<Folder Include="Migrations\" />
+	</ItemGroup>
 
 </Project>

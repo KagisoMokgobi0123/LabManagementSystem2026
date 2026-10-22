@@ -33,15 +33,16 @@
         @ViewData["Title"] - NMB-HLabSys
     </title>
 
-    <!-- Bootstrap -->
+
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
 
-    <!-- Font Awesome 6 -->
+
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
-    <!-- Site CSS -->
+
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
@@ -74,17 +75,11 @@
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             }
 
-            /* =====================================================
-                                       APPLICATION
-                                       ===================================================== */
+
 
             .manager-app {
                 min-height: 100vh;
             }
-
-            /* =====================================================
-                                       SIDEBAR
-                                       ===================================================== */
 
             .manager-sidebar {
                 position: fixed;
@@ -103,9 +98,6 @@
                 transition: width .25s ease, transform .25s ease;
             }
 
-            /* =====================================================
-                                       LOGO
-                                       ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -143,9 +135,6 @@
                 white-space: nowrap;
             }
 
-            /* =====================================================
-                                       SIDEBAR CONTROLS
-                                       ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -177,9 +166,6 @@
                     transform: translateY(-1px);
                 }
 
-            /* =====================================================
-                                       MANAGER USER
-                                       ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -226,9 +212,6 @@
                 font-size: 9px;
             }
 
-            /* =====================================================
-                                       NAVIGATION
-                                       ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
@@ -296,9 +279,6 @@
                 white-space: nowrap;
             }
 
-            /* =====================================================
-                                       LOGOUT
-                                       ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
@@ -329,9 +309,6 @@
                     color: #fff;
                 }
 
-            /* =====================================================
-                                       MAIN CONTENT
-                                       ===================================================== */
 
             .manager-main {
                 min-height: 100vh;
@@ -339,9 +316,7 @@
                 transition: margin-left .25s ease, width .25s ease;
             }
 
-            /* =====================================================
-                                       COLLAPSED SIDEBAR
-                                       ===================================================== */
+
 
             body.sidebar-collapsed .manager-sidebar {
                 width: var(--sidebar-collapsed-width);
@@ -424,9 +399,6 @@
                     margin-right: 0;
                 }
 
-            /* =====================================================
-                                       FULL WIDTH MODE
-                                       ===================================================== */
 
             body.sidebar-hidden .manager-sidebar {
                 transform: translateX(-100%) !important;
@@ -437,9 +409,6 @@
                 width: 100% !important;
             }
 
-            /* =====================================================
-                                       RESTORE BUTTON
-                                       ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -464,9 +433,6 @@
                 display: flex;
             }
 
-            /* =====================================================
-                                       MOBILE
-                                       ===================================================== */
 
             .manager-mobile-header {
                 display: none;
@@ -632,7 +598,7 @@
         <aside class="manager-sidebar"
                id="managerSidebar">
 
-            <!-- LOGO -->
+
 
             <a asp-area="Manager"
                asp-controller="Home"
@@ -658,7 +624,6 @@
 
             </a>
 
-            <!-- SIDEBAR CONTROLS -->
 
             <div class="sidebar-controls">
 
@@ -683,7 +648,7 @@
 
             </div>
 
-            <!-- MANAGER INFORMATION -->
+
 
             <div class="sidebar-user">
 
@@ -712,7 +677,7 @@
 
             <nav class="sidebar-navigation">
 
-                <!-- MAIN -->
+
 
                 <div class="sidebar-section">
                     Main
@@ -734,7 +699,7 @@
 
                 </a>
 
-                <!--TEST MANAGEMENT -->
+
 
                 <div class="sidebar-section">
                     Test Management
@@ -804,7 +769,7 @@
 
                 </a>
 
-                <!--INVENTORY -->
+
 
                 <div class="sidebar-section">
                     Inventory
@@ -874,7 +839,7 @@
 
                 </a>
 
-                <!-- STAFF MANAGEMENT-->
+
 
                 <div class="sidebar-section">
                     Staff Management
@@ -930,38 +895,6 @@
 
                     <span class="sidebar-link-text">
                         Laboratory Reports
-                    </span>
-
-                </a>
-
-                <a asp-area="Manager"
-                   asp-controller="Reports"
-                   asp-action="TestActivity"
-                   title="Test Activity Reports"
-                   class="sidebar-link @(controller == "Reports" && action == "TestActivity" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Test Activity
-                    </span>
-
-                </a>
-
-                <a asp-area="Manager"
-                   asp-controller="Reports"
-                   asp-action="Inventory"
-                   title="Inventory Reports"
-                   class="sidebar-link @(controller == "Reports" && action == "Inventory" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-                        <i class="fa-solid fa-box-open"></i>
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Inventory Reports
                     </span>
 
                 </a>
@@ -1022,7 +955,7 @@
 
             </nav>
 
-            <!--LOGOUT-->
+  
 
             <div class="sidebar-bottom">
 
@@ -1053,7 +986,7 @@
 
         </aside>
 
-        <!--RESTORE SIDEBAR BUTTON -->
+
 
         <button type="button"
                 class="sidebar-restore-btn"
@@ -1064,7 +997,7 @@
 
         </button>
 
-        <!-- MOBILE BACKDROP -->
+
 
         <div class="sidebar-backdrop"
              id="sidebarBackdrop">
@@ -1074,7 +1007,7 @@
 
         <main class="manager-main">
 
-            <!-- MOBILE HEADER -->
+
 
             <div class="manager-mobile-header">
 

@@ -19,9 +19,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -51,10 +48,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // ORDER DETAILS
-        // Used by the popup
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -79,18 +72,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
 
 
-                // ----------------------------------------------------
-                // Build a DTO instead of returning EF entities.
-                //
+
                 // This prevents circular-reference JSON problems
-                // involving:
-                //
-                // Order -> OrderItems -> Order
-                //
-                // and:
-                //
-                // Consumable -> OrderItems -> Consumable
-                // ----------------------------------------------------
 
                 var result = new
                 {
@@ -185,9 +168,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DELIVER INDIVIDUAL ITEM
-        // ============================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -263,9 +243,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
 
 
-                // ====================================================
-                // UPDATE INVENTORY
-                // ====================================================
+                //update Consumable table
 
                 checked
                 {
@@ -274,9 +252,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
 
 
-                // ====================================================
-                // RECALCULATE STOCK STATUS
-                // ====================================================
 
                 item.Consumable.StockStatus =
                     CalculateStockStatus(
@@ -284,9 +259,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         item.Consumable.ReorderLevel);
 
 
-                // ====================================================
-                // MARK ITEM RECEIVED
-                // ====================================================
+                // mark item received
 
                 item.Status =
                     OrderItemStatus.Received;
@@ -294,10 +267,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 item.DateReceived =
                     DateTime.Now;
 
-
-                // ====================================================
-                // CREATE STOCK ADJUSTMENT RECORD
-                // ====================================================
 
                 var adjustment =
                     new StockAdjustmentModel
@@ -318,10 +287,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 _context.StockAdjustments.Add(
                     adjustment);
 
-
-                // ====================================================
-                // CREATE STOCK STATUS HISTORY
-                // ====================================================
 
                 var history =
                     new StockStatusHistoryModel
@@ -346,17 +311,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     history);
 
 
-                // ====================================================
-                // UPDATE ORDER STATUS
-                // ====================================================
-
                 await UpdateOrderStatus(
                     item.Order);
 
-
-                // ====================================================
-                // SAVE
-                // ====================================================
 
                 await _context.SaveChangesAsync();
 
@@ -410,9 +367,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // COMPLETE ENTIRE ORDER
-        // ============================================================
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -485,9 +440,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
 
 
-                // ====================================================
-                // PROCESS EVERY OUTSTANDING ITEM
-                // ====================================================
+
 
                 foreach (var item in pendingItems)
                 {
@@ -499,9 +452,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     }
 
 
-                    // ------------------------------------------------
-                    // UPDATE QUANTITY
-                    // ------------------------------------------------
+
 
                     checked
                     {
@@ -510,9 +461,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     }
 
 
-                    // ------------------------------------------------
-                    // UPDATE STOCK STATUS
-                    // ------------------------------------------------
+
 
                     item.Consumable.StockStatus =
                         CalculateStockStatus(
@@ -520,9 +469,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                             item.Consumable.ReorderLevel);
 
 
-                    // ------------------------------------------------
-                    // UPDATE ITEM
-                    // ------------------------------------------------
+
 
                     item.Status =
                         OrderItemStatus.Received;
@@ -531,9 +478,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         DateTime.Now;
 
 
-                    // ------------------------------------------------
-                    // STOCK ADJUSTMENT
-                    // ------------------------------------------------
 
                     _context.StockAdjustments.Add(
                         new StockAdjustmentModel
@@ -552,9 +496,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         });
 
 
-                    // ------------------------------------------------
-                    // STOCK HISTORY
-                    // ------------------------------------------------
 
                     _context.StockStatusHistories.Add(
                         new StockStatusHistoryModel
@@ -577,9 +518,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
 
 
-                // ====================================================
-                // ORDER IS NOW COMPLETE
-                // ====================================================
 
                 order.Status =
                     OrderStatus.Complete;
@@ -640,9 +578,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // UPDATE ORDER STATUS
-        // ============================================================
+
 
         private async Task UpdateOrderStatus(
             OrderModel order)
@@ -681,9 +617,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     OrderItemStatus.Cancelled);
 
 
-            // --------------------------------------------------------
-            // NOTHING HAS BEEN DELIVERED
-            // --------------------------------------------------------
 
             if (hasOrdered &&
                 !hasReceived &&
@@ -696,9 +629,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
+
             // SOME DELIVERED, SOME STILL ORDERED
-            // --------------------------------------------------------
 
             if (hasOrdered &&
                 hasReceived)
@@ -710,9 +642,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
+
             // NO ITEMS REMAIN ORDERED
-            // --------------------------------------------------------
 
             if (!hasOrdered &&
                 (hasReceived ||
@@ -736,9 +667,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
+
         // STOCK STATUS
-        // ============================================================
 
         private StockStatus CalculateStockStatus(
             int quantityOnHand,
@@ -765,9 +695,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // ORDER STATUS TEXT
-        // ============================================================
 
         private string GetOrderStatusText(
             OrderStatus status)
@@ -792,9 +719,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // ITEM STATUS TEXT
-        // ============================================================
+
 
         private string GetItemStatusText(
             OrderItemStatus status)

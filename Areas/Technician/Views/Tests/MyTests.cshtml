@@ -11,10 +11,10 @@
         .ToList()
         ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
     var now = DateTime.UtcNow;
-    var inProgress = tests.Count(x => x.Status == "In Progress");
-    var completed = tests.Count(x => x.Status == "Completed");
-    var toReview = tests.Count(x => x.Status == "To Be Reviewed");
-    var overdue = tests.Count(x => x.Status == "In Progress" && x.StartDateTime.HasValue &&
+    var inProgress = tests.Count(x => !x.IsDeleted && x.Status == "In Progress");
+    var completed = tests.Count(x => !x.IsDeleted && x.Status == "Completed");
+    var toReview = tests.Count(x => !x.IsDeleted && x.Status == "To Be Reviewed");
+    var overdue = tests.Count(x => !x.IsDeleted && x.Status == "In Progress" && x.StartDateTime.HasValue &&
         x.TestType != null && x.StartDateTime.Value.AddHours(x.TestType.TurnAroundTimeHours) < now);
 }
 
@@ -364,7 +364,40 @@
         }
 
     /* Table actions */
-    .mytests-actions { display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-wrap:wrap; }
+    .mytests-deactivate { display:inline-flex; align-items:center; gap:6px; padding:8px 12px; border:0; border-radius:7px; background:#b91c1c; color:#fff; font-size:11px; font-weight:600; cursor:pointer; white-space:nowrap; }
+    .mytests-deactivate:hover { background:#991b1b; }
+    .mytests-pill.deactivated { background:#fee2e2; color:#991b1b; }
+    /* Stack action buttons vertically with equal widths and consistent spacing. */
+    .mytests-actions {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: 10px;
+        width: 170px;
+        margin-left: auto;
+    }
+    .mytests-actions > .mytests-perform,
+    .mytests-actions > .mytests-edit,
+    .mytests-actions > .mytests-deactivate,
+    .mytests-actions > .mytests-detail {
+        display: inline-flex;
+        width: 100%;
+        min-height: 36px;
+        box-sizing: border-box;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin: 0;
+    }
+    .mytests-table th:last-child,
+    .mytests-table td:last-child {
+        min-width: 200px;
+    }
+    .mytests-edit { display:inline-flex; align-items:center; gap:6px; padding:8px 12px;
+        border:0; border-radius:7px; background:#d97706; color:white; font-size:11px;
+        font-weight:600; cursor:pointer; white-space:nowrap; }
+    .mytests-edit:hover { background:#b45309; }
     .mytests-perform { display:inline-flex; align-items:center; gap:6px; padding:8px 12px;
         border-radius:7px; background:#15803d; color:#fff !important; font-size:11px;
         font-weight:600; text-decoration:none !important; white-space:nowrap; }
@@ -477,7 +510,7 @@
                     <div class="col-lg-6">
                         <div class="row">
                             <div class="col-sm-7 mb-2 mb-sm-0"><input id="myTestsSearch" class="form-control mytests-filter" type="search" placeholder="Search request, patient, or test..." aria-label="Search my tests" /></div>
-                            <div class="col-sm-5"><select id="myTestsStatus" class="form-control mytests-filter" aria-label="Filter by status"><option value="">All statuses</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option><option value="To Be Reviewed">To Be Reviewed</option><option value="Verified">Verified</option></select></div>
+                            <div class="col-sm-5"><select id="myTestsStatus" class="form-control mytests-filter" aria-label="Filter by status"><option value="">All statuses</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option><option value="To Be Reviewed">To Be Reviewed</option><option value="Verified">Verified</option><option value="De-Activated">De-Activated</option></select></div>
                         </div>
                     </div>
                 </div>
@@ -495,9 +528,9 @@
                                 DateTime? due = item.StartDateTime.HasValue && item.TestType != null
                                     ? item.StartDateTime.Value.AddHours(item.TestType.TurnAroundTimeHours)
                                     : (DateTime?)null;
-                                var isOverdue = item.Status == "In Progress" && due.HasValue && due.Value < now;
+                                var isOverdue = !item.IsDeleted && item.Status == "In Progress" && due.HasValue && due.Value < now;
                                 var statusClass = item.Status == "In Progress" ? "progress" : item.Status == "Completed" ? "completed" : item.Status == "To Be Reviewed" ? "review" : "verified";
-                                <tr data-status="@item.Status">
+                                <tr data-status="@(item.IsDeleted ? "De-Activated" : item.Status)">
                                     <td><span class="mytests-main">@(item.TestRequest?.RequestNumber ?? "N/A")</span><span class="mytests-sub">Test #@item.TestRequestTestTypeId</span></td>
                                     <td><span class="mytests-main">@(item.TestType?.Name ?? "Unknown test")</span><span class="mytests-sub">@(item.TestRequest?.Patient?.FullName ?? "Patient unavailable")</span></td>
                                     <td><span class="mytests-pill @urgencyClass">@urgency</span></td>
@@ -521,10 +554,10 @@
                                             <span class="text-muted">Not available</span>
                                         }
                                     </td>
-                                    <td><span class="mytests-pill @statusClass">@item.Status</span></td>
+                                    <td>@if (item.IsDeleted) { <span class="mytests-pill deactivated" title="@item.DeactivationReason">De-Activated</span> } else { <span class="mytests-pill @statusClass">@item.Status</span> }</td>
                                     <td class="text-right">
                                         <div class="mytests-actions">
-                                            @if (item.Status == "In Progress" || item.Status == "To Be Reviewed")
+                                            @if (!item.IsDeleted && (item.Status == "In Progress" || item.Status == "To Be Reviewed"))
                                             {
                                                 <a href="/Technician/Tests/CaptureResults/@item.TestRequestTestTypeId"
                                                    class="mytests-perform"
@@ -532,6 +565,29 @@
                                                     <i class="fas fa-flask" aria-hidden="true"></i> Perform Test
                                                 </a>
                                             }
+                                        @if (item.Status == "In Progress" && !item.IsDeleted)
+                                        {
+                                            <button type="button" class="mytests-edit js-edit-mytest"
+                                                    data-testid="@item.TestRequestTestTypeId"
+                                                    data-request="@(item.TestRequest?.RequestNumber ?? "N/A")"
+                                                    data-patient="@(item.TestRequest?.Patient?.FullName ?? "Patient unavailable")"
+                                                    data-testtype="@(item.TestType?.Name ?? "Unknown test")"
+                                                    data-notes="@(item.TestRequest?.ClinicalNotes ?? "")"
+                                                     data-urgency="@urgency"
+                                                     data-status="@item.Status"
+                                                     data-started="@(item.StartDateTime?.ToString("dd MMM yyyy HH:mm") ?? "Not started")"
+                                                     data-due="@(due?.ToString("dd MMM yyyy HH:mm") ?? "Not available")">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                        }
+                                        @if (!item.IsDeleted && item.Status == "In Progress")
+                                        {
+                                            <button type="button" class="mytests-deactivate js-deactivate-mytest"
+                                                    data-testid="@item.TestRequestTestTypeId"
+                                                    data-testtype="@(item.TestType?.Name ?? "this test")">
+                                                <i class="fas fa-ban" aria-hidden="true"></i> De-Activate
+                                            </button>
+                                        }
                                         <button type="button"
                                                 class="mytests-detail js-test-details"
                                                 data-request="@(item.TestRequest?.RequestNumber ?? "N/A")"
@@ -539,12 +595,12 @@
                                                 data-patient="@(item.TestRequest?.Patient?.FullName ?? "Patient unavailable")"
                                                 data-testtype="@(item.TestType?.Name ?? "Unknown test")"
                                                 data-urgency="@urgency"
-                                                data-status="@item.Status"
+                                                data-status="@(item.IsDeleted ? "De-Activated" : item.Status)"
                                                 data-started="@(item.StartDateTime?.ToString("dd MMM yyyy HH:mm") ?? "Not started")"
                                                 data-tat="@(item.TestType != null ? $"{item.TestType.TurnAroundTimeHours} hours" : "Not set")"
                                                 data-due="@(due?.ToString("dd MMM yyyy HH:mm") ?? "Not available")"
                                                 data-deadline="@(isOverdue ? "Overdue" : item.Status == "Completed" || item.Status == "Verified" ? "Finished" : due.HasValue ? "Within deadline" : "Not available")"
-                                                 data-clinicalnotes="@(item.TestRequest?.GetType().GetProperty("ClinicalNotes")?.GetValue(item.TestRequest)?.ToString() ?? "No clinical notes available.")">
+                                                 data-clinicalnotes="@(item.TestRequest?.ClinicalNotes ?? "No clinical notes available.")">
                                             <i class="fas fa-eye"></i> View Details
                                         </button>
                                         </div>
@@ -565,8 +621,168 @@
 </div>
 
 
+
+@* Edit modal for in-progress assigned tests. Identity and test order remain read-only. *@
+<div class="modal" id="myTestEditModal" tabindex="-1" role="dialog" aria-labelledby="myTestEditTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#075985;color:white">
+                <h5 class="modal-title" id="myTestEditTitle"><i class="fas fa-edit mr-2"></i>Edit Test Details</h5>
+                <button type="button" class="close js-close-edit" aria-label="Close" style="color:white"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <form id="myTestEditForm" method="post" action="@Url.Action("UpdateMyTestDetails", "Tests", new { area = "Technician" })">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="testRequestTestTypeId" id="editMyTestId" />
+                 <div class="modal-body">
+                     <p class="text-muted mb-3">Review the laboratory test information and update the clinical notes below.</p>
+                     <div class="row">
+                         <div class="form-group col-md-6"><label for="editMyRequest">Request Number</label><input class="form-control" id="editMyRequest" readonly /></div>
+                         <div class="form-group col-md-6"><label for="editMyPatient">Patient</label><input class="form-control" id="editMyPatient" readonly /></div>
+                         <div class="form-group col-md-12"><label for="editMyType">Test Type</label><input class="form-control" id="editMyType" readonly /></div>
+                         <div class="form-group col-md-6"><label for="editMyUrgency">Urgency</label><input class="form-control" id="editMyUrgency" readonly /></div>
+                         <div class="form-group col-md-6"><label for="editMyStatus">Progress</label><input class="form-control" id="editMyStatus" readonly /></div>
+                         <div class="form-group col-md-6"><label for="editMyStarted">Started</label><input class="form-control" id="editMyStarted" readonly /></div>
+                         <div class="form-group col-md-6"><label for="editMyDue">Expected Completion</label><input class="form-control" id="editMyDue" readonly /></div>
+                     </div>
+                     <div class="form-group">
+                         <label for="editMyNotes"><strong>Clinical Notes</strong> <span class="text-muted">(editable)</span></label>
+                         <textarea class="form-control" id="editMyNotes" name="clinicalNotes" rows="5" maxlength="2000" aria-describedby="editMyNotesHelp editMyNotesCount"></textarea>
+                         <div class="d-flex justify-content-between mt-1" style="gap:12px">
+                             <small class="text-muted" id="editMyNotesHelp">These are request-level notes. Changes affect all tests under this request.</small>
+                             <small class="text-muted text-nowrap" id="editMyNotesCount" aria-live="polite">0 / 2000</small>
+                         </div>
+                     </div>
+                     <div class="alert alert-danger d-none" id="myTestEditError" role="alert"></div>
+                 </div>
+                <div class="modal-footer" style="gap:12px">
+                    <button type="button" class="btn btn-outline-secondary js-close-edit">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveMyTestEdit"><i class="fas fa-save mr-1"></i>Update Test</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    #myTestEditModal { display:none; position:fixed; inset:0; z-index:10600; overflow-y:auto; padding:24px 12px; background:rgba(15,23,42,.62); }
+    #myTestEditModal.mytests-edit-open { display:block !important; opacity:1 !important; visibility:visible !important; }
+    #myTestEditModal .modal-dialog { max-width:800px; margin:30px auto; transform:none; pointer-events:auto; }
+    #myTestEditModal .modal-content { background:white; box-shadow:0 24px 65px rgba(0,0,0,.25); }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('myTestEditModal');
+    const form = document.getElementById('myTestEditForm');
+    const error = document.getElementById('myTestEditError');
+    let opener = null;
+    function closeEdit() { modal.classList.remove('mytests-edit-open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; if(opener) opener.focus(); }
+    document.querySelectorAll('.js-edit-mytest').forEach(function (button) {
+        button.addEventListener('click', function () {
+            opener=button;
+            document.getElementById('editMyTestId').value=button.dataset.testid || '';
+            document.getElementById('editMyRequest').value=button.dataset.request || '';
+            document.getElementById('editMyPatient').value=button.dataset.patient || '';
+            document.getElementById('editMyType').value=button.dataset.testtype || '';
+            document.getElementById('editMyNotes').value=button.dataset.notes || '';
+             document.getElementById('editMyUrgency').value=button.dataset.urgency || '';
+             document.getElementById('editMyStatus').value=button.dataset.status || '';
+             document.getElementById('editMyStarted').value=button.dataset.started || '';
+             document.getElementById('editMyDue').value=button.dataset.due || '';
+             document.getElementById('editMyNotesCount').textContent=document.getElementById('editMyNotes').value.length + ' / 2000';
+            error.classList.add('d-none');
+            modal.classList.add('mytests-edit-open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+            document.getElementById('editMyNotes').focus();
+        });
+    });
+    modal.querySelectorAll('.js-close-edit').forEach(b => b.addEventListener('click',closeEdit));
+    modal.addEventListener('click',e=>{ if(e.target===modal) closeEdit(); });
+    document.addEventListener('keydown',e=>{if(e.key==='Escape' && modal.classList.contains('mytests-edit-open'))closeEdit();});
+    document.getElementById('editMyNotes').addEventListener('input', function () {
+        document.getElementById('editMyNotesCount').textContent=this.value.length + ' / 2000';
+    });
+    form.addEventListener('submit',async function(e) {
+        e.preventDefault();
+        const save=document.getElementById('saveMyTestEdit');
+        save.disabled=true; error.classList.add('d-none');
+        try {
+            const response=await fetch(form.action, {method:'POST',body:new FormData(form),credentials:'same-origin',headers:{'Accept':'application/json'}});
+            const result=await response.json();
+            if(!response.ok || !result.success)throw new Error(result.message || 'Unable to update test.');
+            window.location.reload();
+        } catch(err) { error.textContent=err.message || 'Update failed.'; error.classList.remove('d-none'); save.disabled=false; }
+    });
+});
+</script>
+
+
+@* De-activate an already claimed in-progress test. *@
+<div class="modal" id="myTestDeactivateModal" tabindex="-1" role="dialog" aria-labelledby="myTestDeactivateTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#991b1b;color:white">
+                <h5 class="modal-title" id="myTestDeactivateTitle"><i class="fas fa-ban mr-2"></i> De-Activate Test</h5>
+                <button type="button" class="close js-close-deactivate" aria-label="Close" style="color:white"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <form id="myTestDeactivateForm" method="post" action="@Url.Action("DeactivateMyTest", "Tests", new { area = "Technician" })">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="testRequestTestTypeId" id="deactivateMyTestId" />
+                <div class="modal-body">
+                    <p>De-activate <strong id="deactivateMyTestName"></strong>? The test will remain in your list for auditing and cannot be performed or edited.</p>
+                    <label for="deactivateMyTestReason">Reason <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="deactivateMyTestReason" name="reason" maxlength="500" rows="4" required placeholder="Explain why this test is being de-activated"></textarea>
+                    <div class="alert alert-danger d-none mt-3" id="myTestDeactivateError" role="alert"></div>
+                </div>
+                <div class="modal-footer" style="gap:12px">
+                    <button type="button" class="btn btn-outline-secondary js-close-deactivate">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="confirmDeactivateMyTest"><i class="fas fa-ban mr-1"></i> De-Activate Test</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    #myTestDeactivateModal { display:none; position:fixed; inset:0; z-index:10610; overflow-y:auto; padding:24px 12px; background:rgba(15,23,42,.62); }
+    #myTestDeactivateModal.mytests-deactivate-open { display:block !important; opacity:1 !important; visibility:visible !important; }
+    #myTestDeactivateModal .modal-dialog { max-width:600px; margin:30px auto; transform:none; pointer-events:auto; }
+    #myTestDeactivateModal .modal-content { background:white; box-shadow:0 24px 65px rgba(0,0,0,.25); }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('myTestDeactivateModal');
+    const form = document.getElementById('myTestDeactivateForm');
+    const error = document.getElementById('myTestDeactivateError');
+    let opener = null;
+    function closeModal() { modal.classList.remove('mytests-deactivate-open'); modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; if(opener) opener.focus(); }
+    document.querySelectorAll('.js-deactivate-mytest').forEach(button => button.addEventListener('click', function () {
+        opener=button;
+        document.getElementById('deactivateMyTestId').value=button.dataset.testid || '';
+        document.getElementById('deactivateMyTestName').textContent=button.dataset.testtype || 'this test';
+        document.getElementById('deactivateMyTestReason').value='';
+        error.classList.add('d-none');
+        modal.classList.add('mytests-deactivate-open'); modal.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+        document.getElementById('deactivateMyTestReason').focus();
+    }));
+    modal.querySelectorAll('.js-close-deactivate').forEach(button => button.addEventListener('click',closeModal));
+    modal.addEventListener('click',event=>{ if(event.target===modal)closeModal(); });
+    document.addEventListener('keydown',event=>{if(event.key==='Escape' && modal.classList.contains('mytests-deactivate-open'))closeModal();});
+    form.addEventListener('submit',async function(event) {
+        event.preventDefault();
+        const reason=document.getElementById('deactivateMyTestReason').value.trim();
+        if(!reason || reason.length>500) {error.textContent='Enter a reason between 1 and 500 characters.';error.classList.remove('d-none');return;}
+        const save=document.getElementById('confirmDeactivateMyTest');
+        save.disabled=true;error.classList.add('d-none');
+        try {
+            const data=new FormData(form);data.set('reason',reason);
+            const response=await fetch(form.action,{method:'POST',body:data,credentials:'same-origin',headers:{'Accept':'application/json'}});
+            const result=await response.json();
+            if(!response.ok || !result.success)throw new Error(result.message || 'Unable to de-activate test.');
+            window.location.reload();
+        } catch(err) {error.textContent=err.message || 'De-activation failed.';error.classList.remove('d-none');save.disabled=false;}
+    });
+});
+</script>
+
 @* Reusable read-only modal. Populate fields using the data attributes on MyTests buttons. *@
-<div class="modal fade" id="myTestDetailsModal" tabindex="-1" role="dialog"
+<div class="modal" id="myTestDetailsModal" tabindex="-1" role="dialog"
      aria-labelledby="myTestDetailsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -632,6 +848,7 @@
 
         #myTestDetailsModal.mytests-modal-open {
             display: block !important;
+            opacity: 1 !important; visibility: visible !important;
         }
 
         #myTestDetailsModal .modal-dialog {

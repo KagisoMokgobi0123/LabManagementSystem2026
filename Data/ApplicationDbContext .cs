@@ -20,26 +20,14 @@ namespace NMB_HLabSys.Data
         {
         }
 
-        // ============================================================
-        // IDENTITY / SECURITY
-        // ============================================================
-
         public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
-
-
-        // ============================================================
-        // USER PROFILES
-        // ============================================================
-
         public DbSet<DoctorProfile> DoctorProfiles { get; set; }
 
         public DbSet<TechnicianProfile> TechnicianProfiles { get; set; }
-
-
-        // ============================================================
-        // TEST REQUESTS
-        // ============================================================
-
+        public DbSet<TechnicianSentEmailModel> TechnicianSentEmails
+        { get; set; }
+        public DbSet<TechnicianNotificationModel> TechnicianNotifications
+        { get; set; }
         public DbSet<TestRequestsModel> TestRequests { get; set; }
 
         public DbSet<SampleModel> Samples { get; set; }
@@ -54,20 +42,9 @@ namespace NMB_HLabSys.Data
 
         public DbSet<MeasurementUnitModel> MeasurementUnits { get; set; }
 
-        // ============================================================
-        // AT LEAST ONE TEST TYPE SHOULD BE ASSIGNED TO EACH TECHNICIAN
-        // MULTIPLE TECHNICIANS COULD BE ASSIGNED THE SAME TEST TYPE
-        // TEST  TYPES THAT THE TECHNICIAN CAN PERFORM SHOULD BE INDICATED FOR EACH
-        // TECHNICIAN
-        // ============================================================
-        public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
+      public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
 
         public DbSet<TestTypeConsumableModel> TestTypeConsumables { get; set; }
-
-
-        // ============================================================
-        // MANAGER - CONSUMABLES & ORDERS
-        // ============================================================
 
         public DbSet<ConsumableModel> Consumables { get; set; }
         public DbSet<TestResultModel> TestResults { get; set; }
@@ -83,10 +60,6 @@ namespace NMB_HLabSys.Data
         public DbSet<StockAdjustmentModel> StockAdjustments { get; set; }
 
 
-        // ============================================================
-        // PATIENT MODELS
-        // ============================================================
-
         public DbSet<PatientModel> Patients { get; set; }
 
         public DbSet<PatientConditionModel> PatientConditions { get; set; }
@@ -98,12 +71,12 @@ namespace NMB_HLabSys.Data
         public DbSet<PatientDoctorConsentModel> PatientDoctorConsents { get; set; }
 
         public DbSet<ConsentRequestItemModel> ConsentRequestItems { get; set; }
-
-
-        // ============================================================
-        // ADMINISTRATOR
-        // ============================================================
-
+        public DbSet<SampleDeactivationAuditModel>
+    SampleDeactivationAudits
+        { get; set; }
+        public DbSet<RequestedTestDeactivationAuditModel>
+    RequestedTestDeactivationAudits
+        { get; set; }
         public DbSet<MedicalConditionCategory> MedicalConditionCategories { get; set; }
 
         public DbSet<MedicalCondition> MedicalConditions { get; set; }
@@ -154,7 +127,27 @@ namespace NMB_HLabSys.Data
                 entity.Property(x => x.NewReferenceMax)
                     .HasPrecision(18, 4);
             });
+            builder.Entity<TechnicianSentEmailModel>(entity =>
+            {
+                // Multiple reports can belong to one request.
+                entity.HasIndex(x => x.TestRequestId)
+                    .IsUnique(false);
 
+                // One preliminary report per individual test.
+                entity.HasIndex(x => new
+                {
+                    x.TestRequestTestTypeId,
+                    x.ReportType
+                })
+                .IsUnique()
+                .HasFilter("[TestRequestTestTypeId] IS NOT NULL");
+
+                // Preserve one combined final report per request.
+                entity.HasIndex(x => x.TestRequestId)
+                    .IsUnique()
+                    .HasDatabaseName("IX_TechnicianSentEmails_OneFinalPerRequest")
+                    .HasFilter("[ReportType] = 'Final'");
+            });
             builder.Entity<TestResultVerificationHistoryModel>(entity =>
             {
                 entity.Property(x => x.PreviousReferenceMin)
@@ -333,10 +326,24 @@ namespace NMB_HLabSys.Data
 
             builder.Entity<TestTypeModel>()
                 .HasOne(x => x.TestCategory)
-                .WithMany()
+                .WithMany(x => x.TestTypes)
                 .HasForeignKey(x => x.TestCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+            builder.Entity<SampleDeactivationAuditModel>(entity =>
+            {
+                entity.HasOne(a => a.Sample)
+                    .WithMany()
+                    .HasForeignKey(a => a.SampleId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(a => a.Technician)
+                    .WithMany()
+                    .HasForeignKey(a => a.TechnicianId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(a => a.SampleId);
+                entity.HasIndex(a => a.TechnicianId);
+            });
 
             // ============================================================
             // TEST TYPE -> SAMPLE TYPE
@@ -464,13 +471,9 @@ namespace NMB_HLabSys.Data
                 .WithMany(x => x.PasswordResetOtps)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-
-            // ============================================================
-            // DEVELOPMENT DEMO: LERATO PATIENT PROFILE
-            // PatientId is distinct from AspNetUsers.Id (UserId).
-            // All demographic values below are fictional test data.
-            // ============================================================
+            
+            
+            
             builder.Entity<PatientModel>().HasData(
                 new PatientModel
                 {
@@ -1010,11 +1013,7 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-
-            // ============================================================
-            // SUPPLIER SEED DATA
-            // ============================================================
-
+            // supplier seeded data
             builder.Entity<SupplierModel>().HasData(
 
                 new SupplierModel
@@ -1383,17 +1382,9 @@ namespace NMB_HLabSys.Data
                     Notes = "Assigned additional testing responsibilities."
                 }
             );
-
-
-            // ============================================================
-            // TEST REQUEST TEST TYPES SEED DATA
-            // Individual tests requested by doctors
-            // ============================================================
-
-
+            
             builder.Entity<TestRequestTestTypeModel>().HasData(
-
-                // Request 1 - Awaiting samples
+                
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1,
@@ -1404,8 +1395,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 2 - Samples received
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 2,
@@ -1427,8 +1416,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 3 - Samples received, request in progress
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 4,
@@ -1439,8 +1426,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 5 - Awaiting samples
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 5,
@@ -1451,8 +1436,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 6 - Samples received
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 6,
@@ -1463,8 +1446,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 9 - Samples received, request in progress
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 7,
@@ -1475,8 +1456,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 10 - Awaiting samples
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 8,
@@ -1487,10 +1466,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // DEVELOPMENT DEMO: Technician 1 completed this test.
-                // Technician 2 has an active assignment for TestTypeId 3
-                // and can independently verify the result.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1001,
@@ -1501,9 +1476,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = new DateTime(2026, 10, 14, 8, 30, 0),
                     CompletionDateTime = new DateTime(2026, 10, 14, 10, 0, 0)
                 },
-
-                // DEVELOPMENT DEMO: Technician 2 completed this test.
-                // Technician 1 can independently verify it.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1002,
@@ -1514,8 +1486,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = new DateTime(2026, 10, 14, 9, 0, 0),
                     CompletionDateTime = new DateTime(2026, 10, 14, 11, 15, 0)
                 },
-
-                // DEVELOPMENT DEMO: Returned to Technician 1 for correction.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1003,
@@ -1526,8 +1496,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = new DateTime(2026, 10, 13, 8, 0, 0),
                     CompletionDateTime = new DateTime(2026, 10, 13, 9, 30, 0)
                 },
-
-                // DEVELOPMENT DEMO: Returned to Technician 2 for correction.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1004,
@@ -1540,10 +1508,6 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-            // ============================================================
-            // DEVELOPMENT-ONLY REVIEW QUEUE RESULTS
-            // Fictional values for UI/workflow testing; not clinical records.
-            // ============================================================
             builder.Entity<TestResultModel>().HasData(
                 new TestResultModel
                 {
@@ -1615,7 +1579,6 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-            // DEMO VERIFICATION AUDIT HISTORY
             builder.Entity<TestResultVerificationHistoryModel>().HasData(
                 new TestResultVerificationHistoryModel
                 {
@@ -1654,10 +1617,6 @@ namespace NMB_HLabSys.Data
                     ActionDateTime = new DateTime(2026, 10, 13, 12, 10, 0, DateTimeKind.Utc)
                 }
             );
-
-            // ============================================================
-            // TEST TYPE / CONSUMABLE SEED DATA
-            // ============================================================
 
             builder.Entity<TestTypeConsumableModel>().HasData(
 
@@ -1742,17 +1701,7 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-            // ============================================================
-            // DEVELOPMENT DEMO: PATIENT MEDICAL HISTORY
-            // Lerato Patient (AspNetUsers.LastName = "Patient")
-            // AspNetUsers.Id = c0fbfbb4-daf5-44e3-bf57-acfded7baceb; patient profile ID = f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15
-            // Lookup IDs 1 and 2 are seeded below in the patient-model lookup tables.
-            // These are fictional demonstration records only.
-            // ============================================================
-            // Lookup records required by the patient-history foreign keys.
-            // AllergyCategories(1) and MedicationCategories(1) already exist
-            // in the development database; do not re-seed those parent rows.
-            // Category 9001 is new: verify it is unused before migration.
+
             builder.Entity<MedicalConditionCategory>().HasData(
                 new MedicalConditionCategory
                 {
@@ -1840,16 +1789,6 @@ namespace NMB_HLabSys.Data
                     Notes = "DEMO DATA ONLY - fictional medication history."
                 }
             );
-
-            // ============================================================
-            // TECHNICIAN ASSESSMENT DATA - DEVELOPMENT / DEMO ONLY
-            // Main technician: 63950297-85b0-4b81-934a-bad2bf77f3cb
-            // No real clinical data. Verify IDs against your existing database.
-            // ============================================================
-
-            // Four Submitted requests (1, 5, 7, 10) each have three unreceived samples.
-            // Request 7 is explicitly set to Submitted above to match ReceiveSamplesController.Index.
-            // All barcodes and sample IDs are unique development-only values.
             builder.Entity<SampleModel>().HasData(
                 new SampleModel { SampleId = 8101, TestRequestId = 1, Barcode = "SMP-2026-008101", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
                 new SampleModel { SampleId = 8102, TestRequestId = 5, Barcode = "SMP-2026-008102", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
@@ -1860,9 +1799,6 @@ namespace NMB_HLabSys.Data
                 new SampleModel { SampleId = 8203, TestRequestId = 7, Barcode = "SMP-2026-008203", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
                 new SampleModel { SampleId = 8204, TestRequestId = 10, Barcode = "SMP-2026-008204", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
             );
-
-            // Five selected tests awaiting capture; no result rows yet.
-            // Test types 1, 2 and 3 are actively assigned to the main technician.
             builder.Entity<TestRequestTestTypeModel>().HasData(
                 new TestRequestTestTypeModel { TestRequestTestTypeId = 1101, TestRequestId = 2, TestTypeId = 1, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 8, 0, 0), CompletionDateTime = null },
                 new TestRequestTestTypeModel { TestRequestTestTypeId = 1102, TestRequestId = 2, TestTypeId = 2, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 9, 0, 0), CompletionDateTime = null },
@@ -1959,11 +1895,6 @@ namespace NMB_HLabSys.Data
                 new TestResultVerificationHistoryModel { TestResultVerificationHistoryId = 3214, TestResultId = 2214, ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185", Action = "Verified", Notes = "DEMO: historical verification for report", ActionDateTime = new DateTime(2026, 10, 14, 9, 15, 0, DateTimeKind.Utc) }
             );
 
-            // ============================================================
-            // ASSESSMENT: FIVE TESTS AWAITING TECHNICIAN SELECTION
-            // These are unassigned, Submitted tests on requests whose samples
-            // have already been received. Includes Urgent and Stat cases.
-            // ============================================================
             builder.Entity<TestRequestsModel>().HasData(
                 new TestRequestsModel
                 {

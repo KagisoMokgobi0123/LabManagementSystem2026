@@ -1,0 +1,185 @@
+﻿@model List<NMB_HLabSys.Areas.Technician.Models.TechnicianSentEmailModel>
+
+@{
+    ViewData["Title"] = "Sent Emails";
+    Layout = "_TechnicianLayout";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between
+        align-items-center mb-4">
+
+        <div>
+            <h3 class="mb-1">Sent Laboratory Emails</h3>
+            <p class="text-muted mb-0">
+                View laboratory report delivery records
+                and download prepared PDF reports.
+            </p>
+        </div>
+
+        <a href="@Url.Action("PrepareReport", "SentEmails", new { area = "Technician" })"
+           class="btn btn-primary">
+            <i class="fas fa-file-pdf me-2"></i>
+            Prepare Laboratory Report
+        </a>
+
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show"
+             role="alert">
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert"
+                    aria-label="Close">
+            </button>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Recipient</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Sent</th>
+                            <th>PDF</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var email in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @if (email.RecipientEmail ==
+                                            "Pending recipient resolution")
+                                        {
+                                            <span class="text-muted">
+                                                Pending recipient resolution
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            @email.RecipientEmail
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @email.Subject
+                                    </td>
+
+                                    <td>
+                                        @if (email.Status == "Sent")
+                                        {
+                                            <span class="badge bg-success">
+                                                Sent
+                                            </span>
+                                        }
+                                        else if (email.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                Pending
+                                            </span>
+                                        }
+                                        else if (email.Status == "Failed")
+                                        {
+                                            <span class="badge bg-danger">
+                                                Failed
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">
+                                                @email.Status
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @(email.CreatedAt
+                                            .ToLocalTime()
+                                            .ToString("dd MMM yyyy HH:mm"))
+                                    </td>
+
+                                    <td>
+                                        @(email.SentAt.HasValue
+                                            ? email.SentAt.Value
+                                                .ToLocalTime()
+                                                .ToString("dd MMM yyyy HH:mm")
+                                            : "Not sent")
+                                    </td>
+
+                                    <td>
+                                        @if (email.PdfAttachment != null &&
+                                             email.PdfAttachment.Length > 0)
+                                        {
+                                            <a href="@Url.Action("DownloadPdf", "SentEmails", new { area = "Technician", id = email.SentEmailId })"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-download me-1"></i>
+                                                Download PDF
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                Not prepared
+                                            </span>
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6"
+                                    class="text-center text-muted py-4">
+                                    <i class="fas fa-envelope-open-text
+                                    fa-2x mb-2 d-block"></i>
+                                    No outgoing laboratory emails recorded yet.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

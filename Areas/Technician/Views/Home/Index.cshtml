@@ -610,14 +610,16 @@
         font-weight: 700;
     }
 
+    .status-default { background: #e2e8f0; color: #334155; }
+
     .status-submitted {
         background: #e0f2fe;
         color: #0369a1;
     }
 
     .status-progress {
-        background: #fef3c7;
-        color: #b45309;
+        background: #dbeafe;
+        color: #1d4ed8;
     }
 
     .status-completed {
@@ -626,8 +628,8 @@
     }
 
     .status-review {
-        background: #ffedd5;
-        color: #c2410c;
+        background: #f3e8ff;
+        color: #7e22ce;
     }
 
     .status-verified {
@@ -650,6 +652,15 @@
         border-radius: 7px;
         font-size: 11px;
     }
+
+    /* Keep the Verification History link above overlapping dashboard layers. */
+    .verification-history-link {
+        position: relative;
+        z-index: 20;
+        pointer-events: auto !important;
+        cursor: pointer;
+    }
+    .verification-history-link * { pointer-events: none; }
 
     /* =========================================================
                PROFILE
@@ -763,7 +774,7 @@
             <div class="tech-hero-content">
 
                 <!-- Header tools: accessible native dropdowns, no JavaScript dependency -->
-                <div class="tech-header-tools" aria-label="Technician account tools">
+          @*       <div class="tech-header-tools" aria-label="Technician account tools">
                     <details class="tech-tool">
                         <summary aria-label="Email account" title="Email account">
                             <i class="fas fa-envelope" aria-hidden="true"></i>
@@ -809,7 +820,7 @@
                             <a href="/Technician/Profile/ChangePassword"><i class="fas fa-key mr-2"></i>Change password</a>
                         </div>
                     </details>
-                </div>
+                </div> *@
 
                 <div class="row align-items-center">
 
@@ -1530,8 +1541,12 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/VerificationHistoryIndex"
-                                   class="quick-action">
+                                <a asp-area="Technician"
+                                   asp-controller="Tests"
+                                   asp-action="VerificationHistoryIndex"
+                                   href="/Technician/Tests/VerificationHistoryIndex"
+                                   class="quick-action verification-history-link"
+                                   aria-label="Open Verification History">
 
                                     <div class="quick-action-icon">
                                         <i class="fas fa-check-circle"></i>
@@ -1798,7 +1813,20 @@
                                     <td>@urgency</td>
                                     <td>@(started.HasValue ? started.Value.ToString("dd MMM yyyy HH:mm") + " UTC" : "Not started")</td>
                                     <td>@(due.HasValue ? due.Value.ToString("dd MMM yyyy HH:mm") + " UTC" : "—")</td>
-                                    <td><span class="status-badge status-progress">@test.Status</span></td>
+                                    <td>
+                                        @{
+                                            var statusClass = (test.Status ?? "").Trim().ToLowerInvariant() switch
+                                            {
+                                                "completed" => "status-completed",
+                                                "in progress" => "status-progress",
+                                                "to be reviewed" => "status-review",
+                                                "verified" => "status-verified",
+                                                "submitted" or "samplesreceived" or "samples received" => "status-submitted",
+                                                _ => "status-default"
+                                            };
+                                        }
+                                        <span class="status-badge @statusClass">@test.Status</span>
+                                    </td>
                                     <td><a class="btn btn-outline-primary btn-sm" href="@Url.Action("Details", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">View</a></td>
                                 </tr>
                             }

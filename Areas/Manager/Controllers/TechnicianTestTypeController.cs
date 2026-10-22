@@ -15,10 +15,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        // IMPORTANT:
-        // The seeded technician role is "LabTechnician".
-        // Keep this in one place so the role name does not become
-        // inconsistent throughout the controller.
+        //prevent role name to not become inconsistent throughout the controller from the seeded data.
         private const string TechnicianRole = "LabTechnician";
 
         public TechnicianTestTypeController(
@@ -30,23 +27,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // INDEX
-        // ============================================================
-
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            // --------------------------------------------------------
-            // LOAD ACTIVE ASSIGNMENTS
-            // --------------------------------------------------------
 
             var assignments = await GetActiveAssignments();
-
-
-            // --------------------------------------------------------
-            // LOAD ACTIVE TECHNICIANS
-            // --------------------------------------------------------
 
             var technicianUsers =
                 await _userManager.GetUsersInRoleAsync(
@@ -61,9 +46,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToList();
 
 
-            // --------------------------------------------------------
-            // DETERMINE TECHNICIANS WITHOUT ASSIGNMENTS
-            // --------------------------------------------------------
+            //Determine Technicians that need assigning of testype
 
             var technicianAssignmentCounts =
                 assignments
@@ -81,16 +64,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToList();
 
 
-            // --------------------------------------------------------
-            // LOAD DROPDOWN DATA
-            // --------------------------------------------------------
-
             await LoadDropdownData();
 
-
-            // --------------------------------------------------------
-            // VIEWBAG DATA
-            // --------------------------------------------------------
 
             ViewBag.ActiveTechnicians =
                 activeTechnicians;
@@ -104,11 +79,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             return View(assignments);
         }
-
-
-        // ============================================================
-        // DETAILS
-        // ============================================================
 
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -156,27 +126,17 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // CREATE
-        // ============================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             TechnicianTestTypeModel model)
         {
-            // --------------------------------------------------------
-            // CLEAN TECHNICIAN ID
-            // --------------------------------------------------------
+     
 
             model.TechnicianId =
                 model.TechnicianId?.Trim()
                 ?? string.Empty;
 
-
-            // --------------------------------------------------------
-            // CURRENT MANAGER
-            // --------------------------------------------------------
 
             var currentManager =
                 await _userManager.GetUserAsync(User);
@@ -191,32 +151,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // SET MANAGER
-            // --------------------------------------------------------
-
             model.ManagerId =
                 currentManager.Id;
 
 
-            // IMPORTANT:
-            //
-            // ManagerId is not submitted by the form because it must
-            // always come from the authenticated Manager.
-            //
-            // If ManagerId has [Required] in TechnicianTestTypeModel,
-            // ASP.NET Core may already have added a validation error
-            // before this action executes.
-            //
-            // Remove that old validation result now that ManagerId
-            // has been supplied by the server.
-
             ModelState.Remove(nameof(TechnicianTestTypeModel.ManagerId));
-
-
-            // --------------------------------------------------------
-            // SERVER-CONTROLLED FIELDS
-            // --------------------------------------------------------
 
             ModelState.Remove(
                 nameof(TechnicianTestTypeModel.AssignedDate));
@@ -224,17 +163,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             ModelState.Remove(
                 nameof(TechnicianTestTypeModel.IsActive));
 
-
-            // --------------------------------------------------------
-            // VALIDATION
-            // --------------------------------------------------------
-
             await ValidateAssignment(model);
 
 
-            // --------------------------------------------------------
-            // DUPLICATE ASSIGNMENT CHECK
-            // --------------------------------------------------------
+            //duplicate assign check
 
             if (!string.IsNullOrWhiteSpace(model.TechnicianId) &&
                 model.TestTypeId > 0)
@@ -260,14 +192,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // VALIDATION FAILURE
-            // --------------------------------------------------------
-
             if (!ModelState.IsValid)
             {
-                // Make sure all dropdowns and technician data are
-                // available when returning the Index view.
+                // Make sure all dropdowns and technician data are available when returning the Index view.
 
                 var assignments =
                     await GetActiveAssignments();
@@ -275,11 +202,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 await LoadDropdownData();
 
                 await LoadIndexTechnicianData();
-
-
-                // ----------------------------------------------------
-                // OPTIONAL: SHOW VALIDATION ERRORS IN SERVER LOG
-                // ----------------------------------------------------
 
                 foreach (var state in ModelState)
                 {
@@ -301,9 +223,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // CREATE ASSIGNMENT
-            // --------------------------------------------------------
 
             model.TechnicianTestTypeId = 0;
 
@@ -318,10 +237,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             await _context.SaveChangesAsync();
 
 
-            // --------------------------------------------------------
-            // SUCCESS
-            // --------------------------------------------------------
-
             TempData["SuccessMessage"] =
                 "Test type assigned to technician successfully.";
 
@@ -330,28 +245,16 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(Index));
         }
 
-
-        // ============================================================
-        // EDIT
-        // ============================================================
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             TechnicianTestTypeModel model)
         {
-            // --------------------------------------------------------
-            // CLEAN TECHNICIAN ID
-            // --------------------------------------------------------
+
 
             model.TechnicianId =
                 model.TechnicianId?.Trim()
                 ?? string.Empty;
-
-
-            // --------------------------------------------------------
-            // FIND EXISTING ASSIGNMENT
-            // --------------------------------------------------------
 
             var existing =
                 await _context.TechnicianTestTypes
@@ -369,18 +272,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // CURRENT MANAGER
-            // --------------------------------------------------------
-            //
-            // We do NOT allow the posted form to change the Manager.
-            // The original manager remains associated with the
-            // assignment.
-            //
-            // If your business rule is that editing should record the
-            // current manager instead, change this accordingly.
-            // --------------------------------------------------------
-
             var currentManager =
                 await _userManager.GetUserAsync(User);
 
@@ -394,10 +285,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // REMOVE SERVER-CONTROLLED MODEL VALIDATION
-            // --------------------------------------------------------
-
             ModelState.Remove(
                 nameof(TechnicianTestTypeModel.ManagerId));
 
@@ -408,20 +295,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 nameof(TechnicianTestTypeModel.IsActive));
 
 
-            // --------------------------------------------------------
-            // VALIDATE TECHNICIAN AND TEST TYPE
-            // --------------------------------------------------------
 
             await ValidateAssignment(model);
 
 
-            // --------------------------------------------------------
             // DUPLICATE ASSIGNMENT CHECK
-            // --------------------------------------------------------
-            //
-            // Ignore the assignment currently being edited.
-            // --------------------------------------------------------
-
             if (!string.IsNullOrWhiteSpace(model.TechnicianId) &&
                 model.TestTypeId > 0)
             {
@@ -448,11 +326,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
             }
 
-
-            // --------------------------------------------------------
-            // VALIDATION FAILURE
-            // --------------------------------------------------------
-
             if (!ModelState.IsValid)
             {
                 var assignments =
@@ -461,11 +334,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 await LoadDropdownData();
 
                 await LoadIndexTechnicianData();
-
-
-                // ----------------------------------------------------
-                // WRITE VALIDATION ERRORS TO SERVER LOG
-                // ----------------------------------------------------
 
                 foreach (var state in ModelState)
                 {
@@ -487,10 +355,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // UPDATE ONLY EDITABLE FIELDS
-            // --------------------------------------------------------
-
             existing.TechnicianId =
                 model.TechnicianId;
 
@@ -498,16 +362,8 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 model.TestTypeId;
 
 
-            // --------------------------------------------------------
-            // SAVE
-            // --------------------------------------------------------
-
             await _context.SaveChangesAsync();
 
-
-            // --------------------------------------------------------
-            // SUCCESS
-            // --------------------------------------------------------
 
             TempData["SuccessMessage"] =
                 "Technician test type assignment updated successfully.";
@@ -518,17 +374,13 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // DELETE / SOFT DELETE
-        // ============================================================
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            // --------------------------------------------------------
-            // FIND ASSIGNMENT
-            // --------------------------------------------------------
+
 
             var assignment =
                 await _context.TechnicianTestTypes
@@ -537,10 +389,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .FirstOrDefaultAsync(a =>
                         a.TechnicianTestTypeId == id);
 
-
-            // --------------------------------------------------------
-            // ASSIGNMENT NOT FOUND
-            // --------------------------------------------------------
 
             if (assignment == null)
             {
@@ -552,10 +400,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // ALREADY INACTIVE
-            // --------------------------------------------------------
-
             if (!assignment.IsActive)
             {
                 TempData["ErrorMessage"] =
@@ -566,10 +410,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // COUNT ACTIVE ASSIGNMENTS
-            // --------------------------------------------------------
-
             var activeAssignmentCount =
                 await _context.TechnicianTestTypes
                     .CountAsync(a =>
@@ -579,9 +419,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         a.IsActive);
 
 
-            // --------------------------------------------------------
-            // PREVENT REMOVING LAST ASSIGNMENT
-            // --------------------------------------------------------
 
             if (activeAssignmentCount <= 1)
             {
@@ -606,20 +443,11 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     nameof(Index));
             }
 
-
-            // --------------------------------------------------------
-            // SOFT DELETE
-            // --------------------------------------------------------
-
             assignment.IsActive = false;
 
 
             await _context.SaveChangesAsync();
 
-
-            // --------------------------------------------------------
-            // DISPLAY NAMES
-            // --------------------------------------------------------
 
             var deletedTechnicianName =
                 assignment.Technician?.FullName;
@@ -637,10 +465,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 ?? "test type";
 
 
-            // --------------------------------------------------------
-            // SUCCESS
-            // --------------------------------------------------------
-
             TempData["SuccessMessage"] =
                 $"The '{testTypeName}' assignment for " +
                 $"'{deletedTechnicianName}' was deactivated successfully.";
@@ -651,16 +475,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // VALIDATION
-        // ============================================================
-
         private async Task ValidateAssignment(
             TechnicianTestTypeModel model)
         {
-            // --------------------------------------------------------
-            // TECHNICIAN REQUIRED
-            // --------------------------------------------------------
+
 
             if (string.IsNullOrWhiteSpace(
                 model.TechnicianId))
@@ -671,9 +489,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // TECHNICIAN EXISTS
-            // --------------------------------------------------------
 
             if (!string.IsNullOrWhiteSpace(
                 model.TechnicianId))
@@ -690,8 +505,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
                 else
                 {
-                    // IMPORTANT:
-                    // Seeded role is LabTechnician, not Technician.
                     var isTechnician =
                         await _userManager.IsInRoleAsync(
                             technician,
@@ -705,10 +518,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     }
 
 
-                    // ------------------------------------------------
-                    // TECHNICIAN ACTIVE CHECK
-                    // ------------------------------------------------
-
                     if (!technician.IsActive)
                     {
                         ModelState.AddModelError(
@@ -719,10 +528,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
 
 
-            // --------------------------------------------------------
-            // TEST TYPE REQUIRED
-            // --------------------------------------------------------
-
             if (model.TestTypeId <= 0)
             {
                 ModelState.AddModelError(
@@ -730,10 +535,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     "Test type is required.");
             }
 
-
-            // --------------------------------------------------------
-            // TEST TYPE EXISTS
-            // --------------------------------------------------------
 
             if (model.TestTypeId > 0)
             {
@@ -761,15 +562,9 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD DROPDOWN DATA
-        // ============================================================
-
         private async Task LoadDropdownData()
         {
-            // --------------------------------------------------------
-            // ACTIVE LAB TECHNICIANS
-            // --------------------------------------------------------
+
 
             var technicianUsers =
                 await _userManager.GetUsersInRoleAsync(
@@ -784,10 +579,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToList();
 
 
-            // --------------------------------------------------------
-            // ACTIVE TEST TYPES
-            // --------------------------------------------------------
-
             ViewBag.TestTypes =
                 await _context.TestTypes
                     .Where(t =>
@@ -798,15 +589,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD INDEX TECHNICIAN DATA
-        // ============================================================
 
         private async Task LoadIndexTechnicianData()
         {
-            // --------------------------------------------------------
-            // LOAD ALL ACTIVE LAB TECHNICIANS
-            // --------------------------------------------------------
+
 
             var technicianUsers =
                 await _userManager.GetUsersInRoleAsync(
@@ -821,9 +607,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToList();
 
 
-            // --------------------------------------------------------
-            // LOAD ACTIVE ASSIGNMENT COUNTS
-            // --------------------------------------------------------
 
             var technicianIds =
                 activeTechnicians
@@ -852,9 +635,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         x => x.Count);
 
 
-            // --------------------------------------------------------
-            // TECHNICIANS WITHOUT ACTIVE ASSIGNMENTS
-            // --------------------------------------------------------
+
 
             var techniciansWithoutAssignments =
                 activeTechnicians
@@ -864,9 +645,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                     .ToList();
 
 
-            // --------------------------------------------------------
-            // VIEW DATA
-            // --------------------------------------------------------
 
             ViewBag.ActiveTechnicians =
                 activeTechnicians;
@@ -879,9 +657,6 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         }
 
 
-        // ============================================================
-        // LOAD ACTIVE ASSIGNMENTS
-        // ============================================================
 
         private async Task<List<TechnicianTestTypeModel>>
             GetActiveAssignments()

@@ -1,0 +1,901 @@
+﻿@model NMB_HLabSys.Areas.Manager.Models.ManagementReportViewModel
+
+@{
+    ViewData["Title"] = "Management Reports";
+    Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
+}
+<style>
+    @@media print {
+        @@page {
+            size: A4 portrait;
+            margin: 15mm;
+        }
+
+        body {
+            background: #fff !important;
+            color: #000 !important;
+            font-size: 10pt;
+        }
+
+        /* Hide navigation and interactive controls */
+        nav,
+        aside,
+        .sidebar,
+        .navbar,
+        .btn,
+        form,
+        .no-print,
+        footer {
+            display: none !important;
+        }
+
+        /* Let the report use the printable page width */
+        .container,
+        .container-fluid {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+            break-inside: avoid;
+        }
+
+        .card-header {
+            background: #fff !important;
+            color: #000 !important;
+        }
+
+        table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+        }
+
+        thead {
+            display: table-header-group;
+        }
+
+        tr {
+            break-inside: avoid;
+        }
+
+        .table-responsive {
+            overflow: visible !important;
+        }
+
+        canvas {
+            max-width: 100% !important;
+        }
+    }
+</style>
+<div class="container-fluid py-4">
+
+    <!-- =========================================================
+         PAGE HEADER
+         ========================================================= -->
+
+    <div class="d-flex flex-wrap justify-content-between
+        align-items-center mb-4">
+
+        <div>
+
+            <h4 class="fw-bold mb-1">
+
+                <i class="fa-solid fa-chart-line
+                text-primary me-2"></i>
+
+                Management Reports
+
+            </h4>
+
+            <p class="text-muted mb-0">
+
+                Review laboratory testing performance and generate
+                reports for a selected reporting period.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MESSAGES
+         ========================================================= -->
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible
+            fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+
+            @TempData["ErrorMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible
+            fade show"
+             role="alert">
+
+            <i class="fa-solid fa-circle-check me-2"></i>
+
+            @TempData["SuccessMessage"]
+
+            <button type="button"
+                    class="btn-close"
+                    data-bs-dismiss="alert">
+            </button>
+
+        </div>
+    }
+
+
+    <!-- =========================================================
+         REPORT INFORMATION
+         ========================================================= -->
+
+    <div class="alert alert-info border-0 shadow-sm">
+
+        <div class="d-flex">
+
+            <i class="fa-solid fa-circle-info
+            mt-1 me-3"></i>
+
+            <div>
+
+                <div class="fw-semibold">
+                    Laboratory Performance Report
+                </div>
+
+                <div class="small">
+
+                    This report measures completed laboratory tests
+                    using their completion dates. Select a reporting
+                    period to review testing activity by category.
+
+                    The graph highlights the five most-performed
+                    categories to keep the comparison readable.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         DATE RANGE FILTER
+         ========================================================= -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <h6 class="fw-bold mb-0">
+
+                <i class="fa-solid fa-calendar-days
+                text-primary me-2"></i>
+
+                Reporting Period
+
+            </h6>
+
+            <small class="text-muted">
+
+                Select the start and end dates for the report.
+
+            </small>
+
+        </div>
+
+        <div class="card-body">
+
+            <form id="reportFilterForm"
+                  method="get"
+                  asp-area="Manager"
+                  asp-controller="Reports"
+                  asp-action="Index">
+
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- START DATE -->
+
+                    <div class="col-md-4">
+
+                        <label for="startDate"
+                               class="form-label fw-semibold">
+
+                            Start Date
+
+                        </label>
+
+                        <input type="date"
+                               id="startDate"
+                               name="startDate"
+                               class="form-control"
+                               value="@Model.StartDate.ToString("yyyy-MM-dd")"
+                               required />
+
+                    </div>
+
+
+                    <!-- END DATE -->
+
+                    <div class="col-md-4">
+
+                        <label for="endDate"
+                               class="form-label fw-semibold">
+
+                            End Date
+
+                        </label>
+
+                        <input type="date"
+                               id="endDate"
+                               name="endDate"
+                               class="form-control"
+                               value="@Model.EndDate.ToString("yyyy-MM-dd")"
+                               required />
+
+                    </div>
+
+
+                    <!-- FILTER BUTTON -->
+
+                    <div class="col-md-4">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            <i class="fa-solid fa-filter me-1"></i>
+
+                            Apply Date Range
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div id="dateValidationMessage"
+                     class="text-danger small mt-2"
+                     style="display:none;">
+
+                    The start date cannot be later than the end date.
+
+                </div>
+
+            </form>
+
+            <hr class="my-3" />
+
+            <div class="d-flex flex-wrap
+                justify-content-between
+                align-items-center gap-2">
+
+                <div class="small text-muted">
+
+                    <i class="fa-solid fa-calendar-check me-1"></i>
+
+                    Selected period:
+
+                    <strong>
+                        @Model.StartDate.ToString("dd MMM yyyy")
+                    </strong>
+
+                    to
+
+                    <strong>
+                        @Model.EndDate.ToString("dd MMM yyyy")
+                    </strong>
+
+                </div>
+
+                <!-- GENERATE PDF REPORT -->
+                <form method="get"
+                      action="/Manager/Reports/GeneratePdf"
+                      target="_blank"
+                      class="no-print">
+
+                    <input type="hidden"
+                           name="startDate"
+                           value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+
+                    <input type="hidden"
+                           name="endDate"
+                           value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+
+                    <button type="submit"
+                            class="btn btn-outline-primary">
+
+                        <i class="fa-solid fa-file-pdf me-1"></i>
+                        Preview PDF Report
+
+                    </button>
+                </form>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+     SUMMARY CARDS
+     ========================================================= -->
+
+    <div class="row g-3 mb-4">
+
+        <!-- TOTAL COMPLETED TESTS -->
+
+        <div class="col-xl-6 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between
+                        align-items-center">
+
+                        <div>
+                            <div class="text-muted small mb-1">
+                                Total Completed Tests
+                            </div>
+
+                            <h3 class="fw-bold mb-0">
+                                @Model.TotalCompletedTests.ToString("N0")
+                            </h3>
+
+                            <small class="text-muted">
+                                Within the selected reporting period
+                            </small>
+                        </div>
+
+                        <div class="d-flex align-items-center
+                            justify-content-center
+                            rounded-circle bg-primary-subtle
+                            text-primary"
+                             style="width:58px;height:58px;">
+
+                            <i class="fa-solid fa-vials fa-xl"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CATEGORIES WITH COMPLETED TESTS -->
+
+        <div class="col-xl-6 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between
+                        align-items-center">
+
+                        <div>
+                            <div class="text-muted small mb-1">
+                                Categories Performed
+                            </div>
+
+                            <h3 class="fw-bold mb-0">
+                                @Model.TotalCategories.ToString("N0")
+                            </h3>
+
+                            <small class="text-muted">
+                                Categories with completed tests
+                            </small>
+                        </div>
+
+                        <div class="d-flex align-items-center
+                            justify-content-center
+                            rounded-circle bg-success-subtle
+                            text-success"
+                             style="width:58px;height:58px;">
+
+                            <i class="fa-solid fa-layer-group fa-xl"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+        <!-- DAILY AVERAGE -->
+
+        <div class="col-xl-4 col-md-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body">
+
+                    <div class="d-flex
+                        justify-content-between
+                        align-items-center">
+
+                        <div>
+
+                            <div class="text-muted small mb-1">
+
+                                Average Tests Per Day
+
+                            </div>
+
+                            <h3 class="fw-bold mb-0">
+
+                                @Model.AverageTestsPerDay.ToString("N1")
+
+                            </h3>
+
+                            <small class="text-muted">
+
+                                Across the selected calendar days
+
+                            </small>
+
+                        </div>
+
+                        <div class="d-flex align-items-center
+                            justify-content-center
+                            rounded-circle
+                            bg-warning-subtle
+                            text-warning"
+                             style="width:58px;height:58px;">
+
+                            <i class="fa-solid fa-chart-simple fa-xl"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- =========================================================
+         TEST PERFORMANCE LINE GRAPH
+         ========================================================= -->
+<div>
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex flex-wrap
+                justify-content-between
+                align-items-center gap-2">
+
+                <div>
+
+                    <h6 class="fw-bold mb-1">
+
+                        <i class="fa-solid fa-chart-line
+                        text-primary me-2"></i>
+
+                        Test Performance by Category
+
+                    </h6>
+
+                    <small class="text-muted">
+
+                        Daily completed tests for the top five
+                        categories during the selected period.
+
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary">
+
+                    Top 5 Categories
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            @if (Model.TotalCompletedTests > 0)
+            {
+                <div style="position:relative;
+                    width:100%;
+                    height:380px;">
+
+                    <canvas id="testPerformanceChart"
+                            role="img"
+                            aria-label="Daily completed tests by category">
+
+                        Daily completed tests by category.
+
+                    </canvas>
+
+                </div>
+
+                <div class="small text-muted mt-3">
+
+                    <i class="fa-solid fa-circle-info me-1"></i>
+
+                    Categories are ranked by their total completed
+                    tests across the selected period. All categories
+                    remain available in the breakdown table below.
+
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+
+                    <i class="fa-solid fa-chart-line fa-2x
+                    text-muted mb-3"></i>
+
+                    <h6 class="fw-semibold">
+
+                        No completed tests found
+
+                    </h6>
+
+                    <p class="text-muted mb-0">
+
+                        There are no completed tests for the selected
+                        date range. Select another period to view
+                        the performance graph.
+
+                    </p>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+</div>
+    <!-- =========================================================
+         CATEGORY BREAKDOWN TABLE
+         ========================================================= -->
+<div>
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 py-3">
+
+            <div class="d-flex flex-wrap
+                justify-content-between
+                align-items-center gap-3">
+
+                <div>
+
+                    <h6 class="fw-bold mb-1">
+
+                        <i class="fa-solid fa-table-list
+                        text-primary me-2"></i>
+
+                        Category Breakdown
+
+                    </h6>
+
+                    <small class="text-muted">
+
+                        Completed test totals and each category's
+                        percentage of all completed tests.
+
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary">
+
+                    @(Model.CategoryBreakdown?.Count ?? 0) categories
+
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover
+                    align-middle mb-0"
+                       id="categoryBreakdownTable">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th class="ps-3">
+                                #
+                            </th>
+
+                            <th>
+                                Test Category
+                            </th>
+
+                            <th class="text-end">
+                                Completed Tests
+                            </th>
+
+                            <th style="min-width:220px;">
+                                Percentage of Total
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model.CategoryBreakdown != null &&
+                             Model.CategoryBreakdown.Any())
+                        {
+                            var rank = 0;
+
+                            foreach (var category in Model.CategoryBreakdown)
+                            {
+                                rank++;
+
+                                <tr>
+
+                                    <td class="ps-3">
+
+                                        <span class="badge
+                                            bg-secondary-subtle
+                                            text-secondary">
+
+                                            @rank
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <div class="fw-semibold">
+
+                                            @category.CategoryName
+
+                                        </div>
+
+                                    </td>
+
+                                    <td class="text-end">
+
+                                        <span class="fw-semibold">
+
+                                            @category.TotalTests.ToString("N0")
+
+                                        </span>
+
+                                    </td>
+
+                                    <td>
+
+                                        <div class="d-flex
+                                            align-items-center
+                                            gap-2">
+
+                                            <div class="progress
+                                                flex-grow-1"
+                                                 role="progressbar"
+                                                 aria-label="Category percentage"
+                                                 aria-valuenow="@category.Percentage"
+                                                 aria-valuemin="0"
+                                                 aria-valuemax="100"
+                                                 style="height:8px;">
+
+                                                <div class="progress-bar bg-primary"
+                                                     style="width:@(Math.Clamp(category.Percentage, 0m, 100m).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%">
+                                                </div>
+
+                                            </div>
+
+                                            <span class="small fw-semibold"
+                                                  style="min-width:55px;
+                                                text-align:right;">
+
+                                                @category.Percentage.ToString("N1")%
+
+                                            </span>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                            <tr class="table-light fw-bold">
+
+                                <td colspan="2" class="ps-3">
+
+                                    Total
+
+                                </td>
+
+                                <td class="text-end">
+
+                                    @Model.TotalCompletedTests.ToString("N0")
+
+                                </td>
+
+                                <td>
+
+                                    @if (Model.TotalCompletedTests > 0)
+                                    {
+                                        <span>100.0%</span>
+                                    }
+                                    else
+                                    {
+                                        <span>0.0%</span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="4"
+                                    class="text-center py-5">
+
+                                    <div class="text-muted">
+
+                                        <i class="fa-solid fa-folder-open
+                                        fa-2x mb-3"></i>
+
+                                        <div class="fw-semibold">
+
+                                            No category data available
+
+                                        </div>
+
+                                        <small>
+
+                                            Completed test category totals
+                                            will appear here when records
+                                            match the selected period.
+
+                                        </small>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById("testPerformanceChart");
+
+        if (!canvas) {
+        console.error("Chart canvas was not found.");
+        return;
+        }
+
+        if (typeof Chart === "undefined") {
+        console.error("Chart.js was not loaded.");
+        return;
+        }
+
+        const labels = @Html.Raw(
+                        System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels));
+
+        const series = @Html.Raw(
+                        System.Text.Json.JsonSerializer.Serialize(Model.ChartSeries)
+                    );
+
+        const colors = [
+        "#0d6efd", "#198754", "#dc3545", "#fd7e14",
+        "#6f42c1", "#0dcaf0", "#d63384", "#6c757d",
+        "#20c997", "#ffc107"
+        ];
+
+        if (!labels.length || !series.length) {
+        console.warn("No chart data was supplied by the controller.");
+        return;
+        }
+
+        new Chart(canvas, {
+        type: "line",
+        data: {
+        labels: labels,
+        datasets: series.map((item, index) => ({
+        label: item.Label,
+        data: item.Data,
+        borderColor: colors[index % colors.length],
+        backgroundColor: colors[index % colors.length],
+        borderWidth: 2,
+        tension: 0.25,
+        pointRadius: 2,
+        fill: false
+        }))
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+        mode: "index",
+        intersect: false
+        },
+        plugins: {
+        legend: {
+        position: "bottom"
+        }
+        },
+        scales: {
+        x: {
+        title: {
+        display: true,
+        text: "Date performed"
+        }
+        },
+        y: {
+        beginAtZero: true,
+        ticks: {
+        precision: 0
+        },
+        title: {
+        display: true,
+        text: "Completed tests"
+        }
+        }
+        }
+        }
+        });
+        });
+    </script>
+

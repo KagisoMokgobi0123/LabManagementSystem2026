@@ -176,6 +176,10 @@
             cursor: not-allowed;
         }
 
+    .select-action-buttons { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .select-btn.edit-test { background: #d97706; }
+    .select-btn.edit-test:hover { background: #b45309; }
+
     .select-empty {
         padding: 55px 20px;
         text-align: center;
@@ -288,7 +292,7 @@
                     </h2>
 
                     <small class="text-muted">
-                        Only unclaimed tests with received samples and an active test-type assignment are displayed.
+                        Unclaimed tests with received samples are displayed, including de-activated records for audit visibility.
                     </small>
                 </div>
 
@@ -331,6 +335,7 @@
                                 var priority = test.Priority ?? "";
                                 var requestStatus = test.RequestStatus ?? "";
                                 var testStatus = test.TestStatus ?? "";
+                                var isDeactivated = test.IsDeactivated;
 
                                 var priorityClass =
                                     priority.Equals("Stat", StringComparison.OrdinalIgnoreCase)
@@ -400,9 +405,9 @@
  *@
                                     <!-- REQUEST STATUS -->
                                     <td>
-                                        <span class="select-pill @(requestStatus == "InProgress" ? "success" :
+                                        <span class="select-pill @(isDeactivated ? "danger" : requestStatus == "InProgress" ? "success" :
                                                                            requestStatus == "SamplesReceived" ? "primary" : "")">
-                                            @(requestStatus == "SamplesReceived" ? "Sample Received" :
+                                            @(isDeactivated ? "De-Activated" : requestStatus == "SamplesReceived" ? "Sample Received" :
                                               requestStatus == "InProgress" ? "In Progress" :
                                               requestStatus)
                                         </span>
@@ -416,8 +421,21 @@
                                         </span>
                                     </td> *@
 
-                                    <!-- OPEN PERFORM TEST MODAL -->
+                                    <!-- ACTIONS -->
                                     <td class="text-center">
+                                        @if (isDeactivated)
+                                        {
+                                            <span class="select-pill danger" title="@test.DeactivationReason">De-Activated</span>
+                                            @if (!string.IsNullOrWhiteSpace(test.DeactivationReason))
+                                            {
+                                                <div class="select-subtext" title="@test.DeactivationReason">Reason: @test.DeactivationReason</div>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <div class="select-action-buttons">
+                                    <!-- OPEN PERFORM TEST MODAL -->
+
                                         <button type="button"
                                                 class="select-btn open-perform-modal"
                                                 data-username="@test.DoctorUsername"
@@ -435,6 +453,27 @@
                                             <i class="fas fa-play-circle mr-1"></i>
                                             Select Test
                                         </button>
+
+
+                                             <button type="button" class="select-btn edit-test js-edit-test"
+                                                     data-test-id="@test.RequestedTestId"
+                                                     data-request="@test.RequestReference"
+                                                     data-patient="@test.PatientName"
+                                                     data-doctor="@test.DoctorFullName"
+                                                     data-test="@test.TestTypeName"
+                                                     data-priority="@test.Priority"
+                                                     data-notes="@test.ClinicalNotes">
+                                                 <i class="fas fa-edit mr-1"></i> Edit
+                                             </button>
+
+                                            <button type="button" class="select-btn js-deactivate-test"
+                                                    style="background:#b91c1c"
+                                                    data-test-id="@test.RequestedTestId"
+                                                    data-test-name="@test.TestTypeName">
+                                                <i class="fas fa-ban mr-1"></i> De-Activate
+                                             </button>
+                                            </div>
+                                        }
                                     </td>
 
                                 </tr>
@@ -473,9 +512,46 @@
 
 </div>
 
+<!-- Edit details modal: patient and doctor are read-only; only clinical notes are editable. -->
+<div class="modal fade" id="editPatientTestModal" tabindex="-1" aria-labelledby="editPatientTestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPatientTestModalLabel"><i class="fas fa-edit mr-2"></i>Edit Patient Test Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <form id="editPatientTestForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editRequestedTestId" name="testRequestTestTypeId" />
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 form-group"><label>Request Number</label><input id="editRequestReference" class="form-control" readonly /></div>
+                        <div class="col-md-6 form-group"><label>Patient</label><input id="editPatientName" class="form-control" readonly /></div>
+                        <div class="col-md-6 form-group"><label>Doctor</label><input id="editDoctorName" class="form-control" readonly /></div>
+                        <div class="col-md-6 form-group"><label>Test Type</label><input id="editTestType" class="form-control" readonly /></div>
+                        <div class="col-md-6 form-group"><label>Priority</label><input id="editPriority" class="form-control" readonly /></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="editClinicalNotes">Clinical Notes</label>
+                        <textarea id="editClinicalNotes" name="clinicalNotes" class="form-control" rows="5" maxlength="2000"></textarea>
+                        <small class="text-muted">These notes belong to the overall patient request and are shared across its tests.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button id="saveEditPatientTest" type="submit" class="btn btn-warning"><i class="fas fa-save mr-1"></i> Update Test</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @await Html.PartialAsync("_PerformTestModal")
 
+<form id="selectSoftDeleteAntiforgery" class="d-none">@Html.AntiForgeryToken()</form>
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
         $(function() {
             $('#selectSearch').on('input', function() {
@@ -487,6 +563,92 @@
                     if (match) visible++;
                 });
                 $('#selectVisibleCount').text('Showing ' + visible + ' matching patient test(s).');
+            });
+
+            $(document).on('click', '.js-edit-test', function () {
+                const b = $(this);
+                $('#editRequestedTestId').val(b.attr('data-test-id'));
+                $('#editRequestReference').val(b.attr('data-request'));
+                $('#editPatientName').val(b.attr('data-patient'));
+                $('#editDoctorName').val(b.attr('data-doctor'));
+                $('#editTestType').val(b.attr('data-test'));
+                $('#editPriority').val(b.attr('data-priority'));
+                $('#editClinicalNotes').val(b.attr('data-notes') || '');
+                const el = document.getElementById('editPatientTestModal');
+                if (window.bootstrap && window.bootstrap.Modal)
+                    window.bootstrap.Modal.getOrCreateInstance(el).show();
+                else if ($.fn.modal) $('#editPatientTestModal').modal('show');
+                else alert('Bootstrap modal JavaScript is not loaded.');
+            });
+
+            $('#editPatientTestModal [data-dismiss="modal"]').on('click', function () {
+                if (window.bootstrap && window.bootstrap.Modal)
+                    window.bootstrap.Modal.getOrCreateInstance(document.getElementById('editPatientTestModal')).hide();
+                else if ($.fn.modal) $('#editPatientTestModal').modal('hide');
+            });
+
+            $('#editPatientTestForm').on('submit', async function (event) {
+                event.preventDefault();
+                const btn = $('#saveEditPatientTest').prop('disabled', true);
+                try {
+                    const response = await $.ajax({
+                        url: '@Url.Action("UpdateSelectedTestDetails", "Tests", new { area = "Technician" })',
+                        method: 'POST',
+                        data: $(this).serialize()
+                    });
+                    if (!response.success) throw new Error(response.message || 'Update failed.');
+                    if (typeof Swal !== 'undefined') await Swal.fire({ icon: 'success', title: 'Updated', text: response.message });
+                    window.location.reload();
+                } catch (xhr) {
+                    const message = xhr.responseJSON?.message || xhr.message || 'Unable to update test details.';
+                    if (typeof Swal !== 'undefined') await Swal.fire({ icon: 'error', title: 'Update failed', text: message });
+                    else alert(message);
+                } finally { btn.prop('disabled', false); }
+            });
+
+            $(document).on('click', '.js-deactivate-test', async function () {
+                if (typeof Swal === 'undefined') {
+                    alert('SweetAlert2 could not load. Please check your network connection.');
+                    return;
+                }
+                const button = $(this);
+                const id = button.attr('data-test-id');
+                const name = button.attr('data-test-name') || 'this test';
+                const result = await Swal.fire({
+                    title: 'De-Activate Patient Test?',
+                    text: 'Enter a reason for de-activating ' + name + '.',
+                    icon: 'warning',
+                    input: 'textarea',
+                    inputPlaceholder: 'Reason for de-activation (required)',
+                    inputAttributes: { maxlength: '500', 'aria-label': 'De-activation reason' },
+                    showCancelButton: true,
+                    confirmButtonText: 'De-Activate',
+                    confirmButtonColor: '#b91c1c',
+                    inputValidator: value => {
+                        if (!value || !value.trim()) return 'A de-activation reason is required.';
+                        if (value.trim().length > 500) return 'Reason cannot exceed 500 characters.';
+                    }
+                });
+                if (!result.isConfirmed) return;
+                button.prop('disabled', true);
+                try {
+                    const response = await $.ajax({
+                        url: '@Url.Action("DeactivateRequestedTest", "Tests", new { area = "Technician" })',
+                        method: 'POST',
+                        data: {
+                            testRequestTestTypeId: id,
+                            reason: result.value.trim(),
+                            __RequestVerificationToken: $('#selectSoftDeleteAntiforgery input[name="__RequestVerificationToken"]').val()
+                        }
+                    });
+                    if (!response.success) throw new Error(response.message || 'Unable to de-activate.');
+                    await Swal.fire({ icon: 'success', title: 'De-Activated', text: response.message });
+                    window.location.reload();
+                } catch (xhr) {
+                    button.prop('disabled', false);
+                    const message = xhr.responseJSON?.message || xhr.message || 'Unable to de-activate the test.';
+                    await Swal.fire({ icon: 'error', title: 'De-activation failed', text: message });
+                }
             });
 
             function updateVerification() {

@@ -7,9 +7,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
 {
     public class TestTypeModel
     {
-        // ============================================================
-        // RECORD STATUS
-        // ============================================================
 
         public enum RecordStatus
         {
@@ -17,28 +14,15 @@ namespace NMB_HLabSys.Areas.Manager.Models
             Active = 1
         }
 
-
-        // ============================================================
-        // PRIMARY KEY
-        // ============================================================
-
         [Key]
         public int TestTypeId { get; set; }
 
-
-        // ============================================================
-        // TEST NAME
-        // ============================================================
 
         [Required]
         [StringLength(150)]
         [Display(Name = "Test Name")]
         public string Name { get; set; } = string.Empty;
 
-
-        // ============================================================
-        // TEST CATEGORY
-        // ============================================================
 
         [Required]
         [Display(Name = "Test Category")]
@@ -48,10 +32,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public virtual TestCategoryModel? TestCategory { get; set; }
 
 
-        // ============================================================
-        // REQUIRED SAMPLE TYPE
-        // ============================================================
-
         [Required]
         [Display(Name = "Required Sample Type")]
         public int SampleTypeId { get; set; }
@@ -59,10 +39,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [ForeignKey(nameof(SampleTypeId))]
         public virtual SampleTypeModel? SampleType { get; set; }
 
-
-        // ============================================================
-        // MEASUREMENT UNIT
-        // ============================================================
 
         [Required]
         [Display(Name = "Measurement Unit")]
@@ -76,10 +52,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         }
 
 
-        // ============================================================
-        // NORMAL RANGE
-        // ============================================================
-
         [Column(TypeName = "decimal(18,4)")]
         [Display(Name = "Normal Minimum")]
         public decimal NormalMin { get; set; }
@@ -90,24 +62,11 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public decimal NormalMax { get; set; }
 
 
-        // ============================================================
-        // TURNAROUND TIME
-        // ============================================================
-        // Property name remains TurnAroundTimeHours for compatibility
-        // with existing subsystems.
-        //
-        // VALUE IS NOW STORED IN MINUTES.
-        // ============================================================
-
         [Required]
         [Range(1, 10000)]
         [Display(Name = "Turnaround Time (Minutes)")]
         public int TurnAroundTimeHours { get; set; }
 
-
-        // ============================================================
-        // SOFT DELETE / RECORD STATUS
-        // ============================================================
 
         [Required]
         [Display(Name = "Status")]
@@ -115,32 +74,11 @@ namespace NMB_HLabSys.Areas.Manager.Models
             = RecordStatus.Active;
 
 
-        // ============================================================
-        // TECHNICIAN ASSIGNMENTS
-        // ============================================================
-
         public virtual ICollection<TechnicianTestTypeModel>
             TechnicianTestTypes
         { get; set; }
             = new List<TechnicianTestTypeModel>();
 
-
-        // ============================================================
-        // CONSUMABLE REQUIREMENTS
-        // ============================================================
-        // Many-to-many relationship:
-        //
-        // TestType -> TestTypeConsumable -> Consumable
-        //
-        // A test can have many consumables.
-        // A consumable can be used by many tests.
-        //
-        // ConsumableId is intentionally NOT stored directly on
-        // TestTypeModel.
-        // ============================================================
-        // ==========================================
-        // TEST MEASUREMENTS
-        // ==========================================
 
         public virtual ICollection<TestTypeMeasurementModel>
             TestTypeMeasurements

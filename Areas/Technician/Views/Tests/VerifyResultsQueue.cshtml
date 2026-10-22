@@ -55,7 +55,17 @@
                                 <td>@(item.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</td>
                                 <td><span class="tv-pill">Awaiting Verification</span></td>
                                 <td><div class="tv-actions">
-                                    <a class="tv-btn" asp-area="Technician" asp-controller="Tests" asp-action="VerifyResult" asp-route-id="@item.TestRequestTestTypeId" aria-label="Verify results for test @item.TestRequestTestTypeId"><i class="fas fa-user-check mr-1"></i>Verify Results</a>
+
+                                        <a class="tv-btn"
+                                           href="@Url.Action("VerifyResult", "Tests", new
+                                           {
+                                               area = "Technician",
+                                               id = item.TestRequestTestTypeId
+                                           })"
+                                           aria-label="Verify results for test @item.TestRequestTestTypeId">
+                                            <i class="fas fa-user-check mr-1"></i>
+                                            Verify Results
+                                        </a>
                                         <a class="tv-history"
                                            href="@Url.Action("VerificationHistory", "Tests", new
                                            {
@@ -93,9 +103,7 @@
                 let visible = 0;
                 rows.forEach(function (row) {
                     const matches = row.textContent.toLocaleLowerCase().includes(term);
-                    row.style.display = matches ? "" : "none";
-                    if (matches) visible++;
-                });
+                    row.style.display = matches ?
                 empty.style.display = visible === 0 ? "block" : "none";
             });
         })();

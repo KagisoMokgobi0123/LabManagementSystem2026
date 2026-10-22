@@ -32,8 +32,8 @@
     <title>
         @ViewData["Title"] - NMB-HLabSys
     </title>
+    <link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
 
-    <!-- Bootstrap -->
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
@@ -41,7 +41,7 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
-    <!-- Site CSS -->
+
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
@@ -74,17 +74,12 @@
                 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             }
 
-            /* =====================================================
-                   APPLICATION
-                   ===================================================== */
 
             .administrator-app {
                 min-height: 100vh;
             }
 
-            /* =====================================================
-                   SIDEBAR
-                   ===================================================== */
+            /* sidebar */
 
             .administrator-sidebar {
                 position: fixed;
@@ -103,9 +98,6 @@
                 transition: width .25s ease, transform .25s ease;
             }
 
-            /* =====================================================
-                   LOGO
-                   ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -143,9 +135,6 @@
                 white-space: nowrap;
             }
 
-            /* =====================================================
-                   SIDEBAR CONTROLS
-                   ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -177,9 +166,7 @@
                     transform: translateY(-1px);
                 }
 
-            /* =====================================================
-                   ADMINISTRATOR USER
-                   ===================================================== */
+
 
             .sidebar-user {
                 display: flex;
@@ -226,9 +213,7 @@
                 font-size: 9px;
             }
 
-            /* =====================================================
-                   NAVIGATION
-                   ===================================================== */
+            /* Navigation */
 
             .sidebar-navigation {
                 flex: 1;
@@ -296,9 +281,6 @@
                 white-space: nowrap;
             }
 
-            /* =====================================================
-                   LOGOUT
-                   ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
@@ -329,9 +311,7 @@
                     color: #fff;
                 }
 
-            /* =====================================================
-                   MAIN CONTENT
-                   ===================================================== */
+            /* main content */
 
             .administrator-main {
                 min-height: 100vh;
@@ -339,9 +319,6 @@
                 transition: margin-left .25s ease, width .25s ease;
             }
 
-            /* =====================================================
-                   COLLAPSED SIDEBAR
-                   ===================================================== */
 
             body.sidebar-collapsed
             .administrator-sidebar {
@@ -443,9 +420,7 @@
                     margin-right: 0;
                 }
 
-            /* =====================================================
-                   FULL WIDTH MODE
-                   ===================================================== */
+
 
             body.sidebar-hidden
             .administrator-sidebar {
@@ -458,9 +433,7 @@
                 width: 100% !important;
             }
 
-            /* =====================================================
-                   RESTORE BUTTON
-                   ===================================================== */
+
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -486,9 +459,7 @@
                 display: flex;
             }
 
-            /* =====================================================
-                   MOBILE
-                   ===================================================== */
+            /* mobile */
 
             .administrator-mobile-header {
                 display: none;
@@ -666,14 +637,10 @@
 <body>
     <div class="administrator-app">
 
-        <!-- =====================================================
-         SIDEBAR
-         ===================================================== -->
+        <!-- side bar -->
 
         <aside class="administrator-sidebar"
                id="administratorSidebar">
-
-            <!-- LOGO -->
 
             <a href="/Administrator/Home/Index"
                class="sidebar-brand"
@@ -697,7 +664,6 @@
 
             </a>
 
-            <!-- SIDEBAR CONTROLS -->
 
             <div class="sidebar-controls">
 
@@ -722,7 +688,6 @@
 
             </div>
 
-            <!-- ADMINISTRATOR INFORMATION -->
 
             <div class="sidebar-user">
 
@@ -747,10 +712,6 @@
 
             </div>
 
-            <!-- =====================================================
-             NAVIGATION
-             ===================================================== -->
-
             <nav class="sidebar-navigation">
 
                 <!-- MAIN -->
@@ -773,9 +734,6 @@
 
                 </a>
 
-                <!-- =================================================
-                 MEDICAL DATA
-                 ================================================= -->
 
                 <div class="sidebar-section">
                     Medical Data
@@ -865,10 +823,6 @@
 
                 </a>
 
-                <!-- =================================================
-                 ACCOUNT
-                 ================================================= -->
-
                 <div class="sidebar-section">
                     Account
                 </div>
@@ -917,9 +871,6 @@
 
             </nav>
 
-            <!-- =====================================================
-             LOGOUT
-             ===================================================== -->
 
             <div class="sidebar-bottom">
 
@@ -948,10 +899,6 @@
 
         </aside>
 
-        <!-- =====================================================
-         RESTORE SIDEBAR BUTTON
-         ===================================================== -->
-
         <button type="button"
                 class="sidebar-restore-btn"
                 id="sidebarRestoreButton"
@@ -961,19 +908,17 @@
 
         </button>
 
-        <!-- MOBILE BACKDROP -->
+        <!-- mobile -->
 
         <div class="sidebar-backdrop"
              id="sidebarBackdrop">
         </div>
 
-        <!-- =====================================================
-         MAIN CONTENT
-         ===================================================== -->
+        <!-- Main Content -->
 
         <main class="administrator-main">
 
-            <!-- MOBILE HEADER -->
+            <!-- mobile-->
 
             <div class="administrator-mobile-header">
 
@@ -1005,9 +950,7 @@
 
     </div>
 
-    <!-- =========================================================
-     SCRIPTS
-     ========================================================= -->
+
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
@@ -1061,9 +1004,7 @@
         "sidebarRestoreButton"
         );
 
-        /* ============================================
-        MOBILE
-        ============================================ */
+        /* mobile */
 
         function openMobileSidebar() {
 
@@ -1127,9 +1068,7 @@
 
         }
 
-        /* ============================================
-        COLLAPSE
-        ============================================ */
+
 
         function updateCollapseIcon() {
 
@@ -1206,9 +1145,7 @@
 
         }
 
-        /* ============================================
-        FULL WIDTH
-        ============================================ */
+
 
         if (fullScreenToggle) {
 
@@ -1236,9 +1173,6 @@
 
         }
 
-        /* ============================================
-        RESTORE SIDEBAR
-        ============================================ */
 
         if (restoreButton) {
 
@@ -1280,9 +1214,7 @@
 
         }
 
-        /* ============================================
-        RESTORE SAVED STATE
-        ============================================ */
+
 
         const saved =
         localStorage.getItem(
@@ -1302,9 +1234,7 @@
 
         updateCollapseIcon();
 
-        /* ============================================
-        RESIZE
-        ============================================ */
+        /* resize */
 
         window.addEventListener(
         "resize",
@@ -1330,9 +1260,7 @@
         }
         );
 
-        /* ============================================
-        ESCAPE KEY
-        ============================================ */
+    
 
         document.addEventListener(
         "keydown",

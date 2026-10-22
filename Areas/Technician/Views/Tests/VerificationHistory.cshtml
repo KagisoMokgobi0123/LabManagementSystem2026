@@ -10,147 +10,28 @@
     var events = Model?.ToList() ?? new List<TestResultVerificationHistoryModel>();
 }
 <style>
-    .vh-page {
-        background: #f4f7fb;
-        min-height: 100vh;
-        padding: 30px 16px 65px;
-    }
-
-    .vh-container {
-        max-width: 1100px;
-        margin: 0 auto;
-    }
-
-    .vh-hero {
-        background: linear-gradient(125deg,#103a76,#1976c9);
-        color: white;
-        padding: 28px;
-        border-radius: 16px;
-        margin-bottom: 22px;
-    }
-
-        .vh-hero h1 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin: 0 0 8px;
-        }
-
-        .vh-hero p {
-            margin: 0;
-            color: #e1efff;
-        }
-
-    .vh-card {
-        background: white;
-        border: 1px solid #e3ebf4;
-        border-radius: 14px;
-        padding: 22px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 18px rgba(18,49,85,.06);
-    }
-
-        .vh-card h2 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #214e80;
-            margin-bottom: 17px;
-        }
-
-    .vh-grid {
-        display: grid;
-        grid-template-columns: repeat(2,minmax(0,1fr));
-        gap: 15px;
-    }
-
-    .vh-label {
-        font-size: .8rem;
-        font-weight: 700;
-        color: #64748b;
-        margin-bottom: 4px;
-    }
-
-    .vh-value {
-        font-weight: 650;
-        color: #22344a;
-        overflow-wrap: anywhere;
-    }
-
-    .vh-event {
-        border-left: 4px solid #2a7bc5;
-        padding: 17px 18px;
-        margin-bottom: 14px;
-        background: #f9fbfe;
-        border-radius: 0 11px 11px 0;
-    }
-
-        .vh-event.returned {
-            border-left-color: #d98a1c;
-        }
-
-        .vh-event.verified {
-            border-left-color: #239461;
-        }
-
-        .vh-event h3 {
-            font-size: 1rem;
-            font-weight: 800;
-            margin: 0 0 8px;
-        }
-
-    .vh-meta {
-        color: #64748b;
-        font-size: .86rem;
-        margin-bottom: 13px;
-    }
-
-    .vh-note {
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        background: #fff;
-        border: 1px solid #e6ecf3;
-        border-radius: 8px;
-        padding: 12px;
-    }
-
-    .vh-changes {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: .9rem;
-    }
-
-        .vh-changes th, .vh-changes td {
-            border-bottom: 1px solid #e5edf5;
-            padding: 10px;
-            text-align: left;
-            vertical-align: top;
-            overflow-wrap: anywhere;
-        }
-
-        .vh-changes th {
-            background: #edf4fb;
-            color: #254a72;
-        }
-
-    .vh-table-wrap {
-        overflow-x: auto;
-    }
-
-    .vh-empty {
-        color: #63748a;
-        background: #f7f9fc;
-        border-radius: 9px;
-        padding: 18px;
-    }
-
-    @@media(max-width:650px) {
-        .vh-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .vh-card {
-            padding: 16px;
-        }
-    }
+    .vh-page { background:#f4f7fb; min-height:100vh; padding:30px 16px 65px; }
+    .vh-container { max-width:1100px; margin:0 auto; }
+    .vh-hero { background:linear-gradient(125deg,#103a76,#1976c9); color:white; padding:28px; border-radius:16px; margin-bottom:22px; }
+    .vh-hero h1 { font-size:1.6rem; font-weight:800; margin:0 0 8px; }
+    .vh-hero p { margin:0; color:#e1efff; }
+    .vh-card { background:white; border:1px solid #e3ebf4; border-radius:14px; padding:22px; margin-bottom:20px; box-shadow:0 4px 18px rgba(18,49,85,.06); }
+    .vh-card h2 { font-size:1.15rem; font-weight:800; color:#214e80; margin-bottom:17px; }
+    .vh-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
+    .vh-label { font-size:.8rem; font-weight:700; color:#64748b; margin-bottom:4px; }
+    .vh-value { font-weight:650; color:#22344a; overflow-wrap:anywhere; }
+    .vh-event { border-left:4px solid #2a7bc5; padding:17px 18px; margin-bottom:14px; background:#f9fbfe; border-radius:0 11px 11px 0; }
+    .vh-event.returned { border-left-color:#d98a1c; }
+    .vh-event.verified { border-left-color:#239461; }
+    .vh-event h3 { font-size:1rem; font-weight:800; margin:0 0 8px; }
+    .vh-meta { color:#64748b; font-size:.86rem; margin-bottom:13px; }
+    .vh-note { white-space:pre-wrap; overflow-wrap:anywhere; background:#fff; border:1px solid #e6ecf3; border-radius:8px; padding:12px; }
+    .vh-changes { width:100%; border-collapse:collapse; font-size:.9rem; }
+    .vh-changes th,.vh-changes td { border-bottom:1px solid #e5edf5; padding:10px; text-align:left; vertical-align:top; overflow-wrap:anywhere; }
+    .vh-changes th { background:#edf4fb; color:#254a72; }
+    .vh-table-wrap { overflow-x:auto; }
+    .vh-empty { color:#63748a; background:#f7f9fc; border-radius:9px; padding:18px; }
+    @@media(max-width:650px) { .vh-grid { grid-template-columns:1fr; } .vh-card { padding:16px; } }
 </style>
 <div class="vh-page">
     <div class="vh-container">
@@ -241,8 +122,8 @@
                 </article>
             }
         </section>
-        <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left mr-1"></i>Back to Pending Verification
+        <a href="@Url.Action("Review", "Tests", new { area = "Technician" })" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left mr-1"></i>Back to Tests for Review
         </a>
     </div>
 </div>

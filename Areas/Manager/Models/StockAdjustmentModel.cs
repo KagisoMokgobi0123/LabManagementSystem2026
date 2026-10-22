@@ -8,21 +8,11 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Key]
         public int StockAdjustmentId { get; set; }
 
-
-        // ============================================================
-        // CONSUMABLE
-        // ============================================================
-
         [Required]
         public int ConsumableId { get; set; }
 
         [ForeignKey(nameof(ConsumableId))]
         public virtual ConsumableModel? Consumable { get; set; }
-
-
-        // ============================================================
-        // ADJUSTMENT
-        // ============================================================
 
         [Required]
         [Display(Name = "Adjustment Type")]
@@ -34,10 +24,6 @@ namespace NMB_HLabSys.Areas.Manager.Models
         [Display(Name = "Quantity")]
         public int Quantity { get; set; }
 
-
-        // ============================================================
-        // DATE
-        // ============================================================
 
         [Required]
         [Display(Name = "Adjustment Date")]

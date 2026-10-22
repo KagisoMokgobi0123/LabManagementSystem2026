@@ -130,7 +130,7 @@
           <td>
            @if (test != null)
            {
-                                        <button type="button" class="vh-link vh-open-timeline" data-url="@Url.Action("VerificationTimelineModal", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"><i class="fas fa-eye me-1"></i> Test Details</button>
+                                        <a class="vh-link" href="@Url.Action("Details", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"><i class="fas fa-eye me-1"></i> View Details</a>
            }
           </td>
          </tr>
@@ -145,12 +145,6 @@
    }
    <div class="vh-footer"><span id="vhVisibleCount">@events.Count</span> of @events.Count audit events shown · Dates displayed in UTC</div>
   </section>
- </div>
-</div>
-<div id="vhTimelineOverlay" class="vh-modal-backdrop" aria-hidden="true">
- <div class="vh-modal" role="dialog" aria-modal="true" aria-labelledby="vhTimelineHeading">
-  <div class="vh-modal-header"><h2 id="vhTimelineHeading" style="margin:0;font-size:1.15rem;color:#194779">Test verification timeline</h2><button id="vhTimelineClose" type="button" class="vh-modal-close" aria-label="Close timeline">&times;</button></div>
-  <div id="vhTimelineContent" class="vh-modal-body" aria-live="polite"></div>
  </div>
 </div>
 <script>
@@ -180,24 +174,5 @@
     apply();
     search.addEventListener('input', apply);
     filter.addEventListener('change', apply);
-    const overlay = document.getElementById('vhTimelineOverlay');
-    const content = document.getElementById('vhTimelineContent');
-    const close = document.getElementById('vhTimelineClose');
-    let previousFocus = null;
-    function hideTimeline(){ overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden','true'); content.innerHTML=''; if(previousFocus) previousFocus.focus(); }
-    close.addEventListener('click', hideTimeline);
-    overlay.addEventListener('click', e => { if(e.target === overlay) hideTimeline(); });
-    document.addEventListener('keydown', e => { if(!overlay.classList.contains('is-open')) return; if(e.key === 'Escape') hideTimeline(); if(e.key === 'Tab'){const focusables=Array.from(overlay.querySelectorAll('button,a[href],input,[tabindex]:not([tabindex="-1"])')).filter(x=>!x.disabled);if(!focusables.length)return;const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey && document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey && document.activeElement===last){e.preventDefault();first.focus();}} });
-    document.querySelectorAll('.vh-open-timeline').forEach(btn => btn.addEventListener('click', async () => {
-      previousFocus = btn;
-      overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden','false');
-      content.textContent = 'Loading verification history...'; close.focus();
-      try {
-        const response = await fetch(btn.dataset.url, {headers:{'X-Requested-With':'XMLHttpRequest'}, credentials:'same-origin'});
-        if(!response.ok) throw new Error('Unable to load timeline (HTTP '+response.status+').');
-        const html = await response.text();
-        if(overlay.classList.contains('is-open')) content.innerHTML = html;
-      } catch(error) { if(overlay.classList.contains('is-open')) content.textContent = error.message; }
-    }));
 })();
 </script>

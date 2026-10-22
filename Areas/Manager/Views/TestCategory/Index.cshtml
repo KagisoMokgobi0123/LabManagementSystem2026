@@ -6,9 +6,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 }
 
 <div class="container-fluid py-4">
-<!-- =========================================================
-     PAGE HEADER
-     ========================================================= -->
+
 
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
@@ -45,9 +43,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 </div>
 
-<!-- =========================================================
-     MESSAGES
-     ========================================================= -->
+
 
 @if (TempData["ErrorMessage"] != null)
 {
@@ -83,9 +79,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
     </div>
 }
 
-<!-- =========================================================
-     INFORMATION
-     ========================================================= -->
+
 
 <div class="alert alert-info border-0 shadow-sm">
 
@@ -111,9 +105,6 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 </div>
 
-<!-- =========================================================
-     TEST CATEGORY TABLE
-     ========================================================= -->
 
 <div class="card border-0 shadow-sm">
 
@@ -154,7 +145,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
                 </div>
 
-                <!-- RECORD COUNT -->
+                <!-- Number of samples -->
 
                 <span class="badge bg-primary-subtle text-primary"
                       id="recordCount">
@@ -209,11 +200,6 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                             var encodedDescription =
                                 System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(
                                     category.Description ?? "");
-
-                            /*
-                             * IsActive is RecordStatus enum.
-                             * It must be compared with RecordStatus.Active.
-                             */
                             var isActive =
                                 category.IsActive ==
                                 NMB_HLabSys.Areas.Manager.Models.TestCategoryModel.RecordStatus.Active;
@@ -231,10 +217,6 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                                 data-description="@category.Description"
                                 data-status="@status">
 
-                                <!-- =================================================
-                                     CATEGORY
-                                     ================================================= -->
-
                                 <td>
 
                                     <div class="fw-semibold">
@@ -244,10 +226,6 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                                     </div>
 
                                 </td>
-
-                                <!-- =================================================
-                                     TEST TYPE COUNT
-                                     ================================================= -->
 
                                 <td>
 
@@ -264,10 +242,6 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                                     </span>
 
                                 </td>
-
-                                <!-- =================================================
-                                     STATUS
-                                     ================================================= -->
 
                                 <td>
 
@@ -293,10 +267,6 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                                     }
 
                                 </td>
-
-                                <!-- =================================================
-                                     ACTIONS
-                                     ================================================= -->
 
                                 <td class="text-end">
 
@@ -391,9 +361,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                         </tr>
                     }
 
-                    <!-- =================================================
-                         SEARCH EMPTY
-                         ================================================= -->
+                    <!-- Searching -->
 
                     <tr id="noSearchResultsRow"
                         style="display:none;">
@@ -434,7 +402,8 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 </div>
 
-</div> <!-- ============================================================= ADD / EDIT TEST CATEGORY MODAL ============================================================= --> <div class="modal fade" id="testCategoryModal" tabindex="-1" aria-hidden="true">
+</div> 
+<!-- Add consumable --> <div class="modal fade" id="testCategoryModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
@@ -528,7 +497,8 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 </div>
 
-</div> <!-- ============================================================= VIEW TEST CATEGORY MODAL ============================================================= --> <div class="modal fade" id="viewTestCategoryModal" tabindex="-1" aria-hidden="true">
+</div> 
+<div class="modal fade" id="viewTestCategoryModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
@@ -614,16 +584,11 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 </div>
 
-</div> <!-- ============================================================= DELETE / SOFT DELETE TEST CATEGORY MODAL ============================================================= --> <div class="modal fade" id="deleteTestCategoryModal" tabindex="-1" aria-hidden="true">
+</div>
+<div class="modal fade" id="deleteTestCategoryModal" tabindex="-1" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered">
 
     <div class="modal-content border-0 shadow">
-
-        <!--
-            IMPORTANT:
-            This form explicitly submits a POST request to the
-            Manager/TestCategory/Delete action.
-        -->
 
         <form id="deleteTestCategoryForm"
               method="post"
@@ -707,7 +672,8 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 </div>
 
-</div> <!-- ============================================================= SUCCESS MESSAGE MODAL ============================================================= -->
+</div> 
+
 @if (TempData["SuccessMessage"] != null)
 {
 <div class="modal fade" id="successMessageModal" tabindex="-1" aria-hidden="true">
@@ -791,9 +757,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
 <script>
 
-    /* =========================================================
-       SUCCESS MESSAGE
-       ========================================================= */
+    /* Success message */
 
     document.addEventListener(
         "DOMContentLoaded",
@@ -818,9 +782,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
         }
     );
 
-    /* =========================================================
-       CREATE
-       ========================================================= */
+    /* create form */
 
     function openCreateModal() {
 
@@ -855,9 +817,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
     }
 
-    /* =========================================================
-       VIEW
-       ========================================================= */
+    /* view details form */
 
     function viewTestCategory(
         id,
@@ -907,9 +867,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
     }
 
-    /* =========================================================
-       EDIT
-       ========================================================= */
+    /* edit form */
 
     function editTestCategory(
         id,
@@ -952,9 +910,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
     }
 
-    /* =========================================================
-       SOFT DELETE
-       ========================================================= */
+    /* Detele*/
 
     function deleteTestCategory(
         id,
@@ -965,40 +921,18 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
                 "deleteTestCategoryForm"
             );
 
-        /*
-         * Explicitly force the delete form to use POST.
-         */
-
         form.method = "post";
-
-        /*
-         * Explicitly point the form to the Delete action.
-         */
 
         form.action =
             "@Url.Action("Delete", "TestCategory", new { area = "Manager" })";
-
-        /*
-         * Set the category ID that will be submitted as:
-         *
-         * id = category ID
-         */
 
         document.getElementById(
             "deleteTestCategoryId"
         ).value = id;
 
-        /*
-         * Display the category being deactivated.
-         */
-
         document.getElementById(
             "deleteTestCategoryName"
         ).innerText = description;
-
-        /*
-         * Show confirmation modal.
-         */
 
         new bootstrap.Modal(
             document.getElementById(
@@ -1008,9 +942,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
 
     }
 
-    /* =========================================================
-       SEARCH
-       ========================================================= */
+    /* Searching */
 
     const searchInput =
         document.getElementById(
@@ -1092,7 +1024,7 @@ Layout = "~/Views/Shared/_LabManagerLayout.cshtml";
             }
         );
 
-    }
+    }``
 
 </script>
 
