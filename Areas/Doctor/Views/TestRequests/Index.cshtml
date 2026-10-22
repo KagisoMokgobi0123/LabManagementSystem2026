@@ -1,9 +1,59 @@
 ﻿@model IEnumerable<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
-@{ ViewData["Title"] = "Test Requests"; Layout = "_DoctorLayout"; var filter = ViewBag.StatusFilter as string; }
-<div class="container-fluid py-4"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2>Test requests</h2><p class="text-muted mb-0">Requests created by you, sorted newest first.</p></div><a class="btn btn-primary" asp-action="Create">Create request</a></div>
-@if(TempData["SuccessMessage"] != null){<div class="alert alert-success">@TempData["SuccessMessage"]</div>}@if(TempData["ErrorMessage"] != null){<div class="alert alert-danger">@TempData["ErrorMessage"]</div>}@if(TempData["WarningMessage"] != null){<div class="alert alert-warning">@TempData["WarningMessage"]</div>}
-<form method="get" class="form-inline mb-3"><label for="status" class="mr-2">Status</label><select id="status" name="status" class="form-control mr-2"><option value="">All statuses</option>@foreach(var s in new[]{"Pending","Submitted","Samples Received","InProgress","Completed","Released","ReleasedByDoctor","Cancelled"}){<option value="@s" selected="@(filter==s)">@s</option>}</select><button class="btn btn-outline-primary">Filter</button></form>
-<div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Request number</th><th>Patient</th><th>Date</th><th>Urgency</th><th>Samples</th><th>Status / progress</th><th></th></tr></thead><tbody>
-@foreach(var r in Model){var pct = r.Status switch { "Submitted" => 15, "Samples Received" or "SamplesReceived" => 35, "InProgress" => 65, "Completed" => 85, "Released" or "ReleasedByDoctor" => 100, _ => 0 }; <tr><td class="font-weight-bold">@r.RequestNumber</td><td>@(r.Patient?.FullName ?? "Patient record")</td><td>@r.RequestDate.ToString("dd MMM yyyy HH:mm")</td><td>@r.Urgency</td><td>@r.Samples.Count</td><td><div class="small mb-1">@(r.Status == "SamplesReceived" ? "Samples Received" : r.Status == "InProgress" ? "In progress" : r.Status)</div><div class="progress" style="height:6px;min-width:110px"><div class="progress-bar @(r.Status=="Cancelled"?"bg-danger":"bg-info")" style="width:@pct%"></div></div></td><td><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@r.TestRequestId">View</a></td></tr>}
-@if(!Model.Any()){<tr><td colspan="7" class="text-center text-muted py-4">No test requests match this filter.</td></tr>}
-</tbody></table></div></div></div>
+@{
+    ViewData["Title"] = "Test Requests";
+    Layout = "_DoctorLayout";
+    var filter = ViewBag.StatusFilter as string;
+}
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div><h2>Test requests</h2><p class="text-muted mb-0">Requests created by you, sorted newest first.</p></div>
+        <a class="btn btn-primary" asp-action="Create">Create request</a>
+    </div>
+    @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
+    @if (TempData["ErrorMessage"] != null) { <div class="alert alert-danger">@TempData["ErrorMessage"]</div> }
+    @if (TempData["WarningMessage"] != null) { <div class="alert alert-warning">@TempData["WarningMessage"]</div> }
+    <form method="get" class="form-inline mb-3">
+        <label for="status" class="mr-2">Status</label>
+        <select id="status" name="status" class="form-control mr-2">
+            <option value="">All statuses</option>
+            @foreach (var status in new[] { "Pending", "Submitted", "Samples Received", "SamplesReceived", "InProgress", "Completed", "Released", "ReleasedByDoctor", "Cancelled" })
+            {
+                <option value="@status" selected="@(filter == status)">@((status == "SamplesReceived") ? "Samples Received" : status == "InProgress" ? "In Progress" : status)</option>
+            }
+        </select>
+        <button class="btn btn-outline-primary">Filter</button>
+    </form>
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover doctor-data-table mb-0">
+                <colgroup><col style="width:16%" /><col style="width:21%" /><col style="width:17%" /><col style="width:11%" /><col style="width:9%" /><col style="width:17%" /><col style="width:9%" /></colgroup>
+                <thead class="thead-light"><tr><th>Request number</th><th>Patient</th><th>Request date</th><th>Urgency</th><th>Samples</th><th>Status / progress</th><th class="text-right">Action</th></tr></thead>
+                <tbody>
+                @foreach (var r in Model)
+                {
+                    var statusText = r.Status == "SamplesReceived" ? "Samples Received" : r.Status == "InProgress" ? "In Progress" : r.Status;
+                    var statusClass = r.Status.Contains("cancel", StringComparison.OrdinalIgnoreCase) ? "badge-status-cancelled"
+                        : r.Status.Contains("release", StringComparison.OrdinalIgnoreCase) ? "badge-status-released"
+                        : r.Status.Contains("complete", StringComparison.OrdinalIgnoreCase) ? "badge-status-completed"
+                        : r.Status.Contains("progress", StringComparison.OrdinalIgnoreCase) ? "badge-status-progress"
+                        : r.Status.Contains("received", StringComparison.OrdinalIgnoreCase) ? "badge-status-received"
+                        : r.Status.Contains("pending", StringComparison.OrdinalIgnoreCase) ? "badge-status-pending" : "badge-status-submitted";
+                    var urgencyClass = r.Urgency.ToString().Equals("Stat", StringComparison.OrdinalIgnoreCase) ? "badge-urgency-stat"
+                        : r.Urgency.ToString().Equals("Urgent", StringComparison.OrdinalIgnoreCase) ? "badge-urgency-urgent" : "badge-urgency-routine";
+                    var pct = r.Status switch { "Submitted" => 15, "Samples Received" or "SamplesReceived" => 35, "InProgress" => 65, "Completed" => 85, "Released" or "ReleasedByDoctor" => 100, "Cancelled" => 0, _ => 5 };
+                    <tr>
+                        <td class="font-weight-bold">@r.RequestNumber</td>
+                        <td>@(r.Patient?.FullName ?? "Patient record")</td>
+                        <td class="text-nowrap">@r.RequestDate.ToString("dd MMM yyyy HH:mm")</td>
+                        <td><span class="badge @urgencyClass">@r.Urgency</span></td>
+                        <td class="text-center">@r.Samples.Count</td>
+                        <td><span class="badge @statusClass mb-1">@statusText</span><div class="progress" style="height:6px"><div class="progress-bar @(r.Status == "Cancelled" ? "bg-danger" : r.Status.Contains("release", StringComparison.OrdinalIgnoreCase) ? "bg-success" : r.Status == "Completed" ? "bg-success" : "bg-info")" role="progressbar" style="width:@pct%" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div></div></td>
+                        <td class="text-right"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@r.TestRequestId">View</a></td>
+                    </tr>
+                }
+                @if (!Model.Any()) { <tr><td colspan="7" class="text-center text-muted py-4">No test requests match this filter.</td></tr> }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

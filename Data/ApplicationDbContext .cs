@@ -20,17 +20,7 @@ namespace NMB_HLabSys.Data
         {
         }
 
-        // ============================================================
-        // IDENTITY / SECURITY
-        // ============================================================
-
         public DbSet<PasswordResetOtp> PasswordResetOtps { get; set; }
-
-
-        // ============================================================
-        // USER PROFILES
-        // ============================================================
-
         public DbSet<DoctorProfile> DoctorProfiles { get; set; }
 
         public DbSet<TechnicianProfile> TechnicianProfiles { get; set; }
@@ -38,10 +28,6 @@ namespace NMB_HLabSys.Data
         { get; set; }
         public DbSet<TechnicianNotificationModel> TechnicianNotifications
         { get; set; }
-        // ============================================================
-        // TEST REQUESTS
-        // ============================================================
-
         public DbSet<TestRequestsModel> TestRequests { get; set; }
 
         public DbSet<SampleModel> Samples { get; set; }
@@ -56,20 +42,9 @@ namespace NMB_HLabSys.Data
 
         public DbSet<MeasurementUnitModel> MeasurementUnits { get; set; }
 
-        // ============================================================
-        // AT LEAST ONE TEST TYPE SHOULD BE ASSIGNED TO EACH TECHNICIAN
-        // MULTIPLE TECHNICIANS COULD BE ASSIGNED THE SAME TEST TYPE
-        // TEST  TYPES THAT THE TECHNICIAN CAN PERFORM SHOULD BE INDICATED FOR EACH
-        // TECHNICIAN
-        // ============================================================
-        public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
+      public DbSet<TechnicianTestTypeModel> TechnicianTestTypes { get; set; }
 
         public DbSet<TestTypeConsumableModel> TestTypeConsumables { get; set; }
-
-
-        // ============================================================
-        // MANAGER - CONSUMABLES & ORDERS
-        // ============================================================
 
         public DbSet<ConsumableModel> Consumables { get; set; }
         public DbSet<TestResultModel> TestResults { get; set; }
@@ -84,10 +59,6 @@ namespace NMB_HLabSys.Data
 
         public DbSet<StockAdjustmentModel> StockAdjustments { get; set; }
 
-
-        // ============================================================
-        // PATIENT MODELS
-        // ============================================================
 
         public DbSet<PatientModel> Patients { get; set; }
 
@@ -106,11 +77,6 @@ namespace NMB_HLabSys.Data
         public DbSet<RequestedTestDeactivationAuditModel>
     RequestedTestDeactivationAudits
         { get; set; }
-
-        // ============================================================
-        // ADMINISTRATOR
-        // ============================================================
-
         public DbSet<MedicalConditionCategory> MedicalConditionCategories { get; set; }
 
         public DbSet<MedicalCondition> MedicalConditions { get; set; }
@@ -119,6 +85,10 @@ namespace NMB_HLabSys.Data
 
         public DbSet<Allergy> Allergies { get; set; }
 
+
+        public DbSet<NMB_HLabSys.Areas.Doctor.Models.DoctorAlertReadModel>
+    DoctorAlertReads
+        { get; set; } = null!;
 
         // ============================================================
         // TECHNICIAN
@@ -289,7 +259,8 @@ namespace NMB_HLabSys.Data
             builder.Entity<TechnicianProfile>()
                 .HasIndex(x => x.EmployeeNumber)
                 .IsUnique();
-
+            //////
+            builder.Entity<DoctorAlertReadModel>().HasNoKey();
 
             // ============================================================
             // TEST CATEGORY STATUS
@@ -355,7 +326,7 @@ namespace NMB_HLabSys.Data
 
             builder.Entity<TestTypeModel>()
                 .HasOne(x => x.TestCategory)
-                .WithMany()
+                .WithMany(x => x.TestTypes)
                 .HasForeignKey(x => x.TestCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
             builder.Entity<SampleDeactivationAuditModel>(entity =>
@@ -1415,11 +1386,9 @@ namespace NMB_HLabSys.Data
                     Notes = "Assigned additional testing responsibilities."
                 }
             );
-
-            // TEST REQUEST TEST TYPES SEED DATA Individual tests requested by doctors
+            
             builder.Entity<TestRequestTestTypeModel>().HasData(
-
-                // Request 1 - Awaiting samples
+                
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1,
@@ -1430,8 +1399,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 2 - Samples received
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 2,
@@ -1453,8 +1420,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 3 - Samples received, request in progress
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 4,
@@ -1465,8 +1430,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 5 - Awaiting samples
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 5,
@@ -1477,8 +1440,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 6 - Samples received
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 6,
@@ -1489,8 +1450,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 9 - Samples received, request in progress
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 7,
@@ -1501,8 +1460,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // Request 10 - Awaiting samples
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 8,
@@ -1513,10 +1470,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = null,
                     CompletionDateTime = null
                 },
-
-                // DEVELOPMENT DEMO: Technician 1 completed this test.
-                // Technician 2 has an active assignment for TestTypeId 3
-                // and can independently verify the result.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1001,
@@ -1527,9 +1480,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = new DateTime(2026, 10, 14, 8, 30, 0),
                     CompletionDateTime = new DateTime(2026, 10, 14, 10, 0, 0)
                 },
-
-                // DEVELOPMENT DEMO: Technician 2 completed this test.
-                // Technician 1 can independently verify it.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1002,
@@ -1540,8 +1490,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = new DateTime(2026, 10, 14, 9, 0, 0),
                     CompletionDateTime = new DateTime(2026, 10, 14, 11, 15, 0)
                 },
-
-                // DEVELOPMENT DEMO: Returned to Technician 1 for correction.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1003,
@@ -1552,8 +1500,6 @@ namespace NMB_HLabSys.Data
                     StartDateTime = new DateTime(2026, 10, 13, 8, 0, 0),
                     CompletionDateTime = new DateTime(2026, 10, 13, 9, 30, 0)
                 },
-
-                // DEVELOPMENT DEMO: Returned to Technician 2 for correction.
                 new TestRequestTestTypeModel
                 {
                     TestRequestTestTypeId = 1004,
@@ -1566,10 +1512,6 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-            // ============================================================
-            // DEVELOPMENT-ONLY REVIEW QUEUE RESULTS
-            // Fictional values for UI/workflow testing; not clinical records.
-            // ============================================================
             builder.Entity<TestResultModel>().HasData(
                 new TestResultModel
                 {
@@ -1641,7 +1583,6 @@ namespace NMB_HLabSys.Data
                 }
             );
 
-            // DEMO VERIFICATION AUDIT HISTORY
             builder.Entity<TestResultVerificationHistoryModel>().HasData(
                 new TestResultVerificationHistoryModel
                 {
@@ -1680,10 +1621,6 @@ namespace NMB_HLabSys.Data
                     ActionDateTime = new DateTime(2026, 10, 13, 12, 10, 0, DateTimeKind.Utc)
                 }
             );
-
-            // ============================================================
-            // TEST TYPE / CONSUMABLE SEED DATA
-            // ============================================================
 
             builder.Entity<TestTypeConsumableModel>().HasData(
 
@@ -1858,16 +1795,6 @@ namespace NMB_HLabSys.Data
                     Notes = "Medication history entered for training; verify at every encounter."
                 }
             );
-
-            // ============================================================
-            // TECHNICIAN ASSESSMENT DATA - DEVELOPMENT / DEMO ONLY
-            // Main technician: 63950297-85b0-4b81-934a-bad2bf77f3cb
-            // No real clinical data. Verify IDs against your existing database.
-            // ============================================================
-
-            // Four Submitted requests (1, 5, 7, 10) each have three unreceived samples.
-            // Request 7 is explicitly set to Submitted above to match ReceiveSamplesController.Index.
-            // All barcodes and sample IDs are unique development-only values.
             builder.Entity<SampleModel>().HasData(
                 new SampleModel { SampleId = 8101, TestRequestId = 1, Barcode = "SMP-2026-008101", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
                 new SampleModel { SampleId = 8102, TestRequestId = 5, Barcode = "SMP-2026-008102", SampleTypeId = 4, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
@@ -1878,9 +1805,6 @@ namespace NMB_HLabSys.Data
                 new SampleModel { SampleId = 8203, TestRequestId = 7, Barcode = "SMP-2026-008203", SampleTypeId = 1, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false },
                 new SampleModel { SampleId = 8204, TestRequestId = 10, Barcode = "SMP-2026-008204", SampleTypeId = 2, TechnicianId = null, DateReceived = null, Status = "Submitted", IsReceived = false, IsDeleted = false }
             );
-
-            // Five selected tests awaiting capture; no result rows yet.
-            // Test types 1, 2 and 3 are actively assigned to the main technician.
             builder.Entity<TestRequestTestTypeModel>().HasData(
                 new TestRequestTestTypeModel { TestRequestTestTypeId = 1101, TestRequestId = 2, TestTypeId = 1, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 8, 0, 0), CompletionDateTime = null },
                 new TestRequestTestTypeModel { TestRequestTestTypeId = 1102, TestRequestId = 2, TestTypeId = 2, TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb", Status = "In Progress", StartDateTime = new DateTime(2026, 10, 15, 9, 0, 0), CompletionDateTime = null },

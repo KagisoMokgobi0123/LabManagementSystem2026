@@ -1,80 +1,141 @@
 ﻿@model NMB_HLabSys.Areas.Doctor.ViewModels.TestRequestCreateViewModel
 @using NMB_HLabSys.Areas.Manager.Models
 @using NMB_HLabSys.Areas.Technician.Models
-@{
-    ViewData["Title"] = "Create Test Request"; Layout = "_DoctorLayout"; var tests = ViewBag.TestTypes as List<TestTypeModel> ?? new(); var sampleTypes = ViewBag.SampleTypes as List<SampleTypeModel> ?? new(); var patient = ViewBag.Patient as NMB_HLabSys.Areas.Patient.Models.PatientModel;
-}
-<div class="container py-4">
-    <div class="mb-3"><a asp-action="Index">← Test requests</a><h2 class="mt-2">Create test request</h2><p class="text-muted">Request date and initial status are assigned automatically.</p></div>
+@{ ViewData["Title"] = "Create Test Request"; Layout = "_DoctorLayout"; var tests = ViewBag.TestTypes as List<TestTypeModel> ?? new(); var sampleTypes = ViewBag.SampleTypes as List<SampleTypeModel> ?? new(); var patient = ViewBag.Patient as NMB_HLabSys.Areas.Patient.Models.PatientModel; }
+<div class="container py-4"><div class="mb-3"><a asp-action="Index">← Test requests</a><h2 class="mt-2">Create test request</h2><p class="text-muted">Request date and initial status are assigned automatically.</p></div>
+
     <form asp-action="Create" method="post" class="card card-body shadow-sm" id="requestForm">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
         <div class="form-group">
-            <label asp-for="PatientIDNumber">Patient South African ID number</label><div class="input-group"><input asp-for="PatientIDNumber" class="form-control" maxlength="13" inputmode="numeric" autocomplete="off" placeholder="Enter the patient's 13-digit ID" /><div class="input-group-append"><button class="btn btn-outline-primary" type="button" id="findPatient">Find patient</button></div></div><span asp-validation-for="PatientIDNumber" class="text-danger"></span><div id="patientMessage" class="mt-2" role="status"></div>
+            <label asp-for="PatientIDNumber">Patient South African ID number</label>
+            <div class="input-group">
+                <input asp-for="PatientIDNumber" class="form-control"
+                       maxlength="13" inputmode="numeric" autocomplete="off"
+                       placeholder="Enter the patient's 13-digit ID" />
+                <div class="input-group-append">
+                    <button class="btn btn-outline-primary" type="button" id="findPatient">
+                        Find patient
+                    </button>
+                </div>
+            </div>
+            <span asp-validation-for="PatientIDNumber" class="text-danger"></span>
+            <div id="patientMessage" class="mt-2" role="status"></div>
+
             @if (patient != null)
             {
-                <div class="alert alert-success mt-2">Patient found: <b>@patient.FullName</b> · DOB @patient.DateOfBirth.ToString("dd MMM yyyy") · @patient.ContactNumber</div>
+                <div class="alert alert-success mt-2">
+                    Patient found: <b>@patient.FullName</b>
+                    · DOB @patient.DateOfBirth.ToString("dd MMM yyyy")
+                    · @patient.ContactNumber
+                </div>
             }
         </div>
+
         <div id="patientSummary" class="alert alert-info" style="display:none"></div>
-        <div id="patientNotFoundModal" class="patient-not-found-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="patientNotFoundTitle" aria-describedby="patientNotFoundDescription">
+
+        <div id="patientNotFoundModal" class="patient-not-found-modal"
+             style="display:none" role="dialog" aria-modal="true"
+             aria-labelledby="patientNotFoundTitle"
+             aria-describedby="patientNotFoundDescription">
             <div class="patient-not-found-dialog">
                 <h4 id="patientNotFoundTitle">Patient not found</h4>
-                <p id="patientNotFoundDescription">No patient record matches this ID number. Would you like to add this patient now?</p>
+                <p id="patientNotFoundDescription">
+                    No patient record matches this ID number. Would you like to add this patient now?
+                </p>
                 <div class="d-flex justify-content-end mt-3">
-                    <button type="button" class="btn btn-outline-secondary mr-2" id="cancelAddPatient">No, go back</button>
-                    <button type="button" class="btn btn-primary" id="confirmAddPatient">Yes, add patient</button>
+                    <button type="button" class="btn btn-outline-secondary mr-2" id="cancelAddPatient">
+                        No, go back
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmAddPatient">
+                        Yes, add patient
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="form-row"><div class="form-group col-md-6"><label>Request date</label><input class="form-control" value="@DateTime.Now.ToString("dd MMM yyyy HH:mm")" readonly /></div><div class="form-group col-md-6"><label asp-for="Urgency"></label><select asp-for="Urgency" class="form-control">@foreach(var u in (IEnumerable<NMB_HLabSys.Areas.Doctor.Models.Urgency>)ViewBag.Urgencies){
-            <option value="@u">@u</option>
-        }
-    </select><span asp-validation-for="Urgency" class="text-danger"></span></div></div>
-    <div class="form-group"><label asp-for="ClinicalNotes"></label><textarea asp-for="ClinicalNotes" class="form-control" rows="3" maxlength="2000" placeholder="Clinical indication, relevant symptoms, and instructions"></textarea><span asp-validation-for="ClinicalNotes" class="text-danger"></span></div>
-    <h5>Select tests</h5><p class="text-muted">Choose all required tests. Their required sample types are listed and sample rows are created automatically.</p><div class="row">@foreach(var t in tests){
-    <div class="col-md-6 col-lg-4 mb-2"><label class="border rounded p-3 d-flex h-100 w-100" style="cursor:pointer"><input type="checkbox" name="TestTypeIds" value="@t.TestTypeId" class="test-option mr-2 mt-1" data-sample-id="@t.SampleTypeId" data-sample-name="@(t.SampleType?.Name ?? "Sample")" @(Model.TestTypeIds.Contains(t.TestTypeId) ? "checked" : "") /><span><b>@t.Name</b><br /><small class="text-muted">@(t.TestCategory?.Description ?? "Test") · Required sample: @(t.SampleType?.Name ?? "Not specified")</small></span></label></div>
-}
-</div><span asp-validation-for="TestTypeIds" class="text-danger"></span>
-<h5 class="mt-3">Sample barcodes</h5><p class="text-muted">Type the barcode from the physical tube or scan it into the focused field. One sample is created per required sample type.</p><div id="sampleRows"><div class="text-muted" id="sampleEmpty">Select at least one test to see required sample types and barcode fields.</div></div><span asp-validation-for="Samples" class="text-danger"></span>
-<div class="alert alert-info mt-3"><i class="fas fa-info-circle mr-1"></i> On submission, the request status starts as <b>Submitted</b>. The patient receives an email confirmation if email delivery is configured.</div><div class="d-flex justify-content-end"><a asp-action="Index" class="btn btn-light mr-2">Cancel</a><button type="submit" class="btn btn-primary">Submit test request</button></div>
-</form>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label>Request date</label>
+                <input class="form-control" value="@DateTime.Now.ToString("dd MMM yyyy HH:mm")" readonly />
+            </div>
+            <div class="form-group col-md-6">
+                <label asp-for="Urgency"></label>
+                <select asp-for="Urgency" class="form-control">
+                    @foreach (var u in (IEnumerable<NMB_HLabSys.Areas.Doctor.Models.Urgency>)ViewBag.Urgencies)
+                    {
+                        <option value="@u">@u</option>
+                    }
+                </select>
+                <span asp-validation-for="Urgency" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ClinicalNotes"></label>
+            <textarea asp-for="ClinicalNotes" class="form-control" rows="3"
+                      maxlength="2000"
+                      placeholder="Clinical indication, relevant symptoms, and instructions"></textarea>
+            <span asp-validation-for="ClinicalNotes" class="text-danger"></span>
+        </div>
+
+        <h5>Select tests</h5>
+        <p class="text-muted">Choose all required tests. Their required sample types are listed and sample rows are created automatically.</p>
+
+        <div class="row">
+            @foreach (var t in tests)
+            {
+                <div class="col-md-6 col-lg-4 mb-2">
+                    <label class="border rounded p-3 d-flex h-100 w-100" style="cursor:pointer">
+                        <input type="checkbox" name="TestTypeIds" value="@t.TestTypeId"
+                               class="test-option mr-2 mt-1"
+                               data-sample-id="@t.SampleTypeId"
+                               data-sample-name="@(t.SampleType?.Name ?? "Sample")"
+                        @(Model.TestTypeIds.Contains(t.TestTypeId) ? "checked" : "") />
+                        <span>
+                            <b>@t.Name</b><br />
+                            <small class="text-muted">
+                                @(t.TestCategory?.Description ?? "Test")
+                                · Required sample: @(t.SampleType?.Name ?? "Not specified")
+                            </small>
+                        </span>
+                    </label>
+                </div>
+            }
+        </div>
+        <span asp-validation-for="TestTypeIds" class="text-danger"></span>
+
+        <h5 class="mt-3">Sample barcodes</h5>
+        <p class="text-muted">Type the barcode printed on each physical sample tube. One sample is created per required sample type.</p>
+        <div id="sampleRows">
+            <div class="text-muted" id="sampleEmpty">
+                Select at least one test to see required sample types and barcode fields.
+            </div>
+        </div>
+        <span asp-validation-for="Samples" class="text-danger"></span>
+
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle mr-1"></i>
+            On submission, the request status starts as <b>Submitted</b>.
+            The patient receives an email confirmation if email delivery is configured.
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <a asp-action="Index" class="btn btn-light mr-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">Submit test request</button>
+        </div>
+    </form>
 </div>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <style>
-        .patient-not-found-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            background: rgba(15,23,42,.6)
-        }
 
-        .patient-not-found-dialog {
-            width: 100%;
-            max-width: 440px;
-            background: #fff;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,.25)
-        }
-
-            .patient-not-found-dialog h4 {
-                margin: 0 0 .75rem;
-                color: #0f172a
-            }
-
-            .patient-not-found-dialog p {
-                margin: 0;
-                color: #475569;
-                line-height: 1.6
-            }
-    </style>
-    <script>
-        (function(){const options=[...document.querySelectorAll('.test-option')],container=document.getElementById('sampleRows'),empty=document.getElementById('sampleEmpty');function render(){const previous=[...container.querySelectorAll('input[name$=".Barcode"]')].map(x=>({sampleId:x.closest('.form-row')?.querySelector('input[type=hidden]')?.value,barcode:x.value}));const barcodeByType=new Map(previous.map(x=>[x.sampleId,x.barcode]));const map=new Map();options.filter(x=>x.checked).forEach(x=>{if(!map.has(x.dataset.sampleId))map.set(x.dataset.sampleId,x.dataset.sampleName)});container.innerHTML='';if(!map.size){container.innerHTML='<div class="text-muted">Select at least one test to see required sample types and barcode fields.</div>';return;}let i=0;map.forEach((name,id)=>{const row=document.createElement('div');row.className='form-row align-items-end border rounded p-3 mb-2';row.innerHTML='<div class="form-group col-md-5 mb-md-0"><label>Required sample type</label><input class="form-control" value="'+escapeHtml(name)+'" readonly/><input type="hidden" name="Samples['+i+'].SampleTypeId" value="'+id+'"/></div><div class="form-group col-md-7 mb-0"><label for="barcode'+i+'">Barcode</label><input id="barcode'+i+'" name="Samples['+i+'].Barcode" class="form-control barcode-input" required minlength="3" maxlength="100" pattern="[A-Za-z0-9-]{3,100}" autocomplete="off" placeholder="Scan or type barcode" value="'+escapeHtml(barcodeByType.get(String(id))||'')+'"/></div>';container.appendChild(row);i++;});}function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}options.forEach(x=>x.addEventListener('change',render));render();container.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('barcode-input')){e.preventDefault();const fields=[...container.querySelectorAll('.barcode-input')],index=fields.indexOf(e.target);if(index>=0&&index+1<fields.length)fields[index+1].focus();else e.target.blur();}});
-        const btn=document.getElementById('findPatient'),id=document.getElementById('PatientIDNumber'),msg=document.getElementById('patientMessage'),summary=document.getElementById('patientSummary'),notFoundModal=document.getElementById('patientNotFoundModal'),cancelAddPatient=document.getElementById('cancelAddPatient'),confirmAddPatient=document.getElementById('confirmAddPatient');let patientCreateUrl='';function closeNotFoundModal(){notFoundModal.style.display='none';btn.focus();}cancelAddPatient.addEventListener('click',closeNotFoundModal);notFoundModal.addEventListener('click',e=>{if(e.target===notFoundModal)closeNotFoundModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&notFoundModal.style.display==='flex')closeNotFoundModal();});confirmAddPatient.addEventListener('click',()=>{if(patientCreateUrl)window.location.assign(patientCreateUrl);});btn.addEventListener('click',async()=>{msg.innerHTML='';summary.style.display='none';if(!/^\d{13}$/.test(id.value.trim())){msg.innerHTML='<div class="alert alert-warning">Enter the complete 13-digit ID number first.</div>';return;}btn.disabled=true;btn.textContent='Searching…';try{const res=await fetch('@Url.Action("FindPatient", "TestRequests", new { area = "Doctor" })?idNumber='+encodeURIComponent(id.value.trim()),{headers:{'Accept':'application/json'}});const data=await res.json();if(!data.found){patientCreateUrl=data.createUrl||'';msg.innerHTML='<div class="alert alert-warning">'+escapeHtml(data.message||'Patient not found.')+'</div>';if(patientCreateUrl){notFoundModal.style.display='flex';confirmAddPatient.focus();}else{msg.innerHTML+='<div class="alert alert-danger">The Add Patient page link could not be generated. Please use Patients → Add patient.</div>';}return;}const p=data.patient;let previous=(data.previousResults||[]);let prevHtml=previous.length?previous.map(x=>'<div class="border-top pt-2 mt-2"><b>'+escapeHtml(x.test)+'</b> — '+escapeHtml(x.result==null?'—':String(x.result))+' '+escapeHtml(x.unit||'')+' <span class="text-muted">(reference '+escapeHtml(String(x.low))+'–'+escapeHtml(String(x.high))+')</span>'+(x.abnormal?' <span class="badge badge-danger">Abnormal</span>':'')+'<div class="small text-muted">'+escapeHtml(x.requestNumber+' · '+x.date+' · '+(x.notes||''))+'</div></div>').join(''):'<div class="small text-muted mt-2">No completed, authorised previous results are available to this doctor.</div>';summary.innerHTML='<b>'+escapeHtml(p.name+' '+p.surname)+'</b> · DOB '+new Date(p.dateOfBirth).toLocaleDateString()+' · '+escapeHtml(p.contactNumber)+'<hr class="my-2"><b>Conditions:</b> '+escapeHtml((data.conditions||[]).join(', ')||'None recorded')+'<br><b>Allergies:</b> '+escapeHtml((data.allergies||[]).join(', ')||'None recorded')+'<br><b>Medications:</b> '+escapeHtml((data.medications||[]).join(', ')||'None recorded')+'<hr class="my-2"><b>Previous completed results</b>'+prevHtml+'<div class="mt-2"><a href="'+data.detailsUrl+'">Open full patient record</a></div>';summary.style.display='block';msg.innerHTML='<div class="text-success">Patient found.</div>';}catch(e){msg.innerHTML='<div class="alert alert-danger">Could not search for this patient. Please retry.</div>';}finally{btn.disabled=false;btn.textContent='Find patient';}});if(/^\d{13}$/.test(id.value.trim()))btn.click();})();
-    </script>
-}
+@section Scripts { <partial name="_ValidationScriptsPartial"/>
+<style>
+.patient-not-found-modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;padding:1rem;background:rgba(15,23,42,.6)}
+.patient-not-found-dialog{width:100%;max-width:440px;background:#fff;border-radius:12px;padding:1.5rem;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.patient-not-found-dialog h4{margin:0 0 .75rem;color:#0f172a}
+.patient-not-found-dialog p{margin:0;color:#475569;line-height:1.6}
+</style>
+<script>
+(function(){const options=[...document.querySelectorAll('.test-option')],container=document.getElementById('sampleRows'),empty=document.getElementById('sampleEmpty');function render(){const previous=[...container.querySelectorAll('input[name$=".Barcode"]')].map(x=>({sampleId:x.closest('.form-row')?.querySelector('input[type=hidden]')?.value,barcode:x.value}));const barcodeByType=new Map(previous.map(x=>[x.sampleId,x.barcode]));const map=new Map();options.filter(x=>x.checked).forEach(x=>{if(!map.has(x.dataset.sampleId))map.set(x.dataset.sampleId,x.dataset.sampleName)});container.innerHTML='';if(!map.size){container.innerHTML='<div class="text-muted">Select at least one test to see required sample types and barcode fields.</div>';return;}let i=0;map.forEach((name,id)=>{const row=document.createElement('div');row.className='form-row align-items-end border rounded p-3 mb-2';row.innerHTML='<div class="form-group col-md-5 mb-md-0"><label>Required sample type</label><input class="form-control" value="'+escapeHtml(name)+'" readonly/><input type="hidden" name="Samples['+i+'].SampleTypeId" value="'+id+'"/></div><div class="form-group col-md-7 mb-0"><label for="barcode'+i+'">Barcode</label><div class="input-group"><input id="barcode'+i+'" name="Samples['+i+'].Barcode" class="form-control barcode-input" required minlength="1" maxlength="100" autocomplete="off" placeholder="Type barcode" value="'+escapeHtml(barcodeByType.get(String(id))||'')+'"/></div><small class="form-text text-muted">Type the barcode exactly as printed on the label.</small></div>';container.appendChild(row);i++;});}function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}options.forEach(x=>x.addEventListener('change',render));render();container.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('barcode-input')){e.preventDefault();const fields=[...container.querySelectorAll('.barcode-input')],index=fields.indexOf(e.target);if(index>=0&&index+1<fields.length)fields[index+1].focus();else e.target.blur();}});
+const btn=document.getElementById('findPatient'),id=document.getElementById('PatientIDNumber'),msg=document.getElementById('patientMessage'),summary=document.getElementById('patientSummary'),notFoundModal=document.getElementById('patientNotFoundModal'),cancelAddPatient=document.getElementById('cancelAddPatient'),confirmAddPatient=document.getElementById('confirmAddPatient');let patientCreateUrl='';function closeNotFoundModal(){notFoundModal.style.display='none';btn.focus();}cancelAddPatient.addEventListener('click',closeNotFoundModal);notFoundModal.addEventListener('click',e=>{if(e.target===notFoundModal)closeNotFoundModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&notFoundModal.style.display==='flex')closeNotFoundModal();});confirmAddPatient.addEventListener('click',()=>{if(patientCreateUrl)window.location.assign(patientCreateUrl);});btn.addEventListener('click',async()=>{msg.innerHTML='';summary.style.display='none';if(!/^\d{13}$/.test(id.value.trim())){msg.innerHTML='<div class="alert alert-warning">Enter the complete 13-digit ID number first.</div>';return;}btn.disabled=true;btn.textContent='Searching…';try{const res=await fetch('@Url.Action("FindPatient","TestRequests",new {area="Doctor"})?idNumber='+encodeURIComponent(id.value.trim()),{headers:{'Accept':'application/json'}});const data=await res.json();if(!data.found){patientCreateUrl=data.createUrl||'';msg.innerHTML='<div class="alert alert-warning">'+escapeHtml(data.message||'Patient not found.')+'</div>';if(patientCreateUrl){notFoundModal.style.display='flex';confirmAddPatient.focus();}else{msg.innerHTML+='<div class="alert alert-danger">The Add Patient page link could not be generated. Please use Patients → Add patient.</div>';}return;}const p=data.patient;let previous=(data.previousResults||[]);let prevHtml=previous.length?previous.map(x=>'<div class="border-top pt-2 mt-2"><b>'+escapeHtml(x.test)+'</b> — '+escapeHtml(x.result==null?'—':String(x.result))+' '+escapeHtml(x.unit||'')+' <span class="text-muted">(reference '+escapeHtml(String(x.low))+'–'+escapeHtml(String(x.high))+')</span>'+(x.abnormal?' <span class="badge badge-danger">Abnormal</span>':'')+'<div class="small text-muted">'+escapeHtml(x.requestNumber+' · '+x.date+' · '+(x.notes||''))+'</div></div>').join(''):'<div class="small text-muted mt-2">No completed, authorised previous results are available to this doctor.</div>';summary.innerHTML='<b>'+escapeHtml(p.name+' '+p.surname)+'</b> · DOB '+new Date(p.dateOfBirth).toLocaleDateString()+' · '+escapeHtml(p.contactNumber)+'<hr class="my-2"><b>Conditions:</b> '+escapeHtml((data.conditions||[]).join(', ')||'None recorded')+'<br><b>Allergies:</b> '+escapeHtml((data.allergies||[]).join(', ')||'None recorded')+'<br><b>Medications:</b> '+escapeHtml((data.medications||[]).join(', ')||'None recorded')+'<hr class="my-2"><b>Previous completed results</b>'+prevHtml+'<div class="mt-2"><a href="'+data.detailsUrl+'">Open full patient record</a></div>';summary.style.display='block';msg.innerHTML='<div class="text-success">Patient found.</div>';}catch(e){msg.innerHTML='<div class="alert alert-danger">Could not search for this patient. Please retry.</div>';}finally{btn.disabled=false;btn.textContent='Find patient';}});if(/^\d{13}$/.test(id.value.trim()))btn.click();})();
+</script>
+ }

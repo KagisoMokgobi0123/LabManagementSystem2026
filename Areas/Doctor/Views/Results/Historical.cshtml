@@ -1,12 +1,142 @@
 @model IEnumerable<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
-@using NMB_HLabSys.Areas.Patient.Models
+@using NMB_HLabSys.Areas.Doctor.Models
+@using NMB_HLabSys.Areas.Manager.Models
 @{
-    ViewData["Title"] = "Historical Results"; Layout = "_DoctorLayout"; var results = ViewBag.Results as List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel> ?? new();
+    ViewData["Title"] = "Historical Results";
+    Layout = "_DoctorLayout";
+    var results = ViewBag.Results as List<TestRequestTestTypeModel> ?? new();
+    var hiddenRequests = ViewBag.HiddenRequests as List<TestRequestsModel> ?? new();
+    var pendingRequestIds = ViewBag.PendingRequestIds as HashSet<int> ?? new();
+    var patientId = ViewBag.IdNumber as string ?? "";
 }
-<div class="container py-4"><div class="d-flex justify-content-between align-items-center mb-3"><div><h2>Historical results</h2><p class="text-muted mb-0">Search by patient ID. Consent is checked on every request.</p></div><a asp-action="Index" class="btn btn-outline-secondary">Back</a></div>
-<form method="get" class="card card-body mb-3"><label for="idNumber">Patient ID number</label><div class="input-group"><input id="idNumber" name="idNumber" value="@ViewBag.IdNumber" class="form-control" maxlength="13" pattern="[0-9]{13}" required/><div class="input-group-append"><button class="btn btn-primary">Check access</button></div></div></form>
-@if(ViewBag.Error != null){<div class="alert alert-warning">@ViewBag.Error</div>}
-@if(ViewBag.PatientName != null){<h5>@ViewBag.PatientName</h5>}
-@if(ViewBag.ConsentGranted == false){<div class="alert alert-warning">No active consent was found for this patient. Historical results remain hidden. Request permission from the results page.</div>}
-@if(ViewBag.ConsentGranted == true){<div class="alert alert-success">Consent is active. Only the historical requests selected by the patient are listed.</div><div class="card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Request</th><th>Date</th><th>Tests</th><th>Status</th></tr></thead><tbody>@foreach(var r in Model){var rs=results.Where(x=>x.TestRequestId==r.TestRequestId).ToList();<tr><td>@r.RequestNumber</td><td>@r.RequestDate.ToString("dd MMM yyyy")</td><td>@foreach(var x in rs){<div><b>@x.TestType?.Name</b>: @x.ResultValue @x.TestType?.MeasurementUnitDetails?.Unit @if(x.IsAbnormal){<span class="badge badge-danger">Abnormal</span>}<div class="small text-muted">@x.ResultNotes</div></div>}</td><td>@r.Status</td></tr>}@if(!Model.Any()){<tr><td colspan="4" class="text-center text-muted py-4">No completed, consented historical results were found.</td></tr>}</tbody></table></div></div>}
+<div class="container-fluid py-4 historical-results-page">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="mb-1">Historical results</h2>
+            <p class="text-muted mb-0">Search for a patient. Hidden result values stay private until the patient approves access to each request.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to results</a>
+    </div>
+
+    @if (TempData["InfoMessage"] is string info) { <div class="alert alert-info">@info</div> }
+    @if (TempData["SuccessMessage"] is string success) { <div class="alert alert-success">@success</div> }
+    @if (TempData["ErrorMessage"] is string error) { <div class="alert alert-danger">@error</div> }
+    @if (TempData["WarningMessage"] is string warning) { <div class="alert alert-warning">@warning</div> }
+    @if (ViewBag.Error != null) { <div class="alert alert-warning">@ViewBag.Error</div> }
+
+    <form method="get" class="card card-body mb-4" id="historicalPatientSearch">
+        <label for="idNumber" class="font-weight-bold">Patient South African ID number</label>
+        <div class="input-group">
+            <input id="idNumber" name="idNumber" value="@patientId" class="form-control" maxlength="13"
+                   minlength="13" pattern="[0-9]{13}" inputmode="numeric" required
+                   placeholder="Enter the patient's 13-digit ID number" />
+            <div class="input-group-append"><button type="submit" class="btn btn-primary">Search patient</button></div>
+        </div>
+        <small class="form-text text-muted">Search returns request metadata only. Result values remain hidden unless consent is active for that specific request.</small>
+    </form>
+
+    @if (ViewBag.PatientName != null)
+    {
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+            <div><h4 class="mb-0">@ViewBag.PatientName</h4><small class="text-muted">ID: @patientId</small></div>
+            <span class="badge badge-secondary">Historical records</span>
+        </div>
+        @if (ViewBag.ConsentGranted != true)
+        {
+            <div class="alert alert-warning">Historical result values are hidden. You can request access to an individual completed request below; the patient must approve it before results appear.</div>
+        }
+        <div class="card mb-4">
+            <div class="card-header font-weight-bold">Hidden historical requests</div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped doctor-data-table mb-0">
+                    <colgroup><col style="width:19%" /><col style="width:22%" /><col style="width:17%" /><col style="width:17%" /><col style="width:25%" /></colgroup>
+                    <thead class="thead-light"><tr><th>Request number</th><th>Request date</th><th>Tests</th><th>Access status</th><th class="text-right">Action</th></tr></thead>
+                    <tbody>
+                    @foreach (var r in hiddenRequests)
+                    {
+                        var activeItems = results.Where(x => x.TestRequestId == r.TestRequestId).ToList();
+                        var alreadyShared = Model.Any(x => x.TestRequestId == r.TestRequestId);
+                        <tr>
+                            <td class="text-nowrap font-weight-bold">@r.RequestNumber</td>
+                            <td class="text-nowrap">@r.RequestDate.ToString("dd MMM yyyy")</td>
+                            <td>@r.EffectiveTestTypes.Count test(s)</td>
+                            <td>
+                                @if (alreadyShared) { <span class="badge badge-success">Consent granted</span> }
+                                else { <span class="badge badge-warning">Hidden</span> }
+                            </td>
+                            <td class="text-right">
+                                @if (alreadyShared)
+                                {
+                                    <span class="small text-success">Available below</span>
+                                }
+                                else if (pendingRequestIds.Contains(r.TestRequestId))
+                                {
+                                    <span class="badge badge-warning">Request pending</span>
+                                }
+                                else
+                                {
+                                    <form asp-action="RequestHistoricalConsent" method="post" class="d-inline historical-request-form"
+                                          data-request="@r.RequestNumber">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="patientIdNumber" value="@patientId" />
+                                        <input type="hidden" name="testRequestId" value="@r.TestRequestId" />
+                                        <button type="submit" class="btn btn-sm btn-outline-primary">Request access</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!hiddenRequests.Any())
+                    {
+                        <tr><td colspan="5" class="text-center text-muted py-4">No completed historical requests were found for this patient.</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (ViewBag.ConsentGranted == true && Model.Any())
+    {
+        <div class="alert alert-success">The patient has granted access to the specific requests listed below. Only complete, verified results are shown.</div>
+        <div class="card">
+            <div class="card-header font-weight-bold">Patient-approved historical results</div>
+            <div class="table-responsive">
+                <table class="table table-hover table-striped doctor-data-table mb-0">
+                    <colgroup><col style="width:18%" /><col style="width:15%" /><col style="width:22%" /><col style="width:20%" /><col style="width:25%" /></colgroup>
+                    <thead class="thead-light"><tr><th>Request</th><th>Date</th><th>Test</th><th>Result</th><th>Notes / interpretation</th></tr></thead>
+                    <tbody>
+                    @foreach (var r in Model)
+                    {
+                        var rows = results.Where(x => x.TestRequestId == r.TestRequestId).ToList();
+                        foreach (var x in rows)
+                        {
+                            <tr>
+                                <td class="text-nowrap">@r.RequestNumber</td>
+                                <td class="text-nowrap">@r.RequestDate.ToString("dd MMM yyyy")</td>
+                                <td>@x.TestType?.Name</td>
+                                <td class="text-nowrap">
+                                    <strong>@x.ResultValue</strong> @x.TestType?.MeasurementUnitDetails?.Unit
+                                    @if (x.IsAbnormal) { <span class="badge badge-danger ml-1">Abnormal</span> }
+                                    else { <span class="badge badge-success ml-1">Normal</span> }
+                                </td>
+                                <td>@(string.IsNullOrWhiteSpace(x.ResultNotes) ? "—" : x.ResultNotes)</td>
+                            </tr>
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
 </div>
+<script>
+document.querySelectorAll('.historical-request-form').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        var requestNumber = form.getAttribute('data-request') || 'this request';
+        if (!window.confirm('Send a permission request to the patient for ' + requestNumber + '? The result values will remain hidden until the patient approves.')) {
+            event.preventDefault();
+        }
+    });
+});
+</script>

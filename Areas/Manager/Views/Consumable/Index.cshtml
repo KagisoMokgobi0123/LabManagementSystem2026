@@ -7,10 +7,6 @@
 
 <div class="container-fluid py-4">
 
-    <!-- =========================================================
-         PAGE HEADER
-         ========================================================= -->
-
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
 
         <div>
@@ -37,10 +33,6 @@
 
     </div>
 
-
-    <!-- =========================================================
-         MESSAGES
-         ========================================================= -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show"
@@ -74,10 +66,6 @@
     }
 
 
-    <!-- =========================================================
-         INFORMATION
-         ========================================================= -->
-
     <div class="alert alert-info border-0 shadow-sm">
 
         <div class="d-flex">
@@ -103,10 +91,6 @@
     </div>
 
 
-    <!-- =========================================================
-         CONSUMABLE TABLE
-         ========================================================= -->
-
     <div class="card border-0 shadow-sm">
 
         <div class="card-header bg-white border-0 py-3">
@@ -127,7 +111,6 @@
 
                 <div class="d-flex align-items-center gap-2">
 
-                    <!-- SEARCH -->
 
                     <div class="input-group input-group-sm"
                          style="width:280px;">
@@ -145,7 +128,7 @@
                     </div>
 
 
-                    <!-- RECORD COUNT -->
+
 
                     <span class="badge bg-primary-subtle text-primary"
                           id="recordCount">
@@ -207,12 +190,6 @@
                         {
                             foreach (var consumable in Model)
                             {
-                                /*
-                                 * IMPORTANT:
-                                 * Do not use StockStatus here.
-                                 * The view calculates the status directly
-                                 * from QuantityOnHand and ReorderLevel.
-                                 */
 
                                 var reorderThreshold =
                                     consumable.ReorderLevel * 1.10m;
@@ -251,11 +228,6 @@
                                     data-supplier="@consumable.Supplier?.SupplierName"
                                     data-status="@stockStatus">
 
-
-                                    <!-- =================================================
-                                         CONSUMABLE
-                                         ================================================= -->
-
                                     <td>
 
                                         <div class="fw-semibold">
@@ -264,10 +236,6 @@
 
                                     </td>
 
-
-                                    <!-- =================================================
-                                         SUPPLIER
-                                         ================================================= -->
 
                                     <td>
 
@@ -287,10 +255,6 @@
                                     </td>
 
 
-                                    <!-- =================================================
-                                         QUANTITY
-                                         ================================================= -->
-
                                     <td>
 
                                         <span class="fw-semibold">
@@ -299,19 +263,11 @@
 
                                     </td>
 
-
-                                    <!-- =================================================
-                                         REORDER LEVEL
-                                         ================================================= -->
-
                                     <td>
                                         @consumable.ReorderLevel
                                     </td>
 
 
-                                    <!-- =================================================
-                                         STOCK STATUS
-                                         ================================================= -->
 
                                     <td>
 
@@ -345,10 +301,6 @@
 
                                     </td>
 
-
-                                    <!-- =================================================
-                                         ACTIONS
-                                         ================================================= -->
 
                                     <td class="text-end">
 
@@ -457,7 +409,6 @@
                         }
 
 
-                        <!-- SEARCH EMPTY -->
 
                         <tr id="noSearchResultsRow"
                             style="display:none;">
@@ -497,9 +448,7 @@
 </div>
 
 
-<!-- =============================================================
-     ADD / EDIT CONSUMABLE MODAL
-     ============================================================= -->
+<!-- add and edit pop up form -->
 
 <div class="modal fade"
      id="consumableModal"
@@ -606,7 +555,7 @@
                     </div>
 
 
-                    <!-- QUANTITY / REORDER -->
+                    <!-- quantity reorder-->
 
                     <div class="row">
 
@@ -691,9 +640,7 @@
 </div>
 
 
-<!-- =============================================================
-     VIEW CONSUMABLE MODAL
-     ============================================================= -->
+<!--view Consumable details-->
 
 <div class="modal fade"
      id="viewConsumableModal"
@@ -813,9 +760,7 @@
 </div>
 
 
-<!-- =============================================================
-     STOCK ADJUSTMENT MODAL
-     ============================================================= -->
+<!-- Stock adjustment form -->
 
 <div class="modal fade"
      id="adjustStockModal"
@@ -826,11 +771,9 @@
 
         <div class="modal-content border-0 shadow">
 
-            <form method="post"
-                  asp-area="Manager"
-                  asp-controller="Consumable"
-                  asp-action="AdjustStock">
-
+            <form id="adjustStockForm"
+                  action="@Url.Action("AdjustStock", "Consumable", new { area = "Manager" })"
+                  method="post">
                 @Html.AntiForgeryToken()
 
 
@@ -971,9 +914,7 @@
 </div>
 
 
-<!-- =============================================================
-     DELETE CONSUMABLE MODAL
-     ============================================================= -->
+<!-- Delete a consumable  -->
 
 <div class="modal fade"
      id="deleteConsumableModal"
@@ -984,11 +925,9 @@
 
         <div class="modal-content border-0 shadow">
 
-            <form method="post"
-                  asp-area="Manager"
-                  asp-controller="Consumable"
-                  asp-action="Delete">
-
+            <form id="deleteConsumableForm"
+                  action="@Url.Action("Delete", "Consumable", new { area = "Manager" })"
+                  method="post">
                 @Html.AntiForgeryToken()
 
 
@@ -1067,9 +1006,7 @@
 </div>
 
 
-<!-- =============================================================
-     SUCCESS MESSAGE MODAL
-     ============================================================= -->
+<!--Successful message -->
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="modal fade"
@@ -1153,9 +1090,7 @@
 
     <script>
 
-        /* =========================================================
-           SUCCESS MESSAGE
-           ========================================================= */
+        /* Success message*/
 
         document.addEventListener("DOMContentLoaded", function () {
 
@@ -1173,9 +1108,7 @@
         });
 
 
-        /* =========================================================
-           CREATE
-           ========================================================= */
+        /* Create Form */
 
         function openCreateModal() {
 
@@ -1209,11 +1142,6 @@
             document.getElementById("QuantityOnHand")
                 .value = "";
 
-            /*
-             * Important:
-             * Create mode must allow quantity editing again
-             * after Edit mode made the field read-only.
-             */
             document.getElementById("QuantityOnHand")
                 .readOnly = false;
 
@@ -1227,9 +1155,7 @@
         }
 
 
-        /* =========================================================
-           VIEW
-           ========================================================= */
+        /*view form*/
 
         function viewConsumable(
             id,
@@ -1261,9 +1187,7 @@
         }
 
 
-        /* =========================================================
-           EDIT
-           ========================================================= */
+        /* Edit */
 
         function editConsumable(
             id,
@@ -1299,11 +1223,6 @@
             document.getElementById("SupplierId")
                 .value = supplierId;
 
-            /*
-             * Quantity is displayed for information only.
-             * The controller should not update QuantityOnHand
-             * during Edit.
-             */
             document.getElementById("QuantityOnHand")
                 .value = quantity;
 
@@ -1324,9 +1243,7 @@
         }
 
 
-        /* =========================================================
-           STOCK ADJUSTMENT
-           ========================================================= */
+        /*Adjust The Stock*/
 
         function adjustStock(
             id,
@@ -1364,9 +1281,7 @@
         }
 
 
-        /* =========================================================
-           DELETE
-           ========================================================= */
+        /* Delete form */
 
         function deleteConsumable(id, name) {
 
@@ -1383,9 +1298,7 @@
         }
 
 
-        /* =========================================================
-           SEARCH
-           ========================================================= */
+        /* Search */
 
         const searchInput =
             document.getElementById("consumableSearch");
@@ -1464,9 +1377,7 @@
         }
 
 
-        /* =========================================================
-           ADJUSTMENT VALIDATION
-           ========================================================= */
+        /* Validate adjustment*/
 
         const adjustmentType =
             document.getElementById("adjustmentType");

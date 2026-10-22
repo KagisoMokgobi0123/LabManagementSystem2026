@@ -1,6 +1,116 @@
+
 @model NMB_HLabSys.Areas.Doctor.ViewModels.DoctorProfileEditViewModel
-@{ ViewData["Title"] = "Edit Profile"; Layout = "_DoctorLayout"; }
-<div class="container py-4"><div class="mb-3"><a asp-action="Index">← My profile</a><h2 class="mt-2">Edit profile</h2><p class="text-muted">Update your display name. Sign-in email changes require a separate verification workflow and are read-only here.</p></div>
-@if(TempData["InfoMessage"] != null){<div class="alert alert-info">@TempData["InfoMessage"]</div>}
-<form asp-action="Edit" method="post" class="card card-body shadow-sm" style="max-width:650px"><div asp-validation-summary="ModelOnly" class="alert alert-danger"></div><div class="form-group"><label asp-for="FirstName"></label><input asp-for="FirstName" class="form-control" autocomplete="given-name"/><span asp-validation-for="FirstName" class="text-danger"></span></div><div class="form-group"><label asp-for="LastName"></label><input asp-for="LastName" class="form-control" autocomplete="family-name"/><span asp-validation-for="LastName" class="text-danger"></span></div><div class="form-group"><label asp-for="Email"></label><input asp-for="Email" class="form-control" readonly/><small class="form-text text-muted">Contact an administrator if your sign-in email needs to change.</small></div><div class="d-flex justify-content-end"><a asp-action="Index" class="btn btn-light mr-2">Cancel</a><button type="submit" class="btn btn-primary">Save profile</button></div></form></div>
-@section Scripts { <partial name="_ValidationScriptsPartial"/> }
+
+@{
+    ViewData["Title"] = "Edit Profile";
+    Layout = "_DoctorLayout";
+}
+
+<div class="container py-4">
+    <div class="mb-3">
+        <a asp-area="Doctor"
+           asp-controller="Profile"
+           asp-action="Index">
+            &larr; My profile
+        </a>
+
+        <h2 class="mt-2">Edit profile</h2>
+
+        <p class="text-muted">
+            Update your first and last name.
+            Your sign-in email is read-only and cannot be changed here.
+        </p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show"
+             role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button"
+                    class="close"
+                    data-dismiss="alert"
+                    aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info" role="status">
+            @TempData["InfoMessage"]
+        </div>
+    }
+
+    <form asp-area="Doctor"
+          asp-controller="Profile"
+          asp-action="Edit"
+          method="post"
+          class="card card-body shadow-sm"
+          style="max-width: 650px;">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"
+             role="alert">
+        </div>
+
+        <div class="form-group">
+            <label asp-for="FirstName"></label>
+
+            <input asp-for="FirstName"
+                   class="form-control"
+                   autocomplete="given-name"
+                   maxlength="100" />
+
+            <span asp-validation-for="FirstName"
+                  class="text-danger">
+            </span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="LastName"></label>
+
+            <input asp-for="LastName"
+                   class="form-control"
+                   autocomplete="family-name"
+                   maxlength="100" />
+
+            <span asp-validation-for="LastName"
+                  class="text-danger">
+            </span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email"></label>
+
+            <input asp-for="Email"
+                   class="form-control"
+                   readonly
+                   aria-describedby="emailHelp" />
+
+            <small id="emailHelp" class="form-text text-muted">
+                Contact an administrator if your sign-in email needs to change.
+            </small>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <a asp-area="Doctor"
+               asp-controller="Profile"
+               asp-action="Index"
+               class="btn btn-light mr-2">
+                Cancel
+            </a>
+
+            <button type="submit" class="btn btn-primary">
+                Save profile
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

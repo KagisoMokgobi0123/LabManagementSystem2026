@@ -18,14 +18,13 @@ namespace NMB_HLabSys.Areas.Manager.Models
         public int TestTypeId { get; set; }
         public TestTypeModel? TestType { get; set; }
 
-        public string? TechnicianId { get; set; }   
-
+        // Technician who captured the result.
+        public string? TechnicianId { get; set; }
         public ApplicationUser? Technician { get; set; }
 
         public string Status { get; set; } = "Submitted";
 
         public DateTime? StartDateTime { get; set; }
-
         public DateTime? CompletionDateTime { get; set; }
 
         [Column(TypeName = "decimal(18,4)")]
@@ -49,5 +48,13 @@ namespace NMB_HLabSys.Areas.Manager.Models
 
         // UTC de-activation timestamp
         public DateTime? DeactivatedAt { get; set; }
+        // Independent verification by a second technician.
+        public bool IsVerified { get; set; } = false;
+
+        public string? VerifiedByTechnicianId { get; set; }
+
+        public ApplicationUser? VerifiedByTechnician { get; set; }
+
+        public DateTime? VerifiedAt { get; set; }
     }
 }

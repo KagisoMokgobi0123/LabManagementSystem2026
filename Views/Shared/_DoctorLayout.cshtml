@@ -1,206 +1,994 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using NMB_HLabSys.Models.Identity
 @inject UserManager<ApplicationUser> UserManager
+
 @{
-    var doctor = await UserManager.GetUserAsync(User);
-    var name = doctor?.FullName ?? "Doctor";
-    var initial = string.IsNullOrWhiteSpace(doctor?.FirstName) ? "D" : doctor.FirstName[..1].ToUpperInvariant();
+    var currentUser = await UserManager.GetUserAsync(User);
+    var doctorName = currentUser?.FullName ?? "Doctor";
+    var doctorInitial = !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+        ? currentUser.FirstName.Substring(0, 1).ToUpperInvariant()
+        : "D";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
     var title = ViewData["Title"]?.ToString() ?? "Doctor Portal";
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@title | NMB-HLabSys</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@title - NMB-HLabSys</title>
+    <link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
+
+
             :root {
-                --navy: #073b5c;
-                --blue: #0284c7;
-                --soft: #f4f7fb;
+                --sidebar-width: 265px;
+                --sidebar-collapsed-width: 78px;
+                --sidebar-dark: #052f4a;
+                --sidebar-blue: #073b5c;
+                --sidebar-light: #075985;
+                --accent: #0284c7;
+                --page-bg: #f4f7fb;
             }
 
+
+            * {
+                box-sizing: border-box;
+            }
+
+
+            html,
             body {
                 margin: 0;
-                background: var(--soft);
-                color: #0f172a;
-                font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+                min-height: 100%;
             }
 
-            .doctor-shell {
-                display: flex;
+
+            body {
+                background: var(--page-bg);
+                color: #334155;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            }
+
+            .doctor-app {
                 min-height: 100vh;
             }
 
+
+            /*Side bar style*/
+
             .doctor-sidebar {
-                width: 252px;
-                flex: none;
-                background: linear-gradient(180deg,#073b5c,#075985);
-                color: #fff;
-                position: sticky;
+                position: fixed;
                 top: 0;
-                height: 100vh;
+                left: 0;
+                bottom: 0;
+                z-index: 1050;
+                width: var(--sidebar-width);
+                display: flex;
+                flex-direction: column;
                 overflow-y: auto;
+                overflow-x: hidden;
+                background: linear-gradient( 180deg, var(--sidebar-dark) 0%, var(--sidebar-blue) 50%, var(--sidebar-light) 100% );
+                box-shadow: 5px 0 25px rgba(15, 23, 42, .13);
+                transition: width .25s ease, transform .25s ease;
             }
 
-            .doctor-brand {
+
+            .sidebar-brand {
+                min-height: 105px;
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 23px 20px;
+                padding: 18px 20px;
+                border-bottom: 1px solid rgba(255,255,255,.10);
+                text-decoration: none !important;
+            }
+
+
+            .sidebar-logo {
+                width: 55px;
+                height: 55px;
+                flex-shrink: 0;
+                object-fit: contain;
+                margin-right: 12px;
+                filter: drop-shadow( 0 4px 8px rgba(0,0,0,.20) );
+            }
+
+
+            .sidebar-brand-text {
+                overflow: hidden;
+            }
+
+
+            .sidebar-brand-name {
+                margin: 0;
                 color: #fff;
-                text-decoration: none;
-                font-weight: 800;
-                border-bottom: 1px solid #ffffff25;
+                font-size: 17px;
+                font-weight: 700;
+                white-space: nowrap;
             }
 
-                .doctor-brand i {
-                    font-size: 25px;
-                }
 
-            .doctor-nav {
-                padding: 17px 12px;
+            .sidebar-brand-subtitle {
+                margin-top: 2px;
+                color: rgba(255,255,255,.60);
+                font-size: 10px;
+                white-space: nowrap;
             }
 
-                .doctor-nav .nav-label {
-                    color: #ffffff85;
-                    font-size: 10px;
-                    letter-spacing: 1.2px;
-                    font-weight: 800;
-                    padding: 17px 12px 7px;
+            /*Side bar controlls*/
+            .sidebar-controls {
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 7px;
+                padding: 8px 12px;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+
+            .sidebar-control-btn {
+                width: 33px;
+                height: 33px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                border: 1px solid rgba(255,255,255,.16);
+                border-radius: 7px;
+                background: rgba(255,255,255,.07);
+                color: rgba(255,255,255,.82);
+                cursor: pointer;
+                transition: background .2s ease, color .2s ease, transform .2s ease;
+            }
+
+
+                .sidebar-control-btn:hover {
+                    background: rgba(255,255,255,.16);
+                    color: #fff;
+                    transform: translateY(-1px);
                 }
 
-                .doctor-nav a {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    padding: 12px 14px;
-                    border-radius: 10px;
-                    color: #e1f0fa;
-                    text-decoration: none;
-                    font-size: 13px;
-                    margin: 3px 0;
+
+            .sidebar-user {
+                display: flex;
+                align-items: center;
+                margin: 15px 13px;
+                padding: 12px;
+                border: 1px solid rgba(255,255,255,.10);
+                border-radius: 10px;
+                background: rgba(255,255,255,.07);
+            }
+
+
+            .sidebar-avatar {
+                width: 39px;
+                height: 39px;
+                min-width: 39px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 10px;
+                border-radius: 50%;
+                background: linear-gradient( 135deg, #0284c7, #06b6d4 );
+                color: #fff;
+                font-size: 14px;
+                font-weight: 700;
+            }
+
+
+            .sidebar-user-details {
+                min-width: 0;
+                overflow: hidden;
+            }
+
+
+            .sidebar-user-name {
+                overflow: hidden;
+                color: #fff;
+                font-size: 12px;
+                font-weight: 700;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-user-role {
+                margin-top: 2px;
+                color: rgba(255,255,255,.55);
+                font-size: 9px;
+            }
+
+
+            .sidebar-navigation {
+                flex: 1;
+                padding: 5px 12px 25px;
+            }
+
+
+            .sidebar-section {
+                margin: 19px 10px 7px;
+                color: rgba(255,255,255,.40);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: .8px;
+                text-transform: uppercase;
+                white-space: nowrap;
+            }
+
+
+            .sidebar-link {
+                position: relative;
+                display: flex;
+                align-items: center;
+                min-height: 45px;
+                margin-bottom: 4px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                color: rgba(255,255,255,.77) !important;
+                font-size: 12px;
+                font-weight: 500;
+                text-decoration: none !important;
+                transition: background .2s ease, color .2s ease, transform .2s ease;
+            }
+
+
+                .sidebar-link:hover {
+                    color: #fff !important;
+                    background: rgba(255,255,255,.10);
+                    transform: translateX(2px);
                 }
 
-                    .doctor-nav a:hover, .doctor-nav a:focus {
-                        background: #ffffff20;
-                        color: white;
+
+                .sidebar-link.active {
+                    color: #fff !important;
+                    background: linear-gradient( 135deg, rgba(2,132,199,.85), rgba(6,182,212,.65) );
+                    box-shadow: 0 5px 15px rgba(0,0,0,.15);
+                }
+
+
+                    .sidebar-link.active::before {
+                        content: "";
+                        position: absolute;
+                        left: -12px;
+                        top: 8px;
+                        bottom: 8px;
+                        width: 3px;
+                        border-radius: 0 4px 4px 0;
+                        background: #38bdf8;
                     }
 
-                    .doctor-nav a i {
-                        width: 19px;
-                        text-align: center;
-                    }
+
+            .sidebar-link-icon {
+                width: 28px;
+                min-width: 28px;
+                margin-right: 8px;
+                text-align: center;
+                font-size: 14px;
+            }
+
+
+            .sidebar-link-text {
+                flex: 1;
+                white-space: nowrap;
+            }
+
+            /* Uniform clickable navigation targets and keyboard focus */
+            .sidebar-navigation .sidebar-link {
+                width: 100%;
+                gap: 0;
+                border: 1px solid transparent;
+            }
+
+                .sidebar-navigation .sidebar-link:focus-visible {
+                    outline: 2px solid #7dd3fc;
+                    outline-offset: 2px;
+                    color: #fff !important;
+                }
+
+            .sidebar-navigation .sidebar-link-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+
+            .sidebar-navigation .sidebar-link.active {
+                font-weight: 650;
+            }
+
+
+            .sidebar-count {
+                min-width: 20px;
+                padding: 2px 6px;
+                border-radius: 20px;
+                background: #dc2626;
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+                text-align: center;
+            }
+
+
+
+            .sidebar-bottom {
+                padding: 12px;
+                border-top: 1px solid rgba(255,255,255,.10);
+            }
+
+
+                .sidebar-bottom form {
+                    margin: 0;
+                }
+
+
+            .sidebar-logout {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                padding: 11px 12px;
+                border: 1px solid rgba(248,113,113,.28);
+                border-radius: 8px;
+                background: rgba(220,38,38,.10);
+                color: #fecaca;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background .2s ease, color .2s ease;
+            }
+
+
+                .sidebar-logout:hover {
+                    background: rgba(220,38,38,.20);
+                    color: #fff;
+                }
+
+
+            /*main content*/
 
             .doctor-main {
-                flex: 1;
-                min-width: 0;
+                min-height: 100vh;
+                margin-left: var(--sidebar-width);
+                transition: margin-left .25s ease, width .25s ease;
             }
 
-            .doctor-topbar {
-                position: sticky;
-                top: 0;
+
+            /* Collaps side bar */
+
+            body.sidebar-collapsed
+            .doctor-sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+
+
+            body.sidebar-collapsed
+            .doctor-main {
+                margin-left: var(--sidebar-collapsed-width);
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-brand {
+                justify-content: center;
+                min-height: 90px;
+                padding: 15px 8px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-logo {
+                width: 48px;
+                height: 48px;
+                margin-right: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-brand-text {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-controls {
+                justify-content: center;
+                padding: 8px 5px;
+            }
+
+            body.sidebar-collapsed
+            #fullScreenToggle {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-user {
+                justify-content: center;
+                margin: 12px 9px;
+                padding: 9px 5px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-avatar {
+                margin-right: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-user-details {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-section {
+                height: 8px;
+                margin: 8px 0;
+                overflow: hidden;
+                font-size: 0;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-navigation {
+                padding: 5px 9px 20px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link {
+                justify-content: center;
+                padding: 10px 5px;
+            }
+
+
+                body.sidebar-collapsed
+                .sidebar-link:hover {
+                    transform: none;
+                }
+
+
+            body.sidebar-collapsed
+            .sidebar-link-icon {
+                width: auto;
+                min-width: 0;
+                margin-right: 0;
+                font-size: 16px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link-text,
+            body.sidebar-collapsed
+            .sidebar-count {
+                display: none;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-link.active::before {
+                left: -9px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-bottom {
+                padding: 10px 9px;
+            }
+
+
+            body.sidebar-collapsed
+            .sidebar-logout {
+                justify-content: center;
+                padding: 11px 5px;
+            }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout
+                .sidebar-link-icon {
+                    margin-right: 0;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout
+                .sidebar-link-text {
+                    display: none;
+                }
+
+            body.sidebar-hidden
+            .doctor-sidebar {
+                transform: translateX(-100%) !important;
+            }
+
+
+            body.sidebar-hidden
+            .doctor-main {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+
+
+            .sidebar-restore-btn {
+                position: fixed;
+                top: 18px;
+                left: 18px;
+                z-index: 1200;
+                width: 44px;
+                height: 44px;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                border-radius: 10px;
+                background: linear-gradient( 135deg, #075985, #0284c7 );
+                color: #fff;
+                font-size: 17px;
+                box-shadow: 0 6px 20px rgba(15,23,42,.25);
+                cursor: pointer;
+                transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            }
+
+
+                .sidebar-restore-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 9px 24px rgba(15,23,42,.30);
+                    background: linear-gradient( 135deg, #0284c7, #06b6d4 );
+                }
+
+
+            body.sidebar-hidden
+            .sidebar-restore-btn {
+                display: flex;
+            }
+
+
+            .doctor-mobile-header {
+                display: none;
+                height: 64px;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 16px;
+                background: #073b5c;
+                color: #fff;
+                box-shadow: 0 2px 12px rgba(15,23,42,.15);
+            }
+
+
+            .mobile-brand {
+                display: flex;
+                align-items: center;
+                color: #fff;
+                font-weight: 700;
+            }
+
+
+            .mobile-logo {
+                width: 39px;
+                height: 39px;
+                margin-right: 9px;
+                object-fit: contain;
+            }
+
+
+            .sidebar-toggle {
+                width: 39px;
+                height: 39px;
+                border: 1px solid rgba(255,255,255,.20);
+                border-radius: 7px;
+                background: rgba(255,255,255,.08);
+                color: #fff;
+                cursor: pointer;
+            }
+
+
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
                 z-index: 1040;
-                min-height: 74px;
+                display: none;
+                background: rgba(15,23,42,.55);
+            }
+
+
+            @@media(max-width: 991.98px) {
+
+                .doctor-sidebar {
+                    width: 265px;
+                    transform: translateX(-100%);
+                    transition: transform .25s ease;
+                }
+
+
+                    .doctor-sidebar.show {
+                        transform: translateX(0);
+                    }
+
+
+                .sidebar-backdrop.show {
+                    display: block;
+                }
+
+
+                .doctor-main {
+                    margin-left: 0;
+                    width: 100%;
+                }
+
+
+                .doctor-mobile-header {
+                    display: flex;
+                }
+
+                .sidebar-controls {
+                    display: none;
+                }
+
+                body.sidebar-collapsed
+                .doctor-sidebar {
+                    width: 265px;
+                }
+
+
+                body.sidebar-collapsed
+                .doctor-main {
+                    margin-left: 0;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-brand {
+                    justify-content: flex-start;
+                    min-height: 105px;
+                    padding: 18px 20px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logo {
+                    width: 55px;
+                    height: 55px;
+                    margin-right: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-brand-text {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-user {
+                    justify-content: flex-start;
+                    margin: 15px 13px;
+                    padding: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-avatar {
+                    margin-right: 10px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-user-details {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-section {
+                    height: auto;
+                    margin: 19px 10px 7px;
+                    font-size: 9px;
+                    overflow: visible;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-navigation {
+                    padding: 5px 12px 25px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link {
+                    justify-content: flex-start;
+                    padding: 10px 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link-icon {
+                    width: 28px;
+                    min-width: 28px;
+                    margin-right: 8px;
+                    font-size: 14px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link-text {
+                    display: block;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-link.active::before {
+                    left: -12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-bottom {
+                    padding: 12px;
+                }
+
+
+                body.sidebar-collapsed
+                .sidebar-logout {
+                    justify-content: flex-start;
+                    padding: 11px 12px;
+                }
+
+
+                    body.sidebar-collapsed
+                    .sidebar-logout
+                    .sidebar-link-icon {
+                        margin-right: 8px;
+                    }
+
+
+                    body.sidebar-collapsed
+                    .sidebar-logout
+                    .sidebar-link-text {
+                        display: block;
+                    }
+
+                .sidebar-restore-btn {
+                    display: none !important;
+                }
+
+
+                body.sidebar-hidden
+                .doctor-sidebar {
+                    transform: translateX(-100%);
+                }
+            }
+
+
+            @@media(max-width: 575.98px) {
+
+                .doctor-sidebar {
+                    width: 280px;
+                    max-width: 86vw;
+                }
+
+
+                body.sidebar-collapsed
+                .doctor-sidebar {
+                    width: 280px;
+                    max-width: 86vw;
+                }
+            }
+
+
+            /* Technician top toolbar and notification badge */
+            .doctor-top-toolbar {
+                min-height: 62px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                gap: 12px;
+                padding: 10px 24px;
                 background: #fff;
                 border-bottom: 1px solid #e2e8f0;
+            }
+
+            .doctor-notification-link {
+                position: relative;
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+                color: #075985;
+                background: #f8fafc;
+                text-decoration: none;
+            }
+
+                .doctor-notification-link:hover,
+                .doctor-notification-link:focus-visible {
+                    color: #fff;
+                    background: #075985;
+                    text-decoration: none;
+                }
+
+            .doctor-notification-badge {
+                position: absolute;
+                top: -7px;
+                right: -8px;
+                min-width: 19px;
+                padding: 2px 5px;
+                border-radius: 999px;
+                background: #dc2626;
+                color: white;
+                font-size: 10px;
+                font-weight: 700;
+                text-align: center;
+            }
+
+            .doctor-profile {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: #334155;
+                text-decoration: none;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+                .doctor-profile:hover {
+                    color: #075985;
+                    text-decoration: none;
+                }
+
+            .doctor-avatar {
+                width: 34px;
+                height: 34px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                background: #075985;
+                color: #fff;
+            }
+
+            @@media (max-width: 575.98px) {
+                .doctor-top-toolbar {
+                    padding: 8px 16px;
+                }
+
+                .doctor-profile-name {
+                    display: none;
+                }
+            }
+
+    
+
+            .doctor-top-toolbar {
+                min-height: 74px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 14px;
                 padding: 10px 24px;
-                box-shadow: 0 2px 10px #0f172a08;
+                background: #fff;
+                border-bottom: 1px solid #e2e8f0;
+                box-shadow: 0 2px 10px rgba(15,23,42,.03);
+                position: sticky;
+                top: 0;
+                z-index: 1030;
             }
 
-            .top-title {
-                font-size: 17px;
+            .doctor-page-title {
+                font-size: 18px;
                 font-weight: 750;
                 margin: 0;
+                color: #0f172a;
             }
 
-            .top-subtitle {
+            .doctor-page-subtitle {
                 font-size: 11px;
                 color: #64748b;
+                margin-top: 3px;
             }
 
-            .top-actions {
+            .doctor-toolbar-actions {
                 display: flex;
                 align-items: center;
                 gap: 10px;
             }
 
-            .top-icon {
-                border: 1px solid #e2e8f0;
-                background: #f8fafc;
-                color: #075985;
-                width: 42px;
-                height: 42px;
-                border-radius: 11px;
-                display: grid;
-                place-items: center;
+            .doctor-notification-link {
                 position: relative;
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #cbd5e1;
+                border-radius: 10px;
+                color: #075985;
+                background: #f8fafc;
+                text-decoration: none;
             }
 
-                .top-icon:hover {
-                    background: #e0f2fe;
+                .doctor-notification-link:hover, .doctor-notification-link:focus-visible {
+                    color: #fff;
+                    background: #075985;
                 }
 
-            .notice-count {
+            .doctor-notification-badge {
                 position: absolute;
-                right: -5px;
-                top: -6px;
-                border-radius: 999px;
+                top: -7px;
+                right: -8px;
                 min-width: 19px;
-                height: 19px;
+                padding: 2px 5px;
+                border-radius: 999px;
                 background: #dc2626;
                 color: white;
                 font-size: 10px;
-                font-weight: 800;
-                display: none;
-                align-items: center;
-                justify-content: center;
-                padding: 0 4px;
+                font-weight: 700;
+                text-align: center;
             }
 
             .doctor-profile {
-                display: flex;
+                display: inline-flex;
                 align-items: center;
-                gap: 10px;
-                border: 1px solid #e2e8f0;
-                background: white;
-                border-radius: 12px;
-                padding: 5px 10px 5px 5px;
-                color: #0f172a;
+                gap: 8px;
+                color: #334155;
                 text-decoration: none;
+                font-size: 13px;
+                font-weight: 600;
             }
+
+                .doctor-profile:hover {
+                    color: #075985;
+                    text-decoration: none;
+                }
 
             .doctor-avatar {
                 width: 36px;
                 height: 36px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
                 border-radius: 50%;
-                display: grid;
-                place-items: center;
-                background: linear-gradient(135deg,#075985,#0284c7);
-                color: white;
+                background: #075985;
+                color: #fff;
                 font-weight: 800;
             }
 
-            .profile-meta {
-                text-align: left;
-                font-size: 12px;
-                font-weight: 700;
+            .doctor-profile-name small {
+                display: block;
+                color: #64748b;
+                font-size: 10px;
+                font-weight: 500;
             }
 
-                .profile-meta small {
-                    display: block;
-                    color: #64748b;
-                    font-weight: 500;
-                }
+            .doctor-main {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
 
             .doctor-content {
-                padding: 0;
+                padding: 24px;
+                min-width: 0;
+                flex: 1 0 auto;
+                width: 100%;
+            }
+
+            .doctor-footer {
+                margin-top: auto;
+                width: 100%;
+                flex: 0 0 auto;
+                padding: 18px 24px;
+                font-size: 11px;
+                color: #64748b;
+                border-top: 1px solid #e2e8f0;
+                background: #fff;
             }
 
             .report-dropdown {
@@ -208,7 +996,7 @@
                 padding: 0;
                 border: 1px solid #e2e8f0;
                 border-radius: 14px;
-                box-shadow: 0 15px 40px #0f172a24;
+                box-shadow: 0 15px 40px rgba(15,23,42,.14);
                 overflow: hidden;
             }
 
@@ -247,14 +1035,12 @@
                     display: block;
                 }
 
-                .report-item small {
+                .report-item small, .report-item a {
                     font-size: 11px;
-                    color: #64748b;
                 }
 
-                .report-item a {
-                    font-size: 11px;
-                    font-weight: 700;
+                .report-item small {
+                    color: #64748b;
                 }
 
             .report-prelim {
@@ -263,155 +1049,331 @@
                 font-weight: 800;
             }
 
-            .doctor-footer {
-                padding: 20px 24px;
-                font-size: 11px;
-                color: #64748b;
-            }
-
-            .mobile-menu {
+            .doctor-mobile-header {
                 display: none;
+                height: 64px;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 16px;
+                background: #073b5c;
+                color: #fff;
+                box-shadow: 0 2px 12px rgba(15,23,42,.15);
             }
 
-            @@media (max-width:850px) {
-                .doctor-sidebar {
-                    position: fixed;
-                    z-index: 1060;
-                    transform: translateX(-100%);
-                    transition: transform .2s;
+            .doctor-mobile-brand {
+                display: flex;
+                align-items: center;
+                color: #fff;
+                font-weight: 700;
+            }
+
+            .doctor-mobile-logo {
+                width: 39px;
+                height: 39px;
+                margin-right: 9px;
+                object-fit: contain;
+            }
+
+            .doctor-mobile-toggle {
+                width: 39px;
+                height: 39px;
+                border: 1px solid rgba(255,255,255,.2);
+                border-radius: 7px;
+                background: rgba(255,255,255,.08);
+                color: #fff;
+                cursor: pointer;
+            }
+
+            @@media(max-width:575.98px) {
+                .doctor-top-toolbar {
+                    padding: 8px 16px;
                 }
 
-                    .doctor-sidebar.show {
-                        transform: translateX(0);
-                    }
-
-                .mobile-menu {
-                    display: grid;
+                .doctor-profile-name {
+                    display: none;
                 }
 
-                .doctor-topbar {
-                    padding: 10px 13px;
+                .doctor-content {
+                    padding: 16px;
                 }
 
-                .profile-meta {
+                .doctor-page-subtitle {
                     display: none;
                 }
             }
+
     </style>
+    <link rel="stylesheet" href="~/css/doctor-views.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <div class="doctor-shell">
-        <aside class="doctor-sidebar" id="doctorSidebar">
-            <a class="doctor-brand" asp-area="Doctor" asp-controller="Home" asp-action="Index"><i class="fas fa-heart-pulse"></i><span>NMB-HLabSys<br /><small style="font-size:11px;font-weight:400">DOCTOR PORTAL</small></span></a>
-            <nav class="doctor-nav" aria-label="Doctor navigation">
-                <div class="nav-label">WORKSPACE</div>
-                <a asp-area="Doctor" asp-controller="Home" asp-action="Index"><i class="fas fa-gauge-high"></i> Dashboard</a>
-                <a asp-area="Doctor" asp-controller="Patients" asp-action="Index"><i class="fas fa-users"></i> My Patients</a>
-                <a asp-area="Doctor" asp-controller="TestRequests" asp-action="Index"><i class="fas fa-vials"></i> Test Requests</a>
-                <a asp-area="Doctor" asp-controller="TestRequests" asp-action="Create"><i class="fas fa-plus-circle"></i> New Request</a>
-                <div class="nav-label">RESULTS & REPORTS</div>
-                <a asp-area="Doctor" asp-controller="Results" asp-action="Index"><i class="fas fa-file-medical"></i> Laboratory Results</a>
-                <a asp-area="Doctor" asp-controller="Reports" asp-action="Index"><i class="fas fa-file-pdf"></i> Reports</a>
-                <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index"><i class="fas fa-bell"></i> Alerts</a>
-                <div class="nav-label">ACCOUNT</div>
-                <a asp-area="Doctor" asp-controller="Profile" asp-action="Index"><i class="fas fa-user-doctor"></i> My Profile</a>
-                <a asp-area="Doctor" asp-controller="Profile" asp-action="ChangePassword"><i class="fas fa-key"></i> Change Password</a>
-            </nav>
-        </aside>
-        <div class="doctor-main">
-            <header class="doctor-topbar">
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="top-icon mobile-menu" id="doctorMenuToggle" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
-                    <div><h1 class="top-title">@title</h1><div class="top-subtitle">Doctor / Healthcare Provider</div></div>
+    <div class="doctor-app">
+        <aside class="doctor-sidebar" id="doctorSidebar" aria-label="Doctor navigation">
+            <a asp-area="Doctor" asp-controller="Home" asp-action="Index" class="sidebar-brand" title="Doctor Dashboard">
+                <img src="~/assets/img/logo.png" class="sidebar-logo" alt="NMB-HLabSys Logo" />
+                <div class="sidebar-brand-text">
+                    <div class="sidebar-brand-name">NMB-HLabSys</div>
+                    <div class="sidebar-brand-subtitle">Doctor Portal</div>
                 </div>
-                <div class="top-actions">
+            </a>
+
+            <div class="sidebar-controls">
+                <button type="button" class="sidebar-control-btn" id="desktopSidebarToggle" title="Collapse sidebar" aria-label="Collapse sidebar">
+                    <i class="fa-solid fa-chevron-left" id="desktopSidebarToggleIcon"></i>
+                </button>
+                <button type="button" class="sidebar-control-btn" id="fullScreenToggle" title="Hide sidebar and use full width" aria-label="Hide sidebar">
+                    <i class="fa-solid fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" title="@doctorName">@doctorInitial</div>
+                <div class="sidebar-user-details">
+                    <div class="sidebar-user-name">@doctorName</div>
+                    <div class="sidebar-user-role">Doctor</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-navigation" aria-label="Main menu">
+                <div class="sidebar-section">Main</div>
+                <a asp-area="Doctor" asp-controller="Home" asp-action="Index" class="sidebar-link @(controller == "Home" ? "active" : "")" title="Dashboard">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-gauge-high"></i></span><span class="sidebar-link-text">Dashboard</span>
+                </a>
+
+                <div class="sidebar-section">Patients</div>
+                <a asp-area="Doctor" asp-controller="Patients" asp-action="Index" class="sidebar-link @(controller == "Patients" && action == "Index" ? "active" : "")" title="My Patients">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-hospital-user"></i></span><span class="sidebar-link-text">My Patients</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="Patients" asp-action="Search" class="sidebar-link @(controller == "Patients" && action == "Search" ? "active" : "")" title="Find Patient">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-user-magnifying-glass"></i></span><span class="sidebar-link-text">Find Patient</span>
+                </a>
+
+                <div class="sidebar-section">Test Requests</div>
+                <a asp-area="Doctor" asp-controller="TestRequests" asp-action="Create" class="sidebar-link @(controller == "TestRequests" && action == "Create" ? "active" : "")" title="Create Test Request">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-file-circle-plus"></i></span><span class="sidebar-link-text">Create Test Request</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="TestRequests" asp-action="Index" class="sidebar-link @(controller == "TestRequests" && action == "Index" ? "active" : "")" title="My Test Requests">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-clipboard-list"></i></span><span class="sidebar-link-text">My Test Requests</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="TestRequests" asp-action="Pending" class="sidebar-link @(controller == "TestRequests" && action == "Pending" ? "active" : "")" title="Pending Requests">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-clock"></i></span><span class="sidebar-link-text">Pending Requests</span>
+                </a>
+
+                <div class="sidebar-section">Laboratory Results</div>
+                <a asp-area="Doctor" asp-controller="Results" asp-action="Index" class="sidebar-link @(controller == "Results" && action == "Index" ? "active" : "")" title="Patient Results">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-file-medical"></i></span><span class="sidebar-link-text">Patient Results</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="Results" asp-action="New" class="sidebar-link @(controller == "Results" && action == "New" ? "active" : "")" title="New Results">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-bell"></i></span><span class="sidebar-link-text">New Results</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="Results" asp-action="Historical" class="sidebar-link @(controller == "Results" && action == "Historical" ? "active" : "")" title="Historical Results and Consent">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-shield-halved"></i></span><span class="sidebar-link-text">Historical Results / Consent</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index" class="sidebar-link @(controller == "Alerts" ? "active" : "")" title="Clinical Alerts">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-triangle-exclamation"></i></span><span class="sidebar-link-text">Clinical Alerts</span>
+                </a>
+
+                <div class="sidebar-section">Reports</div>
+                <a asp-area="Doctor" asp-controller="Reports" asp-action="Index" class="sidebar-link @(controller == "Reports" ? "active" : "")" title="Reports">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-chart-column"></i></span><span class="sidebar-link-text">Reports</span>
+                </a>
+
+                <div class="sidebar-section">Account</div>
+                <a asp-area="Doctor" asp-controller="Profile" asp-action="Index" class="sidebar-link @(controller == "Profile" && action == "Index" ? "active" : "")" title="My Profile">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-user-doctor"></i></span><span class="sidebar-link-text">My Profile</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="Profile" asp-action="ChangePhoneNumber" class="sidebar-link @(controller == "Profile" && action == "ChangePhoneNumber" ? "active" : "")" title="Change Phone Number">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-phone"></i></span><span class="sidebar-link-text">Change Phone Number</span>
+                </a>
+                <a asp-area="Doctor" asp-controller="Profile" asp-action="ChangePassword" class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")" title="Change Password">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-key"></i></span><span class="sidebar-link-text">Change Password</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <form asp-area="Doctor" asp-controller="Profile" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="sidebar-logout" title="Secure Logout">
+                        <span class="sidebar-link-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
+                        <span class="sidebar-link-text">Secure Logout</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <button type="button" class="sidebar-restore-btn" id="sidebarRestoreButton" title="Show sidebar" aria-label="Show sidebar">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <main class="doctor-main">
+            <div class="doctor-mobile-header">
+                <div class="doctor-mobile-brand">
+                    <img src="~/assets/img/logo.png" class="doctor-mobile-logo" alt="NMB-HLabSys" />
+                    <span>NMB-HLabSys Doctor</span>
+                </div>
+                <button type="button" class="doctor-mobile-toggle" id="sidebarToggle" aria-label="Open navigation">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+            <header class="doctor-top-toolbar">
+                <div>
+                    <h1 class="doctor-page-title">@title</h1>
+                    <div class="doctor-page-subtitle">Doctor / Healthcare Provider</div>
+                </div>
+                <div class="doctor-toolbar-actions">
                     <div class="dropdown">
-                        <button class="top-icon" type="button" id="reportNotificationButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Received laboratory PDF reports">
-                            <i class="fas fa-file-pdf"></i><span class="notice-count" id="reportCount"></span>
+                        <button class="doctor-notification-link" type="button" id="reportNotificationButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Received laboratory PDF reports" title="Received PDF reports">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span class="doctor-notification-badge" id="reportCount" style="display:none;" aria-live="polite">0</span>
                         </button>
                         <div class="dropdown-menu dropdown-menu-end report-dropdown" aria-labelledby="reportNotificationButton">
-                            <div class="report-head"><strong style="font-size:13px">Received PDF Reports</strong><button type="button" class="btn btn-sm btn-link" id="refreshReports">Refresh</button></div>
+                            <div class="report-head">
+                                <strong style="font-size:13px">Received PDF Reports</strong>
+                                <button type="button" class="btn btn-sm btn-link" id="refreshReports">Refresh</button>
+                            </div>
                             <div class="report-list" id="reportList"><div class="p-4 text-center text-muted small">Loading reports...</div></div>
-                            <div class="p-2 text-center border-top"><a asp-area="Doctor" asp-controller="Results" asp-action="Index" class="small text-decoration-none">View laboratory results</a></div>
+                            <div class="p-2 text-center border-top">
+                                <a asp-area="Doctor" asp-controller="Results" asp-action="Index" class="small text-decoration-none">View laboratory results</a>
+                            </div>
                         </div>
                     </div>
-                    <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index" class="top-icon" title="Doctor alerts"><i class="fas fa-bell"></i></a>
-                    <a asp-area="Doctor" asp-controller="Profile" asp-action="Index" class="doctor-profile" title="My profile"><span class="doctor-avatar">@initial</span><span class="profile-meta">Dr @name<small>My profile</small></span><i class="fas fa-chevron-down small text-muted"></i></a>
+                    <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index" class="doctor-notification-link" title="Doctor alerts" aria-label="Doctor alerts">
+                        <i class="fa-solid fa-bell"></i>
+                    </a>
+                    <a asp-area="Doctor" asp-controller="Profile" asp-action="Index" class="doctor-profile" title="My profile">
+                        <span class="doctor-avatar">@doctorInitial</span>
+                        <span class="doctor-profile-name">@doctorName<small>My profile</small></span>
+                        <i class="fa-solid fa-chevron-down small text-muted"></i>
+                    </a>
                 </div>
             </header>
-            <main class="doctor-content">@RenderBody()</main>
+
+            <section class="doctor-content">
+                @RenderBody()
+            </section>
             <footer class="doctor-footer">&copy; @DateTime.Now.Year NMB Health Laboratory System &middot; Confidential clinical information</footer>
-        </div>
+        </main>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-            (() => {
-                const menu = document.getElementById('doctorMenuToggle');
-                menu?.addEventListener('click', () => document.getElementById('doctorSidebar')?.classList.toggle('show'));
-                const list = document.getElementById('reportList');
-                const badge = document.getElementById('reportCount');
+            document.addEventListener("DOMContentLoaded", function () {
+                const body = document.body;
+                const sidebar = document.getElementById("doctorSidebar");
+                const mobileToggle = document.getElementById("sidebarToggle");
+                const backdrop = document.getElementById("sidebarBackdrop");
+                const desktopToggle = document.getElementById("desktopSidebarToggle");
+                const desktopToggleIcon = document.getElementById("desktopSidebarToggleIcon");
+                const fullScreenToggle = document.getElementById("fullScreenToggle");
+                const restoreButton = document.getElementById("sidebarRestoreButton");
+
+                function openMobileSidebar() {
+                    sidebar?.classList.add("show");
+                    backdrop?.classList.add("show");
+                    body.style.overflow = "hidden";
+                }
+                function closeMobileSidebar() {
+                    sidebar?.classList.remove("show");
+                    backdrop?.classList.remove("show");
+                    body.style.overflow = "";
+                }
+                mobileToggle?.addEventListener("click", () => {
+                    if (sidebar?.classList.contains("show")) closeMobileSidebar();
+                    else openMobileSidebar();
+                });
+                backdrop?.addEventListener("click", closeMobileSidebar);
+                sidebar?.querySelectorAll("a").forEach(link => {
+                    link.addEventListener("click", () => {
+                        if (window.innerWidth <= 991) closeMobileSidebar();
+                    });
+                });
+
+                function updateCollapseIcon() {
+                    if (!desktopToggleIcon) return;
+                    const collapsed = body.classList.contains("sidebar-collapsed");
+                    desktopToggleIcon.className = collapsed ? "fa-solid fa-chevron-right" : "fa-solid fa-chevron-left";
+                    if (desktopToggle) desktopToggle.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+                }
+                try {
+                    if (localStorage.getItem("doctorSidebarCollapsed") === "true" && window.innerWidth > 991) {
+                        body.classList.add("sidebar-collapsed");
+                    }
+                } catch (_) { }
+                updateCollapseIcon();
+
+                desktopToggle?.addEventListener("click", function () {
+                    if (window.innerWidth <= 991) return;
+                    body.classList.remove("sidebar-hidden");
+                    body.classList.toggle("sidebar-collapsed");
+                    try {
+                        localStorage.setItem("doctorSidebarCollapsed", body.classList.contains("sidebar-collapsed") ? "true" : "false");
+                    } catch (_) { }
+                    updateCollapseIcon();
+                });
+                fullScreenToggle?.addEventListener("click", function () {
+                    if (window.innerWidth <= 991) return;
+                    body.classList.add("sidebar-hidden");
+                    body.classList.remove("sidebar-collapsed");
+                    updateCollapseIcon();
+                });
+                restoreButton?.addEventListener("click", function () {
+                    body.classList.remove("sidebar-hidden");
+                    updateCollapseIcon();
+                });
+
+                const reportList = document.getElementById("reportList");
+                const reportCount = document.getElementById("reportCount");
                 const emailedEndpoint = '@Url.Action("Recent", "ReceivedReports", new { area = "Doctor" })';
                 const portalEndpoint = '@Url.Action("PortalRecent", "ReceivedReports", new { area = "Doctor" })';
                 const emailedDownload = '@Url.Action("Download", "ReceivedReports", new { area = "Doctor" })';
                 const portalDownload = '@Url.Action("PortalDownload", "ReceivedReports", new { area = "Doctor" })';
-                const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 
                 async function fetchReports(url) {
-                    const response = await fetch(url, { credentials: 'same-origin', cache: 'no-store' });
+                    const response = await fetch(url, { credentials: "same-origin", cache: "no-store" });
                     if (!response.ok) throw new Error(`Report endpoint returned ${response.status}`);
                     const data = await response.json();
                     return Array.isArray(data) ? data : [];
                 }
-
-                async function refresh() {
+                async function refreshReports() {
+                    if (!reportList || !reportCount) return;
                     try {
-                        // Portal PDFs are available independently of SMTP delivery.
-                        const [emailed, portal] = await Promise.all([
-                            fetchReports(emailedEndpoint),
-                            fetchReports(portalEndpoint)
-                        ]);
+                        const [emailed, portal] = await Promise.all([fetchReports(emailedEndpoint), fetchReports(portalEndpoint)]);
                         const items = [
-                            ...portal.map(r => ({ ...r, source: 'Portal' })),
-                            ...emailed.map(r => ({ ...r, source: 'Email' }))
+                            ...portal.map(r => ({ ...r, source: "Portal" })),
+                            ...emailed.map(r => ({ ...r, source: "Email" }))
                         ];
-                        // Badge counts available reports, not unread notifications.
-                        badge.style.display = items.length ? 'flex' : 'none';
-                        badge.textContent = items.length > 9 ? '9+' : String(items.length);
+                        reportCount.style.display = items.length ? "inline-block" : "none";
+                        reportCount.textContent = items.length > 9 ? "9+" : String(items.length);
                         if (!items.length) {
-                            list.innerHTML = '<div class="p-4 text-center text-muted small">No received PDF reports yet.</div>';
+                            reportList.innerHTML = '<div class="p-4 text-center text-muted small">No received PDF reports yet.</div>';
                             return;
                         }
-                        list.innerHTML = items.map(r => {
-                            const portalOnly = r.source === 'Portal';
-                            const preliminary = r.reportType === 'Preliminary';
-                            const partial = r.reportType === 'PartialVerified';
-                            const label = partial ? 'Partial verified-results report'
-                                : preliminary ? 'Preliminary laboratory report'
-                                    : 'Final laboratory report';
-                            const note = partial
-                                ? '<span class="report-prelim">INCOMPLETE REQUEST RECORD — NOT A FINAL REPORT</span><br/>'
-                                : preliminary
-                                    ? '<span class="report-prelim">NOT INDEPENDENTLY VERIFIED</span><br/>'
-                                    : '';
-                            const timestamp = r.sentAt ? `<small>${escapeHtml(new Date(r.sentAt).toLocaleString())}</small><br/>` : '';
-                            const link = portalOnly
-                                ? `${portalDownload}?id=${encodeURIComponent(r.testRequestId)}`
-                                : `${emailedDownload}?id=${encodeURIComponent(r.id)}`;
-                            return `<div class="report-item"><i class="fas fa-file-pdf pdf-symbol"></i><div class="flex-grow-1"><strong>${escapeHtml(label)}</strong><small>Request #${escapeHtml(r.testRequestId)}${r.testRequestTestTypeId ? ' · Test #' + escapeHtml(r.testRequestTestTypeId) : ''}</small><br/>${note}${timestamp}<a href="${link}" target="_blank" rel="noopener noreferrer"><i class="fas fa-file-pdf"></i> View PDF</a></div></div>`;
-                        }).join('');
+                        reportList.innerHTML = items.map(r => {
+                            const portalOnly = r.source === "Portal";
+                            const preliminary = r.reportType === "Preliminary";
+                            const partial = r.reportType === "PartialVerified";
+                            const label = partial ? "Partial verified-results report" : preliminary ? "Preliminary laboratory report" : "Final laboratory report";
+                            const note = partial ? '<span class="report-prelim">INCOMPLETE REQUEST RECORD — NOT A FINAL REPORT</span><br/>' : preliminary ? '<span class="report-prelim">NOT INDEPENDENTLY VERIFIED</span><br/>' : "";
+                            const timestamp = r.sentAt ? `<small>${escapeHtml(new Date(r.sentAt).toLocaleString())}</small><br/>` : "";
+                            const link = portalOnly ? `${portalDownload}?id=${encodeURIComponent(r.testRequestId)}` : `${emailedDownload}?id=${encodeURIComponent(r.id)}`;
+                            return `<div class="report-item"><i class="fa-solid fa-file-pdf pdf-symbol"></i><div class="flex-grow-1"><strong>${escapeHtml(label)}</strong><small>Request #${escapeHtml(r.testRequestId)}${r.testRequestTestTypeId ? " · Test #" + escapeHtml(r.testRequestTestTypeId) : ""}</small><br/>${note}${timestamp}<a href="${link}" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-file-pdf"></i> View PDF</a></div></div>`;
+                        }).join("");
                     } catch (error) {
-                        console.error('Unable to load doctor reports:', error);
-                        list.innerHTML = '<div class="p-4 text-center text-danger small">Could not load reports. Please retry.</div>';
-                        badge.style.display = 'none';
+                        console.error("Unable to load doctor reports:", error);
+                        reportList.innerHTML = '<div class="p-4 text-center text-danger small">Could not load reports. Please retry.</div>';
+                        reportCount.style.display = "none";
                     }
                 }
-                document.getElementById('refreshReports')?.addEventListener('click', refresh);
-                document.getElementById('reportNotificationButton')?.addEventListener('click', refresh);
-                refresh();
-                window.setInterval(() => { if (!document.hidden) refresh(); }, 30000);
-            })();
+                document.getElementById("refreshReports")?.addEventListener("click", refreshReports);
+                document.getElementById("reportNotificationButton")?.addEventListener("click", refreshReports);
+                refreshReports();
+                window.setInterval(() => { if (!document.hidden) refreshReports(); }, 30000);
+            });
     </script>
+    <script src="~/js/doctor-views.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
