@@ -10,9 +10,6 @@
 
 <div class="container-fluid py-4">
 
-    <!-- ============================================================
-         PAGE HEADER
-         ============================================================ -->
 
     <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -30,9 +27,6 @@
     </div>
 
 
-    <!-- ============================================================
-         ALERTS
-         ============================================================ -->
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show"
@@ -67,10 +61,6 @@
         </div>
     }
 
-
-    <!-- ============================================================
-         ORDERS CARD
-         ============================================================ -->
 
     <div class="card border-0 shadow-sm">
 
@@ -145,9 +135,6 @@
                                     Status
                                 </th>
 
-                                <th>
-                                    Date
-                                </th>
 
                                 <th class="text-end pe-4">
                                     Action
@@ -301,13 +288,6 @@
                                     </td>
 
 
-                                    <td>
-
-                                        <span>
-                                            —
-                                        </span>
-
-                                    </td>
 
 
                                     <td class="text-end pe-4">
@@ -359,10 +339,6 @@
 
 </div>
 
-
-<!-- ================================================================
-     ORDER DETAILS MODAL
-     ================================================================ -->
 
 <div class="modal fade"
      id="orderDetailsModal"
@@ -598,9 +574,6 @@
 </div>
 
 
-<!-- ================================================================
-     CONFIRM DELIVERY MODAL
-     ================================================================ -->
 
 <div class="modal fade"
      id="deliveryConfirmModal"
@@ -687,10 +660,6 @@
 </div>
 
 
-<!-- ================================================================
-     CONFIRM COMPLETE ORDER MODAL
-     ================================================================ -->
-
 <div class="modal fade"
      id="completeOrderConfirmModal"
      tabindex="-1"
@@ -772,9 +741,6 @@
 </div>
 
 
-<!-- ================================================================
-     HIDDEN ANTI-FORGERY TOKEN
-     ================================================================ -->
 
 <form id="stockReceivingTokenForm"
       class="d-none">
@@ -807,10 +773,7 @@
             );
 
 
-        // ============================================================
-        // OPEN ORDER
-        // ============================================================
-
+ 
         async function openOrderModal(orderId) {
 
             currentOrderId = orderId;
@@ -893,11 +856,7 @@
             }
         }
 
-
-        // ============================================================
-        // RENDER ORDER
-        // ============================================================
-
+        /*Redering order*/
         function renderOrder(data) {
 
             const order =
@@ -1098,10 +1057,7 @@
         }
 
 
-        // ============================================================
-        // DELIVER INDIVIDUAL ITEM
-        // ============================================================
-
+        /*Confirm delivery for individula items */
         function confirmDeliverItem(
             orderItemId,
             itemName) {
@@ -1161,9 +1117,7 @@
             );
 
 
-        // ============================================================
-        // COMPLETE ENTIRE ORDER
-        // ============================================================
+        /* Complete the whole order */
 
         function completeEntireOrder() {
 
@@ -1219,30 +1173,18 @@
             );
 
 
-        // ============================================================
-        // RELOAD CURRENT ORDER
-        // ============================================================
-
         async function reloadOrder() {
 
             await openOrderModal(
                 currentOrderId
             );
 
-            /*
-             * Refresh the underlying order list as well so
-             * status/counts reflect the newly delivered items.
-             */
             setTimeout(function () {
                 window.location.reload();
             }, 700);
 
         }
 
-
-        // ============================================================
-        // POST ACTION
-        // ============================================================
 
         async function postAction(
             url,
@@ -1322,10 +1264,6 @@
         }
 
 
-        // ============================================================
-        // STATUS CLASS
-        // ============================================================
-
         function getStatusClass(status) {
 
             switch (status) {
@@ -1349,10 +1287,6 @@
 
         }
 
-
-        // ============================================================
-        // HTML ESCAPE
-        // ============================================================
 
         function escapeHtml(value) {
 
