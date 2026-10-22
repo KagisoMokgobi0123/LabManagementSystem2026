@@ -1,9 +1,26 @@
-﻿@{
+﻿@model IEnumerable<NMB_HLabSys.Areas.Administrator.Models.MedicalConditionCategory>
+
+@{
     ViewData["Title"] = "Condition Categories";
     Layout = "~/Views/Shared/_AdministratorLayout.cshtml";
 }
 
 <div class="container-fluid py-4">
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>@errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
 
     <!-- =====================================================
          PAGE HEADER
@@ -140,12 +157,12 @@
                             foreach (var category in Model)
                             {
                                 <tr class="category-row"
-                                    data-id="@category.ConditionCategoryId"
+                                    data-id="@category.MedicalConditionCategoryId"
                                     data-name="@category.Name"
                                     style="cursor:pointer;">
 
                                     <td class="px-4 fw-semibold text-muted">
-                                        @category.ConditionCategoryId
+                                        @category.MedicalConditionCategoryId
                                     </td>
 
                                     <td>
@@ -162,7 +179,7 @@
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-primary me-1"
                                                 title="Edit"
-                                                onclick="event.stopPropagation(); openEditModal('@category.ConditionCategoryId', '@category.Name')">
+                                                onclick="event.stopPropagation(); openEditModal('@category.MedicalConditionCategoryId', '@category.Name')">
 
                                             <i class="fa-solid fa-pen"></i>
 
@@ -172,7 +189,7 @@
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-danger"
                                                 title="Delete"
-                                                onclick="event.stopPropagation(); confirmDelete('@category.ConditionCategoryId', '@category.Name')">
+                                                onclick="event.stopPropagation(); confirmDelete('@category.MedicalConditionCategoryId', '@category.Name')">
 
                                             <i class="fa-solid fa-trash"></i>
 
@@ -259,8 +276,8 @@
                 <div class="modal-body p-4">
 
                     <input type="hidden"
-                           id="ConditionCategoryId"
-                           name="ConditionCategoryId" />
+                           id="MedicalConditionCategoryId"
+                           name="MedicalConditionCategoryId" />
 
 
                     <div class="mb-3">
@@ -719,7 +736,7 @@
                 "Add Condition Category";
 
             document.getElementById(
-                "ConditionCategoryId"
+                "MedicalConditionCategoryId"
             ).value = "";
 
             document.getElementById(
@@ -729,7 +746,7 @@
             document.getElementById(
                 "conditionCategoryForm"
             ).action =
-                "@Url.Action("Create", "ConditionCategories", new { area = "Administrator" })";
+                "@Url.Action("Create", "MedicalConditionCategories", new { area = "Administrator" })";
 
         }
 
@@ -746,7 +763,7 @@
                 "Edit Condition Category";
 
             document.getElementById(
-                "ConditionCategoryId"
+                "MedicalConditionCategoryId"
             ).value =
                 id;
 
@@ -758,7 +775,7 @@
             document.getElementById(
                 "conditionCategoryForm"
             ).action =
-                "@Url.Action("Edit", "ConditionCategories", new { area = "Administrator" })";
+                "@Url.Action("Edit", "MedicalConditionCategories", new { area = "Administrator" })";
 
             const modal =
                 new bootstrap.Modal(
@@ -791,7 +808,7 @@
             document.getElementById(
                 "deleteCategoryForm"
             ).action =
-                "@Url.Action("Delete", "ConditionCategories", new { area = "Administrator" })";
+                "@Url.Action("Delete", "MedicalConditionCategories", new { area = "Administrator" })";
 
 
             const modal =

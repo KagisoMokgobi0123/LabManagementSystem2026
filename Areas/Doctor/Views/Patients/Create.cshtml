@@ -217,7 +217,7 @@
                 Medical conditions
             </label>
 
-            <div class="doctor-choice-grid" role="group" aria-label="Medical conditions">
+            <div class="doctor-choice-grid doctor-choice-scroll-list" role="group" aria-label="Medical conditions">
                 @foreach (var item in conditions)
                 {
                     <label class="doctor-choice-card">
@@ -264,7 +264,7 @@
         <div class="form-group">
             <label asp-for="AllergyIds">Allergies</label>
 
-            <div class="doctor-choice-grid" role="group" aria-label="Allergies">
+            <div class="doctor-choice-grid doctor-choice-scroll-list" role="group" aria-label="Allergies">
                 @foreach (var item in allergies)
                 {
                     <label class="doctor-choice-card">
@@ -312,7 +312,7 @@
                 Current medications
             </label>
 
-            <div class="doctor-choice-grid" role="group" aria-label="Current medications">
+            <div class="doctor-choice-grid doctor-choice-scroll-list" role="group" aria-label="Current medications">
                 @foreach (var item in medications)
                 {
                     <label class="doctor-choice-card">

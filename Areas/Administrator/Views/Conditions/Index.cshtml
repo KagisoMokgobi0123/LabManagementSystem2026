@@ -10,6 +10,22 @@
 
 <div class="container-fluid py-4">
 
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>@errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
     <!-- =====================================================
          PAGE HEADER
          ===================================================== -->
@@ -153,20 +169,20 @@
                             {
                                 var category =
                                     categories.FirstOrDefault(
-                                        x => x.MedicalConditionCategoryId == condition.ConditionCategoryId);
+                                        x => x.MedicalConditionCategoryId == condition.MedicalConditionCategoryId);
 
                                 var categoryName =
                                     category?.Name ?? "Uncategorized";
 
                                 <tr class="condition-row"
-                                    data-id="@condition.ConditionId"
+                                    data-id="@condition.MedicalConditionId"
                                     data-name="@condition.Name"
-                                    data-category-id="@condition.ConditionCategoryId"
+                                    data-category-id="@condition.MedicalConditionCategoryId"
                                     data-category="@categoryName"
                                     style="cursor:pointer;">
 
                                     <td class="px-4 fw-semibold text-muted">
-                                        @condition.ConditionId
+                                        @condition.MedicalConditionId
                                     </td>
 
                                     <td>
@@ -196,7 +212,7 @@
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-primary me-1"
                                                 title="Edit"
-                                                onclick="event.stopPropagation(); openEditModal('@condition.ConditionId', '@Html.Raw(condition.Name.Replace("'", "\\'"))', '@condition.ConditionCategoryId')">
+                                                onclick="event.stopPropagation(); openEditModal('@condition.MedicalConditionId', '@Html.Raw(condition.Name.Replace("'", "\\'"))', '@condition.MedicalConditionCategoryId')">
 
                                             <i class="fa-solid fa-pen"></i>
 
@@ -206,7 +222,7 @@
                                         <button type="button"
                                                 class="btn btn-sm btn-outline-danger"
                                                 title="Delete"
-                                                onclick="event.stopPropagation(); confirmDelete('@condition.ConditionId', '@Html.Raw(condition.Name.Replace("'", "\\'"))')">
+                                                onclick="event.stopPropagation(); confirmDelete('@condition.MedicalConditionId', '@Html.Raw(condition.Name.Replace("'", "\\'"))')">
 
                                             <i class="fa-solid fa-trash"></i>
 
@@ -293,8 +309,8 @@
                 <div class="modal-body p-4">
 
                     <input type="hidden"
-                           id="ConditionId"
-                           name="ConditionId" />
+                           id="MedicalConditionId"
+                           name="MedicalConditionId" />
 
 
                     <!-- CONDITION NAME -->
@@ -324,7 +340,7 @@
 
                     <div class="mb-3">
 
-                        <label for="ConditionCategoryId"
+                        <label for="MedicalConditionCategoryId"
                                class="form-label fw-semibold"
                                style="font-size:13px;">
 
@@ -332,8 +348,8 @@
 
                         </label>
 
-                        <select id="ConditionCategoryId"
-                                name="ConditionCategoryId"
+                        <select id="MedicalConditionCategoryId"
+                                name="MedicalConditionCategoryId"
                                 class="form-select"
                                 required>
 
@@ -426,7 +442,7 @@
                     </small>
 
                     <div class="fw-semibold"
-                         id="detailsConditionId">
+                         id="detailsMedicalConditionId">
                     </div>
 
                 </div>
@@ -520,7 +536,7 @@
                 <div class="modal-body p-4">
 
                     <input type="hidden"
-                           id="deleteConditionId"
+                           id="deleteMedicalConditionId"
                            name="id" />
 
                     <p class="mb-2">
@@ -764,7 +780,7 @@
                     return;
 
                 document.getElementById(
-                    "detailsConditionId"
+                    "detailsMedicalConditionId"
                 ).innerText =
                     row.dataset.id;
 
@@ -804,7 +820,7 @@
                 "Add Medical Condition";
 
             document.getElementById(
-                "ConditionId"
+                "MedicalConditionId"
             ).value = "";
 
             document.getElementById(
@@ -812,14 +828,14 @@
             ).value = "";
 
             document.getElementById(
-                "ConditionCategoryId"
+                "MedicalConditionCategoryId"
             ).value = "";
 
 
             document.getElementById(
                 "conditionForm"
             ).action =
-                "@Url.Action("Create", "Conditions", new { area = "Administrator" })";
+                "@Url.Action("Create", "MedicalConditions", new { area = "Administrator" })";
 
         }
 
@@ -836,7 +852,7 @@
                 "Edit Medical Condition";
 
             document.getElementById(
-                "ConditionId"
+                "MedicalConditionId"
             ).value =
                 id;
 
@@ -846,7 +862,7 @@
                 name;
 
             document.getElementById(
-                "ConditionCategoryId"
+                "MedicalConditionCategoryId"
             ).value =
                 categoryId;
 
@@ -854,7 +870,7 @@
             document.getElementById(
                 "conditionForm"
             ).action =
-                "@Url.Action("Edit", "Conditions", new { area = "Administrator" })";
+                "@Url.Action("Edit", "MedicalConditions", new { area = "Administrator" })";
 
 
             const modal =
@@ -876,7 +892,7 @@
         function confirmDelete(id, name) {
 
             document.getElementById(
-                "deleteConditionId"
+                "deleteMedicalConditionId"
             ).value =
                 id;
 
@@ -889,7 +905,7 @@
             document.getElementById(
                 "deleteConditionForm"
             ).action =
-                "@Url.Action("Delete", "Conditions", new { area = "Administrator" })";
+                "@Url.Action("Delete", "MedicalConditions", new { area = "Administrator" })";
 
 
             const modal =

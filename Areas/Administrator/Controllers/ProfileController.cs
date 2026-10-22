@@ -6,7 +6,7 @@ using NMB_HLabSys.Models.Identity;
 
 namespace NMB_HLabSys.Areas.Administrator.Controllers
 {
-    [Area("Administrtor")]
+    [Area("Administrator")]
     [Authorize(Roles = "Administrator")]
     public class ProfileController : Controller
     {

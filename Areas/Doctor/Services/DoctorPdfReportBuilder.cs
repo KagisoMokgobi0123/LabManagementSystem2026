@@ -1,4 +1,5 @@
-﻿
+﻿using System.IO;
+
 using System.Globalization;
 using System.Text;
 
@@ -59,6 +60,7 @@ public static class DoctorPdfReportBuilder
             (int)Math.Ceiling(
                 Math.Max(safeRows.Count, 1) / (double)RowsPerPage));
 
+        var logoBytes = LoadLogoBytes();
         var objects = new List<byte[]>
         {
             Ascii("<< /Type /Catalog /Pages 2 0 R >>"),
@@ -66,6 +68,14 @@ public static class DoctorPdfReportBuilder
             Ascii("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"),
             Ascii("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>")
         };
+
+        // PDF image XObject uses a JPEG stream so the logo is embedded in
+        // the report and does not depend on the recipient having the asset.
+        if (logoBytes != null)
+        {
+            var imageHeader = Ascii($"<< /Type /XObject /Subtype /Image /Width 360 /Height 240 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length {logoBytes.Length} >>\nstream\n");
+            objects.Add(JoinBytes(imageHeader, logoBytes, Ascii("\nendstream")));
+        }
 
         var pageObjectNumbers = new List<int>();
 
@@ -89,7 +99,8 @@ public static class DoctorPdfReportBuilder
                 safeRows.Count,
                 emptyMessage,
                 pageNumber,
-                pageCount);
+                pageCount,
+                logoBytes != null);
 
             var contentBytes = Ascii(content);
 
@@ -101,7 +112,8 @@ public static class DoctorPdfReportBuilder
             objects.Add(Ascii(
                 $"<< /Type /Page /Parent 2 0 R " +
                 $"/MediaBox [0 0 {PageWidth} {PageHeight}] " +
-                $"/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> " +
+                $"/Resources << /Font << /F1 3 0 R /F2 4 0 R >> " +
+                (logoBytes != null ? "/XObject << /Logo 5 0 R >> " : "") + ">> " +
                 $"/Contents {contentObjectNumber} 0 R >>"));
 
             objects.Add(JoinBytes(
@@ -130,15 +142,18 @@ public static class DoctorPdfReportBuilder
         int totalRecords,
         string emptyMessage,
         int pageNumber,
-        int pageCount)
+        int pageCount,
+        bool hasLogo)
     {
         var sb = new StringBuilder();
 
         // Page background and report header.
         Rect(sb, 0, 0, PageWidth, PageHeight, 1, 1, 1);
         Rect(sb, 0, 515, PageWidth, 80, 0.04, 0.25, 0.40);
-        Text(sb, 38, 563, "NMB-HLabSys", 19, true, 1, 1, 1);
-        Text(sb, 38, 540, "NELSON MANDELA BAY HAEMATOLOGY LABORATORY SYSTEM",
+        if (hasLogo)
+            sb.AppendLine("q 48 0 0 32 38 531 cm /Logo Do Q");
+        Text(sb, hasLogo ? 92 : 38, 563, "NMB-HLabSys", 19, true, 1, 1, 1);
+        Text(sb, hasLogo ? 92 : 38, 540, "NELSON MANDELA BAY HAEMATOLOGY LABORATORY SYSTEM",
             8, false, 0.88, 0.94, 0.97);
 
         Text(sb, 804, 562, Clean(title), 15, true,
@@ -480,6 +495,24 @@ public static class DoctorPdfReportBuilder
             stream.Write(part, 0, part.Length);
 
         return stream.ToArray();
+    }
+
+    private static byte[]? LoadLogoBytes()
+    {
+        var candidates = new[]
+        {
+            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "assets", "img", "nmb-report-logo.jpg"),
+            Path.Combine(AppContext.BaseDirectory, "wwwroot", "assets", "img", "nmb-report-logo.jpg"),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "wwwroot", "assets", "img", "nmb-report-logo.jpg"))
+        };
+
+        foreach (var path in candidates)
+        {
+            if (File.Exists(path))
+                return File.ReadAllBytes(path);
+        }
+
+        return null;
     }
 
     private static byte[] BuildPdf(IReadOnlyList<byte[]> objects)

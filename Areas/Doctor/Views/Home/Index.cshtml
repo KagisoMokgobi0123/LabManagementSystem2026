@@ -22,8 +22,8 @@
 <style>
 
     /* =========================================================
-       PAGE
-       ========================================================= */
+           PAGE
+           ========================================================= */
 
     .doctor-dashboard {
         min-height: 100vh;
@@ -32,54 +32,37 @@
 
 
     /* =========================================================
-       HERO
-       ========================================================= */
+           HERO
+           ========================================================= */
 
     .doctor-hero {
         position: relative;
         overflow: hidden;
-
         padding: 38px 0 82px;
-
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 45%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
     }
 
-    .doctor-hero::before {
-        content: "";
+        .doctor-hero::before {
+            content: "";
+            position: absolute;
+            width: 260px;
+            height: 260px;
+            right: 220px;
+            bottom: -190px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
 
-        position: absolute;
-
-        width: 260px;
-        height: 260px;
-
-        right: 220px;
-        bottom: -190px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.05);
-    }
-
-    .doctor-hero::after {
-        content: "";
-
-        position: absolute;
-
-        width: 380px;
-        height: 380px;
-
-        right: -100px;
-        top: -210px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.06);
-    }
+        .doctor-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
 
     .doctor-hero-content {
         position: relative;
@@ -89,70 +72,52 @@
     .doctor-badge {
         display: inline-flex;
         align-items: center;
-
         gap: 7px;
-
         padding: 7px 13px;
         margin-bottom: 14px;
-
         border: 1px solid rgba(255,255,255,.20);
         border-radius: 50px;
-
         background: rgba(255,255,255,.13);
-
         color: #fff;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .doctor-hero h1 {
         margin-bottom: 7px;
-
         color: #fff;
-
         font-size: 30px;
         font-weight: 700;
     }
 
     .doctor-hero p {
         max-width: 720px;
-
         margin: 0;
-
         color: rgba(255,255,255,.82);
-
         font-size: 14px;
     }
 
     .hero-actions {
         display: flex;
         flex-wrap: wrap;
-
         gap: 10px;
     }
 
     .hero-btn {
         display: inline-flex;
         align-items: center;
-
         gap: 7px;
-
         padding: 10px 17px;
-
         border-radius: 8px;
-
         font-size: 13px;
         font-weight: 600;
-
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .hero-btn:hover {
-        transform: translateY(-2px);
-    }
+        .hero-btn:hover {
+            transform: translateY(-2px);
+        }
 
     .hero-btn-primary {
         background: #fff;
@@ -161,91 +126,64 @@
 
     .hero-btn-outline {
         border: 1px solid rgba(255,255,255,.50);
-
         background: rgba(255,255,255,.08);
-
         color: #fff !important;
     }
 
 
     /* =========================================================
-       PAGE INNER
-       ========================================================= */
+           PAGE INNER
+           ========================================================= */
 
     .doctor-page-inner {
         position: relative;
         z-index: 5;
-
         margin-top: -48px;
-
         padding-bottom: 50px;
     }
 
 
     /* =========================================================
-       STAT CARDS
-       ========================================================= */
+           STAT CARDS
+           ========================================================= */
 
     .stat-card-link {
         display: block;
-
         height: 100%;
-
         color: inherit !important;
         text-decoration: none !important;
     }
 
     .stat-card {
         position: relative;
-
         height: 100%;
-
         padding: 20px;
-
         overflow: hidden;
-
         border: 1px solid transparent;
         border-radius: 13px;
-
         background: #fff;
-
         box-shadow: 0 4px 18px rgba(15,23,42,.07);
-
         cursor: pointer;
-
-        transition:
-            transform .2s ease,
-            box-shadow .2s ease,
-            border-color .2s ease;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
     }
 
     .stat-card-link:hover .stat-card {
         transform: translateY(-4px);
-
         border-color: #bae6fd;
-
         box-shadow: 0 12px 30px rgba(15,23,42,.13);
     }
 
     .stat-card::after {
         content: "\f054";
-
         position: absolute;
-
         right: 20px;
         bottom: 17px;
-
         font-family: "Font Awesome 5 Free";
-
         font-size: 10px;
         font-weight: 900;
-
         color: #cbd5e1;
-
         opacity: 0;
-
         transform: translateX(-5px);
-
         transition: .2s ease;
     }
 
@@ -256,27 +194,21 @@
 
     .stat-top {
         display: flex;
-
         justify-content: space-between;
         align-items: flex-start;
-
         gap: 15px;
     }
 
     .stat-title {
         margin-bottom: 7px;
-
         color: #64748b;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .stat-number {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 28px;
         font-weight: 700;
     }
@@ -284,24 +216,18 @@
     .stat-note {
         margin-top: 7px;
         padding-right: 10px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
     .stat-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 44px;
         height: 44px;
         min-width: 44px;
-
         border-radius: 11px;
-
         font-size: 17px;
     }
 
@@ -342,37 +268,30 @@
 
 
     /* =========================================================
-       DASHBOARD CARDS
-       ========================================================= */
+           DASHBOARD CARDS
+           ========================================================= */
 
     .dashboard-card {
         margin-bottom: 24px;
-
         border: 0;
         border-radius: 13px;
-
         background: #fff;
-
         box-shadow: 0 4px 18px rgba(15,23,42,.06);
     }
 
-    .dashboard-card .card-header {
-        padding: 18px 20px;
+        .dashboard-card .card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid #eef2f7;
+            background: transparent;
+        }
 
-        border-bottom: 1px solid #eef2f7;
-
-        background: transparent;
-    }
-
-    .dashboard-card .card-body {
-        padding: 20px;
-    }
+        .dashboard-card .card-body {
+            padding: 20px;
+        }
 
     .dashboard-title {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 15px;
         font-weight: 700;
     }
@@ -380,244 +299,184 @@
     .dashboard-subtitle {
         margin-top: 4px;
         margin-bottom: 0;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       QUICK ACTIONS
-       ========================================================= */
+           QUICK ACTIONS
+           ========================================================= */
 
     .quick-action {
         display: flex;
-
         align-items: center;
-
         min-height: 78px;
-
         margin-bottom: 12px;
         padding: 15px;
-
         border: 1px solid #e8edf3;
         border-radius: 10px;
-
         background: #fff;
-
         color: inherit !important;
-
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .quick-action:hover {
-        transform: translateY(-2px);
-
-        border-color: #0284c7;
-
-        background: #f8fcff;
-
-        box-shadow: 0 6px 18px rgba(15,23,42,.06);
-    }
+        .quick-action:hover {
+            transform: translateY(-2px);
+            border-color: #0284c7;
+            background: #f8fcff;
+            box-shadow: 0 6px 18px rgba(15,23,42,.06);
+        }
 
     .quick-action-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 42px;
         height: 42px;
         min-width: 42px;
-
         margin-right: 12px;
-
         border-radius: 10px;
-
         background: #e0f2fe;
-
         color: #0284c7;
     }
 
     .quick-action-title {
         color: #0f172a;
-
         font-size: 13px;
         font-weight: 700;
     }
 
     .quick-action-text {
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
     .quick-action-arrow {
         margin-left: auto;
         padding-left: 10px;
-
         color: #cbd5e1;
     }
 
 
     /* =========================================================
-       WORKFLOW
-       ========================================================= */
+           WORKFLOW
+           ========================================================= */
 
     .workflow {
         display: flex;
-
         align-items: center;
         justify-content: space-between;
-
         gap: 5px;
     }
 
     .workflow-item {
         flex: 1;
-
         text-align: center;
     }
 
     .workflow-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 48px;
         height: 48px;
-
         margin: auto;
-
         border-radius: 50%;
-
         background: #e0f2fe;
-
         color: #0284c7;
-
         font-size: 16px;
     }
 
     .workflow-title {
         margin-top: 8px;
-
         color: #334155;
-
         font-size: 11px;
         font-weight: 600;
     }
 
     .workflow-line {
         flex: .6;
-
         height: 2px;
-
         margin-top: -20px;
-
         background: #e2e8f0;
     }
 
 
     /* =========================================================
-       ATTENTION
-       ========================================================= */
+           ATTENTION
+           ========================================================= */
 
     .attention-item {
         display: flex;
-
         align-items: flex-start;
-
         padding: 13px 0;
-
         border-bottom: 1px solid #f1f5f9;
-
         color: inherit !important;
         text-decoration: none !important;
     }
 
-    .attention-item:last-child {
-        border-bottom: 0;
-    }
+        .attention-item:last-child {
+            border-bottom: 0;
+        }
 
     .attention-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 37px;
         height: 37px;
         min-width: 37px;
-
         margin-right: 11px;
-
         border-radius: 9px;
     }
 
     .attention-title {
         color: #334155;
-
         font-size: 12px;
         font-weight: 700;
     }
 
     .attention-text {
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       TABLE
-       ========================================================= */
+           TABLE
+           ========================================================= */
 
     .doctor-table {
         margin-bottom: 0;
     }
 
-    .doctor-table thead th {
-        padding: 12px 10px;
+        .doctor-table thead th {
+            padding: 12px 10px;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
 
-        border-top: 0;
-        border-bottom: 1px solid #e2e8f0;
-
-        color: #64748b;
-
-        font-size: 10px;
-        font-weight: 700;
-
-        text-transform: uppercase;
-        letter-spacing: .4px;
-    }
-
-    .doctor-table tbody td {
-        padding: 13px 10px;
-
-        vertical-align: middle;
-
-        border-color: #f1f5f9;
-
-        color: #334155;
-
-        font-size: 12px;
-    }
+        .doctor-table tbody td {
+            padding: 13px 10px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
 
     .status-badge {
         display: inline-block;
-
         padding: 5px 9px;
-
         border-radius: 50px;
-
         font-size: 10px;
         font-weight: 700;
     }
@@ -654,8 +513,8 @@
 
 
     /* =========================================================
-       PROFILE
-       ========================================================= */
+           PROFILE
+           ========================================================= */
 
     .profile-summary {
         display: flex;
@@ -664,31 +523,19 @@
 
     .profile-avatar {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 46px;
         height: 46px;
-
         margin-right: 12px;
-
         border-radius: 50%;
-
-        background: linear-gradient(
-            135deg,
-            #075985,
-            #0284c7
-        );
-
+        background: linear-gradient( 135deg, #075985, #0284c7 );
         color: #fff;
-
         font-weight: 700;
     }
 
     .profile-name {
         color: #0f172a;
-
         font-size: 13px;
         font-weight: 700;
     }
@@ -696,14 +543,13 @@
     .profile-role,
     .profile-email {
         color: #64748b;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+           RESPONSIVE
+           ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -711,9 +557,9 @@
             padding-top: 25px;
         }
 
-        .doctor-hero h1 {
-            font-size: 24px;
-        }
+            .doctor-hero h1 {
+                font-size: 24px;
+            }
 
         .hero-actions {
             margin-top: 20px;
@@ -726,9 +572,7 @@
 
         .workflow-item {
             display: flex;
-
             align-items: center;
-
             text-align: left;
         }
 
@@ -739,25 +583,82 @@
 
         .workflow-line {
             flex: none;
-
             width: 2px;
             height: 20px;
-
             margin: 0 0 0 23px;
         }
     }
 
 
-    .analytics-row { margin-bottom: 16px; color: #475569; font-size: 12px; }
-    .analytics-track, .month-bar-track { background: #e2e8f0; border-radius: 7px; overflow: hidden; }
-    .analytics-track { height: 10px; }
-    .analytics-bar { height: 100%; min-width: 2px; border-radius: 7px; background: linear-gradient(90deg, #0284c7, #22d3ee); }
-    .monthly-chart { display: flex; align-items: end; justify-content: space-between; gap: 8px; min-height: 190px; padding-top: 8px; }
-    .month-column { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; gap: 6px; color: #64748b; font-size: 10px; text-align: center; }
-    .month-column strong { color: #0f172a; font-size: 11px; }
-    .month-bar-track { display: flex; align-items: end; width: 100%; max-width: 30px; height: 120px; }
-    .month-bar { width: 100%; min-height: 2px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #22d3ee, #0369a1); }
-    .month-column span { white-space: nowrap; transform: rotate(-25deg); transform-origin: center top; }
+    .analytics-row {
+        margin-bottom: 16px;
+        color: #475569;
+        font-size: 12px;
+    }
+
+    .analytics-track, .month-bar-track {
+        background: #e2e8f0;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+
+    .analytics-track {
+        height: 10px;
+    }
+
+    .analytics-bar {
+        height: 100%;
+        min-width: 2px;
+        border-radius: 7px;
+        background: linear-gradient(90deg, #0284c7, #22d3ee);
+    }
+
+    .monthly-chart {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 8px;
+        min-height: 190px;
+        padding-top: 8px;
+    }
+
+    .month-column {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 10px;
+        text-align: center;
+    }
+
+        .month-column strong {
+            color: #0f172a;
+            font-size: 11px;
+        }
+
+    .month-bar-track {
+        display: flex;
+        align-items: end;
+        width: 100%;
+        max-width: 30px;
+        height: 120px;
+    }
+
+    .month-bar {
+        width: 100%;
+        min-height: 2px;
+        border-radius: 5px 5px 0 0;
+        background: linear-gradient(180deg, #22d3ee, #0369a1);
+    }
+
+    .month-column span {
+        white-space: nowrap;
+        transform: rotate(-25deg);
+        transform-origin: center top;
+    }
 
 </style>
 
@@ -782,7 +683,7 @@
 
                             <i class="fas fa-user-doctor"></i>
 
-                            Doctor / Healthcare Provider
+                            Doctor
 
                         </div>
 
@@ -818,7 +719,7 @@
                             </a>
 
 
-                            <a asp-area="Doctor"
+                            @* <a asp-area="Doctor"
                                asp-controller="Alerts"
                                asp-action="Index"
                                class="hero-btn hero-btn-outline">
@@ -827,7 +728,7 @@
 
                                 View Alerts
 
-                            </a>
+                            </a> *@
 
                         </div>
 
@@ -1215,7 +1116,9 @@
                         <p class="dashboard-subtitle">Monthly requests created by your account</p>
                     </div>
                     <div class="card-body">
-                        @{ var maxMonth = Math.Max(1, Model.MonthlyChart.Count == 0 ? 0 : Model.MonthlyChart.Max(x => x.Count)); }
+                        @{
+                            var maxMonth = Math.Max(1, Model.MonthlyChart.Count == 0 ? 0 : Model.MonthlyChart.Max(x => x.Count));
+                        }
                         <div class="monthly-chart" role="img" aria-label="Monthly test request counts for the last six months">
                             @foreach (var month in Model.MonthlyChart)
                             {
@@ -1911,11 +1814,13 @@
                         <tbody>
                             @if (Model.RecentRequests.Count == 0)
                             {
-                                <tr><td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="fas fa-flask fa-2x mb-3 d-block"></i>
-                                    No test requests have been submitted by your account yet.
-                                    <div class="mt-3"><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Create" class="btn btn-primary btn-sm"><i class="fas fa-plus mr-1"></i>Create Test Request</a></div>
-                                </td></tr>
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <i class="fas fa-flask fa-2x mb-3 d-block"></i>
+                                        No test requests have been submitted by your account yet.
+                                        <div class="mt-3"><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Create" class="btn btn-primary btn-sm"><i class="fas fa-plus mr-1"></i>Create Test Request</a></div>
+                                    </td>
+                                </tr>
                             }
                             else
                             {
@@ -1925,12 +1830,15 @@
                                         request.Status.Contains("complete", StringComparison.OrdinalIgnoreCase) ? "status-completed" :
                                         request.Status.Contains("release", StringComparison.OrdinalIgnoreCase) ? "status-released" :
                                         request.Status.Contains("progress", StringComparison.OrdinalIgnoreCase) ? "status-progress" :
-                                        request.Status.Contains("received", StringComparison.OrdinalIgnoreCase) ? "status-received" : "status-submitted";
+                                        request.Status.Contains("received", StringComparison.OrdinalIgnoreCase) ? "status-received" :
+                                        request.Status.Contains("pending", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-submitted";
+                                    var urgencyClass = request.Urgency.ToString().Equals("Stat", StringComparison.OrdinalIgnoreCase) ? "urgency-stat" :
+                                        request.Urgency.ToString().Equals("Urgent", StringComparison.OrdinalIgnoreCase) ? "urgency-urgent" : "urgency-routine";
                                     <tr>
                                         <td>@request.RequestNumber</td>
                                         <td>@request.PatientName</td>
                                         <td>@request.RequestDate.ToString("dd MMM yyyy HH:mm")</td>
-                                        <td>@request.Urgency</td>
+                                        <td><span class="urgency-badge @urgencyClass">@request.Urgency</span></td>
                                         <td><span class="status-badge @statusClass">@request.Status</span></td>
                                         <td><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Details" asp-route-id="@request.TestRequestId" class="btn btn-outline-primary btn-sm">View</a></td>
                                     </tr>
@@ -2000,8 +1908,10 @@
                 {
                     <div class="attention-item">
                         <div class="attention-icon icon-red"><i class="fas fa-triangle-exclamation"></i></div>
-                        <div><div class="attention-title">@Model.AbnormalResultsCount abnormal result(s) detected</div>
-                            <div class="attention-text">Review the abnormal results for requests you submitted.</div></div>
+                        <div>
+                            <div class="attention-title">@Model.AbnormalResultsCount abnormal result(s) detected</div>
+                            <div class="attention-text">Review the abnormal results for requests you submitted.</div>
+                        </div>
                     </div>
                     <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index" class="btn btn-danger btn-sm mt-3">Review alerts</a>
                 }

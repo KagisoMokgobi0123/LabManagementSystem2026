@@ -5,8 +5,8 @@
 }
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-3"><div><h2>Results: @request?.RequestNumber</h2><p class="text-muted mb-0">Patient: @(request?.Patient?.FullName ?? "Patient") · @request?.RequestDate.ToString("dd MMM yyyy")</p></div><a asp-action="Index" class="btn btn-outline-secondary">Back to results</a></div><div class="alert alert-success">All associated test entries have completed. These results are available for clinical review.</div>
-    <div class="card"><div class="table-responsive"><table class="table table-striped mb-0"><thead><tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference range</th><th>Flag</th><th>Technician notes</th><th>Completed</th></tr></thead><tbody>@foreach(var r in Model){var abnormal = r.IsAbnormal;
-        <tr><td>@r.TestType?.Name</td><td>@(r.ResultValue?.ToString() ?? "—")</td><td>@r.TestType?.MeasurementUnitDetails?.Unit</td><td>@r.TestType?.NormalMin – @r.TestType?.NormalMax</td><td>@if(abnormal){
+    <div class="card"><div class="table-responsive"><table class="table table-striped doctor-data-table mb-0"><colgroup><col style="width:17%" /><col style="width:12%" /><col style="width:9%" /><col style="width:14%" /><col style="width:12%" /><col style="width:23%" /><col style="width:13%" /></colgroup><thead class="thead-light"><tr><th>Test</th><th>Result</th><th>Unit</th><th>Reference range</th><th>Flag</th><th>Technician notes</th><th>Completed</th></tr></thead><tbody>@foreach(var r in Model){var abnormal = r.IsAbnormal;
+        <tr><td>@r.TestType?.Name</td><td class="text-nowrap font-weight-bold">@(r.ResultValue?.ToString() ?? "—")</td><td>@r.TestType?.MeasurementUnitDetails?.Unit</td><td>@r.TestType?.NormalMin – @r.TestType?.NormalMax</td><td>@if(abnormal){
             <span class="badge badge-danger">Abnormal</span>
         }else
         {

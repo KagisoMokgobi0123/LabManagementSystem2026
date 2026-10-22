@@ -611,7 +611,7 @@ public sealed class TestRequestsController : Controller
                 items.Count(x => x.TestRequestId == r.TestRequestId)
                     >= r.EffectiveTestTypes.Count &&
                 items.Where(x => x.TestRequestId == r.TestRequestId)
-                    .All(x => x.Status == "Completed"))
+                    .All(x => x.Status == "Completed" || x.Status == "Verified"))
             .SelectMany(r =>
                 items.Where(x => x.TestRequestId == r.TestRequestId)
                     .Select(x => new

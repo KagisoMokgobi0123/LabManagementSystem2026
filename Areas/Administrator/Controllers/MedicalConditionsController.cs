@@ -22,13 +22,18 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.ConditionCategories = await _context.MedicalConditionCategories
+                .Where(x => x.Status == Status.Active)
+                .OrderBy(x => x.Name)
+                .ToListAsync();
+
             var conditions = await _context.MedicalConditions
                 .Include(x => x.Category)
                 .Where(x => x.Status == Status.Active)
                 .OrderBy(x => x.Name)
                 .ToListAsync();
 
-            return View(conditions);
+            return View("~/Areas/Administrator/Views/Conditions/Index.cshtml", conditions);
         }
 
         [HttpGet]
@@ -67,8 +72,12 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         public async Task<IActionResult> Create(
             MedicalCondition condition)
         {
+            condition.Name = condition.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = "Unable to save the medical condition. Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var categoryExists =
                 await _context.MedicalConditionCategories
@@ -78,18 +87,24 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (!categoryExists)
-                return BadRequest("Invalid category.");
+            {
+                TempData["ErrorMessage"] = "Select a valid active category before saving.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.MedicalConditions.AnyAsync(x => x.Status == Status.Active && x.MedicalConditionCategoryId == condition.MedicalConditionCategoryId && x.Name.ToLower() == condition.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "A medical condition with this name already exists in the selected category.";
+                return RedirectToAction(nameof(Index));
+            }
 
             condition.Status = Status.Active;
 
             _context.MedicalConditions.Add(condition);
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Medical condition added successfully."
-            });
+            TempData["SuccessMessage"] = "Medical condition added successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -97,8 +112,12 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         public async Task<IActionResult> Edit(
             MedicalCondition condition)
         {
+            condition.Name = condition.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = "Unable to save the medical condition. Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var existing =
                 await _context.MedicalConditions
@@ -108,7 +127,10 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (existing == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "The medical condition could not be found or is no longer active.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var categoryExists =
                 await _context.MedicalConditionCategories
@@ -118,7 +140,16 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (!categoryExists)
-                return BadRequest("Invalid category.");
+            {
+                TempData["ErrorMessage"] = "Select a valid active category before saving.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.MedicalConditions.AnyAsync(x => x.Status == Status.Active && x.MedicalConditionId != condition.MedicalConditionId && x.MedicalConditionCategoryId == condition.MedicalConditionCategoryId && x.Name.ToLower() == condition.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "A medical condition with this name already exists in the selected category.";
+                return RedirectToAction(nameof(Index));
+            }
 
             existing.Name = condition.Name;
             existing.Description = condition.Description;
@@ -127,11 +158,8 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Medical condition updated successfully."
-            });
+            TempData["SuccessMessage"] = "Medical condition updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -145,17 +173,17 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (condition == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "The medical condition could not be found or is already inactive.";
+                return RedirectToAction(nameof(Index));
+            }
 
             condition.Status = Status.Inactive;
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Medical condition removed successfully."
-            });
+            TempData["SuccessMessage"] = "Medical condition removed successfully.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

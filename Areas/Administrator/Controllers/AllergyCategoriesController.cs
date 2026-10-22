@@ -44,76 +44,75 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            AllergyCategory category)
+        public async Task<IActionResult> Create(AllergyCategory category)
         {
+            category.Name = category.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).FirstOrDefault() ?? "Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.AllergyCategories.AnyAsync(x => x.Name.ToLower() == category.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "A allergy category with this name already exists.";
+                return RedirectToAction(nameof(Index));
+            }
 
             category.Status = Status.Active;
-
             _context.AllergyCategories.Add(category);
             await _context.SaveChangesAsync();
-
-            return Json(new
-            {
-                success = true,
-                message = "Allergy category added successfully."
-            });
+            TempData["SuccessMessage"] = "Allergy category added successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(
-            AllergyCategory category)
+        public async Task<IActionResult> Edit(AllergyCategory category)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var existing =
-                await _context.AllergyCategories
-                    .FirstOrDefaultAsync(x =>
-                        x.AllergyCategoryId ==
-                        category.AllergyCategoryId &&
-                        x.Status == Status.Active);
-
+            category.Name = category.Name?.Trim() ?? string.Empty;
+            var existing = await _context.AllergyCategories.FirstOrDefaultAsync(x => x.AllergyCategoryId == category.AllergyCategoryId && x.Status == Status.Active);
             if (existing == null)
-                return NotFound();
-
+            {
+                TempData["ErrorMessage"] = "The allergy category could not be found or is inactive.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).FirstOrDefault() ?? "Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (await _context.AllergyCategories.AnyAsync(x => x.AllergyCategoryId != category.AllergyCategoryId && x.Name.ToLower() == category.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "A allergy category with this name already exists.";
+                return RedirectToAction(nameof(Index));
+            }
             existing.Name = category.Name;
             existing.Description = category.Description;
-
             await _context.SaveChangesAsync();
-
-            return Json(new
-            {
-                success = true,
-                message = "Allergy category updated successfully."
-            });
+            TempData["SuccessMessage"] = "Allergy category updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var category =
-                await _context.AllergyCategories
-                    .FirstOrDefaultAsync(x =>
-                        x.AllergyCategoryId == id &&
-                        x.Status == Status.Active);
-
-            if (category == null)
-                return NotFound();
-
-            category.Status = Status.Inactive;
-
-            await _context.SaveChangesAsync();
-
-            return Json(new
+            var existing = await _context.AllergyCategories.FirstOrDefaultAsync(x => x.AllergyCategoryId == id && x.Status == Status.Active);
+            if (existing == null)
             {
-                success = true,
-                message = "Allergy category removed successfully."
-            });
+                TempData["ErrorMessage"] = "The allergy category could not be found or is already inactive.";
+                return RedirectToAction(nameof(Index));
+            }
+            if (await _context.Allergies.AnyAsync(x => x.AllergyCategoryId == id && x.Status == Status.Active))
+            {
+                TempData["ErrorMessage"] = "This category cannot be deactivated while active records are assigned to it. Reassign or deactivate those records first.";
+                return RedirectToAction(nameof(Index));
+            }
+            existing.Status = Status.Inactive;
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Allergy category removed successfully.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

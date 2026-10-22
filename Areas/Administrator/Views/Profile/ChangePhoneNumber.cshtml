@@ -1,0 +1,381 @@
+﻿@model NMB_HLabSys.Areas.Technician.Models.UpdatePhoneNumberViewModel
+
+@{
+    ViewData["Title"] = "Change Phone Number";
+    Layout = "~/Views/Shared/_AdministratorLayout.cshtml";
+
+    var successMessage = TempData["SuccessMessage"]?.ToString();
+    var infoMessage = TempData["InfoMessage"]?.ToString();
+    var errorMessage = TempData["ErrorMessage"]?.ToString();
+
+    var validationErrors = ViewData.ModelState
+        .Values
+        .SelectMany(v => v.Errors)
+        .Select(e => e.ErrorMessage)
+        .Where(e => !string.IsNullOrWhiteSpace(e))
+        .ToList();
+}
+
+<style>
+    .phone-page {
+        padding: 35px 0 60px;
+        background: #f4f7fb;
+        min-height: 100vh;
+    }
+
+    .phone-container {
+        max-width: 650px;
+        margin: 0 auto;
+    }
+
+    .phone-card {
+        background: #ffffff;
+        border: 0;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(15, 23, 42, .08);
+        overflow: hidden;
+    }
+
+    .phone-header {
+        padding: 25px 30px;
+        background: linear-gradient(135deg, #073b5c, #0284c7);
+        color: white;
+    }
+
+        .phone-header h4 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .phone-header p {
+            margin: 7px 0 0;
+            font-size: 13px;
+            opacity: .85;
+        }
+
+    .phone-body {
+        padding: 30px;
+    }
+
+    .phone-icon {
+        width: 65px;
+        height: 65px;
+        margin: 0 auto 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #e0f2fe;
+        color: #0284c7;
+        font-size: 24px;
+    }
+
+    .form-label {
+        color: #334155;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .form-control {
+        height: 46px;
+        border: 1px solid #dbe3ec;
+        border-radius: 9px;
+        font-size: 14px;
+    }
+
+        .form-control:focus {
+            border-color: #0284c7;
+            box-shadow: 0 0 0 .15rem rgba(2, 132, 199, .12);
+        }
+
+    .phone-help {
+        margin-top: 7px;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .validation-summary-errors {
+        margin-bottom: 20px;
+        padding: 12px 15px;
+        border-radius: 8px;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-size: 13px;
+    }
+
+    .update-btn {
+        background: #0284c7;
+        border-color: #0284c7;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 9px;
+    }
+
+        .update-btn:hover {
+            background: #0369a1;
+            border-color: #0369a1;
+        }
+
+        .update-btn:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+        }
+</style>
+
+<div class="phone-page">
+    <div class="container">
+        <div class="phone-container">
+
+            <div class="mb-3">
+                <a href="/Administrator/Profile/Index"
+                   class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left mr-1"></i>
+                    Back to Profile
+                </a>
+            </div>
+
+            <div class="phone-card">
+
+                <div class="phone-header">
+                    <h4>
+                        <i class="fas fa-phone-alt mr-2"></i>
+                        Change Phone Number
+                    </h4>
+
+                    <p>
+                        Update the cellphone number associated
+                        with your Administrator account.
+                    </p>
+                </div>
+
+                <div class="phone-body">
+
+                    <div class="phone-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+
+                    <form id="changePhoneForm"
+                          action="@Url.Action("ChangePhoneNumber", "Profile", new { area = "Administrator" })"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger small mb-3">
+                        </div>
+
+                        <div class="form-group">
+
+                            <label for="PhoneNumber"
+                                   class="form-label">
+                                Cellphone Number
+                            </label>
+
+                            <div class="input-group">
+
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-phone"></i>
+                                    </span>
+                                </div>
+
+                                <input id="PhoneNumber"
+                                       name="PhoneNumber"
+                                       type="tel"
+                                       class="form-control"
+                                       value="@Model?.PhoneNumber"
+                                       placeholder="e.g. 0712345678"
+                                       autocomplete="tel"
+                                       inputmode="tel"
+                                       maxlength="13"
+                                       required />
+
+                            </div>
+
+                            <span asp-validation-for="PhoneNumber"
+                                  class="text-danger small">
+                            </span>
+
+                            <div class="phone-help">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Enter a valid South African cellphone number,
+                                for example 0712345678 or +27712345678.
+                            </div>
+
+                        </div>
+
+                        <button type="submit"
+                                id="updatePhoneBtn"
+                                class="btn btn-primary update-btn btn-block mt-4">
+
+                            <i class="fas fa-save mr-1"></i>
+                            Update Phone Number
+
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const form = document.getElementById("changePhoneForm");
+            const phoneInput = document.getElementById("PhoneNumber");
+            const submitButton = document.getElementById("updatePhoneBtn");
+
+            const successMessage = @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(successMessage));
+
+            const infoMessage = @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(infoMessage));
+
+            const errorMessage = @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(errorMessage));
+
+            const validationErrors = @Html.Raw(
+                                            System.Text.Json.JsonSerializer.Serialize(validationErrors));
+
+            // SweetAlert2 must be available.
+            if (typeof Swal === "undefined") {
+                console.error("SweetAlert2 failed to load.");
+
+                const notice = document.createElement("div");
+                notice.className = "alert alert-danger";
+                notice.textContent =
+                    "The notification component could not load. Please refresh the page.";
+                form.parentNode.insertBefore(notice, form);
+
+                submitButton.disabled = true;
+                return;
+            }
+
+            // SERVER SUCCESS MESSAGE
+            if (successMessage) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Phone Number Updated!",
+                    text: successMessage,
+                    confirmButtonText: "OK",
+                    confirmButtonColor: "#0284c7"
+                });
+            }
+
+            // SERVER ERROR MESSAGE
+            else if (errorMessage) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Phone Number Update Failed",
+                    text: errorMessage,
+                    confirmButtonColor: "#0284c7"
+                });
+            }
+
+            // MODEL VALIDATION ERRORS
+            else if (validationErrors.length > 0) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Validation Error",
+                    text: validationErrors.join("\n"),
+                    confirmButtonColor: "#0284c7"
+                });
+            }
+
+            // INFORMATION MESSAGE
+            else if (infoMessage) {
+                Swal.fire({
+                    icon: "info",
+                    title: "Information",
+                    text: infoMessage,
+                    confirmButtonColor: "#0284c7"
+                });
+            }
+
+            let submitting = false;
+
+            form.addEventListener("submit", async function(event) {
+
+                event.preventDefault();
+
+                if (submitting) {
+                    return;
+                }
+
+                const phone = phoneInput.value.trim();
+
+                // REQUIRED FIELD VALIDATION
+                if (!phone) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Missing Phone Number",
+                        text: "Please enter your cellphone number.",
+                        confirmButtonColor: "#0284c7"
+                    });
+
+                    phoneInput.focus();
+                    return;
+                }
+
+                // SOUTH AFRICAN MOBILE NUMBER VALIDATION
+                const phonePattern =
+                    /^(?:0[6-8][0-9]{8}|\+27[6-8][0-9]{8})$/;
+
+                if (!phonePattern.test(phone)) {
+                    await Swal.fire({
+                        icon: "error",
+                        title: "Invalid Phone Number",
+                        text: "Enter a valid South African cellphone number, such as 0712345678 or +27712345678.",
+                        confirmButtonColor: "#0284c7"
+                    });
+
+                    phoneInput.focus();
+                    return;
+                }
+
+                // CHECK SERVER-DEFINED FORM VALIDATION
+                if (window.jQuery &&
+                    jQuery.fn &&
+                    typeof jQuery.fn.valid === "function" &&
+                    !jQuery(form).valid()) {
+                    return;
+                }
+
+                // CONFIRMATION POPUP
+                const result = await Swal.fire({
+                    icon: "question",
+                    title: "Confirm Phone Number Update",
+                    text: "Are you sure you want to update your cellphone number?",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, Update",
+                    cancelButtonText: "Cancel",
+                    confirmButtonColor: "#0284c7",
+                    cancelButtonColor: "#64748b",
+                    reverseButtons: true
+                });
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                // SUBMIT FORM TO ASP.NET CORE CONTROLLER
+                submitting = true;
+
+                submitButton.disabled = true;
+                submitButton.innerHTML =
+                    '<i class="fas fa-spinner fa-spin mr-1"></i> Updating...';
+
+                HTMLFormElement.prototype.submit.call(form);
+            });
+        });
+    </script>
+}

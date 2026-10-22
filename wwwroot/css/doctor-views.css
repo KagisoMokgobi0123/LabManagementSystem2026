@@ -58,3 +58,79 @@
 .doctor-main .doctor-section-heading { margin-top:1.35rem; padding-bottom:.55rem; border-bottom:1px solid #e5ebf2; }
 @media(max-width:767.98px) { .doctor-main .container,.doctor-main .container-fluid { padding-left:1rem; padding-right:1rem; } .doctor-main .card-body { padding:1rem; } .doctor-main .table thead th,.doctor-main .table tbody td { padding:.7rem .65rem; } .doctor-main .btn { max-width:100%; } }
 @media(prefers-reduced-motion:reduce) { .doctor-main *,.doctor-main *::before,.doctor-main *::after { transition:none!important; animation:none!important; } }
+
+
+/* Doctor tables: stable column alignment and consistent clinical status colours. */
+.doctor-content .doctor-data-table,
+.doctor-content .table {
+    width: 100%;
+    margin-bottom: 0;
+    vertical-align: middle;
+}
+.doctor-content .doctor-data-table {
+    table-layout: fixed;
+}
+.doctor-content .doctor-data-table th,
+.doctor-content .doctor-data-table td,
+.doctor-content .table th,
+.doctor-content .table td {
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+}
+.doctor-content .doctor-data-table th {
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .015em;
+    white-space: normal;
+}
+.doctor-content .doctor-data-table .text-nowrap {
+    white-space: nowrap !important;
+}
+.doctor-content .table .badge,
+.doctor-content .doctor-data-table .badge {
+    display: inline-block;
+    padding: .35rem .55rem;
+    border-radius: .45rem;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+.doctor-content .badge-status-submitted { background: #dbeafe; color: #1d4ed8; }
+.doctor-content .badge-status-pending { background: #fef3c7; color: #92400e; }
+.doctor-content .badge-status-received { background: #cffafe; color: #155e75; }
+.doctor-content .badge-status-progress { background: #dbeafe; color: #1e40af; }
+.doctor-content .badge-status-completed { background: #dcfce7; color: #166534; }
+.doctor-content .badge-status-released { background: #d1fae5; color: #065f46; }
+.doctor-content .badge-status-cancelled,
+.doctor-content .badge-status-rejected { background: #fee2e2; color: #991b1b; }
+.doctor-content .badge-urgency-routine { background: #e2e8f0; color: #334155; }
+.doctor-content .badge-urgency-urgent { background: #ffedd5; color: #9a3412; }
+.doctor-content .badge-urgency-stat { background: #fee2e2; color: #991b1b; }
+.doctor-choice-scroll-list {
+    max-height: 240px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border: 1px solid #d7dee8;
+    border-radius: .5rem;
+    padding: .65rem;
+    background: #fff;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: .45rem .65rem;
+    scrollbar-gutter: stable;
+}
+.doctor-choice-scroll-list .doctor-choice-card {
+    margin: 0;
+    min-width: 0;
+}
+@media (max-width: 767.98px) {
+    .doctor-content .doctor-data-table { table-layout: auto; min-width: 700px; }
+    .doctor-choice-scroll-list { max-height: 210px; grid-template-columns: 1fr; }
+}
+
+.doctor-content .status-pending { background:#fef3c7; color:#92400e; }
+.doctor-content .urgency-badge { display:inline-block; padding:.32rem .55rem; border-radius:.45rem; font-size:.72rem; font-weight:700; white-space:nowrap; }
+.doctor-content .urgency-routine { background:#e2e8f0; color:#334155; }
+.doctor-content .urgency-urgent { background:#ffedd5; color:#9a3412; }
+.doctor-content .urgency-stat { background:#fee2e2; color:#991b1b; }

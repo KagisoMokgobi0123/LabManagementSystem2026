@@ -2921,8 +2921,16 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 // 6. CHECK ALL ACTIVE TESTS ON THE REQUEST
                 // ==========================================
 
+                var allSamplesReceived =
+                    await _context.Samples.AnyAsync(s =>
+                        s.TestRequestId == test.TestRequestId && !s.IsDeleted) &&
+                    !await _context.Samples.AnyAsync(s =>
+                        s.TestRequestId == test.TestRequestId &&
+                        !s.IsDeleted && !s.IsReceived);
+
                 var allTestsVerified =
                     decision == "Verify" &&
+                    allSamplesReceived &&
                     await _context.TestRequestTestTypes.AnyAsync(x =>
                         x.TestRequestId == test.TestRequestId && !x.IsDeleted) &&
                     !await _context.TestRequestTestTypes.AnyAsync(x =>
