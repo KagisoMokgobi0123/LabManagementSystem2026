@@ -259,16 +259,23 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             }
         }
 
-
-        private async Task<List<TestCategoryModel>>
-            GetActiveCategories()
+        private async Task<List<TestCategoryModel>> GetActiveCategories()
         {
             return await _context.TestCategories
-                .Include(c => c.TestTypes)
                 .Where(c =>
-                    c.IsActive ==
-                    TestCategoryModel.RecordStatus.Active)
+                    c.IsActive == TestCategoryModel.RecordStatus.Active)
                 .OrderBy(c => c.Description)
+                .Select(c => new TestCategoryModel
+                {
+                    TestCategoryId = c.TestCategoryId,
+                    Description = c.Description,
+                    IsActive = c.IsActive,
+
+                    TestTypes = c.TestTypes
+                        .Where(t =>
+                            t.IsActive == TestTypeModel.RecordStatus.Active)
+                        .ToList()
+                })
                 .ToListAsync();
         }
     }
