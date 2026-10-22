@@ -54,7 +54,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             });
         }
 
-=
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
