@@ -1,4 +1,5 @@
-﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+﻿@model NMB_HLabSys.Areas.Doctor.ViewModels.DoctorDashboardViewModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @using Microsoft.AspNetCore.Identity
 @using NMB_HLabSys.Models.Identity
 @inject UserManager<ApplicationUser> UserManager
@@ -746,6 +747,18 @@
         }
     }
 
+
+    .analytics-row { margin-bottom: 16px; color: #475569; font-size: 12px; }
+    .analytics-track, .month-bar-track { background: #e2e8f0; border-radius: 7px; overflow: hidden; }
+    .analytics-track { height: 10px; }
+    .analytics-bar { height: 100%; min-width: 2px; border-radius: 7px; background: linear-gradient(90deg, #0284c7, #22d3ee); }
+    .monthly-chart { display: flex; align-items: end; justify-content: space-between; gap: 8px; min-height: 190px; padding-top: 8px; }
+    .month-column { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: center; gap: 6px; color: #64748b; font-size: 10px; text-align: center; }
+    .month-column strong { color: #0f172a; font-size: 11px; }
+    .month-bar-track { display: flex; align-items: end; width: 100%; max-width: 30px; height: 120px; }
+    .month-bar { width: 100%; min-height: 2px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #22d3ee, #0369a1); }
+    .month-column span { white-space: nowrap; transform: rotate(-25deg); transform-origin: center top; }
+
 </style>
 
 
@@ -863,11 +876,11 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.PatientCount
                                 </h2>
 
                                 <div class="stat-note">
-                                    Patient records available to you
+                                    Registered patient records
                                 </div>
 
                             </div>
@@ -908,7 +921,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.TestRequestCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -953,7 +966,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.CompletedResultsCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -998,7 +1011,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.AbnormalResultsCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -1050,7 +1063,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.SubmittedCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -1095,7 +1108,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.InProgressCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -1140,7 +1153,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @Model.ReadyToReleaseCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -1164,6 +1177,58 @@
 
             </div>
 
+        </div>
+
+
+
+        <!-- DATABASE-DRIVEN ANALYTICS -->
+        <div class="row">
+            <div class="col-lg-7">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h4 class="dashboard-title">Test Request Status Analytics</h4>
+                        <p class="dashboard-subtitle">Distribution of requests submitted by your account</p>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.StatusChart.Count == 0)
+                        {
+                            <p class="text-muted mb-0">No request data is available for this doctor yet.</p>
+                        }
+                        else
+                        {
+                            var maxStatus = Math.Max(1, Model.StatusChart.Max(x => x.Count));
+                            foreach (var item in Model.StatusChart)
+                            {
+                                <div class="analytics-row">
+                                    <div class="d-flex justify-content-between mb-1"><span>@item.Label</span><strong>@item.Count</strong></div>
+                                    <div class="analytics-track"><div class="analytics-bar" style="width:@((item.Count * 100.0 / maxStatus).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h4 class="dashboard-title">Six-Month Request Trend</h4>
+                        <p class="dashboard-subtitle">Monthly requests created by your account</p>
+                    </div>
+                    <div class="card-body">
+                        @{ var maxMonth = Math.Max(1, Model.MonthlyChart.Count == 0 ? 0 : Model.MonthlyChart.Max(x => x.Count)); }
+                        <div class="monthly-chart" role="img" aria-label="Monthly test request counts for the last six months">
+                            @foreach (var month in Model.MonthlyChart)
+                            {
+                                <div class="month-column" title="@month.Label: @month.Count requests">
+                                    <strong>@month.Count</strong>
+                                    <div class="month-bar-track"><div class="month-bar" style="height:@((month.Count * 100.0 / maxMonth).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                                    <span>@month.Label</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -1665,8 +1730,7 @@
                                 </div>
 
                                 <div class="attention-text">
-                                    Review recent abnormal laboratory
-                                    results for tests you ordered.
+                                    @Model.AbnormalResultsCount abnormal result(s) are flagged across your test requests.
                                 </div>
 
                             </div>
@@ -1692,8 +1756,7 @@
                                 </div>
 
                                 <div class="attention-text">
-                                    Review completed and verified
-                                    laboratory results.
+                                    @Model.CompletedResultsCount completed/released request(s) are recorded.
                                 </div>
 
                             </div>
@@ -1719,8 +1782,7 @@
                                 </div>
 
                                 <div class="attention-text">
-                                    Release reviewed results to patients
-                                    with the appropriate note.
+                                    @Model.ReadyToReleaseCount completed request(s) may be ready for review/release.
                                 </div>
 
                             </div>
@@ -1746,8 +1808,7 @@
                                 </div>
 
                                 <div class="attention-text">
-                                    Monitor laboratory requests that
-                                    have not yet been completed.
+                                    @Model.ActiveRequestCount active request(s) remain unfinished.
                                 </div>
 
                             </div>
@@ -1848,35 +1909,33 @@
 
 
                         <tbody>
-
-                            <tr>
-
-                                <td colspan="6"
-                                    class="text-center py-5 text-muted">
-
+                            @if (Model.RecentRequests.Count == 0)
+                            {
+                                <tr><td colspan="6" class="text-center py-5 text-muted">
                                     <i class="fas fa-flask fa-2x mb-3 d-block"></i>
-
-                                    No recent test requests available.
-
-                                    <div class="mt-3">
-
-                                        <a asp-area="Doctor"
-                                           asp-controller="TestRequests"
-                                           asp-action="Create"
-                                           class="btn btn-primary btn-sm">
-
-                                            <i class="fas fa-plus mr-1"></i>
-
-                                            Create Test Request
-
-                                        </a>
-
-                                    </div>
-
-                                </td>
-
-                            </tr>
-
+                                    No test requests have been submitted by your account yet.
+                                    <div class="mt-3"><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Create" class="btn btn-primary btn-sm"><i class="fas fa-plus mr-1"></i>Create Test Request</a></div>
+                                </td></tr>
+                            }
+                            else
+                            {
+                                foreach (var request in Model.RecentRequests)
+                                {
+                                    var statusClass = request.Status.Contains("cancel", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" :
+                                        request.Status.Contains("complete", StringComparison.OrdinalIgnoreCase) ? "status-completed" :
+                                        request.Status.Contains("release", StringComparison.OrdinalIgnoreCase) ? "status-released" :
+                                        request.Status.Contains("progress", StringComparison.OrdinalIgnoreCase) ? "status-progress" :
+                                        request.Status.Contains("received", StringComparison.OrdinalIgnoreCase) ? "status-received" : "status-submitted";
+                                    <tr>
+                                        <td>@request.RequestNumber</td>
+                                        <td>@request.PatientName</td>
+                                        <td>@request.RequestDate.ToString("dd MMM yyyy HH:mm")</td>
+                                        <td>@request.Urgency</td>
+                                        <td><span class="status-badge @statusClass">@request.Status</span></td>
+                                        <td><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Details" asp-route-id="@request.TestRequestId" class="btn btn-outline-primary btn-sm">View</a></td>
+                                    </tr>
+                                }
+                            }
                         </tbody>
 
                     </table>
@@ -1933,26 +1992,27 @@
 
 
             <div class="card-body">
-
-                <div class="text-center py-4 text-muted">
-
-                    <div class="stat-icon icon-green mx-auto mb-3">
-
-                        <i class="fas fa-circle-check"></i>
-
+                @if (ViewBag.ResultAnalyticsWarning != null)
+                {
+                    <div class="alert alert-warning">@ViewBag.ResultAnalyticsWarning</div>
+                }
+                @if (Model.AbnormalResultsCount > 0)
+                {
+                    <div class="attention-item">
+                        <div class="attention-icon icon-red"><i class="fas fa-triangle-exclamation"></i></div>
+                        <div><div class="attention-title">@Model.AbnormalResultsCount abnormal result(s) detected</div>
+                            <div class="attention-text">Review the abnormal results for requests you submitted.</div></div>
                     </div>
-
-                    <div class="quick-action-title">
-                        No abnormal-result alerts
+                    <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index" class="btn btn-danger btn-sm mt-3">Review alerts</a>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <div class="stat-icon icon-green mx-auto mb-3"><i class="fas fa-circle-check"></i></div>
+                        <div class="quick-action-title">No abnormal results recorded</div>
+                        <div class="quick-action-text">This is based on the abnormal flags currently stored for your requests.</div>
                     </div>
-
-                    <div class="quick-action-text">
-                        New abnormal results from your ordered
-                        tests will appear here.
-                    </div>
-
-                </div>
-
+                }
             </div>
 
         </div>

@@ -1,35 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿
+using Microsoft.AspNetCore.Identity;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
-using NMB_HLabSys.Models.Account;
 using NMB_HLabSys.Models.Identity;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NMB_HLabSys.Areas.Doctor.Models
 {
     public class TestRequestsModel
     {
-        // ============================================================
-        // PRIMARY KEY
-        // ============================================================
-
         [Key]
         public int TestRequestId { get; set; }
 
-
-        // ============================================================
-        // REQUEST NUMBER
-        // ============================================================
-
         [Required]
         [StringLength(50)]
-        [Display(Name = "Request Number")]
         public string RequestNumber { get; set; } = string.Empty;
-
-
-        // ============================================================
-        // PATIENT
-        // ============================================================
 
         [Required]
         public string PatientId { get; set; } = string.Empty;
@@ -37,100 +25,79 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         [ForeignKey(nameof(PatientId))]
         public virtual ApplicationUser? Patient { get; set; }
 
-
-        // ============================================================
-        // DOCTOR
-        // ============================================================
-
         [Required]
         public string DoctorId { get; set; } = string.Empty;
 
         [ForeignKey(nameof(DoctorId))]
         public virtual ApplicationUser? Doctor { get; set; }
 
-
-        // ============================================================
-        // REQUEST DATE
-        // ============================================================
-
         [Required]
         [Display(Name = "Request Date")]
         public DateTime RequestDate { get; set; } = DateTime.Now;
 
-
-        // ============================================================
-        // URGENCY
-        // Routine / Urgent / Stat
-        // ============================================================
-
         [Required]
         [Display(Name = "Urgency")]
         public Urgency Urgency { get; set; } = Urgency.Routine;
-
-
-        // ============================================================
-        // CLINICAL NOTES
-        // ============================================================
 
         [StringLength(2000)]
         [Display(Name = "Clinical Notes")]
         public string? ClinicalNotes { get; set; }
 
 
-        // ============================================================
-        // REQUEST STATUS
-        //
-        // Submitted
-        // Samples Received
-        // InProgress
-        // Completed
-        // Released
-        // Cancelled
-        // ============================================================
 
         [Required]
         [StringLength(50)]
         public string Status { get; set; } =
             TestRequestStatus.Submitted.ToString();
 
+        // Doctor's decision and information recorded when releasing results.
 
-        // ============================================================
-        // SAMPLES
-        //
-        // One test request can contain one or more samples.
-        // ============================================================
+        [StringLength(1000)]
+        [Display(Name = "Cancellation Reason")]
+        public string? CancellationReason { get; set; }
 
+        [StringLength(2000)]
+        [Display(Name = "Doctor's Release Note")]
+        public string? DoctorReleaseNote { get; set; }
+
+        [Display(Name = "Results Released At")]
+        public DateTime? ResultsReleasedAt { get; set; }
+
+        public string? ReleasedByDoctorId { get; set; }
+
+        [ForeignKey(nameof(ReleasedByDoctorId))]
+        public virtual ApplicationUser? ReleasedByDoctor { get; set; }
+
+        [StringLength(30)]
+        [Display(Name = "Patient Notification Method")]
+        public string? PatientNotificationMethod { get; set; }
+
+        // Samples associated with this test request.
         public virtual ICollection<SampleModel> Samples { get; set; }
             = new List<SampleModel>();
 
+        // Legacy/direct test-type relationship, retained for compatibility.
+        public virtual ICollection<TestTypeModel> TestTypes { get; set; }
+            = new List<TestTypeModel>();
 
-        // ============================================================
-        // REQUESTED TEST TYPES
-        //
-        // One request can contain multiple test types.
-        // ============================================================
-
-        public virtual ICollection<TestTypeModel> TestTypes
+        // Individual test types requested for this request.
+        public virtual ICollection<TestRequestTestTypeModel> RequestedTestTypes
         {
             get;
             set;
-        } = new List<TestTypeModel>();
+        } = new List<TestRequestTestTypeModel>();
 
-
-        public virtual ICollection<TestRequestTestTypeModel> RequestedTestTypes { get; set; }
-            = new List<TestRequestTestTypeModel>();
-
+        // Uses the individual requested test entries when available.
+        // Falls back to the legacy TestTypes collection.
         [NotMapped]
-        public IReadOnlyCollection<TestTypeModel> EffectiveTestTypes => RequestedTestTypes.Any()
-            ? RequestedTestTypes.Where(x => x.TestType != null).Select(x => x.TestType!).ToList()
-            : TestTypes.ToList();
-
+        public IReadOnlyCollection<TestTypeModel> EffectiveTestTypes =>
+            RequestedTestTypes != null && RequestedTestTypes.Count > 0
+                ? RequestedTestTypes
+                    .Where(x => x.TestType != null)
+                    .Select(x => x.TestType!)
+                    .ToList()
+                : TestTypes.ToList();
     }
-
-
-    // ================================================================
-    // URGENCY
-    // ================================================================
 
     public enum Urgency
     {
@@ -139,23 +106,14 @@ namespace NMB_HLabSys.Areas.Doctor.Models
         Stat = 3
     }
 
-
-    // ================================================================
-    // TEST REQUEST STATUS
-    // ================================================================
-
     public enum TestRequestStatus
     {
         Submitted = 1,
-
         SamplesReceived = 2,
-
         InProgress = 3,
-
         Completed = 4,
-
         Released = 5,
-
-        Cancelled = 6
+        Cancelled = 6,
+        ReleasedByDoctor = 7
     }
 }

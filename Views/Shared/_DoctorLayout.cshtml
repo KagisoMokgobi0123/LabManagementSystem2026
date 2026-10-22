@@ -82,8 +82,8 @@
 
 
             /* =====================================================
-                       APPLICATION
-                       ===================================================== */
+                                   APPLICATION
+                                   ===================================================== */
 
             .doctor-app {
                 min-height: 100vh;
@@ -91,8 +91,8 @@
 
 
             /* =====================================================
-                       SIDEBAR
-                       ===================================================== */
+                                   SIDEBAR
+                                   ===================================================== */
 
             .doctor-sidebar {
                 position: fixed;
@@ -113,8 +113,8 @@
 
 
             /* =====================================================
-                       LOGO
-                       ===================================================== */
+                                   LOGO
+                                   ===================================================== */
 
             .sidebar-brand {
                 min-height: 105px;
@@ -158,8 +158,8 @@
 
 
             /* =====================================================
-                       CONTROLS
-                       ===================================================== */
+                                   CONTROLS
+                                   ===================================================== */
 
             .sidebar-controls {
                 display: flex;
@@ -194,8 +194,8 @@
 
 
             /* =====================================================
-                       DOCTOR
-                       ===================================================== */
+                                   DOCTOR
+                                   ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -248,8 +248,8 @@
 
 
             /* =====================================================
-                       NAVIGATION
-                       ===================================================== */
+                                   NAVIGATION
+                                   ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
@@ -326,8 +326,8 @@
 
 
             /* =====================================================
-                       LOGOUT
-                       ===================================================== */
+                                   LOGOUT
+                                   ===================================================== */
 
             .sidebar-bottom {
                 padding: 12px;
@@ -363,10 +363,12 @@
 
 
             /* =====================================================
-                       MAIN CONTENT
-                       ===================================================== */
+                                   MAIN CONTENT
+                                   ===================================================== */
 
             .doctor-main {
+                position: relative;
+                z-index: 1041;
                 min-height: 100vh;
                 margin-left: var(--sidebar-width);
                 transition: margin-left .25s ease, width .25s ease;
@@ -374,8 +376,8 @@
 
 
             /* =====================================================
-                       COLLAPSED SIDEBAR
-                       ===================================================== */
+                                   COLLAPSED SIDEBAR
+                                   ===================================================== */
 
             body.sidebar-collapsed
             .doctor-sidebar {
@@ -494,8 +496,8 @@
 
 
             /* =====================================================
-                       FULL WIDTH MODE
-                       ===================================================== */
+                                   FULL WIDTH MODE
+                                   ===================================================== */
 
             body.sidebar-hidden
             .doctor-sidebar {
@@ -511,8 +513,8 @@
 
 
             /* =====================================================
-                       RESTORE BUTTON
-                       ===================================================== */
+                                   RESTORE BUTTON
+                                   ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -541,8 +543,8 @@
 
 
             /* =====================================================
-                       MOBILE
-                       ===================================================== */
+                                   MOBILE
+                                   ===================================================== */
 
             .doctor-mobile-header {
                 display: none;
@@ -586,15 +588,15 @@
             .sidebar-backdrop {
                 position: fixed;
                 inset: 0;
-                z-index: 1040;
+                z-index: 1030;
                 display: none;
                 background: rgba(15,23,42,.55);
             }
 
 
             /* =====================================================
-                       RESPONSIVE
-                       ===================================================== */
+                                   RESPONSIVE
+                                   ===================================================== */
 
             @@media(max-width: 991.98px) {
 
@@ -746,6 +748,7 @@
         required: false
     )
 
+    <link rel="stylesheet" href="~/css/doctor-views.css" asp-append-version="true" />
 </head>
 
 
@@ -1004,6 +1007,20 @@
                 </a>
 
 
+
+                <a href="/Doctor/Results/Historical"
+                   title="Historical Results / Consent"
+                   class="sidebar-link @(controller == "Results" && action == "Historical" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                    <span class="sidebar-link-text">Historical Results / Consent</span>
+                </a>
+
+                <a href="/Doctor/Alerts/Index"
+                   title="Clinical Alerts"
+                   class="sidebar-link @(controller == "Alerts" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                    <span class="sidebar-link-text">Clinical Alerts</span>
+                </a>
 
                 <!-- ================= REPORTS ================= -->
 
@@ -1636,6 +1653,8 @@
 
     </script>
 
+
+    <script src="~/js/doctor-views.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync(
         "Scripts",

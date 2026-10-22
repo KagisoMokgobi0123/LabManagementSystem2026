@@ -1,11 +1,543 @@
-﻿@model IEnumerable<NMB_HLabSys.Areas.Patient.Models.PatientModel>
-@{ ViewData["Title"] = "Patients"; Layout = "_DoctorLayout"; }
-<div class="container-fluid py-4">
- <div class="d-flex flex-wrap justify-content-between align-items-center mb-3"><div><h2>Patients</h2><p class="text-muted mb-0">Find patients by South African ID number or open their records.</p></div><a class="btn btn-primary" asp-area="Doctor" asp-controller="Patients" asp-action="Create"><i class="fas fa-user-plus mr-1"></i> Add patient</a></div>
- @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }
- <form method="get" class="card card-body mb-3"><label for="idNumber">Patient ID number</label><div class="input-group"><input id="idNumber" name="idNumber" value="@ViewBag.SearchId" class="form-control" maxlength="13" pattern="[0-9]{13}" placeholder="Enter 13-digit ID number"/><div class="input-group-append"><button class="btn btn-outline-primary" type="submit">Search</button></div></div></form>
- <div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Patient</th><th>ID number</th><th>Date of birth</th><th>Contact</th><th></th></tr></thead><tbody>
- @foreach (var p in Model) { <tr><td>@p.FullName</td><td>@p.IDNumber</td><td>@p.DateOfBirth.ToString("dd MMM yyyy")</td><td>@p.ContactNumber</td><td class="text-right"><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@p.PatientId">View record</a></td></tr> }
- @if (!Model.Any()) { <tr><td colspan="5" class="text-center text-muted py-4">@if(string.IsNullOrWhiteSpace(ViewBag.SearchId as string)){<span>Enter a patient's ID number to find their record. Patient records are not browsable as a list.</span>}else{<span>No patient found for this ID number. You can add a new patient.</span>}</td></tr> }
- </tbody></table></div></div>
+﻿
+@model IEnumerable<NMB_HLabSys.Areas.Patient.Models.PatientModel>
+
+@{
+    ViewData["Title"] = "Find Patient";
+    Layout = "_DoctorLayout";
+}
+
+<style>
+    .patient-search-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 40px 16px 70px;
+    }
+
+    .search-card {
+        background: #fff;
+        border: 0;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, .08);
+        overflow: visible;
+    }
+
+    .search-header {
+        padding: 28px;
+        color: #fff;
+        border-radius: 16px 16px 0 0;
+        background: linear-gradient(135deg, #073b5c, #0284c7);
+    }
+
+    .search-header h2 {
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .search-header p {
+        margin-bottom: 0;
+        opacity: .9;
+    }
+
+    .search-body {
+        padding: 30px;
+    }
+
+    .search-label {
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .search-input {
+        min-height: 50px;
+        border-radius: 9px;
+    }
+
+    .suggestion-wrapper {
+        position: relative;
+    }
+
+    .suggestion-list {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        background: #fff;
+        border: 1px solid #dbe3ec;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+        max-height: 320px;
+        overflow-y: auto;
+    }
+
+    .suggestion-item {
+        display: block;
+        width: 100%;
+        padding: 13px 16px;
+        text-align: left;
+        border: 0;
+        border-bottom: 1px solid #edf1f5;
+        background: #fff;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .suggestion-item:last-child {
+        border-bottom: 0;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item:focus {
+        background: #f0f9ff;
+        outline: none;
+    }
+
+    .suggestion-name {
+        display: block;
+        font-weight: 600;
+    }
+
+    .suggestion-details {
+        display: block;
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 3px;
+    }
+
+    .search-status {
+        min-height: 24px;
+        margin-top: 12px;
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .search-help {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .search-icon {
+        width: 66px;
+        height: 66px;
+        margin: 0 auto 18px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #e0f2fe;
+        color: #0284c7;
+        border-radius: 50%;
+        font-size: 27px;
+    }
+
+    .patient-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, .55);
+    }
+
+    .patient-modal {
+        width: 100%;
+        max-width: 460px;
+        padding: 28px;
+        background: #fff;
+        border-radius: 15px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+    }
+
+    .patient-modal h4 {
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .patient-modal p {
+        color: #64748b;
+    }
+
+    .modal-icon {
+        font-size: 35px;
+        color: #0284c7;
+        margin-bottom: 14px;
+    }
+
+    @@media (max-width: 576px) {
+        .search-body {
+            padding: 20px;
+        }
+
+        .search-header {
+            padding: 22px;
+        }
+    }
+</style>
+
+<div class="patient-search-page">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
+        <div class="mb-3">
+            <h2 class="mb-1">Find a Patient</h2>
+            <p class="text-muted mb-0">
+                Search for an existing patient using their South African ID number.
+            </p>
+        </div>
+
+        <a class="btn btn-primary mb-3"
+           asp-area="Doctor"
+           asp-controller="Patients"
+           asp-action="Create">
+            <i class="fas fa-user-plus mr-1"></i>
+            Add Patient
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="alert">
+            @successMessage
+        </div>
+    }
+
+    <div class="search-card">
+        <div class="search-header">
+            <h2 class="h4">
+                <i class="fas fa-search mr-2"></i>
+                Patient Lookup
+            </h2>
+            <p>Enter the patient's ID number to find their record.</p>
+        </div>
+
+        <div class="search-body">
+
+            <div class="search-icon">
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+            </div>
+
+            <form id="patientSearchForm" autocomplete="off">
+                <label for="idNumber" class="search-label">
+                    South African ID Number
+                </label>
+
+                <div class="suggestion-wrapper">
+                    <input id="idNumber"
+                           name="idNumber"
+                           type="text"
+                           class="form-control search-input"
+                           maxlength="13"
+                           minlength="1"
+                           inputmode="numeric"
+                           pattern="[0-9]{13}"
+                           placeholder="Start typing the 13-digit ID number"
+                           aria-describedby="searchHelp searchStatus"
+                           aria-autocomplete="list"
+                           aria-controls="suggestionList"
+                           aria-expanded="false" />
+
+                    <div id="suggestionList"
+                         class="suggestion-list"
+                         role="listbox"
+                         hidden>
+                    </div>
+                </div>
+
+                <div id="searchStatus"
+                     class="search-status"
+                     role="status"
+                     aria-live="polite">
+                </div>
+
+                <div id="searchHelp" class="search-help">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Patient records are not displayed as a list.
+                    Matching records will appear here as you type.
+                </div>
+
+                <button type="submit"
+                        class="btn btn-outline-primary mt-3">
+                    <i class="fas fa-search mr-1"></i>
+                    Search ID Number
+                </button>
+            </form>
+
+        </div>
+    </div>
 </div>
+
+<div id="createPatientModal"
+     class="patient-modal-backdrop"
+     role="presentation"
+     hidden>
+
+    <div class="patient-modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="createPatientTitle"
+         aria-describedby="createPatientDescription">
+
+        <div class="modal-icon">
+            <i class="fas fa-user-plus" aria-hidden="true"></i>
+        </div>
+
+        <h4 id="createPatientTitle">Patient Not Found</h4>
+
+        <p id="createPatientDescription">
+            No existing patient matches this ID number.
+            Would you like to create a new patient record?
+        </p>
+
+        <div class="d-flex flex-wrap justify-content-end mt-4">
+            <button type="button"
+                    id="cancelCreatePatient"
+                    class="btn btn-outline-secondary mr-2 mb-2">
+                Cancel
+            </button>
+
+            <button type="button"
+                    id="confirmCreatePatient"
+                    class="btn btn-primary mb-2">
+                <i class="fas fa-user-plus mr-1"></i>
+                Create Patient
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            "use strict";
+
+            const input = document.getElementById("idNumber");
+            const form = document.getElementById("patientSearchForm");
+            const suggestions = document.getElementById("suggestionList");
+            const status = document.getElementById("searchStatus");
+            const modal = document.getElementById("createPatientModal");
+            const cancelButton = document.getElementById("cancelCreatePatient");
+            const createButton = document.getElementById("confirmCreatePatient");
+
+            const searchUrl =
+                '@Url.Action("SearchSuggestions", "Patients", new { area = "Doctor" })';
+
+            const createUrl =
+                '@Url.Action("Create", "Patients", new { area = "Doctor" })';
+
+            let debounceTimer = null;
+            let activeController = null;
+            let currentIdNumber = "";
+            let lastNoResultsId = "";
+            let isSearching = false;
+
+            function hideSuggestions() {
+                suggestions.replaceChildren();
+                suggestions.hidden = true;
+                input.setAttribute("aria-expanded", "false");
+            }
+
+            function setStatus(message) {
+                status.textContent = message;
+            }
+
+            function showModal(idNumber) {
+                currentIdNumber = idNumber;
+                modal.hidden = false;
+                cancelButton.focus();
+            }
+
+            function hideModal() {
+                modal.hidden = true;
+                input.focus();
+            }
+
+            function openCreatePage(idNumber) {
+                const url = new URL(createUrl, window.location.origin);
+                url.searchParams.set("idNumber", idNumber);
+                window.location.assign(url.toString());
+            }
+
+            function addSuggestion(patient) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "suggestion-item";
+                button.setAttribute("role", "option");
+
+                const name = document.createElement("span");
+                name.className = "suggestion-name";
+                name.textContent = patient.name || "Patient";
+
+                const details = document.createElement("span");
+                details.className = "suggestion-details";
+                details.textContent =
+                    "ID: " + patient.idNumber +
+                    (patient.dateOfBirth
+                        ? " · Date of birth: " + patient.dateOfBirth
+                        : "");
+
+                button.append(name, details);
+
+                button.addEventListener("click", () => {
+                    if (patient.detailsUrl) {
+                        window.location.assign(patient.detailsUrl);
+                    }
+                });
+
+                suggestions.appendChild(button);
+            }
+
+            async function searchPatients() {
+                const idNumber = input.value.trim();
+
+                if (!/^[0-9]{1,13}$/.test(idNumber)) {
+                    hideSuggestions();
+                    setStatus(idNumber.length === 0
+                        ? ""
+                        : "Enter digits only for the ID number.");
+                    return;
+                }
+
+                if (activeController) {
+                    activeController.abort();
+                }
+
+                activeController = new AbortController();
+                const controller = activeController;
+
+                setStatus("Searching...");
+                hideSuggestions();
+                isSearching = true;
+
+                try {
+                    const url = new URL(searchUrl, window.location.origin);
+                    url.searchParams.set("term", idNumber);
+
+                    const response = await fetch(url.toString(), {
+                        method: "GET",
+                        headers: { "Accept": "application/json" },
+                        credentials: "same-origin",
+                        signal: controller.signal
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Patient search failed.");
+                    }
+
+                    const data = await response.json();
+
+                    if (input.value.trim() !== idNumber) {
+                        return;
+                    }
+
+                    if (data.requiresFullId) {
+                        setStatus("Enter all 13 digits to search for this patient.");
+                        return;
+                    }
+
+                    if (Array.isArray(data.patients) && data.patients.length > 0) {
+                        data.patients.forEach(addSuggestion);
+                        suggestions.hidden = false;
+                        input.setAttribute("aria-expanded", "true");
+
+                        setStatus(data.patients.length === 1
+                            ? "1 matching patient found. Select the record to continue."
+                            : data.patients.length + " matching patients found. Select a record to continue.");
+
+                        lastNoResultsId = "";
+                        return;
+                    }
+
+                    setStatus("No matching patients found.");
+
+                    if (idNumber.length === 13 && lastNoResultsId !== idNumber) {
+                        lastNoResultsId = idNumber;
+                        showModal(idNumber);
+                    }
+                } catch (error) {
+                    if (error.name !== "AbortError") {
+                        setStatus("Unable to search right now. Please try again.");
+                    }
+                } finally {
+                    if (activeController === controller) {
+                        isSearching = false;
+                    }
+                }
+            }
+
+            input.addEventListener("input", () => {
+                clearTimeout(debounceTimer);
+                hideSuggestions();
+                lastNoResultsId = "";
+
+                if (activeController) {
+                    activeController.abort();
+                }
+
+                const value = input.value.trim();
+
+                if (value.length === 0) {
+                    setStatus("");
+                    return;
+                }
+
+                if (!/^[0-9]+$/.test(value)) {
+                    setStatus("Enter digits only for the ID number.");
+                    return;
+                }
+
+                if (value.length > 13) {
+                    setStatus("A South African ID number must contain 13 digits.");
+                    return;
+                }
+
+                debounceTimer = setTimeout(searchPatients, 250);
+            });
+
+            form.addEventListener("submit", async event => {
+                event.preventDefault();
+                clearTimeout(debounceTimer);
+
+                const value = input.value.trim();
+
+                if (!/^[0-9]{13}$/.test(value)) {
+                    setStatus("Enter a 13-digit ID number to search.");
+                    input.focus();
+                    return;
+                }
+
+                if (isSearching) {
+                    return;
+                }
+
+                await searchPatients();
+            });
+
+            createButton.addEventListener("click", () => {
+                if (/^[0-9]{13}$/.test(currentIdNumber)) {
+                    openCreatePage(currentIdNumber);
+                }
+            });
+
+            cancelButton.addEventListener("click", hideModal);
+
+            modal.addEventListener("click", event => {
+                if (event.target === modal) {
+                    hideModal();
+                }
+            });
+
+            document.addEventListener("keydown", event => {
+                if (event.key === "Escape" && !modal.hidden) {
+                    hideModal();
+                }
+            });
+
+            document.addEventListener("click", event => {
+                if (!suggestions.contains(event.target) && event.target !== input) {
+                    hideSuggestions();
+                }
+            });
+        })();
+    </script>
+}

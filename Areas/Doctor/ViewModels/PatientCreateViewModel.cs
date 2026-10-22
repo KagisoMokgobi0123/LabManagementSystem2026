@@ -9,13 +9,13 @@ public sealed class PatientCreateViewModel
     [Required, StringLength(100)] public string Surname { get; set; } = "";
     [Required, SouthAfricanIdNumber] public string IDNumber { get; set; } = "";
     [Required, DataType(DataType.Date)] public DateTime? DateOfBirth { get; set; }
-    [Required, Phone] public string ContactNumber { get; set; } = "";
+    [Required, StringLength(10, MinimumLength = 10, ErrorMessage = "Enter a 10-digit South African cellphone number."), RegularExpression(@"^0[0-9]{9}$", ErrorMessage = "The contact number must contain exactly 10 digits and start with 0.")] public string ContactNumber { get; set; } = "";
     [Required, EmailAddress, StringLength(254)] public string Email { get; set; } = "";
     [Required, StringLength(200)] public string Address { get; set; } = "";
     [StringLength(100)] public string? Suburb { get; set; }
     [Required, StringLength(100)] public string City { get; set; } = "";
     [Required, StringLength(100)] public string Province { get; set; } = "Eastern Cape";
-    [StringLength(4, MinimumLength=4)] public string? PostalCode { get; set; }
+    [StringLength(4, MinimumLength = 4)] public string? PostalCode { get; set; }
     public List<int> MedicalConditionIds { get; set; } = new();
     public List<int> AllergyIds { get; set; } = new();
     public List<int> MedicationIds { get; set; } = new();

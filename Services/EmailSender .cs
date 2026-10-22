@@ -1,16 +1,21 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿
 using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace NMB_HLabSys.Services
 {
-    public class EmailSender : IEmailSender
+    public sealed class EmailSender : IEmailSender
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<EmailSender> _logger;
 
-        public EmailSender(IConfiguration configuration)
+        public EmailSender(
+            IConfiguration configuration,
+            ILogger<EmailSender> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(
@@ -18,64 +23,68 @@ namespace NMB_HLabSys.Services
             string subject,
             string htmlMessage)
         {
-            var smtpHost =
-                _configuration["EmailSettings:SmtpHost"];
+            if (string.IsNullOrWhiteSpace(email))
+                throw new ArgumentException(
+                    "Recipient email is required.", nameof(email));
 
-            var smtpPort =
-                int.Parse(
-                    _configuration["EmailSettings:SmtpPort"]
-                    ?? "587");
+            var host = _configuration["EmailSettings:SmtpHost"];
+            var portValue = _configuration["EmailSettings:SmtpPort"];
+            var username = _configuration["EmailSettings:Username"];
+            var password = _configuration["EmailSettings:Password"];
+            var fromEmail = _configuration["EmailSettings:FromEmail"];
+            var fromName = _configuration["EmailSettings:FromName"]
+                           ?? "NMB Health Laboratory System";
 
-            var smtpUsername =
-                _configuration["EmailSettings:Username"];
+            if (string.IsNullOrWhiteSpace(host) ||
+                !int.TryParse(portValue, out var port) ||
+                string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password) ||
+                string.IsNullOrWhiteSpace(fromEmail))
+            {
+                throw new InvalidOperationException(
+                    "Email configuration is incomplete. Check " +
+                    "EmailSettings:SmtpHost, SmtpPort, Username, " +
+                    "Password and FromEmail.");
+            }
 
-            var smtpPassword =
-                _configuration["EmailSettings:Password"];
+            if (!MailAddress.TryCreate(email, out _) ||
+                !MailAddress.TryCreate(fromEmail, out _))
+            {
+                throw new InvalidOperationException(
+                    "The sender or recipient email address is invalid.");
+            }
 
-            var fromEmail =
-                _configuration["EmailSettings:FromEmail"];
-
-            var fromName =
-                _configuration["EmailSettings:FromName"]
-                ?? "NMB Health Laboratory System";
-
-
-            using var message =
-                new MailMessage();
-
-            message.From =
-                new MailAddress(
-                    fromEmail!,
-                    fromName);
+            using var message = new MailMessage
+            {
+                From = new MailAddress(fromEmail, fromName),
+                Subject = subject,
+                Body = htmlMessage,
+                IsBodyHtml = true
+            };
 
             message.To.Add(email);
 
-            message.Subject =
-                subject;
+            using var smtp = new SmtpClient(host, port)
+            {
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(username, password),
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                Timeout = 30000
+            };
 
-            message.Body =
-                htmlMessage;
-
-            message.IsBodyHtml =
-                true;
-
-
-            using var smtp =
-                new SmtpClient(
-                    smtpHost,
-                    smtpPort);
-
-            smtp.EnableSsl =
-                true;
-
-            smtp.Credentials =
-                new NetworkCredential(
-                    smtpUsername,
-                    smtpPassword);
-
-
-            await smtp.SendMailAsync(
-                message);
+            try
+            {
+                await smtp.SendMailAsync(message);
+                _logger.LogInformation(
+                    "Email sent successfully to {Recipient}.", email);
+            }
+            catch (SmtpException ex)
+            {
+                _logger.LogError(
+                    ex, "SMTP failed to send an email to {Recipient}.", email);
+                throw;
+            }
         }
     }
 }

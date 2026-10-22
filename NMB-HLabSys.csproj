@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>NMB_HLabSys</RootNamespace>
+    <UserSecretsId>69a676ed-da31-4534-ad78-2aa5f91eac5b</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

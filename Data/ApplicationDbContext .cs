@@ -113,6 +113,10 @@ namespace NMB_HLabSys.Data
         public DbSet<Allergy> Allergies { get; set; }
 
 
+        public DbSet<NMB_HLabSys.Areas.Doctor.Models.DoctorAlertReadModel>
+    DoctorAlertReads
+        { get; set; } = null!;
+
         // ============================================================
         // TECHNICIAN
         // ============================================================
@@ -262,7 +266,8 @@ namespace NMB_HLabSys.Data
             builder.Entity<TechnicianProfile>()
                 .HasIndex(x => x.EmployeeNumber)
                 .IsUnique();
-
+            //////
+            builder.Entity<DoctorAlertReadModel>().HasNoKey();
 
             // ============================================================
             // TEST CATEGORY STATUS

@@ -25,15 +25,102 @@ public sealed class PatientsController : Controller
     { _db = db; _users = users; _roles = roles; _email = email; _logger = logger; }
 
     [HttpGet]
-    public async Task<IActionResult> Index(string? idNumber)
+    public async Task<IActionResult> Index(string? searchTerm, string? idNumber)
     {
-        // Search by ID number only; do not expose a browseable list of patient identities.
-        var patients = string.IsNullOrWhiteSpace(idNumber)
-            ? new List<PatientModel>()
-            : await _db.Patients.Include(p => p.User).Where(p => p.IDNumber == idNumber.Trim())
-                .OrderBy(p => p.Surname).ThenBy(p => p.Name).Take(1).ToListAsync();
+        // Doctors can browse existing patient records and narrow the list by ID,
+        // name, surname, email, or contact number. Keep this endpoint role-protected.
+        var query = _db.Patients
+            .AsNoTracking()
+            .Include(p => p.User)
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(idNumber))
+        {
+            var cleanId = idNumber.Trim();
+            query = query.Where(p => p.IDNumber == cleanId);
+            searchTerm = cleanId;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim();
+            query = query.Where(p =>
+                p.IDNumber.Contains(term) ||
+                p.Name.Contains(term) ||
+                p.Surname.Contains(term) ||
+                p.Email.Contains(term) ||
+                p.ContactNumber.Contains(term));
+        }
+
+        var patients = await query
+            .OrderBy(p => p.Surname)
+            .ThenBy(p => p.Name)
+            .ToListAsync();
+
+        ViewBag.SearchTerm = searchTerm;
         ViewBag.SearchId = idNumber;
         return View(patients);
+    }
+
+    /// <summary>
+    /// AJAX endpoint used by the Doctor patient lookup page.
+    /// The view calls SearchSuggestions?term=..., so the action name and JSON
+    /// response shape must stay in sync with that JavaScript.
+    /// </summary>
+    [HttpGet]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public async Task<IActionResult> SearchSuggestions(
+        string? term,
+        CancellationToken cancellationToken)
+    {
+        term = (term ?? string.Empty).Trim();
+
+        if (term.Length == 0 || term.Any(c => c < '0' || c > '9') || term.Length > 13)
+        {
+            return Json(new
+            {
+                requiresFullId = false,
+                patients = Array.Empty<object>()
+            });
+        }
+
+        if (term.Length < 13)
+        {
+            return Json(new
+            {
+                requiresFullId = true,
+                patients = Array.Empty<object>()
+            });
+        }
+
+        var matches = await _db.Patients
+            .AsNoTracking()
+            .Where(p => p.IDNumber == term)
+            .Select(p => new
+            {
+                p.PatientId,
+                p.Name,
+                p.Surname,
+                p.IDNumber,
+                p.DateOfBirth
+            })
+            .Take(10)
+            .ToListAsync(cancellationToken);
+
+        var patients = matches.Select(p => new
+        {
+            name = string.Join(" ", new[] { p.Name, p.Surname }
+                .Where(part => !string.IsNullOrWhiteSpace(part))),
+            idNumber = p.IDNumber,
+            dateOfBirth = p.DateOfBirth.ToString("dd MMM yyyy"),
+            detailsUrl = Url.Action(nameof(Details), "Patients",
+                new { area = "Doctor", id = p.PatientId })
+        }).ToList();
+
+        return Json(new
+        {
+            requiresFullId = false,
+            patients
+        });
     }
 
     [HttpGet]
@@ -54,6 +141,12 @@ public sealed class PatientsController : Controller
     {
         var cleanId = (model.IDNumber ?? "").Trim();
         model.IDNumber = cleanId;
+
+        var cleanContactNumber = (model.ContactNumber ?? "").Trim();
+        model.ContactNumber = cleanContactNumber;
+        if (cleanContactNumber.Length != 10 || cleanContactNumber[0] != '0' || cleanContactNumber.Any(c => c < '0' || c > '9'))
+            ModelState.AddModelError(nameof(model.ContactNumber), "Enter a South African contact number containing exactly 10 digits and starting with 0.");
+
         var embeddedDob = NMB_HLabSys.Validation.SouthAfricanIdNumberAttribute.TryGetDateOfBirth(cleanId);
         if (embeddedDob == null) ModelState.AddModelError(nameof(model.IDNumber), "Enter a valid South African ID number, including a valid date and checksum.");
         else if (model.DateOfBirth?.Date != embeddedDob.Value.Date) ModelState.AddModelError(nameof(model.DateOfBirth), "Date of birth must match the date encoded in the ID number.");
@@ -80,9 +173,16 @@ public sealed class PatientsController : Controller
         var temporaryPassword = GenerateTemporaryPassword();
         var user = new ApplicationUser
         {
-            UserName = model.Email.Trim(), Email = model.Email.Trim(), EmailConfirmed = true,
-            FirstName = model.Name.Trim(), LastName = model.Surname.Trim(), PhoneNumber = model.ContactNumber.Trim(),
-            IsActive = true, MustChangePassword = true, IsProfileCompleted = false, CreatedDate = DateTime.UtcNow
+            UserName = model.Email.Trim(),
+            Email = model.Email.Trim(),
+            EmailConfirmed = true,
+            FirstName = model.Name.Trim(),
+            LastName = model.Surname.Trim(),
+            PhoneNumber = model.ContactNumber.Trim(),
+            IsActive = true,
+            MustChangePassword = true,
+            IsProfileCompleted = false,
+            CreatedDate = DateTime.UtcNow
         };
         var created = await _users.CreateAsync(user, temporaryPassword);
         if (!created.Succeeded)
@@ -103,12 +203,23 @@ public sealed class PatientsController : Controller
 
             var patient = new PatientModel
             {
-                PatientId = Guid.NewGuid().ToString(), UserId = user.Id,
-                Name = model.Name.Trim(), Surname = model.Surname.Trim(), IDNumber = cleanId,
-                DateOfBirth = embeddedDob!.Value.Date, ContactNumber = model.ContactNumber.Trim(), Email = model.Email.Trim(),
-                Address = model.Address.Trim(), Suburb = model.Suburb?.Trim() ?? "", City = model.City.Trim(),
-                Province = model.Province.Trim(), PostalCode = model.PostalCode?.Trim() ?? "", CreatedDate = DateTime.Now,
-                NoKnownMedicalConditions = model.NoKnownMedicalConditions, NoKnownAllergies = model.NoKnownAllergies, NoCurrentMedications = model.NoCurrentMedications
+                PatientId = Guid.NewGuid().ToString(),
+                UserId = user.Id,
+                Name = model.Name.Trim(),
+                Surname = model.Surname.Trim(),
+                IDNumber = cleanId,
+                DateOfBirth = embeddedDob!.Value.Date,
+                ContactNumber = model.ContactNumber.Trim(),
+                Email = model.Email.Trim(),
+                Address = model.Address.Trim(),
+                Suburb = model.Suburb?.Trim() ?? "",
+                City = model.City.Trim(),
+                Province = model.Province.Trim(),
+                PostalCode = model.PostalCode?.Trim() ?? "",
+                CreatedDate = DateTime.Now,
+                NoKnownMedicalConditions = model.NoKnownMedicalConditions,
+                NoKnownAllergies = model.NoKnownAllergies,
+                NoCurrentMedications = model.NoCurrentMedications
             };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();

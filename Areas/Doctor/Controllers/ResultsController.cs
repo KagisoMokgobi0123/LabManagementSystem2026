@@ -55,6 +55,72 @@ public sealed class ResultsController : Controller
     }
 
     [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Release(int id, string releaseNote, string notificationMethod = "Email")
+    {
+        var doctorId = _users.GetUserId(User);
+        releaseNote = (releaseNote ?? string.Empty).Trim();
+        if (releaseNote.Length == 0 || releaseNote.Length > 2000)
+        {
+            TempData["ErrorMessage"] = "A release note is required (maximum 2000 characters).";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        if (notificationMethod != "Email")
+        {
+            TempData["ErrorMessage"] = "Only email notification is currently supported.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        var request = await _db.TestRequests.Include(r => r.Patient).Include(r => r.Samples).Include(r => r.RequestedTestTypes)
+            .FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId);
+        if (request == null) return NotFound();
+        var items = await _db.TestRequestTestTypes.Include(x => x.TestType)
+            .Where(x => x.TestRequestId == id).ToListAsync();
+        if (request.Status == "Released" || request.Status == "ReleasedByDoctor")
+        {
+            TempData["InfoMessage"] = "These results have already been released.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        if (!request.Samples.Any() || request.Samples.Any(x => !x.IsReceived) || items.Count < request.EffectiveTestTypes.Count || items.Count == 0 || items.Any(x => x.Status != "Completed" || !x.IsVerified))
+        {
+            TempData["ErrorMessage"] = "Results cannot be released until all samples and tests are complete and every result is verified.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+        var doctor = await _users.GetUserAsync(User);
+        request.Status = "ReleasedByDoctor";
+        request.DoctorReleaseNote = releaseNote;
+        request.PatientNotificationMethod = "Email";
+        request.ReleasedByDoctorId = doctorId;
+        request.ResultsReleasedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Patient?.Email)) throw new InvalidOperationException("The patient has no email address.");
+            await _email.SendAsync(request.Patient.Email, "Your laboratory results have been released",
+                $"<p>Hello {System.Net.WebUtility.HtmlEncode(request.Patient.FullName)},</p><p>Dr. {System.Net.WebUtility.HtmlEncode(doctor?.FullName ?? "your doctor")} has reviewed and released the results for request <b>{System.Net.WebUtility.HtmlEncode(request.RequestNumber)}</b>.</p><p><b>Doctor's note:</b> {System.Net.WebUtility.HtmlEncode(releaseNote)}</p><p>Please sign in to your patient account to view your results.</p>");
+            TempData["SuccessMessage"] = "Results released and patient email sent.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Results released but patient email failed for request {RequestNumber}", request.RequestNumber);
+            TempData["WarningMessage"] = "Results were released, but the patient notification email failed. Check email settings and notify the patient through an approved channel.";
+        }
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> DownloadPdf(int id)
+    {
+        var doctorId = _users.GetUserId(User);
+        var request = await _db.TestRequests.Include(r => r.Patient).FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId && (r.Status == "Released" || r.Status == "ReleasedByDoctor"));
+        if (request == null) return NotFound();
+        var items = await _db.TestRequestTestTypes.Include(x => x.TestType).ThenInclude(t => t!.MeasurementUnitDetails).Where(x => x.TestRequestId == id).OrderBy(x => x.TestType!.Name).ToListAsync();
+        if (items.Count == 0 || items.Any(x => x.Status != "Completed" || !x.IsVerified)) return Forbid();
+        var rows = items.Select(x => new[] { x.TestType?.Name ?? "Test", x.ResultValue?.ToString() ?? "—", x.TestType?.MeasurementUnitDetails?.Unit ?? "", $"{x.TestType?.NormalMin} - {x.TestType?.NormalMax}", x.IsAbnormal ? "ABNORMAL" : "Within range", x.ResultNotes ?? "" }).ToList();
+        var doctor = await _users.GetUserAsync(User);
+        var pdf = DoctorPdfReportBuilder.Build("Laboratory Results", $"Dr {doctor?.FullName ?? "Doctor"}", null, DateTime.Now.ToString("dd MMM yyyy HH:mm"), $"Request: {request.RequestNumber}; Patient: {request.Patient?.FullName}; Status: {request.Status}; Release note: {request.DoctorReleaseNote ?? "—"}", rows, "No result rows available.");
+        return File(pdf, "application/pdf", $"results-{request.RequestNumber}.pdf");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> RequestHistoricalConsent(string patientIdNumber)
     {
         var doctorId = _users.GetUserId(User); var doctor = await _users.GetUserAsync(User);

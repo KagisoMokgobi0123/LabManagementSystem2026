@@ -317,6 +317,24 @@ namespace NMBHLabSys.Migrations
                     b.ToTable("MedicationCategories");
                 });
 
+            modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.DoctorAlertReadModel", b =>
+                {
+                    b.Property<int>("DoctorAlertReadId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("DoctorId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReadAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TestRequestTestTypeId")
+                        .HasColumnType("int");
+
+                    b.ToTable("DoctorAlertReads");
+                });
+
             modelBuilder.Entity("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", b =>
                 {
                     b.Property<int>("TestRequestId")
@@ -324,6 +342,10 @@ namespace NMBHLabSys.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TestRequestId"));
+
+                    b.Property<string>("CancellationReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("ClinicalNotes")
                         .HasMaxLength(2000)
@@ -333,11 +355,22 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("DoctorReleaseNote")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<string>("PatientId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("PatientModelPatientId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PatientNotificationMethod")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ReleasedByDoctorId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("RequestDate")
@@ -347,6 +380,9 @@ namespace NMBHLabSys.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("ResultsReleasedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -363,6 +399,8 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("PatientId");
 
                     b.HasIndex("PatientModelPatientId");
+
+                    b.HasIndex("ReleasedByDoctorId");
 
                     b.ToTable("TestRequests");
 
@@ -1132,6 +1170,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<bool>("IsAbnormal")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("bit");
+
                     b.Property<string>("ResultNotes")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -1155,6 +1196,12 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestTypeId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VerifiedByTechnicianId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("TestRequestTestTypeId");
 
                     b.HasIndex("TechnicianId");
@@ -1163,6 +1210,8 @@ namespace NMBHLabSys.Migrations
 
                     b.HasIndex("TestTypeId");
 
+                    b.HasIndex("VerifiedByTechnicianId");
+
                     b.ToTable("TestRequestTestTypes");
 
                     b.HasData(
@@ -1170,6 +1219,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 1,
                             TestTypeId = 1
@@ -1178,6 +1228,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 2,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 2,
                             TestTypeId = 1
@@ -1186,6 +1237,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 3,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 2,
                             TestTypeId = 2
@@ -1194,6 +1246,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 4,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 3,
                             TestTypeId = 3
@@ -1202,6 +1255,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 5,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 5,
                             TestTypeId = 6
@@ -1210,6 +1264,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 6,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 6,
                             TestTypeId = 3
@@ -1218,6 +1273,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 7,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 9,
                             TestTypeId = 3
@@ -1226,6 +1282,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 8,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 10,
                             TestTypeId = 1
@@ -1235,6 +1292,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1001,
                             CompletionDateTime = new DateTime(2026, 10, 14, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 14, 8, 30, 0, 0, DateTimeKind.Unspecified),
                             Status = "Completed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1246,6 +1304,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1002,
                             CompletionDateTime = new DateTime(2026, 10, 14, 11, 15, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 14, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Completed",
                             TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -1257,6 +1316,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1003,
                             CompletionDateTime = new DateTime(2026, 10, 13, 9, 30, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 13, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "To Be Reviewed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1268,6 +1328,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1004,
                             CompletionDateTime = new DateTime(2026, 10, 13, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 13, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "To Be Reviewed",
                             TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -1278,6 +1339,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1101,
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 15, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "In Progress",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1288,6 +1350,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1102,
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 15, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "In Progress",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1298,6 +1361,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1103,
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 15, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "In Progress",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1308,6 +1372,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1104,
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 15, 11, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "In Progress",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1318,6 +1383,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1105,
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "In Progress",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1329,6 +1395,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1106,
                             CompletionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 14, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Completed",
                             TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -1340,6 +1407,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1107,
                             CompletionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 14, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "To Be Reviewed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1351,6 +1419,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1201,
                             CompletionDateTime = new DateTime(2026, 10, 1, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1362,6 +1431,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1202,
                             CompletionDateTime = new DateTime(2026, 10, 2, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 2, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1373,6 +1443,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1203,
                             CompletionDateTime = new DateTime(2026, 10, 3, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 3, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1384,6 +1455,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1204,
                             CompletionDateTime = new DateTime(2026, 10, 4, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 4, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1395,6 +1467,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1205,
                             CompletionDateTime = new DateTime(2026, 10, 5, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 5, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1406,6 +1479,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1206,
                             CompletionDateTime = new DateTime(2026, 10, 6, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 6, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1417,6 +1491,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1207,
                             CompletionDateTime = new DateTime(2026, 10, 7, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 7, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1428,6 +1503,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1208,
                             CompletionDateTime = new DateTime(2026, 10, 8, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 8, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1439,6 +1515,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1209,
                             CompletionDateTime = new DateTime(2026, 10, 9, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 9, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1450,6 +1527,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1210,
                             CompletionDateTime = new DateTime(2026, 10, 10, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 10, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1461,6 +1539,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1211,
                             CompletionDateTime = new DateTime(2026, 10, 11, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 11, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1472,6 +1551,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1212,
                             CompletionDateTime = new DateTime(2026, 10, 12, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 12, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1483,6 +1563,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1213,
                             CompletionDateTime = new DateTime(2026, 10, 13, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 13, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1494,6 +1575,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1214,
                             CompletionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 14, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1505,6 +1587,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1301,
                             CompletionDateTime = new DateTime(2026, 10, 1, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 1, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1516,6 +1599,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1302,
                             CompletionDateTime = new DateTime(2026, 10, 2, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 2, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1527,6 +1611,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1303,
                             CompletionDateTime = new DateTime(2026, 10, 3, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 3, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1538,6 +1623,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1304,
                             CompletionDateTime = new DateTime(2026, 10, 4, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 4, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1549,6 +1635,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1305,
                             CompletionDateTime = new DateTime(2026, 10, 5, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 5, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1560,6 +1647,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1306,
                             CompletionDateTime = new DateTime(2026, 10, 6, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 6, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1571,6 +1659,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1307,
                             CompletionDateTime = new DateTime(2026, 10, 7, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 7, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1582,6 +1671,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1308,
                             CompletionDateTime = new DateTime(2026, 10, 8, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 8, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1593,6 +1683,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1309,
                             CompletionDateTime = new DateTime(2026, 10, 9, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 9, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1604,6 +1695,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1310,
                             CompletionDateTime = new DateTime(2026, 10, 10, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 10, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1615,6 +1707,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1311,
                             CompletionDateTime = new DateTime(2026, 10, 11, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 11, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1626,6 +1719,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1312,
                             CompletionDateTime = new DateTime(2026, 10, 12, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 12, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1637,6 +1731,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1313,
                             CompletionDateTime = new DateTime(2026, 10, 13, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 13, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1648,6 +1743,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1314,
                             CompletionDateTime = new DateTime(2026, 10, 14, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 14, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1659,6 +1755,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1315,
                             CompletionDateTime = new DateTime(2026, 10, 1, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 1, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1670,6 +1767,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1316,
                             CompletionDateTime = new DateTime(2026, 10, 2, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 2, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1681,6 +1779,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1317,
                             CompletionDateTime = new DateTime(2026, 10, 3, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 3, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1692,6 +1791,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1318,
                             CompletionDateTime = new DateTime(2026, 10, 4, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 4, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1703,6 +1803,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1319,
                             CompletionDateTime = new DateTime(2026, 10, 5, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 5, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1714,6 +1815,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1320,
                             CompletionDateTime = new DateTime(2026, 10, 6, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 6, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1725,6 +1827,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1321,
                             CompletionDateTime = new DateTime(2026, 10, 7, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 7, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1736,6 +1839,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1322,
                             CompletionDateTime = new DateTime(2026, 10, 8, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 8, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1747,6 +1851,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1323,
                             CompletionDateTime = new DateTime(2026, 10, 9, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 9, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1758,6 +1863,7 @@ namespace NMBHLabSys.Migrations
                             TestRequestTestTypeId = 1324,
                             CompletionDateTime = new DateTime(2026, 10, 10, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
+                            IsVerified = false,
                             StartDateTime = new DateTime(2026, 10, 10, 10, 0, 0, 0, DateTimeKind.Utc),
                             Status = "Verified",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
@@ -1768,6 +1874,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1401,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 2,
                             TestTypeId = 1
@@ -1776,6 +1883,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1402,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 2,
                             TestTypeId = 2
@@ -1784,6 +1892,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1403,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 6,
                             TestTypeId = 3
@@ -1792,6 +1901,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1404,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 11,
                             TestTypeId = 1
@@ -1800,6 +1910,7 @@ namespace NMBHLabSys.Migrations
                         {
                             TestRequestTestTypeId = 1405,
                             IsAbnormal = false,
+                            IsVerified = false,
                             Status = "Submitted",
                             TestRequestId = 11,
                             TestTypeId = 2
@@ -3957,9 +4068,15 @@ namespace NMBHLabSys.Migrations
                         .WithMany("TestRequests")
                         .HasForeignKey("PatientModelPatientId");
 
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "ReleasedByDoctor")
+                        .WithMany()
+                        .HasForeignKey("ReleasedByDoctorId");
+
                     b.Navigation("Doctor");
 
                     b.Navigation("Patient");
+
+                    b.Navigation("ReleasedByDoctor");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.ConsumableModel", b =>
@@ -4074,11 +4191,17 @@ namespace NMBHLabSys.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("NMB_HLabSys.Models.Identity.ApplicationUser", "VerifiedByTechnician")
+                        .WithMany()
+                        .HasForeignKey("VerifiedByTechnicianId");
+
                     b.Navigation("Technician");
 
                     b.Navigation("TestRequest");
 
                     b.Navigation("TestType");
+
+                    b.Navigation("VerifiedByTechnician");
                 });
 
             modelBuilder.Entity("NMB_HLabSys.Areas.Manager.Models.TestTypeConsumableModel", b =>

@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,25 @@ var builder = WebApplication.CreateBuilder(args);
 // Use Community only if your organization meets QuestPDF's license eligibility.
 QuestPDF.Settings.License = LicenseType.Community;
 
+// ======================================================
+// DATABASE CONFIGURATION
+// Supports your existing "Con" connection string.
+// Also supports "DefaultConnection" if configured later.
+// ======================================================
+
 var connectionString =
-    builder.Configuration.GetConnectionString("DefaultConnection")
+    builder.Configuration.GetConnectionString("Con")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
-        "Connection string 'DefaultConnection' was not found.");
+        "No connection string was found. Configure either " +
+        "'Con' or 'DefaultConnection' in appsettings.json.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
+// ======================================================
+// ASP.NET CORE IDENTITY CONFIGURATION
+// ======================================================
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -46,9 +59,21 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// ======================================================
+// EMAIL SERVICES
+// ======================================================
+
+// ASP.NET Core Identity email service.
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-// Authentication cookies
+// Doctor subsystem email service.
+// Used for patient credentials and other doctor notifications.
+builder.Services.AddScoped<DoctorEmailService>();
+
+// ======================================================
+// AUTHENTICATION COOKIE CONFIGURATION
+// ======================================================
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -63,8 +88,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// ======================================================
+// MVC, CACHE AND SESSION
+// ======================================================
+
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<DoctorEmailService>();
+
 builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
@@ -74,7 +103,24 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+// ======================================================
+// LOGGING
+// ASP.NET Core already configures logging from appsettings.json.
+// This keeps the default logging providers enabled.
+// ======================================================
+
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+// ======================================================
+// BUILD APPLICATION
+// ======================================================
+
 var app = builder.Build();
+
+// ======================================================
+// HTTP PIPELINE
+// ======================================================
 
 if (!app.Environment.IsDevelopment())
 {
@@ -83,11 +129,20 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.UseStaticFiles();
+
 app.UseRouting();
+
 app.UseSession();
+
 app.UseAuthentication();
+
 app.UseAuthorization();
+
+// ======================================================
+// ROUTES
+// ======================================================
 
 app.MapControllerRoute(
     name: "areas",
@@ -96,6 +151,10 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// ======================================================
+// SEED IDENTITY ACCOUNTS
+// ======================================================
 
 using (var scope = app.Services.CreateScope())
 {
@@ -108,8 +167,15 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while seeding Identity accounts.");
+
+        logger.LogError(
+            ex,
+            "An error occurred while seeding Identity accounts.");
     }
 }
+
+// ======================================================
+// START APPLICATION
+// ======================================================
 
 app.Run();

@@ -1,4 +1,184 @@
 @model IEnumerable<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>
 @using NMB_HLabSys.Areas.Doctor.Models
-@{ ViewData["Title"] = "Clinical Alerts"; Layout = "_DoctorLayout"; var requests = ViewBag.Requests as Dictionary<int,TestRequestsModel> ?? new(); }
-<div class="container-fluid py-4"><h2>Clinical alerts</h2><p class="text-muted">Abnormal test results associated with your requests. Review results in the context of the patient's clinical presentation.</p><div class="alert alert-warning">Alerts support clinical review and do not replace professional judgement or local critical-result escalation procedures.</div><div class="card"><div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Completed</th><th>Patient</th><th>Request</th><th>Test</th><th>Result</th><th>Technician notes</th><th></th></tr></thead><tbody>@foreach(var x in Model){var req=requests.ContainsKey(x.TestRequestId)?requests[x.TestRequestId]:null;<tr><td>@x.CompletionDateTime?.ToString("dd MMM yyyy HH:mm")</td><td>@(req?.Patient?.FullName ?? "Patient")</td><td>@req?.RequestNumber</td><td>@x.TestType?.Name</td><td><span class="badge badge-danger">@x.ResultValue @x.TestType?.MeasurementUnitDetails?.Unit</span></td><td>@x.ResultNotes</td><td>@if(req != null && (req.Status=="Completed" || req.Status=="Released" || req.Status=="ReleasedByDoctor")){<a asp-controller="Results" asp-action="Details" asp-route-id="@req.TestRequestId">View result</a>}</td></tr>}@if(!Model.Any()){<tr><td colspan="7" class="text-center text-muted py-4">No abnormal results have been recorded for your requests.</td></tr>}</tbody></table></div></div></div>
+@using NMB_HLabSys.Areas.Doctor.Controllers
+
+@{
+    ViewData["Title"] = "Clinical Alerts";
+    Layout = "_DoctorLayout";
+
+    var requests = ViewBag.Requests
+        as Dictionary<int, TestRequestsModel>
+        ?? new Dictionary<int, TestRequestsModel>();
+
+    var readIds = ViewBag.ReadAlertIds as List<int> ?? new List<int>();
+    var startDate = ViewBag.StartDate as string ?? "";
+    var endDate = ViewBag.EndDate as string ?? "";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-bell text-danger mr-2"></i>Clinical Alerts
+            </h2>
+            <p class="text-muted mb-0">
+                Abnormal results from tests ordered by you.
+            </p>
+        </div>
+    </div>
+
+    <div class="alert alert-warning">
+        <strong>Clinical safety:</strong>
+        Review abnormal results in clinical context and follow your
+        laboratory's critical-result escalation procedures.
+    </div>
+
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form asp-area="Doctor"
+                  asp-controller="Alerts"
+                  asp-action="Index"
+                  method="get"
+                  class="row align-items-end">
+
+                <div class="col-md-4 mb-3">
+                    <label for="startDate">From date</label>
+                    <input type="date"
+                           id="startDate"
+                           name="startDate"
+                           class="form-control"
+                           value="@startDate"
+                           required />
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label for="endDate">To date</label>
+                    <input type="date"
+                           id="endDate"
+                           name="endDate"
+                           class="form-control"
+                           value="@endDate"
+                           required />
+                </div>
+
+                <div class="col-md-4 mb-3 d-flex flex-wrap" style="gap:8px">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter mr-1"></i>Apply filter
+                    </button>
+
+                    <a asp-area="Doctor"
+                       asp-controller="Alerts"
+                       asp-action="Index"
+                       class="btn btn-outline-secondary">
+                        Last 5 days
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Abnormal results</h5>
+            <span class="badge badge-danger">@Model.Count() result(s)</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Date recorded</th>
+                        <th>Patient</th>
+                        <th>Request</th>
+                        <th>Test</th>
+                        <th>Result</th>
+                        <th>Technician notes</th>
+                        <th>Notification</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="fas fa-circle-check fa-2x mb-3 d-block"></i>
+                            No abnormal results were found for the selected dates.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var alert in Model)
+                    {
+                        var request = requests.TryGetValue(alert.TestRequestId, out var found)
+                            ? found
+                            : null;
+
+                        var isRead = readIds.Contains(alert.TestRequestTestTypeId);
+
+                        <tr class="@(isRead ? "" : "table-warning")">
+                            <td>
+                                @alert.CompletionDateTime?.ToString("dd MMM yyyy HH:mm")
+                            </td>
+                            <td>@(request?.Patient?.FullName ?? "Patient record unavailable")</td>
+                            <td>@(request?.RequestNumber ?? "—")</td>
+                            <td>@(alert.TestType?.Name ?? "Test unavailable")</td>
+                            <td>
+                                <span class="badge badge-danger">
+                                    <i class="fas fa-triangle-exclamation mr-1"></i>
+                                    @alert.ResultValue
+                                    @(alert.TestType?.MeasurementUnitDetails?.Unit ?? "")
+                                </span>
+                            </td>
+                            <td>@(string.IsNullOrWhiteSpace(alert.ResultNotes) ? "—" : alert.ResultNotes)</td>
+                            <td>
+                                @if (isRead)
+                                {
+                                    <span class="badge badge-secondary">Acknowledged</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-warning">Unread</span>
+                                }
+                            </td>
+                            <td class="text-nowrap">
+                                @if (!isRead)
+                                {
+                                    <form asp-area="Doctor"
+                                          asp-controller="Alerts"
+                                          asp-action="MarkRead"
+                                          method="post"
+                                          class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@alert.TestRequestTestTypeId" />
+                                        <button type="submit"
+                                                class="btn btn-sm btn-outline-secondary mb-1">
+                                            Mark read
+                                        </button>
+                                    </form>
+                                }
+
+                                @if (request != null)
+                                {
+                                    <a asp-area="Doctor"
+                                       asp-controller="Results"
+                                       asp-action="Details"
+                                       asp-route-id="@request.TestRequestId"
+                                       class="btn btn-sm btn-outline-primary mb-1">
+                                        View result
+                                    </a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
