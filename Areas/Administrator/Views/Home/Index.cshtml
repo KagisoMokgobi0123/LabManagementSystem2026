@@ -543,7 +543,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @ViewBag.MedicalConditionCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -587,7 +587,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @ViewBag.AllergyCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -631,7 +631,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @ViewBag.MedicationCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -682,7 +682,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @ViewBag.ConditionCategoryCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -724,7 +724,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @ViewBag.AllergyCategoryCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -766,7 +766,7 @@
                                 </div>
 
                                 <h2 class="stat-number">
-                                    0
+                                    @ViewBag.MedicationCategoryCount
                                 </h2>
 
                                 <div class="stat-note">
@@ -1219,6 +1219,9 @@
                                 <div class="quick-action-text">
                                     Maintain laboratory sample
                                     type reference data
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    Active sample types: <strong>@ViewBag.SampleTypeCount</strong>
                                 </div>
 
                             </div>

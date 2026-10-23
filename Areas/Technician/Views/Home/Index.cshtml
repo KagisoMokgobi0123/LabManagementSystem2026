@@ -69,24 +69,131 @@
 <style>
 
     /* Header account controls */
-    .tech-header-tools { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-bottom:18px; position:relative; z-index:30; }
-    .tech-tool { position:relative; }
-    .tech-tool > summary { list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border:1px solid rgba(255,255,255,.35); border-radius:12px; background:rgba(255,255,255,.12); color:#fff; }
-    .tech-tool > summary::-webkit-details-marker { display:none; }
-    .tech-tool > summary:hover, .tech-tool[open] > summary { background:rgba(255,255,255,.24); }
-    .tech-tool .tool-count { position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 4px; border-radius:12px; background:#dc2626; color:#fff; font-size:11px; font-weight:700; text-align:center; line-height:19px; pointer-events:none; }
-    .tech-tool-menu { position:absolute; right:0; top:calc(100% + 9px); width:280px; max-width:calc(100vw - 32px); padding:14px; background:#fff; color:#334155; border:1px solid #e2e8f0; border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.18); z-index:50; overflow-wrap:anywhere; }
-    .tech-tool-menu h3 { font-size:14px; font-weight:700; margin:0 0 8px; color:#0f172a; }
-    .tech-tool-menu p { font-size:12px; margin:0 0 12px; }
-    .tech-tool-menu a { display:block; font-size:12px; padding:9px; border-radius:7px; text-decoration:none; color:#075985; }
-    .tech-tool-menu a:hover { background:#eff6ff; }
-    .tech-profile-trigger { width:auto !important; padding:0 12px; gap:9px; }
-    .tech-profile-trigger .tech-avatar { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:#fff; color:#075985; font-weight:700; }
-    @@media(max-width:575.98px) { .tech-header-tools { flex-wrap:wrap; } .tech-profile-trigger .tech-profile-label { display:none; } }
+    .tech-header-tools {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+        position: relative;
+        z-index: 30;
+    }
+
+    .tech-tool {
+        position: relative;
+    }
+
+        .tech-tool > summary {
+            list-style: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 12px;
+            background: rgba(255,255,255,.12);
+            color: #fff;
+        }
+
+            .tech-tool > summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .tech-tool > summary:hover, .tech-tool[open] > summary {
+                background: rgba(255,255,255,.24);
+            }
+
+        .tech-tool .tool-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 19px;
+            height: 19px;
+            padding: 0 4px;
+            border-radius: 12px;
+            background: #dc2626;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            text-align: center;
+            line-height: 19px;
+            pointer-events: none;
+        }
+
+    .tech-tool-menu {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 9px);
+        width: 280px;
+        max-width: calc(100vw - 32px);
+        padding: 14px;
+        background: #fff;
+        color: #334155;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(0,0,0,.18);
+        z-index: 50;
+        overflow-wrap: anywhere;
+    }
+
+        .tech-tool-menu h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            color: #0f172a;
+        }
+
+        .tech-tool-menu p {
+            font-size: 12px;
+            margin: 0 0 12px;
+        }
+
+        .tech-tool-menu a {
+            display: block;
+            font-size: 12px;
+            padding: 9px;
+            border-radius: 7px;
+            text-decoration: none;
+            color: #075985;
+        }
+
+            .tech-tool-menu a:hover {
+                background: #eff6ff;
+            }
+
+    .tech-profile-trigger {
+        width: auto !important;
+        padding: 0 12px;
+        gap: 9px;
+    }
+
+        .tech-profile-trigger .tech-avatar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #fff;
+            color: #075985;
+            font-weight: 700;
+        }
+
+    @@media(max-width:575.98px) {
+        .tech-header-tools {
+            flex-wrap: wrap;
+        }
+
+        .tech-profile-trigger .tech-profile-label {
+            display: none;
+        }
+    }
 
     /* =========================================================
-               PAGE
-               ========================================================= */
+                   PAGE
+                   ========================================================= */
 
     .tech-dashboard {
         min-height: 100vh;
@@ -94,8 +201,8 @@
     }
 
     /* =========================================================
-               HERO
-               ========================================================= */
+                   HERO
+                   ========================================================= */
 
     .tech-hero {
         position: relative;
@@ -193,8 +300,8 @@
     }
 
     /* =========================================================
-               PAGE INNER
-               ========================================================= */
+                   PAGE INNER
+                   ========================================================= */
 
     .tech-page-inner {
         position: relative;
@@ -204,8 +311,8 @@
     }
 
     /* =========================================================
-               CLICKABLE STAT CARDS
-               ========================================================= */
+                   CLICKABLE STAT CARDS
+                   ========================================================= */
 
     .stat-card-link {
         display: block;
@@ -336,8 +443,8 @@
     }
 
     /* =========================================================
-               DASHBOARD CARDS
-               ========================================================= */
+                   DASHBOARD CARDS
+                   ========================================================= */
 
     .dashboard-card {
         margin-bottom: 24px;
@@ -372,8 +479,8 @@
     }
 
     /* =========================================================
-               WORKFLOW
-               ========================================================= */
+                   WORKFLOW
+                   ========================================================= */
 
     .workflow {
         display: flex;
@@ -415,8 +522,8 @@
     }
 
     /* =========================================================
-               CLICKABLE WORKFLOW
-               ========================================================= */
+                   CLICKABLE WORKFLOW
+                   ========================================================= */
 
     .workflow-link {
         position: relative;
@@ -477,8 +584,8 @@
     }
 
     /* =========================================================
-               QUICK ACTIONS
-               ========================================================= */
+                   QUICK ACTIONS
+                   ========================================================= */
 
     .quick-action {
         display: flex;
@@ -533,8 +640,8 @@
     }
 
     /* =========================================================
-               ATTENTION
-               ========================================================= */
+                   ATTENTION
+                   ========================================================= */
 
     .attention-item {
         display: flex;
@@ -571,8 +678,8 @@
     }
 
     /* =========================================================
-               TABLE
-               ========================================================= */
+                   TABLE
+                   ========================================================= */
 
     .tech-table {
         margin-bottom: 0;
@@ -610,7 +717,10 @@
         font-weight: 700;
     }
 
-    .status-default { background: #e2e8f0; color: #334155; }
+    .status-default {
+        background: #e2e8f0;
+        color: #334155;
+    }
 
     .status-submitted {
         background: #e0f2fe;
@@ -643,8 +753,8 @@
     }
 
     /* =========================================================
-               FILTERS
-               ========================================================= */
+                   FILTERS
+                   ========================================================= */
 
     .filter-select {
         height: 35px;
@@ -660,11 +770,14 @@
         pointer-events: auto !important;
         cursor: pointer;
     }
-    .verification-history-link * { pointer-events: none; }
+
+        .verification-history-link * {
+            pointer-events: none;
+        }
 
     /* =========================================================
-               PROFILE
-               ========================================================= */
+                   PROFILE
+                   ========================================================= */
 
     .profile-summary {
         display: flex;
@@ -697,8 +810,8 @@
     }
 
     /* =========================================================
-               RESPONSIVE
-               ========================================================= */
+                   RESPONSIVE
+                   ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -774,7 +887,7 @@
             <div class="tech-hero-content">
 
                 <!-- Header tools: accessible native dropdowns, no JavaScript dependency -->
-          @*       <div class="tech-header-tools" aria-label="Technician account tools">
+                @*       <div class="tech-header-tools" aria-label="Technician account tools">
                     <details class="tech-tool">
                         <summary aria-label="Email account" title="Email account">
                             <i class="fas fa-envelope" aria-hidden="true"></i>
@@ -801,8 +914,8 @@
                         <div class="tech-tool-menu">
                             <h3><i class="fas fa-bell mr-2"></i>Notifications</h3>
                             <p>@waitingVerificationCount test(s) waiting for verification.</p>
-                            <a href="/Technician/Tests/PendingVerification"><i class="fas fa-user-check mr-2"></i>View pending verification</a>
-                            <a href="/Technician/Tests/Review"><i class="fas fa-rotate-left mr-2"></i>Tests to review (@toReviewCount)</a>
+                            <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"><i class="fas fa-user-check mr-2"></i>View pending verification</a>
+                            <a asp-area="Technician" asp-controller="Tests" asp-action="Review"><i class="fas fa-rotate-left mr-2"></i>Tests to review (@toReviewCount)</a>
                         </div>
                     </details>
 
@@ -815,9 +928,9 @@
                         <div class="tech-tool-menu">
                             <h3>@technicianName</h3>
                             <p class="text-muted">Lab Technician · @technicianEmail</p>
-                            <a href="/Technician/Profile/ProfileIndex"><i class="fas fa-user mr-2"></i>My profile</a>
-                            <a href="/Technician/Profile/ChangePhoneNumber"><i class="fas fa-phone mr-2"></i>Change phone number</a>
-                            <a href="/Technician/Profile/ChangePassword"><i class="fas fa-key mr-2"></i>Change password</a>
+                            <a asp-area="Technician" asp-controller="Profile" asp-action="ProfileIndex"><i class="fas fa-user mr-2"></i>My profile</a>
+                            <a asp-area="Technician" asp-controller="Profile" asp-action="ChangePhoneNumber"><i class="fas fa-phone mr-2"></i>Change phone number</a>
+                            <a asp-area="Technician" asp-controller="Profile" asp-action="ChangePassword"><i class="fas fa-key mr-2"></i>Change password</a>
                         </div>
                     </details>
                 </div> *@
@@ -854,7 +967,7 @@
                              style="flex-wrap: nowrap; gap: 10px;">
 
                             @*Redirect the technician to the Select Test view*@
-                            <a href="/Technician/Tests/Select"
+                            <a asp-area="Technician" asp-controller="Tests" asp-action="Select"
                                class="hero-btn hero-btn-primary"
                                style="white-space: nowrap;">
 
@@ -863,7 +976,7 @@
 
                             </a>
                             @*Redirect the technician to the Receive Samples view*@
-                            <a href="/Technician/ReceiveSamples/Index"
+                            <a asp-area="Technician" asp-controller="ReceiveSamples" asp-action="Index"
                                class="hero-btn hero-btn-outline"
                                style="white-space: nowrap;">
 
@@ -872,7 +985,7 @@
 
                             </a>
                             @*Redirect the technician to the verified samples results*@
-                            <a href="/Technician/Tests/PendingVerification"
+                            <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"
                                class="hero-btn hero-btn-outline"
                                style="white-space: nowrap;">
 
@@ -911,7 +1024,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="/Technician/Tests/MyTests"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
                    class="stat-card-link"
                    title="View my selected tests">
 
@@ -954,7 +1067,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="/Technician/Tests/Select"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Select"
                    class="stat-card-link"
                    title="View tests waiting for selection">
 
@@ -997,7 +1110,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="/Technician/Tests/PendingVerification"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"
                    class="stat-card-link"
                    title="View results waiting for verification">
 
@@ -1040,7 +1153,7 @@
 
             <div class="col-xl-3 col-md-6 mb-4">
 
-                <a href="/Technician/Tests/Review"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Review"
                    class="stat-card-link"
                    title="View tests returned for review">
 
@@ -1091,7 +1204,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a href="/Technician/Tests/Urgent"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Urgent"
                    class="stat-card-link"
                    title="View urgent and STAT tests">
 
@@ -1134,7 +1247,7 @@
 
             <div class="col-xl-4 col-md-6 mb-4">
 
-                <a href="/Technician/Tests/Overdue"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Overdue"
                    class="stat-card-link"
                    title="View overdue tests">
 
@@ -1177,7 +1290,7 @@
 
             <div class="col-xl-4 col-md-12 mb-4">
 
-                <a href="/Technician/Tests/NearingTat"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="NearingTat"
                    class="stat-card-link"
                    title="View tests nearing turnaround time">
 
@@ -1266,7 +1379,7 @@
 
                 <div class="workflow">
 
-                    <a href="/Technician/ReceiveSamples/Index"
+                    <a asp-area="Technician" asp-controller="ReceiveSamples" asp-action="Index"
                        class="workflow-item workflow-link" title="Receive and verify laboratory samples">
                         <div class="workflow-icon"><i class="fas fa-vials"></i></div>
                         <div class="workflow-title">Receive Samples</div>
@@ -1275,7 +1388,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a href="/Technician/Tests/Select"
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="Select"
                        class="workflow-item workflow-link" title="Select an available assigned test type">
                         <div class="workflow-icon"> <i class="fas fa-clipboard-list"></i></div>
                         <div class="workflow-title">Select Test Type</div>
@@ -1284,7 +1397,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a href="/Technician/Tests/MyTests"
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
                        class="workflow-item workflow-link" title="View and perform your selected tests">
                         <div class="workflow-icon"><i class="fas fa-microscope"></i></div>
                         <div class="workflow-title">Perform Test</div>
@@ -1293,7 +1406,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a href="/Technician/Tests/TestResults"
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="TestResults"
                        class="workflow-item workflow-link" title="Capture laboratory test results">
                         <div class="workflow-icon"><i class="fas fa-file-medical"></i></div>
                         <div class="workflow-title">Capture Results</div>
@@ -1302,7 +1415,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a href="/Technician/Tests/PendingVerification"
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"
                        class="workflow-item workflow-link" title="Verify completed test results">
                         <div class="workflow-icon"><i class="fas fa-user-check"></i></div>
                         <div class="workflow-title">Verify Results</div>
@@ -1311,7 +1424,7 @@
 
                     <div class="workflow-line"></div>
 
-                    <a href="/Technician/Tests/Verified"
+                    <a asp-area="Technician" asp-controller="Tests" asp-action="Verified"
                        class="workflow-item workflow-link" title="View verified laboratory results">
                         <div class="workflow-icon"><i class="fas fa-check-circle"></i></div>
                         <div class="workflow-title">Verified</div>
@@ -1358,7 +1471,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/ReceiveSamples/Index"
+                                <a asp-area="Technician" asp-controller="ReceiveSamples" asp-action="Index"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1389,7 +1502,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/Select"
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="Select"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1420,7 +1533,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/MyTests"
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1448,7 +1561,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/MyTests"
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1479,7 +1592,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/MyTests"
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1510,7 +1623,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Tests/Review"
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="Review"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1544,7 +1657,6 @@
                                 <a asp-area="Technician"
                                    asp-controller="Tests"
                                    asp-action="VerificationHistoryIndex"
-                                   href="/Technician/Tests/VerificationHistoryIndex"
                                    class="quick-action verification-history-link"
                                    aria-label="Open Verification History">
 
@@ -1576,7 +1688,7 @@
 
                             <div class="col-md-6">
 
-                                <a href="/Technician/Reports/Index"
+                                <a asp-area="Technician" asp-controller="Reports" asp-action="Index"
                                    class="quick-action">
 
                                     <div class="quick-action-icon">
@@ -1632,7 +1744,7 @@
 
                     <div class="card-body">
 
-                        <a href="/Technician/Tests/Urgent"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="Urgent"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-red">
@@ -1655,7 +1767,7 @@
                         </a>
 
 
-                        <a href="/Technician/Tests/Overdue"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="Overdue"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-red">
@@ -1678,7 +1790,7 @@
                         </a>
 
 
-                        <a href="/Technician/Tests/NearingTat"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="NearingTat"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-yellow">
@@ -1701,7 +1813,7 @@
                         </a>
 
 
-                        <a href="/Technician/Tests/Review"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="Review"
                            class="attention-item text-decoration-none">
 
                             <div class="attention-icon icon-orange">
@@ -1827,13 +1939,13 @@
                                         }
                                         <span class="status-badge @statusClass">@test.Status</span>
                                     </td>
-                                    <td><a class="btn btn-outline-primary btn-sm" href="@Url.Action("Details", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })">View</a></td>
+                                    <td><a class="btn btn-outline-primary btn-sm" asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@test.TestRequestTestTypeId">View</a></td>
                                 </tr>
                             }
                             <tr id="workloadEmpty" style="@(workload.Any() ? "display:none" : "")">
                                 <td colspan="8" class="text-center py-5 text-muted">
                                     No matching selected tests.
-                                    <div class="mt-3"><a href="/Technician/Tests/Select" class="btn btn-primary btn-sm">View Available Tests</a></div>
+                                    <div class="mt-3"><a asp-area="Technician" asp-controller="Tests" asp-action="Select" class="btn btn-primary btn-sm">View Available Tests</a></div>
                                 </td>
                             </tr>
                         </tbody>
@@ -1889,7 +2001,7 @@
 
                     <div class="col-md-4">
 
-                        <a href="/Technician/Tests/PendingVerification"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="PendingVerification"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1920,7 +2032,7 @@
 
                     <div class="col-md-4">
 
-                        <a href="/Technician/Tests/Verified"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="Verified"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -1951,7 +2063,7 @@
 
                     <div class="col-md-4">
 
-                        <a href="/Technician/Tests/VerificationHistoryIndex"
+                        <a asp-area="Technician" asp-controller="Tests" asp-action="VerificationHistoryIndex"
                            class="quick-action">
 
                             <div class="quick-action-icon">
@@ -2037,7 +2149,7 @@
 
                     <div class="col-md-4 text-md-right mt-3 mt-md-0">
 
-                        <a href="/Technician/Reports/Index"
+                        <a asp-area="Technician" asp-controller="Reports" asp-action="Index"
                            class="btn btn-primary btn-sm">
 
                             <i class="fas fa-file-pdf mr-1"></i>
@@ -2109,7 +2221,7 @@
 
                     <div class="col-md-6 text-md-right mt-3 mt-md-0">
 
-                        <a href="/Technician/Profile/ProfileIndex"
+                        <a asp-area="Technician" asp-controller="Profile" asp-action="ProfileIndex"
                            class="btn btn-outline-primary btn-sm mr-2">
 
                             <i class="fas fa-user mr-1"></i>
@@ -2119,7 +2231,7 @@
                         </a>
 
 
-                        <a href="/Technician/Profile/ChangePassword"
+                        <a asp-area="Technician" asp-controller="Profile" asp-action="ChangePassword"
                            class="btn btn-outline-secondary btn-sm mr-2">
 
                             <i class="fas fa-key mr-1"></i>
@@ -2159,59 +2271,59 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script>
-(() => {
-    const canvas = document.getElementById('technicianActivityChart');
-    if (!canvas) return;
-    const status = document.getElementById('activityStatus');
-    let days = 7;
-    let chart = null;
-    let loading = false;
-    const endpoint = '@Url.Action("TestActivityStats", "Home", new { area = "Technician" })';
-    const buttons = document.querySelectorAll('.activity-period');
-    async function refreshActivity() {
-        if (loading) return;
-        if (typeof Chart === 'undefined') {
-            status.textContent = 'Chart.js did not load. Check your internet connection or install Chart.js locally.';
-            return;
-        }
-        loading = true;
-        try {
-            const response = await fetch(endpoint + '?days=' + days, { cache: 'no-store', credentials: 'same-origin' });
-            if (!response.ok) throw new Error('HTTP ' + response.status);
-            const data = await response.json();
-            const started = data.started.reduce((a, b) => a + b, 0);
-            const completed = data.completed.reduce((a, b) => a + b, 0);
-            document.getElementById('activityStarted').textContent = started;
-            document.getElementById('activityCompleted').textContent = completed;
-            document.getElementById('activityRate').textContent = started ? (completed / started * 100).toFixed(1) + '%' : 'N/A';
-            const series = [
-                { label: 'Started', data: data.started, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.25 },
-                { label: 'Completed', data: data.completed, borderColor: '#16a34a', backgroundColor: '#16a34a', tension: 0.25 }
-            ];
-            if (chart) {
-                chart.data.labels = data.labels;
-                chart.data.datasets = series;
-                chart.update();
-            } else {
-                chart = new Chart(canvas, {
-                    type: 'line',
-                    data: { labels: data.labels, datasets: series },
-                    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-                });
+    (() => {
+        const canvas = document.getElementById('technicianActivityChart');
+        if (!canvas) return;
+        const status = document.getElementById('activityStatus');
+        let days = 7;
+        let chart = null;
+        let loading = false;
+        const endpoint = '@Url.Action("TestActivityStats", "Home", new { area = "Technician" })';
+        const buttons = document.querySelectorAll('.activity-period');
+        async function refreshActivity() {
+            if (loading) return;
+            if (typeof Chart === 'undefined') {
+                status.textContent = 'Chart.js did not load. Check your internet connection or install Chart.js locally.';
+                return;
             }
-            status.textContent = 'Last updated: ' + new Date().toLocaleTimeString() + ' (graph dates use UTC)';
-        } catch (err) {
-            status.textContent = 'Unable to load live statistics: ' + err.message;
-        } finally { loading = false; }
-    }
-    buttons.forEach(btn => btn.addEventListener('click', () => {
-        days = Number(btn.dataset.days);
-        buttons.forEach(b => { b.classList.toggle('btn-primary', b === btn); b.classList.toggle('btn-outline-primary', b !== btn); });
+            loading = true;
+            try {
+                const response = await fetch(endpoint + '?days=' + days, { cache: 'no-store', credentials: 'same-origin' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const data = await response.json();
+                const started = data.started.reduce((a, b) => a + b, 0);
+                const completed = data.completed.reduce((a, b) => a + b, 0);
+                document.getElementById('activityStarted').textContent = started;
+                document.getElementById('activityCompleted').textContent = completed;
+                document.getElementById('activityRate').textContent = started ? (completed / started * 100).toFixed(1) + '%' : 'N/A';
+                const series = [
+                    { label: 'Started', data: data.started, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.25 },
+                    { label: 'Completed', data: data.completed, borderColor: '#16a34a', backgroundColor: '#16a34a', tension: 0.25 }
+                ];
+                if (chart) {
+                    chart.data.labels = data.labels;
+                    chart.data.datasets = series;
+                    chart.update();
+                } else {
+                    chart = new Chart(canvas, {
+                        type: 'line',
+                        data: { labels: data.labels, datasets: series },
+                        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+                    });
+                }
+                status.textContent = 'Last updated: ' + new Date().toLocaleTimeString() + ' (graph dates use UTC)';
+            } catch (err) {
+                status.textContent = 'Unable to load live statistics: ' + err.message;
+            } finally { loading = false; }
+        }
+        buttons.forEach(btn => btn.addEventListener('click', () => {
+            days = Number(btn.dataset.days);
+            buttons.forEach(b => { b.classList.toggle('btn-primary', b === btn); b.classList.toggle('btn-outline-primary', b !== btn); });
+            refreshActivity();
+        }));
+        document.getElementById('refreshActivity').addEventListener('click', refreshActivity);
         refreshActivity();
-    }));
-    document.getElementById('refreshActivity').addEventListener('click', refreshActivity);
-    refreshActivity();
-    const interval = setInterval(() => { if (!document.hidden) refreshActivity(); }, 15000);
-    window.addEventListener('pagehide', () => clearInterval(interval), { once: true });
-})();
+        const interval = setInterval(() => { if (!document.hidden) refreshActivity(); }, 15000);
+        window.addEventListener('pagehide', () => clearInterval(interval), { once: true });
+    })();
 </script>

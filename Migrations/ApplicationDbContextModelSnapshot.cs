@@ -260,8 +260,8 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             MedicalConditionCategoryId = 9001,
-                            Description = "DEMO DATA ONLY - laboratory assessment",
-                            Name = "Demo chronic conditions",
+                            Description = "Long-term conditions relevant to laboratory investigations",
+                            Name = "Chronic medical conditions",
                             Status = 1
                         });
                 });
@@ -2268,14 +2268,14 @@ namespace NMBHLabSys.Migrations
                             AllergyId = 1,
                             AllergyCategoryId = 1,
                             AllergyName = "Penicillin",
-                            Description = "DEMO DATA ONLY"
+                            Description = "Reported beta-lactam antibiotic allergy"
                         },
                         new
                         {
                             AllergyId = 2,
                             AllergyCategoryId = 1,
                             AllergyName = "Peanuts",
-                            Description = "DEMO DATA ONLY"
+                            Description = "Reported food allergy to peanuts"
                         });
                 });
 
@@ -2332,14 +2332,14 @@ namespace NMBHLabSys.Migrations
                         {
                             MedicalConditionId = 1,
                             ConditionName = "Hypertension",
-                            Description = "DEMO DATA ONLY",
+                            Description = "Chronic elevated blood pressure",
                             MedicalConditionCategoryId = 9001
                         },
                         new
                         {
                             MedicalConditionId = 2,
-                            ConditionName = "Type 2 diabetes",
-                            Description = "DEMO DATA ONLY",
+                            ConditionName = "Type 2 diabetes mellitus",
+                            Description = "Chronic disorder of glucose regulation",
                             MedicalConditionCategoryId = 9001
                         });
                 });
@@ -2374,14 +2374,14 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             MedicationId = 1,
-                            Description = "DEMO DATA ONLY",
+                            Description = "Oral antihyperglycaemic medicine",
                             MedicationCategoryId = 1,
                             MedicationName = "Metformin"
                         },
                         new
                         {
                             MedicationId = 2,
-                            Description = "DEMO DATA ONLY",
+                            Description = "Calcium channel blocker used for blood pressure management",
                             MedicationCategoryId = 1,
                             MedicationName = "Amlodipine"
                         });
@@ -2421,7 +2421,7 @@ namespace NMBHLabSys.Migrations
                         {
                             PatientAllergyId = 6001,
                             AllergyId = 1,
-                            Notes = "DEMO DATA ONLY - fictional allergy history.",
+                            Notes = "Reported rash after previous penicillin exposure; confirmation pending.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                             Severity = "Moderate"
                         },
@@ -2429,7 +2429,7 @@ namespace NMBHLabSys.Migrations
                         {
                             PatientAllergyId = 6002,
                             AllergyId = 2,
-                            Notes = "DEMO DATA ONLY - fictional allergy history.",
+                            Notes = "Reported itching after peanut exposure; confirmation pending.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                             Severity = "Mild"
                         });
@@ -2470,7 +2470,7 @@ namespace NMBHLabSys.Migrations
                             PatientConditionId = 5001,
                             DateDiagnosed = new DateTime(2024, 3, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             MedicalConditionId = 1,
-                            Notes = "DEMO DATA ONLY - example medical condition.",
+                            Notes = "Recorded history: blood pressure monitoring recommended.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15"
                         },
                         new
@@ -2478,7 +2478,7 @@ namespace NMBHLabSys.Migrations
                             PatientConditionId = 5002,
                             DateDiagnosed = new DateTime(2025, 6, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             MedicalConditionId = 2,
-                            Notes = "DEMO DATA ONLY - example medical condition.",
+                            Notes = "Recorded history: periodic HbA1c and fasting glucose monitoring.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15"
                         });
                 });
@@ -2564,7 +2564,7 @@ namespace NMBHLabSys.Migrations
                             Dosage = "500 mg",
                             Frequency = "Twice daily",
                             MedicationId = 1,
-                            Notes = "DEMO DATA ONLY - fictional medication history.",
+                            Notes = "Medication history entered for training; verify at every encounter.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                             StartDate = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
@@ -2574,7 +2574,7 @@ namespace NMBHLabSys.Migrations
                             Dosage = "10 mg",
                             Frequency = "Once daily",
                             MedicationId = 2,
-                            Notes = "DEMO DATA ONLY - fictional medication history.",
+                            Notes = "Medication history entered for training; verify at every encounter.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                             StartDate = new DateTime(2026, 2, 15, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });

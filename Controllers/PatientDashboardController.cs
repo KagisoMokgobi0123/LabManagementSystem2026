@@ -63,7 +63,7 @@ namespace NMB_HLabSys.Controllers
 
             // Get test requests
             var testRequests = await _context.TestRequests
-                .Where(r => r.PatientId == patient.PatientId)
+                .Where(r => r.PatientId == patient.UserId)
                 .OrderByDescending(r => r.RequestDate)
                 .Take(10)
                 .ToListAsync();
@@ -109,7 +109,7 @@ namespace NMB_HLabSys.Controllers
                 return NotFound();
 
             var requests = await _context.TestRequests
-                .Where(r => r.PatientId == patient.PatientId)
+                .Where(r => r.PatientId == patient.UserId)
                 .OrderByDescending(r => r.RequestDate)
                 .Select(r => new
                 {
@@ -120,15 +120,15 @@ namespace NMB_HLabSys.Controllers
                     r.Urgency,
                     r.ClinicalNotes,
                     TestItems = r.TestTypes//_context.TestRequestItems
-                        //.Where(ti => ti.TestRequestId == r.TestRequestId)//KG changed from THIS to TestTypes
-                        //.Select(ti => new
-                        //{
-                        //    ti.TestRequestItemId,
-                        //    ti.TestTypeID,
-                        //    ti.ResultValue,
-                        //    ti.Status,
-                        //    ti.Notes
-                        //}).ToList()
+                                           //.Where(ti => ti.TestRequestId == r.TestRequestId)//KG changed from THIS to TestTypes
+                                           //.Select(ti => new
+                                           //{
+                                           //    ti.TestRequestItemId,
+                                           //    ti.TestTypeID,
+                                           //    ti.ResultValue,
+                                           //    ti.Status,
+                                           //    ti.Notes
+                                           //}).ToList()
                 })
                 .ToListAsync();
 
@@ -193,8 +193,8 @@ namespace NMB_HLabSys.Controllers
                 medications
             });
         }
-      
-    // ===== TEST REQUESTS =====
+
+        // ===== TEST REQUESTS =====
         public async Task<IActionResult> TestRequests()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -202,7 +202,7 @@ namespace NMB_HLabSys.Controllers
             if (patient == null) return RedirectToAction("Index");
 
             var requests = await _context.TestRequests
-                .Where(r => r.PatientId == patient.PatientId)
+                .Where(r => r.PatientId == patient.UserId)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -321,7 +321,7 @@ namespace NMB_HLabSys.Controllers
 
             // Get patient test requests for consent selection
             var testRequests = await _context.TestRequests
-                .Where(r => r.PatientId == patient.PatientId)
+                .Where(r => r.PatientId == patient.UserId)
                 .OrderByDescending(r => r.RequestDate)
                 .ToListAsync();
 
@@ -340,6 +340,21 @@ namespace NMB_HLabSys.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
             if (patient == null) return RedirectToAction("Index");
+
+            var doctorRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Doctor");
+            if (doctorRole == null || !await _context.UserRoles.AnyAsync(ur => ur.UserId == doctorUserId && ur.RoleId == doctorRole.Id))
+            {
+                TempData["Error"] = "Select a valid doctor account.";
+                return RedirectToAction("Consent");
+            }
+
+            // Only allow the patient to share their own historical requests.
+            var validSelectedRequestIds = selectedRequestIds == null
+                ? new List<int>()
+                : await _context.TestRequests
+                    .Where(r => r.PatientId == patient.UserId && selectedRequestIds.Contains(r.TestRequestId))
+                    .Select(r => r.TestRequestId)
+                    .ToListAsync();
 
             // Check if consent already exists
             var existing = await _context.PatientDoctorConsents
@@ -367,9 +382,9 @@ namespace NMB_HLabSys.Controllers
             await _context.SaveChangesAsync();
 
             // Add selected test requests
-            if (selectedRequestIds != null && selectedRequestIds.Any())
+            if (validSelectedRequestIds.Any())
             {
-                foreach (var requestId in selectedRequestIds)
+                foreach (var requestId in validSelectedRequestIds)
                 {
                     var item = new ConsentRequestItemModel
                     {
@@ -382,6 +397,48 @@ namespace NMB_HLabSys.Controllers
             }
 
             TempData["Success"] = "Access granted successfully.";
+            return RedirectToAction("Consent");
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RespondHistoricalConsent(int consentId, bool approve)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient == null) return RedirectToAction("Index");
+
+            var consent = await _context.PatientDoctorConsents
+                .Include(c => c.ConsentRequestItems)
+                .ThenInclude(i => i.TestRequest)
+                .FirstOrDefaultAsync(c => c.PatientDoctorConsentId == consentId
+                    && c.PatientId == patient.PatientId
+                    && !c.IsActive
+                    && c.Notes != null
+                    && c.Notes.Contains("Historical result access request Pending"));
+
+            if (consent == null)
+            {
+                TempData["Error"] = "This historical access request is no longer pending.";
+                return RedirectToAction("Consent");
+            }
+
+            if (approve)
+            {
+                consent.IsActive = true;
+                consent.RevokedDate = null;
+                consent.GrantedDate = DateTime.Now;
+                consent.Notes = "Historical result access approved by patient";
+                TempData["Success"] = "You approved access to the selected historical request only.";
+            }
+            else
+            {
+                consent.IsActive = false;
+                consent.Notes = "Historical result access request declined by patient";
+                TempData["Success"] = "You declined the historical result access request. The doctor cannot view these results.";
+            }
+
+            await _context.SaveChangesAsync();
             return RedirectToAction("Consent");
         }
 
@@ -574,4 +631,4 @@ namespace NMB_HLabSys.Controllers
         }
 
     }
-} 
+}

@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewBag.Title = "Consent Management";
 
     var consents = ViewBag.Consents as List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>
@@ -146,7 +146,7 @@
 
     <!-- EXISTING CONSENTS -->
     <h5 class="fw-bold mb-3">
-        Doctors Currently With Access
+        Doctor Access & Pending Requests
         <span class="badge bg-secondary ms-2">@consents.Count</span>
     </h5>
 
@@ -168,12 +168,23 @@
         {
             <div class="consent-card">
 
+                @{
+                    var isHistoricalPending = !c.IsActive && c.RevokedDate == null
+                        && c.Notes != null && c.Notes.Contains("Historical result access request Pending");
+                }
                 <!-- Doctor Header -->
                 <div class="consent-card-header">
                     <div>
                         <h5>👨‍⚕️ @(c.Doctor?.FullName ?? "Unknown Doctor")</h5>
                         <small class="text-muted">
-                            Access granted: @c.GrantedDate.ToString("dd MMM yyyy")
+                            @if (isHistoricalPending)
+                            {
+                                <span>Requested: @c.GrantedDate.ToString("dd MMM yyyy")</span>
+                            }
+                            else
+                            {
+                                <span>Access granted: @c.GrantedDate.ToString("dd MMM yyyy")</span>
+                            }
                             @if (c.RevokedDate.HasValue)
                             {
                                 <span class="ms-2 text-danger">
@@ -182,9 +193,17 @@
                             }
                         </small>
                     </div>
-                    @if (c.IsActive)
+                    @if (isHistoricalPending)
+                    {
+                        <span class="badge badge-warning">⏳ Approval required</span>
+                    }
+                    else if (c.IsActive)
                     {
                         <span class="active-badge">✅ Active</span>
+                    }
+                    else if (c.Notes != null && c.Notes.Contains("declined", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <span class="revoked-badge">Declined</span>
                     }
                     else
                     {
@@ -197,7 +216,7 @@
                 {
                     <div class="px-4 pt-3 pb-1">
                         <small class="fw-semibold text-muted text-uppercase" style="font-size:0.73rem; letter-spacing:0.05em;">
-                            Records This Doctor Can Access
+                            @(isHistoricalPending ? "Historical request awaiting your decision" : "Records This Doctor Can Access")
                         </small>
                     </div>
 
@@ -213,7 +232,11 @@
                                     — @(item.TestRequest?.ClinicalNotes)
                                 </small>
                             </div>
-                            @if (c.IsActive)
+                            @if (isHistoricalPending)
+                            {
+                                <span class="badge badge-warning">Hidden until approved</span>
+                            }
+                            else if (c.IsActive)
                             {
                                 <form asp-action="RevokeConsentItem" method="post"
                                       onsubmit="return confirm('Remove this record from this doctor access? The doctor will no longer see this test result.')">
@@ -230,7 +253,28 @@
                 else
                 {
                     <div class="px-4 py-3 text-muted" style="font-size:0.88rem;">
-                        <em>No specific records selected — doctor has general access.</em>
+                        <em>No specific historical requests have been shared in this consent record.</em>
+                    </div>
+                }
+
+                @if (isHistoricalPending)
+                {
+                    <div class="revoke-zone">
+                        <small class="text-muted">Approve only if you want this doctor to see the selected historical request. No other records are shared.</small>
+                        <div class="d-flex flex-wrap" style="gap:8px">
+                            <form asp-action="RespondHistoricalConsent" method="post" onsubmit="return confirm('Approve access to only the selected historical request?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="consentId" value="@c.PatientDoctorConsentId" />
+                                <input type="hidden" name="approve" value="true" />
+                                <button type="submit" class="btn btn-sm btn-success">Approve request</button>
+                            </form>
+                            <form asp-action="RespondHistoricalConsent" method="post" onsubmit="return confirm('Decline this historical access request?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="consentId" value="@c.PatientDoctorConsentId" />
+                                <input type="hidden" name="approve" value="false" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Decline</button>
+                            </form>
+                        </div>
                     </div>
                 }
 

@@ -1,8 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NMB_HLabSys.Data;
+using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Services;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
@@ -13,116 +14,104 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly ILogger<SentEmailsController> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public SentEmailsController(
             ApplicationDbContext context,
-            ILogger<SentEmailsController> logger)
+            ILogger<SentEmailsController> logger,
+            UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _logger = logger;
+            _userManager = userManager;
+        }
+
+        // A combined report belongs to a request, potentially involving several
+        // technicians. Show it to a technician only if they were assigned an active
+        // test in that request. This is not a sender-ownership audit field.
+        private IQueryable<int> AccessibleRequestIds(string technicianId)
+        {
+            return _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Where(t => t.TechnicianId == technicianId && !t.IsDeleted)
+                .Select(t => t.TestRequestId)
+                .Distinct();
         }
 
 #if DEBUG
-        // GET: Technician/SentEmails/PrepareReport
         [HttpGet]
-        public IActionResult PrepareReport()
-        {
-            return View();
-        }
+        public IActionResult PrepareReport() => View();
 
-        // POST: Technician/SentEmails/PrepareReport
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PrepareReport(
             int testRequestId,
-            [FromServices]
-            LaboratoryReportDeliveryService reportDeliveryService)
+            [FromServices] LaboratoryReportDeliveryService reportDeliveryService)
         {
-            if (testRequestId <= 0)
-            {
-                TempData["ErrorMessage"] =
-                    "Please enter a valid Test Request ID.";
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId)) return Challenge();
 
+            if (testRequestId <= 0 ||
+                !await AccessibleRequestIds(technicianId).ContainsAsync(testRequestId))
+            {
+                TempData["ErrorMessage"] = "This test request is not available to your account.";
                 return RedirectToAction(nameof(PrepareReport));
             }
 
             try
             {
-                bool prepared =
-                    await reportDeliveryService.PrepareReportAsync(
-                        testRequestId);
-
-                if (prepared)
-                {
-                    TempData["SuccessMessage"] =
-                        "Verified laboratory PDF generated and saved " +
-                        "to the outgoing email record. " +
-                        "No email has been sent.";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] =
-                        "Report preparation was blocked. " +
-                        "Confirm that the request is completed, " +
-                        "all results are independently verified, " +
-                        "the doctor has an email address, " +
-                        "and a Pending email record exists.";
-                }
+                bool prepared = await reportDeliveryService.PrepareReportAsync(testRequestId);
+                TempData[prepared ? "SuccessMessage" : "ErrorMessage"] = prepared
+                    ? "Laboratory PDF prepared for the pending email record. Check delivery status."
+                    : "Report preparation was blocked. Check the request, results, recipient and pending email status.";
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    ex,
-                    "PDF preparation failed for request {TestRequestId}",
-                    testRequestId);
-
-                TempData["ErrorMessage"] =
-                    "PDF preparation failed. Check the application logs.";
+                _logger.LogError(ex, "PDF preparation failed for request {TestRequestId}", testRequestId);
+                TempData["ErrorMessage"] = "PDF preparation failed. Check the application logs.";
             }
 
             return RedirectToAction(nameof(Index));
         }
 #endif
 
-        // GET: Technician/SentEmails
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId)) return Challenge();
+
+            var accessibleRequestIds = AccessibleRequestIds(technicianId);
             var emails = await _context.TechnicianSentEmails
                 .AsNoTracking()
+                .Where(e => accessibleRequestIds.Contains(e.TestRequestId))
                 .OrderByDescending(e => e.CreatedAt)
                 .ToListAsync();
 
             return View(emails);
         }
 
-        // GET: Technician/SentEmails/DownloadPdf/5
         [HttpGet]
         public async Task<IActionResult> DownloadPdf(int id)
         {
-            if (id <= 0)
-                return BadRequest();
+            if (id <= 0) return BadRequest();
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId)) return Challenge();
 
+            var accessibleRequestIds = AccessibleRequestIds(technicianId);
             var email = await _context.TechnicianSentEmails
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.SentEmailId == id);
+                .FirstOrDefaultAsync(e => e.SentEmailId == id &&
+                                          accessibleRequestIds.Contains(e.TestRequestId));
 
-            if (email == null ||
-                email.PdfAttachment == null ||
-                email.PdfAttachment.Length == 0)
-            {
+            if (email?.PdfAttachment == null || email.PdfAttachment.Length == 0)
                 return NotFound();
-            }
 
-            var fileName =
-                string.IsNullOrWhiteSpace(email.PdfFileName)
-                    ? $"LaboratoryReport_{email.TestRequestId}.pdf"
-                    : email.PdfFileName;
+            var fileName = string.IsNullOrWhiteSpace(email.PdfFileName)
+                ? $"LaboratoryReport_{email.TestRequestId}.pdf"
+                : Path.GetFileName(email.PdfFileName);
 
-            return File(
-                email.PdfAttachment,
-                "application/pdf",
-                fileName);
+            return File(email.PdfAttachment, "application/pdf", fileName);
         }
     }
 }

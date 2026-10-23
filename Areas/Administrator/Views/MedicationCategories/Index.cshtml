@@ -7,6 +7,21 @@
 
 <div class="container-fluid px-4 py-4">
 
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>@errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- =========================================================
          PAGE HEADER
          ========================================================= -->
@@ -159,10 +174,8 @@
                                             <button type="button"
                                                     class="btn btn-outline-primary"
                                                     title="Edit"
-                                                    onclick="openEditModal(
-                                                @category.MedicationCategoryId,
-                                                '@Html.Raw(System.Text.Json.JsonSerializer.Serialize(category.Name ?? ""))'
-                                                )">
+                                                    data-name="@category.Name"
+                                                    onclick="openEditModal(@category.MedicationCategoryId, this.dataset.name)">
 
                                                 <i class="fa-solid fa-pen"></i>
 
@@ -171,7 +184,8 @@
                                             <button type="button"
                                                     class="btn btn-outline-danger"
                                                     title="Delete"
-                                                    onclick="confirmDelete(@category.MedicationCategoryId, '@Html.Raw(System.Text.Json.JsonSerializer.Serialize(category.Name ?? ""))')">
+                                                    data-name="@category.Name"
+                                                    onclick="confirmDelete(@category.MedicationCategoryId, this.dataset.name)">
 
                                                 <i class="fa-solid fa-trash"></i>
 
@@ -354,6 +368,7 @@
                   method="post">
 
                 @Html.AntiForgeryToken()
+                <input type="hidden" id="deleteCategoryId" name="id" value="0" />
 
                 <div class="modal-body text-center p-4">
 
@@ -724,22 +739,7 @@
                 id;
 
 
-            try {
-
-                document.getElementById(
-                    "Name"
-                ).value =
-                    JSON.parse(name);
-
-            }
-            catch {
-
-                document.getElementById(
-                    "Name"
-                ).value =
-                    name;
-
-            }
+            document.getElementById("Name").value = name || "";
 
 
             document.getElementById(
@@ -766,17 +766,7 @@
 
         function confirmDelete(id, name) {
 
-            let categoryName = name;
-
-            try {
-
-                categoryName =
-                    JSON.parse(name);
-
-            }
-            catch {
-                // Use original value.
-            }
+            const categoryName = name || "";
 
 
             document.getElementById(
@@ -785,10 +775,11 @@
                 categoryName;
 
 
+            document.getElementById("deleteCategoryId").value = id;
             document.getElementById(
                 "deleteCategoryForm"
             ).action =
-                "@Url.Action("Delete", "MedicationCategories", new { area = "Administrator" })/" + id;
+                "@Url.Action("Delete", "MedicationCategories", new { area = "Administrator" })";
 
 
             const modal =

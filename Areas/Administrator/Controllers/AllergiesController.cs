@@ -21,6 +21,11 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.AllergyCategories = await _context.AllergyCategories
+                .Where(x => x.Status == Status.Active)
+                .OrderBy(x => x.Name)
+                .ToListAsync();
+
             var allergies = await _context.Allergies
                 .Include(x => x.Category)
                 .Where(x => x.Status == Status.Active)
@@ -66,8 +71,12 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         public async Task<IActionResult> Create(
             Allergy allergy)
         {
+            allergy.Name = allergy.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = "Unable to save the allergy. Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var categoryExists =
                 await _context.AllergyCategories
@@ -77,18 +86,24 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (!categoryExists)
-                return BadRequest("Invalid category.");
+            {
+                TempData["ErrorMessage"] = "Select a valid active category before saving.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.Allergies.AnyAsync(x => x.Status == Status.Active && x.AllergyCategoryId == allergy.AllergyCategoryId && x.Name.ToLower() == allergy.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "An allergy with this name already exists in the selected category.";
+                return RedirectToAction(nameof(Index));
+            }
 
             allergy.Status = Status.Active;
 
             _context.Allergies.Add(allergy);
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Allergy added successfully."
-            });
+            TempData["SuccessMessage"] = "Allergy added successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -96,8 +111,12 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         public async Task<IActionResult> Edit(
             Allergy allergy)
         {
+            allergy.Name = allergy.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = "Unable to save the allergy. Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var existing =
                 await _context.Allergies
@@ -106,7 +125,10 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (existing == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "The allergy could not be found or is no longer active.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var categoryExists =
                 await _context.AllergyCategories
@@ -116,7 +138,16 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (!categoryExists)
-                return BadRequest("Invalid category.");
+            {
+                TempData["ErrorMessage"] = "Select a valid active category before saving.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.Allergies.AnyAsync(x => x.Status == Status.Active && x.AllergyId != allergy.AllergyId && x.AllergyCategoryId == allergy.AllergyCategoryId && x.Name.ToLower() == allergy.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "An allergy with this name already exists in the selected category.";
+                return RedirectToAction(nameof(Index));
+            }
 
             existing.Name = allergy.Name;
             existing.Description = allergy.Description;
@@ -125,11 +156,8 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Allergy updated successfully."
-            });
+            TempData["SuccessMessage"] = "Allergy updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -142,17 +170,17 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                     x.Status == Status.Active);
 
             if (allergy == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "The allergy could not be found or is already inactive.";
+                return RedirectToAction(nameof(Index));
+            }
 
             allergy.Status = Status.Inactive;
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Allergy removed successfully."
-            });
+            TempData["SuccessMessage"] = "Allergy removed successfully.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

@@ -394,6 +394,11 @@
 
 
                     <div class="mb-3">
+                        <label for="AllergyDescription" class="form-label fw-semibold">Description</label>
+                        <textarea id="AllergyDescription" name="Description" class="form-control" rows="3" maxlength="1000" placeholder="Optional description"></textarea>
+                    </div>
+
+                    <div class="mb-3">
 
                         <label for="AllergyCategoryId"
                                class="form-label fw-semibold">
@@ -723,6 +728,7 @@
 
             document.getElementById("Name")
                 .value = "";
+            document.getElementById("AllergyDescription").value = "";
 
             document.getElementById("AllergyCategoryId")
                 .value = "";
@@ -766,7 +772,7 @@
            EDIT
            ========================================================= */
 
-        function editAllergy(id, name, categoryId) {
+        function editAllergy(id, name, categoryId, description = "") {
 
             const form =
                 document.getElementById("allergyForm");
@@ -785,6 +791,11 @@
 
             document.getElementById("Name")
                 .value = name;
+            document.getElementById("AllergyDescription").value = description || "";
+            fetch("@Url.Action("Get", "Allergies", new { area = "Administrator" })?id=" + encodeURIComponent(id), { headers: { "Accept": "application/json" } })
+                .then(response => { if (!response.ok) throw new Error("Could not load allergy details."); return response.json(); })
+                .then(data => { document.getElementById("AllergyDescription").value = data.description || ""; })
+                .catch(() => { /* Keep the form usable if the optional description cannot be loaded. */ });
 
             document.getElementById("AllergyCategoryId")
                 .value = categoryId;

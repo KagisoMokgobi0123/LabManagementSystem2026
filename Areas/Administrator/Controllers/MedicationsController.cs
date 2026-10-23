@@ -21,6 +21,11 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
         public async Task<IActionResult> Index()
         {
+            ViewBag.MedicationCategories = await _context.MedicationCategories
+                .Where(x => x.Status == NMB_HLabSys.Areas.Administrator.Models.Enums.Status.Active)
+                .OrderBy(x => x.Name)
+                .ToListAsync();
+
             var medications = await _context.Medications
                 .Include(x => x.Category)
                 .Where(x => x.Status == Status.Active)
@@ -66,8 +71,12 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         public async Task<IActionResult> Create(
             Medication medication)
         {
+            medication.Name = medication.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = "Unable to save the medication. Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var categoryExists =
                 await _context.MedicationCategories
@@ -77,18 +86,24 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (!categoryExists)
-                return BadRequest("Invalid category.");
+            {
+                TempData["ErrorMessage"] = "Select a valid active category before saving.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.Medications.AnyAsync(x => x.Status == Status.Active && x.MedicationCategoryId == medication.MedicationCategoryId && x.Name.ToLower() == medication.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "A medication with this name already exists in the selected category.";
+                return RedirectToAction(nameof(Index));
+            }
 
             medication.Status = Status.Active;
 
             _context.Medications.Add(medication);
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Medication added successfully."
-            });
+            TempData["SuccessMessage"] = "Medication added successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -96,8 +111,12 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         public async Task<IActionResult> Edit(
             Medication medication)
         {
+            medication.Name = medication.Name?.Trim() ?? string.Empty;
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                TempData["ErrorMessage"] = "Unable to save the medication. Check the submitted details and try again.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var existing =
                 await _context.Medications
@@ -107,7 +126,10 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (existing == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "The medication could not be found or is no longer active.";
+                return RedirectToAction(nameof(Index));
+            }
 
             var categoryExists =
                 await _context.MedicationCategories
@@ -117,7 +139,16 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (!categoryExists)
-                return BadRequest("Invalid category.");
+            {
+                TempData["ErrorMessage"] = "Select a valid active category before saving.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _context.Medications.AnyAsync(x => x.Status == Status.Active && x.MedicationId != medication.MedicationId && x.MedicationCategoryId == medication.MedicationCategoryId && x.Name.ToLower() == medication.Name.ToLower()))
+            {
+                TempData["ErrorMessage"] = "A medication with this name already exists in the selected category.";
+                return RedirectToAction(nameof(Index));
+            }
 
             existing.Name = medication.Name;
             existing.Description = medication.Description;
@@ -126,11 +157,8 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Medication updated successfully."
-            });
+            TempData["SuccessMessage"] = "Medication updated successfully.";
+            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -144,17 +172,17 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
                         x.Status == Status.Active);
 
             if (medication == null)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "The medication could not be found or is already inactive.";
+                return RedirectToAction(nameof(Index));
+            }
 
             medication.Status = Status.Inactive;
 
             await _context.SaveChangesAsync();
 
-            return Json(new
-            {
-                success = true,
-                message = "Medication removed successfully."
-            });
+            TempData["SuccessMessage"] = "Medication removed successfully.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

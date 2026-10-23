@@ -7,6 +7,22 @@
 
 <div class="container-fluid px-4 py-4">
 
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>@errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+
     <!-- =========================================================
          PAGE HEADER
          ========================================================= -->
@@ -200,11 +216,8 @@
                                             <button type="button"
                                                     class="btn btn-outline-primary"
                                                     title="Edit"
-                                                    onclick="openEditModal(
-                                                @medication.MedicationId,
-                                                '@Html.Raw(System.Text.Json.JsonSerializer.Serialize(medication.Name ?? ""))',
-                                                @medication.MedicationCategoryId
-                                                )">
+                                                    data-name="@medication.Name"
+                                                    onclick="openEditModal(@medication.MedicationId, this.dataset.name, @medication.MedicationCategoryId)">
 
                                                 <i class="fa-solid fa-pen"></i>
 
@@ -214,10 +227,8 @@
                                             <button type="button"
                                                     class="btn btn-outline-danger"
                                                     title="Delete"
-                                                    onclick="confirmDelete(
-                                                @medication.MedicationId,
-                                                '@Html.Raw(System.Text.Json.JsonSerializer.Serialize(medication.Name ?? ""))'
-                                                )">
+                                                    data-name="@medication.Name"
+                                                    onclick="confirmDelete(@medication.MedicationId, this.dataset.name)">
 
                                                 <i class="fa-solid fa-trash"></i>
 
@@ -345,6 +356,11 @@
                     </div>
 
 
+                    <div class="mb-3">
+                        <label for="MedicationDescription" class="form-label fw-semibold">Description</label>
+                        <textarea id="MedicationDescription" name="Description" class="form-control" rows="3" maxlength="1000" placeholder="Optional description"></textarea>
+                    </div>
+
                     <!-- CATEGORY -->
 
                     <div class="mb-3">
@@ -434,6 +450,7 @@
                   method="post">
 
                 @Html.AntiForgeryToken()
+                <input type="hidden" id="deleteMedicationId" name="id" value="0" />
 
                 <div class="modal-body text-center p-4">
 
@@ -825,7 +842,7 @@
            EDIT
            ========================================================= */
 
-        function openEditModal(id, name, categoryId) {
+        function openEditModal(id, name, categoryId, description = "") {
 
             document.getElementById(
                 "medicationModalLabel"
@@ -845,23 +862,14 @@
                 id;
 
 
-            try {
+            document.getElementById("Name").value = name || "";
 
-                document.getElementById(
-                    "Name"
-                ).value =
-                    JSON.parse(name);
 
-            }
-            catch {
-
-                document.getElementById(
-                    "Name"
-                ).value =
-                    name;
-
-            }
-
+            document.getElementById("MedicationDescription").value = description || "";
+            fetch("@Url.Action("Get", "Medications", new { area = "Administrator" })?id=" + encodeURIComponent(id), { headers: { "Accept": "application/json" } })
+                .then(response => { if (!response.ok) throw new Error("Could not load medication details."); return response.json(); })
+                .then(data => { document.getElementById("MedicationDescription").value = data.description || ""; })
+                .catch(() => { /* Keep the form usable if the optional description cannot be loaded. */ });
 
             document.getElementById(
                 "MedicationCategoryId"
@@ -894,19 +902,7 @@
 
         function confirmDelete(id, name) {
 
-            let medicationName =
-                name;
-
-
-            try {
-
-                medicationName =
-                    JSON.parse(name);
-
-            }
-            catch {
-                // Use original value.
-            }
+            const medicationName = name || "";
 
 
             document.getElementById(
@@ -915,10 +911,11 @@
                 medicationName;
 
 
+            document.getElementById("deleteMedicationId").value = id;
             document.getElementById(
                 "deleteMedicationForm"
             ).action =
-                "@Url.Action("Delete", "Medications", new { area = "Administrator" })/" + id;
+                "@Url.Action("Delete", "Medications", new { area = "Administrator" })";
 
 
             const modal =
