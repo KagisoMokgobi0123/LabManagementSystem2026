@@ -1050,25 +1050,22 @@
                 </a>
 
 
-
-                <!-- ================= RESULTS ================= -->
-
                 <!-- ================= RESULTS ================= -->
 
                 <div class="sidebar-section">
                     Results
                 </div>
 
-                <a asp-area="Patient" asp-controller="Home" asp-action="Results"
+                <a asp-area="Patient" asp-controller="Results" asp-action="Index"
                    title="My Results"
-                   class="sidebar-link @(controller == "Home" && action == "Results" ? "active" : "")">
+                   class="sidebar-link @(controller == "Results" && action == "Index" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fa-solid fa-file-medical"></i></span>
                     <span class="sidebar-link-text">My Results</span>
                 </a>
 
-                <a asp-area="Patient" asp-controller="Home" asp-action="History"
+                <a asp-area="Patient" asp-controller="Results" asp-action="History"
                    title="Result History"
-                   class="sidebar-link @(controller == "Home" && action == "History" ? "active" : "")">
+                   class="sidebar-link @(controller == "Results" && action == "History" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
                     <span class="sidebar-link-text">Result History</span>
                 </a>
@@ -1087,37 +1084,36 @@
                     <span class="sidebar-link-text">Patient Reports</span>
                 </a>
 
-
                 <!-- ================= MY HEALTH ================= -->
 
                 <div class="sidebar-section">
                     My Health
                 </div>
 
-                <a asp-area="Patient" asp-controller="Home" asp-action="MedicalHistory"
+                <a asp-area="Patient" asp-controller="MedicalInformation" asp-action="Index"
                    title="Medical Information"
-                   class="sidebar-link @(controller == "Home" && action == "MedicalHistory" ? "active" : "")">
+                   class="sidebar-link @(controller == "MedicalInformation" && action == "Index" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fa-solid fa-notes-medical"></i></span>
                     <span class="sidebar-link-text">Medical Information</span>
                 </a>
 
-                <a asp-area="Patient" asp-controller="Home" asp-action="Conditions"
+                <a asp-area="Patient" asp-controller="MedicalInformation" asp-action="Conditions"
                    title="Medical Conditions"
-                   class="sidebar-link @(controller == "Home" && action == "Conditions" ? "active" : "")">
+                   class="sidebar-link @(controller == "MedicalInformation" && action == "Conditions" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fa-solid fa-heart-pulse"></i></span>
                     <span class="sidebar-link-text">Medical Conditions</span>
                 </a>
 
-                <a asp-area="Patient" asp-controller="Home" asp-action="Allergies"
+                <a asp-area="Patient" asp-controller="MedicalInformation" asp-action="Allergies"
                    title="Allergies"
-                   class="sidebar-link @(controller == "Home" && action == "Allergies" ? "active" : "")">
+                   class="sidebar-link @(controller == "MedicalInformation" && action == "Allergies" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
                     <span class="sidebar-link-text">Allergies</span>
                 </a>
 
-                <a asp-area="Patient" asp-controller="Home" asp-action="Medications"
+                <a asp-area="Patient" asp-controller="MedicalInformation" asp-action="Medications"
                    title="Medications"
-                   class="sidebar-link @(controller == "Home" && action == "Medications" ? "active" : "")">
+                   class="sidebar-link @(controller == "MedicalInformation" && action == "Medications" ? "active" : "")">
                     <span class="sidebar-link-icon"><i class="fa-solid fa-pills"></i></span>
                     <span class="sidebar-link-text">Medications</span>
                 </a>
