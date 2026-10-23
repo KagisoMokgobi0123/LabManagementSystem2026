@@ -572,32 +572,7 @@
                 </p>
                 <br />
 
-@*                 <p>
-                   LOG IN CREDENTIALS:
-                    <br />
-                    Admin:  <br />
-                   Username: administrator@nmbhlab.co.za <br/>
-                   Password: Admin@123<br/>
-                    <br />
-                 
-                    Manager:   <br />
-                    Username: manager@nmbhlab.co.za <br />
-                    Password: Manager@123<br />
-                    <br />
-                    Doctor:<br />
-                    Username: doctor@nmbhlab.co.za <br />
-                    Password: Doctor@123<br />
-                    <br />
-                
-                    Techncian:  <br />
-                    Username: technician@nmbhlab.co.za <br />
-                    Password: Tech@1234<br />
-                    <br />
-                    Patient:  <br />
-                    Username: patient@nmbhlab.co.za <br />
-                    Password: Patient@123<br />
-                </p>
- *@
+
             </div>
 
         </section>
@@ -1262,13 +1237,6 @@
                     );
                 }
 
-
-                // =========================================================
-                // RESTORE ROLE AFTER SERVER VALIDATION ERROR
-                //
-                // If RoleLogin returns this same view and role is placed in
-                // ViewData["Role"], select it again.
-                // =========================================================
 
                 const serverRole =
                     '@(ViewData["Role"]?.ToString() ?? "")';
