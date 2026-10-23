@@ -44,9 +44,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         [Display(Name = "Measurement Unit")]
         public string? MeasurementUnit { get; set; }
 
-        // -----------------------------------------
-        // Reference range
-        // -----------------------------------------
+  
 
         [Display(Name = "Minimum Reference Value")]
         public decimal? ReferenceMin { get; set; }
@@ -54,9 +52,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         [Display(Name = "Maximum Reference Value")]
         public decimal? ReferenceMax { get; set; }
 
-        // -----------------------------------------
-        // Abnormal result detection
-        // -----------------------------------------
+
 
         [Display(Name = "Abnormal Result")]
         public bool IsAbnormal { get; set; }
@@ -66,11 +62,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string ResultFlag { get; set; } =
             "Normal";
 
-        // Normal, Low, High, or Not Evaluated
 
-        // -----------------------------------------
-        // Technician information
-        // -----------------------------------------
 
         [Required]
         public string TechnicianId { get; set; } =
@@ -143,11 +135,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         [StringLength(2000)]
         public string? NewResultNotes { get; set; }
 
-        // ==========================================
-        // MANAGER-DEFINED MEASUREMENT
-        // ==========================================
 
-        // Nullable initially to preserve existing results.
         public int? TestTypeMeasurementId { get; set; }
 
         [ForeignKey(nameof(TestTypeMeasurementId))]
