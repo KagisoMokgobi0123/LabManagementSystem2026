@@ -71,9 +71,29 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
             try
             {
-                // Only tests assigned to the logged-in technician,
-                // within the date range, and belonging to requests
-                // whose overall status is Completed.
+                // Technician activity is counted per individual test.
+                // The parent request may still be In Progress while other
+                // tests are awaiting completion or verification.
+                // Diagnostic for test #1001. This is logged server-side only.
+                // It distinguishes an outdated deployment from a filter mismatch.
+                var test1001 = await _context.TestRequestTestTypes
+                    .AsNoTracking()
+                    .Where(x => x.TestRequestTestTypeId == 1001)
+                    .Select(x => new
+                    {
+                        x.TestRequestTestTypeId,
+                        x.TechnicianId,
+                        x.Status,
+                        x.CompletionDateTime,
+                        ParentStatus = x.TestRequest != null
+                            ? x.TestRequest.Status : null
+                    })
+                    .FirstOrDefaultAsync();
+
+                _logger.LogWarning(
+                    "REPORT-V2-20261023: Test1001={@Test1001}; LoggedInTechnicianId={TechnicianId}; From={From}; Until={Until}",
+                    test1001, technician.Id, from, until);
+
                 var tests = await _context.TestRequestTestTypes
                     .AsNoTracking()
                     .Include(x => x.TestType)
@@ -82,7 +102,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                     .Where(x =>
                         x.TechnicianId == technician.Id &&
                         x.TestRequest != null &&
-                        x.TestRequest.Status == "Completed" &&
                         x.CompletionDateTime.HasValue &&
                         x.CompletionDateTime.Value >= from &&
                         x.CompletionDateTime.Value < until &&
@@ -90,6 +109,10 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                          x.Status == "Verified"))
                     .OrderBy(x => x.CompletionDateTime)
                     .ToListAsync();
+
+                _logger.LogWarning(
+                    "REPORT-V2-20261023: Query returned {Count} matching tests for technician {TechnicianId}",
+                    tests.Count, technician.Id);
 
                 var testIds = tests
                     .Select(x => x.TestRequestTestTypeId)
@@ -153,7 +176,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                                 .FontColor(Colors.Blue.Darken3);
 
                             header.Item()
-                                .Text("Technician Completed Tests Report")
+                                .Text("Technician Completed Tests Report - V2")
                                 .FontSize(14)
                                 .SemiBold();
 
@@ -172,7 +195,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                             header.Item()
                                 .Text(
-                                    "Scope: Completed parent requests only")
+                                    "Scope: Individual completed or verified tests performed by this technician | REPORT-V2-20261023")
                                 .FontSize(9)
                                 .FontColor(Colors.Grey.Darken2);
 
@@ -225,8 +248,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                                 {
                                     column.Item()
                                         .Text(
-                                            "No qualifying tests were found " +
-                                            "for the selected date range.");
+                                            "REPORT-V2-20261023: No completed or verified tests performed by " +
+                                            "this technician were found for the selected date range.");
                                 }
 
                                 foreach (var category in categories)

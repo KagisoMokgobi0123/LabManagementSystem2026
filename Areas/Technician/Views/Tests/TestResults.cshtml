@@ -4,8 +4,17 @@
     ViewData["Title"] = "Test Results";
     Layout = "_TechnicianLayout";
 
-    var results = Model?.ToList()
-        ?? new List<NMB_HLabSys.Areas.Technician.Models.TestResultModel>();
+    // This register displays captured quantitative measurements only.
+    // Qualitative descriptions and placeholders are excluded from the table and totals.
+    var results = (Model ?? Enumerable.Empty<NMB_HLabSys.Areas.Technician.Models.TestResultModel>())
+        .Where(r => !string.IsNullOrWhiteSpace(r.ResultValue) &&
+            (decimal.TryParse(r.ResultValue.Trim(),
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture, out _) ||
+             decimal.TryParse(r.ResultValue.Trim(),
+                System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.CurrentCulture, out _)))
+        .ToList();
 
     // Populate these dictionaries in TestsController.Results().
     var remainingByResultId = ViewData["ConsumableRemainingByResultId"]
@@ -14,12 +23,18 @@
         as IEnumerable<int> ?? Enumerable.Empty<int>();
     var deletedIds = deletedResultIds.ToHashSet();
 
+    var techniciansByRequestId = ViewData["TechniciansByRequestId"]
+        as IDictionary<int, string> ?? new Dictionary<int, string>();
+
     var totalResults = results.Count;
 
     var verifiedResults = results.Count(r =>
         r.VerifiedDateTime.HasValue && !deletedIds.Contains(r.TestResultId));
 
-    var abnormalResults = results.Count(r => r.IsAbnormal && !deletedIds.Contains(r.TestResultId));
+    var abnormalResults = results.Count(r => !deletedIds.Contains(r.TestResultId) &&
+        (r.IsAbnormal || string.Equals(r.ResultFlag, "Abnormal", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(r.ResultFlag, "High", StringComparison.OrdinalIgnoreCase) ||
+         string.Equals(r.ResultFlag, "Low", StringComparison.OrdinalIgnoreCase)));
 
     var reviewResults = results.Count(r => !deletedIds.Contains(r.TestResultId) && (
         r.RequiresReview ||
@@ -154,7 +169,10 @@
         font-size: 12px;
     }
 
-    .results-table {
+    .results-scroll-top { overflow-x: auto; overflow-y: hidden; height: 18px; margin: 0 16px; scrollbar-width: auto; }
+    .results-scroll-top-inner { height: 1px; }
+    .results-scroll-bottom { overflow-x: auto; overflow-y: auto; width: 100%; }
+    .results-table { min-width: 1700px;
         margin: 0;
     }
 
@@ -268,7 +286,7 @@
         white-space: nowrap;
     }
 
-    .result-action {
+    .result-action { cursor: pointer; position: relative; z-index: 2;
         gap: 6px;
         width: auto;
         min-width: 82px;
@@ -310,7 +328,7 @@
         color: white;
     }
 
-    .result-actions {
+    .result-actions { position: relative; z-index: 1;
         display: flex;
         align-items: center;
         flex-wrap: nowrap;
@@ -360,6 +378,17 @@
             font-size: 24px;
         }
     }
+
+    /* Register tools and pagination match the Receive Samples table. */
+    .results-table-tools { padding: 14px 18px 5px; }
+    .results-table-tools .dt-buttons { display:flex; gap:7px; flex-wrap:wrap; }
+    .results-table-tools .dt-button { border-radius:7px !important; font-size:12px; font-weight:650; margin:0 !important; }
+    .results-table-tools .btn-copy-visible, .results-table-tools .btn-copy-visible:hover { background:#475569 !important; border-color:#475569 !important; color:#fff !important; }
+    .results-table-tools .dataTables_length select { width:auto; display:inline-block; margin:0 5px; }
+    .results-table-footer { padding:12px 18px 18px; }
+    .results-table-footer .pagination { flex-wrap:wrap; }
+    .results-table thead th { cursor:pointer; }
+    .results-table thead th:last-child { cursor:default; }
 </style>
 
 <div class="results-page">
@@ -372,7 +401,7 @@
                         Test Results
                     </h1>
                     <p>
-                        Review captured laboratory measurements,
+                        Review captured quantitative laboratory measurements,
                         patient information, flags and consumable stock.
                     </p>
                 </div>
@@ -463,6 +492,8 @@
             </div>
         </div>
 
+        <form id="resultAntiForgeryForm" class="d-none">@Html.AntiForgeryToken()</form>
+
         <div class="results-card">
             <div class="results-card-header">
                 <div class="row align-items-center">
@@ -472,7 +503,7 @@
                             Laboratory Results Register
                         </h4>
                         <p class="results-card-subtitle">
-                            Search by result, test, patient, flag or status.
+                            Search numeric results by request number, result, test, patient, flag or status.
                             Current consumable stock balances are shown for each test type.
                         </p>
                     </div>
@@ -487,15 +518,19 @@
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="results-table-tools" id="resultsTableTools"></div>
+            <div class="results-scroll-top" id="resultsScrollTop" aria-label="Horizontal scroll for results table" tabindex="0"><div class="results-scroll-top-inner" id="resultsScrollTopInner"></div></div>
+            <div class="results-scroll-bottom" id="resultsScrollBottom">
                 <table class="table results-table" id="resultsTable">
                     <thead>
                         <tr>
-                            <th>Result ID</th>
+                            <th>Request Number</th>
                             <th>Test</th>
                             <th>Patient</th>
+                            <th>Performed By</th>
                             <th>Result Name</th>
                             <th>Result Value</th>
+                            <th>Measurement Unit</th>
                             <th>Reference Range</th>
                             <th>Flag</th>
                             <th>Consumables / Current Stock</th>
@@ -513,7 +548,23 @@
                             var testType = test?.TestType;
                             var patient = test?.TestRequest?.Patient;
                             var status = test?.Status ?? "Unknown";
-                            var isDeleted = deletedIds.Contains(result.TestResultId);
+                            var performingTechnician = result.Technician?.FullName
+                                ?? test?.Technician?.FullName
+                                ?? "Not assigned";
+                            var requestId = test?.TestRequestId ?? 0;
+                            var requestTeam = techniciansByRequestId.TryGetValue(requestId, out var teamNames)
+                                ? teamNames : "No assigned technicians";
+                            var isDeleted = deletedIds.Contains(result.TestResultId) || test?.IsDeleted == true;
+                            // Same UTC deadline rule used by TestsController.IsPastTestDeadline.
+                            var isOverdue = test?.StartDateTime.HasValue == true
+                                && test.TestType != null
+                                && test.TestType.TurnAroundTimeHours > 0
+                                && DateTime.UtcNow > DateTime.SpecifyKind(test.StartDateTime.Value, DateTimeKind.Utc)
+                                    .AddHours(test.TestType.TurnAroundTimeHours);
+                            var overdueDeadline = isOverdue
+                                ? DateTime.SpecifyKind(test!.StartDateTime!.Value, DateTimeKind.Utc)
+                                    .AddHours(test.TestType!.TurnAroundTimeHours)
+                                : (DateTime?)null;
                             var canModifyResult = !isDeleted
                                 && !result.VerifiedDateTime.HasValue
                                 && string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId)
@@ -522,14 +573,40 @@
                             var hasStock = remainingByResultId.TryGetValue(result.TestResultId, out var stockText);
                             var stockColors = new[] { "c-blue", "c-green", "c-orange", "c-purple", "c-teal", "c-pink" };
                             var stockColor = stockColors[(int)((uint)(test?.TestTypeId ?? 0) % (uint)stockColors.Length)];
+                             // Quantitative values come from stored records; no synthetic UI values.
+                             var displayValue = result.ResultValue?.Trim() ?? "Not recorded";
+                             var displayUnit = string.IsNullOrWhiteSpace(result.MeasurementUnit)
+                                 ? "Unit not recorded" : result.MeasurementUnit;
+                             var hasRange = result.ReferenceMin.HasValue || result.ReferenceMax.HasValue;
+                             var validRange = hasRange && !(result.ReferenceMin == 0m && result.ReferenceMax == 0m);
+                             var displayRange = validRange
+                                 ? $"{(result.ReferenceMin?.ToString("0.##") ?? "—")} to {(result.ReferenceMax?.ToString("0.##") ?? "—")}" 
+                                 : "Not recorded";
+                             var storedFlag = result.ResultFlag?.Trim() ?? "";
+                             var isNormal = storedFlag.Equals("Normal", StringComparison.OrdinalIgnoreCase);
+                             var isAbnormal = result.IsAbnormal ||
+                                 storedFlag.Equals("Abnormal", StringComparison.OrdinalIgnoreCase) ||
+                                 storedFlag.Equals("High", StringComparison.OrdinalIgnoreCase) ||
+                                 storedFlag.Equals("Low", StringComparison.OrdinalIgnoreCase);
+                             var displayFlag = isAbnormal
+                                 ? (storedFlag.Equals("High", StringComparison.OrdinalIgnoreCase) ||
+                                    storedFlag.Equals("Low", StringComparison.OrdinalIgnoreCase)
+                                    ? storedFlag.ToUpperInvariant() : "ABNORMAL")
+                                 : (isNormal ? "NORMAL" : "NOT EVALUATED");
+                             var flagClass = isAbnormal ? "abnormal" : (isNormal ? "normal" : "review");
+                             var isFlagAbnormal = isAbnormal;
 
-                            <tr class="@(isDeleted ? "result-row-deleted" : "")"
+
+                            <tr class="@(isDeleted ? "result-row-deleted" : "")" data-result-id="@result.TestResultId"
                                 data-result-verified="@(result.VerifiedDateTime.HasValue && !isDeleted ? "true" : "false")"
-                                data-result-abnormal="@(result.IsAbnormal && !isDeleted ? "true" : "false")"
+                                data-result-abnormal="@(isFlagAbnormal && !isDeleted ? "true" : "false")"
                                 data-result-review="@((result.RequiresReview || string.Equals(status, "To Be Reviewed", StringComparison.OrdinalIgnoreCase)) && !isDeleted ? "true" : "false")">
                                 <td>
                                     <span class="result-main">
-                                        #@result.TestResultId
+                                        @(test?.TestRequest?.RequestNumber ?? "Not available")
+                                    </span>
+                                    <span class="result-sub" title="Technicians assigned to tests within this request">
+                                        Request team: @requestTeam
                                     </span>
                                 </td>
 
@@ -548,49 +625,29 @@
                                     </span>
                                 </td>
 
+                                <td>
+                                    <span class="result-main">@performingTechnician</span>
+                                    <span class="result-sub">Test performer</span>
+                                </td>
+
                                 <td>@result.ResultName</td>
 
-                                <td>
-                                    <span class="result-main">
-                                        @result.ResultValue
-                                    </span>
-                                    <span class="result-sub">
-                                        @(result.MeasurementUnit ?? "Unit not recorded")
-                                    </span>
+                                                                <td>
+                                    <span class="result-main">@displayValue</span>
                                 </td>
 
                                 <td>
-                                    @if (result.ReferenceMin.HasValue ||
-                                         result.ReferenceMax.HasValue)
-                                    {
-                                        <span>
-                                            @(result.ReferenceMin?.ToString("0.##") ?? "—")
-                                            to
-                                            @(result.ReferenceMax?.ToString("0.##") ?? "—")
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">Not recorded</span>
-                                    }
+                                    <span class="@(displayUnit == "Unit not recorded" ? "text-muted" : "")">@displayUnit</span>
                                 </td>
 
                                 <td>
-                                    @if (result.IsAbnormal)
-                                    {
-                                        <span class="result-pill abnormal">
-                                            ABNORMAL
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="result-pill normal">
-                                            NORMAL
-                                        </span>
-                                    }
+                                    <span class="@(displayRange == "Not recorded" ? "text-muted" : "")">@displayRange</span>
                                 </td>
 
                                 <td>
+                                    <span class="result-pill @flagClass">@displayFlag</span>
+                                </td>
+<td>
                                     @if (hasStock)
                                     {
                                         <div class="consumable-pill-group">
@@ -613,7 +670,11 @@
                                 </td>
 
                                 <td>
-                                    @if (result.RequiresReview ||
+                                    @if (isOverdue && !isDeleted)
+                                    {
+                                        <span class="result-pill deleted" title="The turnaround deadline has passed">Overdue</span>
+                                    }
+                                    else if (result.RequiresReview ||
                                          string.Equals(
                                              status,
                                              "To Be Reviewed",
@@ -639,7 +700,7 @@
 
                                 <td>
                                     <span class="result-pill @(isDeleted ? "deleted" : "active")">
-                                        @(isDeleted ? "Soft Deleted" : "Active")
+                                        @(isDeleted ? "De-Activated" : "Active")
                                     </span>
                                 </td>
 
@@ -662,7 +723,10 @@
                                         @if (canModifyResult)
                                         {
                                             <button type="button"
-                                                    class="result-action result-action-edit js-result-modal"
+                                                    class="result-action result-action-edit @(isOverdue ? "js-overdue-result" : "js-result-modal")"
+                                                    data-request-number="@(test?.TestRequest?.RequestNumber ?? "N/A")"
+                                                    data-test-name="@(testType?.Name ?? "Unknown test")"
+                                                    data-deadline="@(overdueDeadline?.ToString("dd MMM yyyy HH:mm 'UTC'") ?? "")"
                                                     data-url="@Url.Action("EditResult", "Tests", new { area = "Technician", id = result.TestResultId })"
                                                     data-result-id="@result.TestResultId"
                                                     data-modal-title="Edit Result"
@@ -670,17 +734,16 @@
                                                 <i class="fas fa-edit" aria-hidden="true"></i> Edit
                                             </button>
 
-                                            <form asp-area="Technician" asp-controller="Tests"
-                                                  asp-action="DeleteResult" asp-route-id="@result.TestResultId"
-                                                  method="post" class="d-inline js-deactivate-result-form">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="result-action result-action-delete"
-                                                        title="De-activate result" aria-label="De-activate result">
-                                                    <i class="fas fa-ban" aria-hidden="true"></i> De-Activate
-                                                </button>
-                                            </form>
+                                            <button type="button"
+                                                    class="result-action result-action-delete js-deactivate-result"
+                                                    data-result-id="@result.TestResultId"
+                                                    data-request-number="@(test?.TestRequest?.RequestNumber ?? "N/A")"
+                                                    data-test-name="@(testType?.Name ?? "Unknown test")"
+                                                    data-url="@Url.Action("DeactivateResultTest", "Tests", new { area = "Technician", id = result.TestResultId })"
+                                                    title="De-activate test" aria-label="De-activate test">
+                                                <i class="fas fa-ban" aria-hidden="true"></i> De-Activate
+                                            </button>
 
-                                         
                                             @* The href is the POST destination; JS opens confirmation modal. *@
                                             @if (test != null)
                                             {
@@ -690,10 +753,10 @@
                                                    data-patient="@(patient?.FullName ?? "Patient unavailable")"
                                                    data-test="@(testType?.Name ?? "Unknown test")"
                                                    data-result-name="@result.ResultName"
-                                                   data-result="@result.ResultValue"
-                                                   data-unit="@result.MeasurementUnit"
-                                                   data-range="@(result.ReferenceMin?.ToString("0.##") ?? "—") to @(result.ReferenceMax?.ToString("0.##") ?? "—")"
-                                                   data-flag="@(result.IsAbnormal ? "ABNORMAL" : "NORMAL")"
+                                                   data-result="@displayValue"
+                                                   data-unit="@displayUnit"
+                                                   data-range="@displayRange"
+                                                   data-flag="@displayFlag"
                                                    data-status="@status"
                                                    data-assignment-id="@test.TestRequestTestTypeId"
                                                    title="Review and complete this test"
@@ -712,11 +775,11 @@
                         @if (!results.Any())
                         {
                             <tr class="empty-row">
-                                <td colspan="12" class="results-empty">
+                                <td colspan="14" class="results-empty">
                                     <i class="fas fa-flask fa-2x mb-3"></i>
-                                    <h5>No captured results found</h5>
+                                    <h5>No numeric results found</h5>
                                     <p>
-                                        Results you capture will appear in this table.
+                                        Captured numeric results will appear in this table.
                                     </p>
                                 </td>
                             </tr>
@@ -725,6 +788,7 @@
                 </table>
             </div>
 
+            <div class="results-table-footer" id="resultsTableFooter"></div>
             <div class="px-3 py-3 text-muted small"
                  id="resultsCount"
                  aria-live="polite">
@@ -749,69 +813,118 @@
     </div>
 </div>
 
-@* Confirmation modal for the existing soft-delete endpoint. *@
-<div class="modal fade" id="deactivateResultModal" tabindex="-1" role="dialog"
-     aria-labelledby="deactivateResultModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="deactivateResultModalLabel">
-                    <i class="fas fa-ban mr-2"></i>De-Activate Laboratory Result
-                </h5>
-                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-2">De-activate result <strong id="deactivateResultNumber"></strong>?</p>
-                <p class="text-muted small mb-0">This uses the existing DeleteResult soft-delete action. The result remains in the register marked Soft Deleted. Audit recording depends on the controller implementation.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" id="confirmDeactivateResult" class="btn btn-danger">
-                    <i class="fas fa-ban mr-1"></i>De-Activate
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @* Modal is outside the table and rendered only once. *@
 @await Html.PartialAsync("_CompleteTestModal")
 
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
         $(function() {
-            // Confirm before submitting the existing soft-delete form.
-            let pendingDeactivateForm = null;
-            $(document).on('submit', '.js-deactivate-result-form', function(event) {
+            // An overdue test remains visible but the Edit action shows a warning instead.
+            $(document).on('click', '.js-overdue-result', function(event) {
                 event.preventDefault();
-                pendingDeactivateForm = this;
-                const row = $(this).closest('tr');
-                $('#deactivateResultNumber').text(row.find('td:first .result-main').text().trim());
-                const modal = document.getElementById('deactivateResultModal');
-                if (window.bootstrap && window.bootstrap.Modal) {
-                    window.bootstrap.Modal.getOrCreateInstance(modal).show();
-                } else if ($.fn.modal) {
-                    $('#deactivateResultModal').modal('show');
-                } else if (window.confirm('De-activate this laboratory result?')) {
-                    this.submit();
+                event.stopImmediatePropagation();
+                const button = $(this);
+                const requestNumber = button.attr('data-request-number') || 'N/A';
+                const testName = button.attr('data-test-name') || 'Selected test';
+                const deadline = button.attr('data-deadline') || 'the scheduled turnaround time';
+                const message = `Request ${requestNumber} (${testName}) passed its deadline (${deadline}). The technician cannot edit this result. Please contact the laboratory manager for an authorised extension.`;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({ icon:'warning', title:'Test Overdue - Editing Locked', text:message,
+                        confirmButtonText:'Understood', confirmButtonColor:'#075985' });
+                } else { alert(message); }
+            });
+
+            // Match Receive Samples: button click, SweetAlert2 reason, AJAX POST, audit handled server-side.
+            $(document).on('click', '.js-deactivate-result', async function(event) {
+                event.preventDefault();
+                const button = $(this);
+                if (button.prop('disabled')) return;
+                if (typeof Swal === 'undefined') {
+                    alert('SweetAlert2 is not loaded. Please contact the administrator.');
+                    return;
                 }
-            });
-            $('#confirmDeactivateResult').on('click', function() {
-                if (!pendingDeactivateForm) return;
-                const form = pendingDeactivateForm;
-                pendingDeactivateForm = null;
-                $(this).prop('disabled', true);
-                form.submit();
-            });
-            $('#deactivateResultModal').on('hidden.bs.modal', function() {
-                pendingDeactivateForm = null;
-                $('#confirmDeactivateResult').prop('disabled', false);
+
+                const resultId = Number(button.attr('data-result-id'));
+                const requestNumber = button.attr('data-request-number') || 'N/A';
+                const testName = button.attr('data-test-name') || 'Selected test';
+                const url = button.attr('data-url');
+                if (!Number.isInteger(resultId) || resultId <= 0 || !url) {
+                    await Swal.fire({ icon: 'error', title: 'Invalid Test', text: 'Result ID or endpoint is missing.' });
+                    return;
+                }
+
+                const confirmation = await Swal.fire({
+                    icon: 'warning',
+                    title: 'De-Activate Test?',
+                    text: `Request: ${requestNumber} | Test: ${testName}. A reason is mandatory and will be recorded in the audit trail.`,
+                    input: 'textarea',
+                    inputLabel: 'Reason for de-activation (required)',
+                    inputPlaceholder: 'Explain why this test must be de-activated...',
+                    inputAttributes: { maxlength: '500', 'aria-label': 'Reason for de-activation' },
+                    inputValidator: value => {
+                        if (!value || !value.trim()) return 'Please provide a reason for de-activation.';
+                        if (value.trim().length > 500) return 'The reason must not exceed 500 characters.';
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, De-Activate',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#dc2626',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: () => !Swal.isLoading(),
+                    preConfirm: async value => {
+                        try {
+                            const token = $('input[name="__RequestVerificationToken"]').first().val();
+                            const response = await $.ajax({
+                                url: url,
+                                type: 'POST',
+                                data: {
+                                    id: resultId,
+                                    reason: value.trim(),
+                                    __RequestVerificationToken: token
+                                }
+                            });
+                            if (!response || !response.success) {
+                                Swal.showValidationMessage(response?.message || 'De-activation failed.');
+                                return false;
+                            }
+                            return response;
+                        } catch (xhr) {
+                            const message = xhr.responseJSON?.message ||
+                                (xhr.status === 401 || xhr.status === 403
+                                    ? 'Your session has expired or you are not authorized.'
+                                    : 'Unable to de-activate the test. Please try again.');
+                            Swal.showValidationMessage(message);
+                            return false;
+                        }
+                    }
+                });
+
+                if (confirmation.isConfirmed && confirmation.value?.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Test De-Activated',
+                        text: confirmation.value.message || 'The test and audit record were saved.',
+                        confirmButtonText: 'OK'
+                    });
+                    window.location.reload();
+                }
             });
 
             // Cross-version Bootstrap modal close controls (Bootstrap 4 and 5).
-            $(document).on('click', '#testResultModal [data-dismiss="modal"], #testResultModal [data-bs-dismiss="modal"], #deactivateResultModal [data-dismiss="modal"], #deactivateResultModal [data-bs-dismiss="modal"]', function(event) {
+            $(document).on('click', '#testResultModal [data-dismiss="modal"], #testResultModal [data-bs-dismiss="modal"]', function(event) {
                 event.preventDefault();
                 const element = $(this).closest('.modal')[0];
                 if (!element) return;
@@ -897,6 +1010,34 @@
                 $('#completeSubmitButton').prop('disabled', false);
             });
 
+            // Synchronise the upper and lower horizontal scrollbars.
+            const topScroller = document.getElementById('resultsScrollTop');
+            const bottomScroller = document.getElementById('resultsScrollBottom');
+            const topInner = document.getElementById('resultsScrollTopInner');
+            const resultsTable = document.getElementById('resultsTable');
+            if (topScroller && bottomScroller && topInner && resultsTable) {
+                let syncing = false;
+                const updateScrollWidth = () => {
+                    topInner.style.width = Math.max(resultsTable.scrollWidth, bottomScroller.clientWidth + 1) + 'px';
+                    topScroller.scrollLeft = bottomScroller.scrollLeft;
+                };
+                topScroller.addEventListener('scroll', () => {
+                    if (syncing) return;
+                    syncing = true;
+                    bottomScroller.scrollLeft = topScroller.scrollLeft;
+                    syncing = false;
+                });
+                bottomScroller.addEventListener('scroll', () => {
+                    if (syncing) return;
+                    syncing = true;
+                    topScroller.scrollLeft = bottomScroller.scrollLeft;
+                    syncing = false;
+                });
+                updateScrollWidth();
+                window.addEventListener('resize', updateScrollWidth);
+                if (window.ResizeObserver) new ResizeObserver(updateScrollWidth).observe(resultsTable);
+            }
+
             const $modal = $('#testResultModal');
             const $content = $('#testResultModalContent');
             let activeRequest = null;
@@ -920,7 +1061,10 @@
                 const url = $button.attr('data-url');
                 const title = $button.attr('data-modal-title') || 'Test result';
 
-                if (!url) return;
+                if (!url || url === '#') {
+                    alert('The result endpoint is unavailable. Check TestsController ResultDetails/EditResult actions.');
+                    return;
+                }
                 if (activeRequest) activeRequest.abort();
                 const sequence = ++requestSequence;
                 $button.prop('disabled', true);
@@ -928,16 +1072,10 @@
                 const resultModalElement = $modal[0];
                 if (window.bootstrap && window.bootstrap.Modal) {
                     window.bootstrap.Modal.getOrCreateInstance(resultModalElement).show();
-                } else if ($.fn.modal) {
-                    if (window.bootstrap && window.bootstrap.Modal) {
-                        window.bootstrap.Modal.getOrCreateInstance($modal[0]).show();
-                    } else if ($.fn.modal) {
-                        $modal.modal('show');
-                    } else {
-                        alert('Bootstrap modal JavaScript is missing.');
-                    }
+                } else if (typeof $.fn.modal === 'function') {
+                    $modal.modal('show');
                 } else {
-                    alert('Bootstrap modal JavaScript is missing.');
+                    $content.html('<div class="modal-body"><div class="alert alert-warning">Bootstrap modal JavaScript is not loaded. Please check _TechnicianLayout.cshtml.</div></div>');
                     $button.prop('disabled', false);
                     return;
                 }
@@ -996,7 +1134,9 @@
                         alert(response.message || 'Unable to save result.');
                     }
                 }).fail(function(xhr) {
-                    alert(xhr.responseJSON?.message || ('Save failed (HTTP ' + xhr.status + ').'));
+                    const message = xhr.responseJSON?.message || xhr.responseText || ('Save failed (HTTP ' + xhr.status + ').');
+                    if (typeof Swal !== 'undefined') Swal.fire({icon:'warning', title:'Unable to Edit Result', text:message});
+                    else alert(message);
                 }).always(function() {
                     $button.prop('disabled', false);
                     $button.find('.save-result-normal').removeClass('d-none');
@@ -1004,46 +1144,98 @@
                 });
             });
 
-            // Summary cards filter this register without requiring new controller actions.
-            // Query-string URLs also work when the page is opened in a new tab.
-            const $rows = $('#resultsTable tbody tr').not('.empty-row');
+            // DataTables paging, sorting and export; custom summary filters remain active.
             const allowedFilters = ['all', 'verified', 'abnormal', 'review'];
             const queryParams = new URLSearchParams(window.location.search);
             let activeFilter = queryParams.get('resultFilter') || 'all';
             if (!allowedFilters.includes(activeFilter)) activeFilter = 'all';
+            let resultsDataTable = null;
+            const $resultTable = $('#resultsTable');
+            const hasData = $resultTable.find('tbody tr:not(.empty-row)').length > 0;
 
-            function applyResultFilters() {
-                const query = ($('#resultsSearch').val() || '').trim().toLowerCase();
-                let visible = 0;
-                $rows.each(function() {
-                    const matchesStatus = activeFilter === 'all' ||
-                        this.getAttribute('data-result-' + activeFilter) === 'true';
-                    const matchesSearch = $(this).text().toLowerCase().includes(query);
-                    const show = matchesStatus && matchesSearch;
-                    $(this).toggle(show);
-                    if (show) visible++;
-                });
+            function updateSummarySelection() {
                 $('.results-summary-link').each(function() {
                     const selected = this.getAttribute('data-result-filter') === activeFilter;
                     $(this).toggleClass('is-active', selected)
                            .attr('aria-current', selected ? 'true' : null);
                 });
-                $('#resultsCount').text('Showing ' + visible + ' matching result(s).');
             }
 
+            if (hasData && $.fn.DataTable) {
+                $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+                    if (settings.nTable !== $resultTable[0]) return true;
+                    if (activeFilter === 'all') return true;
+                    const row = settings.aoData[dataIndex]?.nTr;
+                    return row?.getAttribute('data-result-' + activeFilter) === 'true';
+                });
+                resultsDataTable = $resultTable.DataTable({
+                    processing: true,
+                    autoWidth: false,
+                    pageLength: 10,
+                    lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
+                    pagingType: 'full_numbers',
+                    order: [[12,'desc']],
+                    columnDefs: [{targets:13, orderable:false, searchable:false}],
+                    // Keep existing upper/lower horizontal scrollers, not DataTables scrollX.
+                    dom: 'lBrtip',
+                    buttons: [
+                        { extend:'copyHtml5', text:'<i class="fas fa-copy mr-1"></i> Copy',
+                          className:'btn btn-secondary btn-sm btn-copy-visible',
+                          title:'NMB-HLabSys - Laboratory Test Results', exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} },
+                        { extend:'csvHtml5', text:'<i class="fas fa-file-csv mr-1"></i> CSV',
+                          className:'btn btn-info btn-sm', filename:'NMB-HLabSys_Test_Results',
+                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} },
+                        { extend:'excelHtml5', text:'<i class="fas fa-file-excel mr-1"></i> Excel',
+                          className:'btn btn-success btn-sm', filename:'NMB-HLabSys_Test_Results',
+                          title:'NMB-HLabSys - Laboratory Test Results',
+                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} },
+                        { extend:'pdfHtml5', text:'<i class="fas fa-file-pdf mr-1"></i> PDF',
+                          className:'btn btn-danger btn-sm', filename:'NMB-HLabSys_Test_Results',
+                          title:'NMB-HLabSys - Laboratory Test Results', orientation:'landscape', pageSize:'A3',
+                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}},
+                          customize:function(doc) { doc.defaultStyle.fontSize=7; doc.styles.tableHeader.fontSize=7; doc.pageMargins=[20,25,20,25]; } },
+                        { extend:'print', text:'<i class="fas fa-print mr-1"></i> Print',
+                          className:'btn btn-primary btn-sm', title:'NMB-HLabSys - Laboratory Test Results',
+                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} }
+                    ],
+                    language:{emptyTable:'No laboratory results found.'}
+                });
+                const $wrapper = $(resultsDataTable.table().container());
+                $('#resultsTableTools').append($wrapper.find('.dataTables_length'), $wrapper.find('.dt-buttons'));
+                $('#resultsTableFooter').append($wrapper.find('.dataTables_info'), $wrapper.find('.dataTables_paginate'));
+                resultsDataTable.on('draw', function() {
+                    $('#resultsCount').text('Showing ' + resultsDataTable.rows({search:'applied'}).count() + ' matching result(s).');
+                    $('#resultsScrollTopInner').width(Math.max(document.getElementById('resultsTable').scrollWidth, document.getElementById('resultsScrollBottom').clientWidth + 1));
+                });
+            }
+
+            function applyResultFilters() {
+                const query = ($('#resultsSearch').val() || '').trim();
+                updateSummarySelection();
+                if (resultsDataTable) {
+                    resultsDataTable.search(query).draw();
+                } else {
+                    let visible = 0;
+                    $('#resultsTable tbody tr').not('.empty-row').each(function() {
+                        const matchStatus = activeFilter === 'all' || this.getAttribute('data-result-' + activeFilter) === 'true';
+                        const show = matchStatus && $(this).text().toLowerCase().includes(query.toLowerCase());
+                        $(this).toggle(show);
+                        if (show) visible++;
+                    });
+                    $('#resultsCount').text('Showing ' + visible + ' matching result(s).');
+                }
+            }
             $(document).on('click', '.results-summary-link', function(event) {
-                // Allow Ctrl+click, middle-click, etc. to use the real MVC URL.
                 if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.which !== 1) return;
                 event.preventDefault();
                 activeFilter = this.getAttribute('data-result-filter') || 'all';
                 const url = new URL(this.href, window.location.href);
-                window.history.pushState({ resultFilter: activeFilter }, '', url);
+                window.history.pushState({resultFilter:activeFilter}, '', url);
                 applyResultFilters();
-                document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('resultsTable').scrollIntoView({behavior:'smooth',block:'start'});
             });
             $(window).on('popstate', function() {
-                const params = new URLSearchParams(window.location.search);
-                activeFilter = params.get('resultFilter') || 'all';
+                activeFilter = new URLSearchParams(window.location.search).get('resultFilter') || 'all';
                 if (!allowedFilters.includes(activeFilter)) activeFilter = 'all';
                 applyResultFilters();
             });

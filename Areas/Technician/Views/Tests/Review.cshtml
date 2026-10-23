@@ -6,6 +6,10 @@
     Layout = "_TechnicianLayout";
 
     var tests = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel>();
+    var technicianNamesById = ViewData["TechnicianNamesById"] as Dictionary<string, string>
+        ?? new Dictionary<string, string>();
+    var returnedByTest = ViewData["ReturnedByTest"] as Dictionary<int, (string Name, DateTime ReviewedOnUtc)>
+        ?? new Dictionary<int, (string Name, DateTime ReviewedOnUtc)>();
     var total = tests.Count;
     var pendingVerificationCount = tests.Count(t => t.Status == "Completed" && !t.IsDeleted);
     var returnedCount = tests.Count(t => t.Status == "To Be Reviewed" && !t.IsDeleted);
@@ -386,9 +390,11 @@
                             <tr>
                                 <th>Request</th>
                                 <th>Test / Category</th>
+                                <th>Performed By</th>
                                 <th>Urgency</th>
                                 <th>Started</th>
                                 <th>Status</th>
+                                <th>Returned By</th>
                                 <th>Verifier Feedback</th>
                                 <th>Action</th>
                             </tr>
@@ -398,11 +404,25 @@
                             {
                                 resultByTest.TryGetValue(test.TestRequestTestTypeId, out var savedResult);
                                 var feedback = savedResult?.ReviewNotes;
+                                (string Name, DateTime ReviewedOnUtc) returnInfo = default;
+                                var hasReturn = test.Status == "To Be Reviewed" &&
+                                    returnedByTest.TryGetValue(test.TestRequestTestTypeId, out returnInfo);
+                                var returnedByName = hasReturn ? returnInfo.Name : "Not yet reviewed";
+                                var returnedOn = hasReturn
+                                    ? returnInfo.ReviewedOnUtc.ToString("dd MMM yyyy, HH:mm") + " UTC"
+                                    : "—";
+                                // Resolve the performing technician from the controller's Identity lookup.
+                                // Never display a raw Identity GUID as a technician name.
+                                var performerId = savedResult?.TechnicianId ?? test.TechnicianId;
+                                var performedBy = !string.IsNullOrWhiteSpace(performerId)
+                                    && technicianNamesById.TryGetValue(performerId, out var technicianName)
+                                    ? technicianName
+                                    : "Technician name unavailable";
                                 var isCompleted = test.Status == "Completed";
                                 var isDeactivated = test.IsDeleted;
                                 var urgency = test.TestRequest?.Urgency.ToString() ?? "Not specified";
                                 var urgencyClass = urgency.Trim().ToLowerInvariant().Replace(" ", "-");
-                                var searchText = $"{test.TestRequest?.RequestNumber} {test.TestType?.Name} {test.TestType?.TestCategory?.Description} {urgency} {feedback} {test.Status}";
+                                var searchText = $"{test.TestRequest?.RequestNumber} {test.TestType?.Name} {test.TestType?.TestCategory?.Description} {urgency} {feedback} {performedBy} {returnedByName} {test.Status}";
                                 <tr class="review-row" data-search="@searchText.ToLowerInvariant()" data-urgency="@urgency" data-status="@test.Status">
                                     <td>
                                         <div class="review-primary">@(test.TestRequest?.RequestNumber ?? "N/A")</div>
@@ -412,9 +432,17 @@
                                         <div class="review-primary">@(test.TestType?.Name ?? "Unknown test")</div>
                                         <div class="review-sub">@(test.TestType?.TestCategory?.Description ?? "Category not specified")</div>
                                     </td>
+                                    <td>
+                                        <div class="review-primary">@performedBy</div>
+                                        <div class="review-sub">Result technician</div>
+                                    </td>
                                     <td><span class="review-urgency review-urgency-@urgencyClass">@urgency</span></td>
                                     <td>@(test.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not started")</td>
                                     <td><span class="review-status @(isDeactivated ? "returned" : (isCompleted ? "completed" : "returned"))">@(isDeactivated ? "De-Activated" : test.Status)</span></td>
+                                    <td>
+                                        <div class="review-primary">@returnedByName</div>
+                                        <div class="review-sub">@returnedOn</div>
+                                    </td>
                                     <td>
                                         <div class="review-note @(string.IsNullOrWhiteSpace(feedback) ? "missing" : "")">
                                             @(isCompleted ? "Awaiting independent verification." : (string.IsNullOrWhiteSpace(feedback) ? "No verifier note recorded. Check the history." : feedback))
@@ -430,6 +458,9 @@
                                                     data-status="@(isDeactivated ? "De-Activated" : test.Status)"
                                                     data-started="@(test.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "Not started")"
                                                     data-feedback="@(feedback ?? "No verifier feedback recorded")"
+                                                                                                         data-technician="@performedBy"
+                                                     data-returned-by="@returnedByName"
+                                                     data-returned-on="@returnedOn"
                                                     data-result="@(savedResult?.ResultValue ?? "No result recorded")"
                                                     data-notes="@(savedResult?.Notes ?? "No notes recorded")">
                                                 <i class="fas fa-eye mr-1"></i> View
@@ -490,7 +521,10 @@
    <dt class="col-sm-4">Urgency</dt><dd class="col-sm-8" id="rvUrgency"></dd>
    <dt class="col-sm-4">Status</dt><dd class="col-sm-8" id="rvStatus"></dd>
    <dt class="col-sm-4">Started</dt><dd class="col-sm-8" id="rvStarted"></dd>
-   <dt class="col-sm-4">Result</dt><dd class="col-sm-8" id="rvResult"></dd>
+   <dt class="col-sm-4">Performed By</dt><dd class="col-sm-8" id="rvTechnician"></dd>
+   <dt class="col-sm-4">Returned By</dt><dd class="col-sm-8" id="rvReturnedBy"></dd>
+   <dt class="col-sm-4">Reviewed On</dt><dd class="col-sm-8" id="rvReturnedOn"></dd>
+    <dt class="col-sm-4">Result</dt><dd class="col-sm-8" id="rvResult"></dd>
    <dt class="col-sm-4">Result notes</dt><dd class="col-sm-8" id="rvNotes" style="white-space:pre-wrap"></dd>
    <dt class="col-sm-4">Verifier feedback</dt><dd class="col-sm-8" id="rvFeedback" style="white-space:pre-wrap"></dd>
   </dl></div>
@@ -514,7 +548,7 @@
  function hideModal(el){if(window.bootstrap?.Modal){bootstrap.Modal.getOrCreateInstance(el).hide();}else if(window.jQuery?.fn?.modal){window.jQuery(el).modal('hide');}else{el.style.display='none';el.classList.remove('show');el.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');}}
  document.addEventListener('click',function(e){
   const view=e.target.closest('.js-view-review');
-  if(view){e.preventDefault();const fields={rvRequest:'request',rvTest:'test',rvCategory:'category',rvUrgency:'urgency',rvStatus:'status',rvStarted:'started',rvResult:'result',rvNotes:'notes',rvFeedback:'feedback'};Object.entries(fields).forEach(([id,key])=>document.getElementById(id).textContent=view.dataset[key]||'—');showModal(document.getElementById('reviewDetailsModal'));return;}
+  if(view){e.preventDefault();const fields={rvRequest:'request',rvTest:'test',rvCategory:'category',rvUrgency:'urgency',rvStatus:'status',rvStarted:'started',rvTechnician:'technician',rvReturnedBy:'returnedBy',rvReturnedOn:'returnedOn',rvResult:'result',rvNotes:'notes',rvFeedback:'feedback'};Object.entries(fields).forEach(([id,key])=>document.getElementById(id).textContent=view.dataset[key]||'—');showModal(document.getElementById('reviewDetailsModal'));return;}
   const deactivate=e.target.closest('.js-review-deactivate');
   if(deactivate){e.preventDefault();document.getElementById('reviewDeactivateId').value=deactivate.dataset.id;document.getElementById('reviewDeactivateName').textContent='De-activate '+(deactivate.dataset.test||'this test')+'?';document.getElementById('reviewDeactivateReason').value='';document.getElementById('reviewDeactivateError').classList.add('d-none');showModal(document.getElementById('reviewDeactivateModal'));return;}
   const close=e.target.closest('.js-close-review-dialog');if(close){e.preventDefault();hideModal(close.closest('.modal'));}

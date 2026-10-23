@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,59 +26,117 @@ namespace NMB_HLabSys.Services
             _logger = logger;
         }
 
+        // ==========================================
+        // PREPARE REPORT FOR CLAIMED OR PENDING EMAIL
+        // ==========================================
+
         public async Task<bool> PrepareReportForEmailAsync(
-            int sentEmailId, CancellationToken cancellationToken = default)
+            int sentEmailId,
+            CancellationToken cancellationToken = default)
         {
             var email = await _context.TechnicianSentEmails
-                .FirstOrDefaultAsync(x => x.SentEmailId == sentEmailId &&
-                                          x.Status == "Pending", cancellationToken);
-            if (email == null)
-                return Block(sentEmailId, "Pending email not found.");
-
-            var request = await _context.TestRequests.AsNoTracking()
-                .Include(x => x.Patient)
-                .Include(x => x.Doctor)
-                .FirstOrDefaultAsync(x => x.TestRequestId == email.TestRequestId,
+                .FirstOrDefaultAsync(x =>
+                    x.SentEmailId == sentEmailId &&
+                    (x.Status == "Pending" ||
+                     x.Status == "Processing"),
                     cancellationToken);
 
-            if (request == null || request.Patient == null || request.Doctor == null ||
-                string.IsNullOrWhiteSpace(request.Doctor.Email))
-                return Block(sentEmailId, "Request, patient or requesting doctor's email is missing.");
+            if (email == null)
+            {
+                return Block(
+                    sentEmailId,
+                    "Pending or processing email not found.");
+            }
 
-            email.RecipientEmail = request.Doctor.Email.Trim();
+            var request = await _context.TestRequests
+                .AsNoTracking()
+                .Include(x => x.Patient)
+                .Include(x => x.Doctor)
+                .FirstOrDefaultAsync(x =>
+                    x.TestRequestId == email.TestRequestId,
+                    cancellationToken);
+
+            if (request == null ||
+                request.Patient == null ||
+                request.Doctor == null ||
+                string.IsNullOrWhiteSpace(request.Doctor.Email))
+            {
+                return Block(
+                    sentEmailId,
+                    "Request, patient or requesting doctor's email is missing.");
+            }
+
+            // The requesting doctor is the only intended recipient.
+            email.RecipientEmail =
+                request.Doctor.Email.Trim();
+
+            // ==========================================
+            // 1. PRELIMINARY INDIVIDUAL REPORT
+            // ==========================================
 
             if (email.ReportType == "Preliminary")
             {
                 if (!email.TestRequestTestTypeId.HasValue)
-                    return Block(sentEmailId, "Preliminary email has no individual test ID.");
+                {
+                    return Block(
+                        sentEmailId,
+                        "Preliminary email has no individual test ID.");
+                }
 
-                int testId = email.TestRequestTestTypeId.Value;
-                var test = await _context.TestRequestTestTypes.AsNoTracking()
-                    .FirstOrDefaultAsync(x => x.TestRequestTestTypeId == testId &&
-                                              x.TestRequestId == request.TestRequestId &&
-                                              !x.IsDeleted, cancellationToken);
+                int testId =
+                    email.TestRequestTestTypeId.Value;
 
-                if (test == null || test.Status != "Completed")
-                    return Block(sentEmailId, "Individual test is not currently Completed.");
+                var test = await _context.TestRequestTestTypes
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x =>
+                        x.TestRequestTestTypeId == testId &&
+                        x.TestRequestId == request.TestRequestId &&
+                        !x.IsDeleted,
+                        cancellationToken);
 
-                var results = await _context.TestResults.AsNoTracking()
-                    .Where(x => x.TestRequestTestTypeId == testId)
+                if (test == null ||
+                    test.Status != "Completed")
+                {
+                    return Block(
+                        sentEmailId,
+                        "Individual test is not currently Completed.");
+                }
+
+                var results = await _context.TestResults
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.TestRequestTestTypeId == testId)
                     .ToListAsync(cancellationToken);
 
+                // Preserve the existing single-result preliminary
+                // PDF contract. Multi-measurement preliminary reports
+                // require a separate PDF method update.
                 if (results.Count != 1)
-                    return Block(sentEmailId, "Individual test must have exactly one result.");
+                {
+                    return Block(
+                        sentEmailId,
+                        "Individual preliminary report requires exactly one result.");
+                }
 
                 var result = results[0];
+
                 if (string.IsNullOrWhiteSpace(result.ResultValue) ||
-                    result.ResultValue.Trim().Equals("DEMO - NO CLINICAL RESULT", StringComparison.OrdinalIgnoreCase) ||
+                    IsDemoResult(result.ResultValue) ||
                     string.IsNullOrWhiteSpace(test.TechnicianId) ||
                     result.TechnicianId != test.TechnicianId ||
                     result.RequiresReview ||
-                    !string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) ||
+                    !string.IsNullOrWhiteSpace(
+                        result.VerifiedByTechnicianId) ||
                     result.VerifiedDateTime.HasValue)
-                    return Block(sentEmailId, "Result is invalid, under review or already verified.");
+                {
+                    return Block(
+                        sentEmailId,
+                        "Result is invalid, under review or already verified.");
+                }
 
-                email.Subject = $"PRELIMINARY - Unverified Laboratory Result - {request.RequestNumber}";
+                email.Subject =
+                    $"PRELIMINARY - Unverified Laboratory Result - {request.RequestNumber}";
+
                 email.Body =
                     "Dear Doctor,\n\n" +
                     "An individual laboratory test has been completed. " +
@@ -85,125 +144,266 @@ namespace NMB_HLabSys.Services
                     "IMPORTANT: THIS RESULT HAS NOT BEEN INDEPENDENTLY VERIFIED. " +
                     "A verified report may follow after independent verification.\n\n" +
                     "Kind regards,\nNMB-HLabSys Laboratory";
-                email.PdfFileName = $"Preliminary_Test_{testId}_Request_{request.TestRequestId}.pdf";
-                // Always regenerate so the PDF reflects the current validated result.
-                email.PdfAttachment = _pdfService.GeneratePreliminaryReport(
-                    request.TestRequestId, testId, request.Patient.FullName,
-                    request.Doctor.FullName, result);
+
+                email.PdfFileName =
+                    $"Preliminary_Test_{testId}_Request_{request.TestRequestId}.pdf";
+
+                email.PdfAttachment =
+                    _pdfService.GeneratePreliminaryReport(
+                        request.TestRequestId,
+                        testId,
+                        request.Patient.FullName,
+                        request.Doctor.FullName,
+                        result);
             }
+
+            // ==========================================
+            // 2. FINAL COMBINED VERIFIED REPORT
+            // ==========================================
+
             else if (email.ReportType == "Final")
             {
                 if (email.TestRequestTestTypeId.HasValue)
-                    return Block(sentEmailId, "Combined report must not target an individual test.");
+                {
+                    return Block(
+                        sentEmailId,
+                        "Combined report must not target an individual test.");
+                }
 
-                if (request.Status != TestRequestStatus.Completed.ToString())
-                    return Block(sentEmailId, "Request is not Completed.");
+                // Demo requests must never be released as genuine patient reports.
+                if (request.RequestNumber.StartsWith("NMB-REQ-DEMO-", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Block(sentEmailId, "Demonstration requests cannot be emailed as clinical reports.");
+                }
 
-                var tests = await _context.TestRequestTestTypes.AsNoTracking()
-                    .Where(x => x.TestRequestId == request.TestRequestId && !x.IsDeleted)
+                if (request.Status !=
+                    TestRequestStatus.Completed.ToString())
+                {
+                    return Block(
+                        sentEmailId,
+                        "Request is not Completed.");
+                }
+
+                // ==========================================
+                // LOAD ALL ACTIVE TESTS
+                // ==========================================
+
+                var tests = await _context.TestRequestTestTypes
+                    .AsNoTracking()
+                    .Where(x =>
+                        x.TestRequestId ==
+                            request.TestRequestId &&
+                        !x.IsDeleted)
                     .ToListAsync(cancellationToken);
 
-                if (tests.Count == 0 || tests.Any(x =>
-                    x.Status != "Verified" && x.Status != "Completed"))
-                    return Block(sentEmailId, "Not all active tests are Verified or Completed.");
+                // STRICT RULE:
+                // Every active test must be Verified.
+                if (tests.Count == 0 ||
+                    tests.Any(x => x.Status != "Verified"))
+                {
+                    return Block(
+                        sentEmailId,
+                        "All active tests must be independently verified before preparing a final report.");
+                }
 
-                var testIds = tests.Select(x => x.TestRequestTestTypeId).ToList();
-                var results = await _context.TestResults.AsNoTracking()
+                // ==========================================
+                // LOAD ALL RESULT MEASUREMENTS
+                // ==========================================
+
+                var testIds = tests
+                    .Select(x => x.TestRequestTestTypeId)
+                    .ToList();
+
+                var results = await _context.TestResults
+                    .AsNoTracking()
                     .Include(x => x.Technician)
                     .Include(x => x.VerifiedByTechnician)
-                    .Where(x => testIds.Contains(x.TestRequestTestTypeId))
-                    .OrderBy(x => x.TestRequestTestTypeId)
+                    .Where(x =>
+                        testIds.Contains(
+                            x.TestRequestTestTypeId))
+                    .OrderBy(x =>
+                        x.TestRequestTestTypeId)
+                    .ThenBy(x => x.TestResultId)
                     .ToListAsync(cancellationToken);
 
-                if (results.Count != tests.Count)
-                    return Block(sentEmailId, "Combined report has an incorrect result count.");
+                // ==========================================
+                // VALIDATE EACH TEST AND MEASUREMENT
+                // ==========================================
 
-                bool hasUnverified = false;
                 foreach (var test in tests)
                 {
-                    var matching = results.Where(x =>
-                        x.TestRequestTestTypeId == test.TestRequestTestTypeId).ToList();
-                    if (matching.Count != 1)
-                        return Block(sentEmailId, "A test has missing or duplicate results.");
+                    var measurements = results
+                        .Where(x =>
+                            x.TestRequestTestTypeId ==
+                            test.TestRequestTestTypeId)
+                        .ToList();
 
-                    var result = matching[0];
-                    if (string.IsNullOrWhiteSpace(result.ResultValue) ||
-                        result.ResultValue.Trim().Equals("DEMO - NO CLINICAL RESULT", StringComparison.OrdinalIgnoreCase) ||
-                        string.IsNullOrWhiteSpace(test.TechnicianId) ||
-                        result.TechnicianId != test.TechnicianId ||
-                        result.RequiresReview)
-                        return Block(sentEmailId, "A result is missing, invalid or requires review.");
-
-                    bool verified =
-                        !string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) &&
-                        result.VerifiedDateTime.HasValue &&
-                        result.VerifiedByTechnicianId != result.TechnicianId;
-
-                    if (test.Status == "Verified" && !verified)
-                        return Block(sentEmailId, "A Verified test lacks independent verification evidence.");
-
-                    if (test.Status == "Completed")
+                    if (measurements.Count == 0)
                     {
-                        // A completed test may be included, but not represented as verified.
-                        if (!string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) ||
-                            result.VerifiedDateTime.HasValue)
-                            return Block(sentEmailId, "Completed test has inconsistent verification metadata.");
-                        hasUnverified = true;
+                        return Block(
+                            sentEmailId,
+                            $"Test {test.TestRequestTestTypeId} has no saved measurements.");
+                    }
+
+                    if (string.IsNullOrWhiteSpace(
+                        test.TechnicianId))
+                    {
+                        return Block(
+                            sentEmailId,
+                            $"Test {test.TestRequestTestTypeId} has no assigned technician.");
+                    }
+
+                    foreach (var result in measurements)
+                    {
+                        if (string.IsNullOrWhiteSpace(
+                                result.ResultValue) ||
+                            IsDemoResult(result.ResultValue))
+                        {
+                            return Block(
+                                sentEmailId,
+                                $"Test {test.TestRequestTestTypeId} contains an invalid measurement.");
+                        }
+
+                        if (result.TechnicianId !=
+                            test.TechnicianId)
+                        {
+                            return Block(
+                                sentEmailId,
+                                $"Test {test.TestRequestTestTypeId} contains a result from a different technician.");
+                        }
+
+                        if (result.RequiresReview)
+                        {
+                            return Block(
+                                sentEmailId,
+                                $"Test {test.TestRequestTestTypeId} still requires review.");
+                        }
+
+                        if (string.IsNullOrWhiteSpace(
+                                result.VerifiedByTechnicianId) ||
+                            !result.VerifiedDateTime.HasValue)
+                        {
+                            return Block(
+                                sentEmailId,
+                                $"Test {test.TestRequestTestTypeId} contains an unverified measurement.");
+                        }
+
+                        if (result.VerifiedByTechnicianId ==
+                            result.TechnicianId)
+                        {
+                            return Block(
+                                sentEmailId,
+                                $"Test {test.TestRequestTestTypeId} contains a self-verified measurement.");
+                        }
                     }
                 }
 
-                email.Subject = hasUnverified
-                    ? $"PRELIMINARY - Combined Laboratory Results - {request.RequestNumber}"
-                    : $"Verified Laboratory Results - {request.RequestNumber}";
-                email.Body = hasUnverified
-                    ? "Dear Doctor,\n\nAll active tests on your laboratory request have reached Completed or Verified status. " +
-                      "The combined laboratory report is attached.\n\n" +
-                      "IMPORTANT: THIS REPORT INCLUDES RESULTS THAT HAVE NOT BEEN INDEPENDENTLY VERIFIED. " +
-                      "These results are preliminary and subject to correction. " +
-                      "Please review the verification status of each result in the attached PDF.\n\n" +
-                      "Kind regards,\nNMB-HLabSys Laboratory"
-                    : "Dear Doctor,\n\nAll active tests on your laboratory request have been independently " +
-                      "verified. The combined final report is attached.\n\n" +
-                      "Kind regards,\nNMB-HLabSys Laboratory";
+                // ==========================================
+                // BUILD FINAL VERIFIED REPORT
+                // ==========================================
 
-                email.PdfFileName = hasUnverified
-                    ? $"Preliminary_Combined_LaboratoryReport_{request.TestRequestId}.pdf"
-                    : $"LaboratoryReport_{request.TestRequestId}.pdf";
+                email.Subject =
+                    $"Verified Laboratory Results - {request.RequestNumber}";
 
-                // The updated PDF service must label each unverified result explicitly.
-                email.PdfAttachment = _pdfService.GenerateLaboratoryReport(
-                    request.TestRequestId, request.Patient.FullName,
-                    request.Doctor.FullName, results);
+                email.Body =
+                    "Dear Doctor,\n\n" +
+                    "All active tests on your laboratory request " +
+                    "have been independently verified.\n\n" +
+                    "The combined final laboratory report is attached.\n\n" +
+                    "Kind regards,\nNMB-HLabSys Laboratory";
+
+                email.PdfFileName =
+                    $"LaboratoryReport_{request.TestRequestId}.pdf";
+
+                email.PdfAttachment =
+                    _pdfService.GenerateLaboratoryReport(
+                        request.TestRequestId,
+                        request.Patient.FullName,
+                        request.Doctor.FullName,
+                        results);
             }
             else
             {
-                return Block(sentEmailId, $"Unknown report type '{email.ReportType}'.");
+                return Block(
+                    sentEmailId,
+                    $"Unknown report type '{email.ReportType}'.");
             }
 
-            if (email.PdfAttachment == null || email.PdfAttachment.Length == 0)
-                return Block(sentEmailId, "PDF generation returned no data.");
+            // ==========================================
+            // 3. VALIDATE GENERATED PDF
+            // ==========================================
+
+            if (email.PdfAttachment == null ||
+                email.PdfAttachment.Length == 0)
+            {
+                return Block(
+                    sentEmailId,
+                    "PDF generation returned no data.");
+            }
+
+            // ==========================================
+            // 4. SAVE PREPARED EMAIL
+            // ==========================================
 
             email.ErrorMessage = null;
-            await _context.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Prepared {ReportType} report for email {EmailId}.",
-                email.ReportType, sentEmailId);
+
+            await _context.SaveChangesAsync(
+                cancellationToken);
+
+            _logger.LogInformation(
+                "Prepared {ReportType} report for email {EmailId}.",
+                email.ReportType,
+                sentEmailId);
+
             return true;
         }
 
-        public async Task<bool> PrepareReportAsync(int testRequestId)
+        // ==========================================
+        // PREPARE FINAL REPORT BY REQUEST ID
+        // ==========================================
+
+        public async Task<bool> PrepareReportAsync(
+            int testRequestId)
         {
-            var emailId = await _context.TechnicianSentEmails.AsNoTracking()
-                .Where(x => x.TestRequestId == testRequestId &&
-                            x.ReportType == "Final" && x.Status == "Pending")
+            var emailId = await _context.TechnicianSentEmails
+                .AsNoTracking()
+                .Where(x =>
+                    x.TestRequestId == testRequestId &&
+                    x.ReportType == "Final" &&
+                    x.Status == "Pending")
+                .OrderBy(x => x.SentEmailId)
                 .Select(x => x.SentEmailId)
                 .FirstOrDefaultAsync();
-            return emailId != 0 && await PrepareReportForEmailAsync(emailId);
+
+            return emailId != 0 &&
+                await PrepareReportForEmailAsync(emailId);
         }
 
-        private bool Block(int emailId, string reason)
+        // ==========================================
+        // HELPER: DEMONSTRATION RESULT DETECTION
+        // ==========================================
+
+        private static bool IsDemoResult(string value)
         {
-            _logger.LogWarning("Report preparation blocked for email {EmailId}: {Reason}",
-                emailId, reason);
+            var normalized = value.Trim();
+            return normalized.Contains("DEMO - NO CLINICAL RESULT", StringComparison.OrdinalIgnoreCase)
+                || normalized.Contains("SIMULATED TRAINING DATA", StringComparison.OrdinalIgnoreCase)
+                || normalized.Contains("NOT FOR CLINICAL USE", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // ==========================================
+        // HELPER: BLOCK INVALID REPORT PREPARATION
+        // ==========================================
+
+        private bool Block(
+            int emailId,
+            string reason)
+        {
+            _logger.LogWarning(
+                "Report preparation blocked for email {EmailId}: {Reason}",
+                emailId,
+                reason);
+
             return false;
         }
     }

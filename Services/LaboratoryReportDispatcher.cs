@@ -1,5 +1,11 @@
-﻿
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NMB_HLabSys.Data;
 
 namespace NMB_HLabSys.Services
@@ -17,69 +23,49 @@ namespace NMB_HLabSys.Services
             _logger = logger;
         }
 
-        protected override async Task ExecuteAsync(
-            CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation(
-                "Laboratory Report Dispatcher started.");
-
+            _logger.LogInformation("Laboratory Report Dispatcher started.");
             try
             {
-                await Task.Delay(
-                    TimeSpan.FromSeconds(5),
-                    stoppingToken);
-
-                using var timer = new PeriodicTimer(
-                    TimeSpan.FromSeconds(15));
-
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
                 do
                 {
                     try
                     {
                         await ProcessPendingAsync(stoppingToken);
                     }
-                    catch (OperationCanceledException)
-                        when (stoppingToken.IsCancellationRequested)
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                     {
                         break;
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(
-                            ex,
-                            "Laboratory report dispatch cycle failed.");
+                        _logger.LogError(ex, "Laboratory report dispatch cycle failed.");
                     }
                 }
-                while (await timer.WaitForNextTickAsync(
-                    stoppingToken));
+                while (await timer.WaitForNextTickAsync(stoppingToken));
             }
-            catch (OperationCanceledException)
-                when (stoppingToken.IsCancellationRequested)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // Application is shutting down normally.
+                // Normal shutdown.
             }
-
-            _logger.LogInformation(
-                "Laboratory Report Dispatcher stopped.");
+            _logger.LogInformation("Laboratory Report Dispatcher stopped.");
         }
 
-        private async Task ProcessPendingAsync(
-            CancellationToken cancellationToken)
+        private async Task ProcessPendingAsync(CancellationToken cancellationToken)
         {
             using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var deliveryService = scope.ServiceProvider.GetRequiredService<LaboratoryReportDeliveryService>();
+            var emailService = scope.ServiceProvider.GetRequiredService<LaboratoryEmailService>();
 
-            var context = scope.ServiceProvider
-                .GetRequiredService<ApplicationDbContext>();
-
-            var deliveryService = scope.ServiceProvider
-                .GetRequiredService<LaboratoryReportDeliveryService>();
-
-            var emailService = scope.ServiceProvider
-                .GetRequiredService<LaboratoryEmailService>();
-
+            // Only final verified reports are automatically delivered.
+            // Preliminary reports remain available through the existing manual workflow.
             var pendingIds = await context.TechnicianSentEmails
                 .AsNoTracking()
-                .Where(x => x.Status == "Pending")
+                .Where(x => x.Status == "Pending" && x.ReportType == "Final")
                 .OrderBy(x => x.CreatedAt)
                 .Select(x => x.SentEmailId)
                 .Take(10)
@@ -88,176 +74,138 @@ namespace NMB_HLabSys.Services
             foreach (var emailId in pendingIds)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                bool smtpAttemptStarted = false;
 
                 try
                 {
-                    // Load pending email.
+                    // Claim before preparing the report, not afterward.
+                    int claimed = await context.TechnicianSentEmails
+                        .Where(x => x.SentEmailId == emailId &&
+                                    x.Status == "Pending" &&
+                                    x.ReportType == "Final")
+                        .ExecuteUpdateAsync(
+                            setters => setters.SetProperty(x => x.Status, "Processing"),
+                            cancellationToken);
+
+                    if (claimed != 1)
+                        continue;
+
+                    // Always regenerate from the current database state.
+                    // Preparation also resolves the current requesting doctor's address.
+                    bool prepared = await deliveryService.PrepareReportForEmailAsync(
+                        emailId, cancellationToken);
+
+                    if (!prepared)
+                    {
+                        await SetStatusAsync(context, emailId, "Failed",
+                            "Final report preparation blocked: request or verification state is invalid.",
+                            cancellationToken);
+                        continue;
+                    }
+
+                    // Read current saved report after preparation.
+                    context.ChangeTracker.Clear();
                     var email = await context.TechnicianSentEmails
-                        .FirstOrDefaultAsync(
-                            x => x.SentEmailId == emailId &&
-                                 x.Status == "Pending",
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.SentEmailId == emailId &&
+                                                  x.Status == "Processing" &&
+                                                  x.ReportType == "Final",
                             cancellationToken);
 
                     if (email == null)
                         continue;
 
-                    // Never trust a previously stored PDF on a Pending email.
-                    // It may have been generated before results or recipient details changed.
-                    // Hold it for review rather than risk sending stale clinical data.
-                    if (email.PdfAttachment is { Length: > 0 })
-                    {
-                        email.Status = "Failed";
-                        email.ErrorMessage =
-                            "Existing PDF requires review before delivery; " +
-                            "a previously generated attachment was not revalidated.";
-                        await context.SaveChangesAsync(cancellationToken);
-                        _logger.LogWarning(
-                            "Held email {EmailId} because its PDF was already attached.",
-                            emailId);
-                        continue;
-                    }
-
-                    // Prepare and validate a fresh report from the current records.
-                    bool prepared = await deliveryService.PrepareReportForEmailAsync(
-                        email.SentEmailId, cancellationToken);
-
-                    if (!prepared)
-                    {
-                        email.Status = "Failed";
-                        email.ErrorMessage =
-                            "Report preparation blocked: check the result records, " +
-                            "verification, request status, and doctor's address.";
-                        await context.SaveChangesAsync(cancellationToken);
-                        _logger.LogWarning("Preparation blocked for email {EmailId}.", emailId);
-                        continue;
-                    }
-
-                    await context.Entry(email).ReloadAsync(cancellationToken);
-                    if (email.PdfAttachment == null || email.PdfAttachment.Length == 0)
-                    {
-                        email.Status = "Failed";
-                        email.ErrorMessage = "Generated PDF attachment is missing.";
-                        await context.SaveChangesAsync(cancellationToken);
-                        continue;
-                    }
-
-                    // Atomically claim the email for delivery.
-                    int claimed = await context.TechnicianSentEmails
-                        .Where(x =>
-                            x.SentEmailId == emailId &&
-                            x.Status == "Pending")
-                        .ExecuteUpdateAsync(
-                            setters => setters.SetProperty(
-                                x => x.Status,
-                                "Processing"),
-                            cancellationToken);
-
-                    if (claimed != 1)
-                    {
-                        context.Entry(email).State =
-                            EntityState.Detached;
-
-                        continue;
-                    }
-
-                    await context.Entry(email).ReloadAsync(
-                        cancellationToken);
-
-                    // Ensure the recipient is valid.
-                    if (string.IsNullOrWhiteSpace(email.RecipientEmail) ||
-                        email.RecipientEmail ==
-                            "Pending recipient resolution")
-                    {
-                        email.Status = "Failed";
-                        email.ErrorMessage =
-                            "Requesting doctor's email is missing.";
-
-                        await context.SaveChangesAsync(
-                            cancellationToken);
-
-                        continue;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(email.Subject) ||
+                    if (email.PdfAttachment is not { Length: > 0 } ||
+                        string.IsNullOrWhiteSpace(email.RecipientEmail) ||
+                        email.RecipientEmail == "Pending recipient resolution" ||
+                        string.IsNullOrWhiteSpace(email.Subject) ||
                         string.IsNullOrWhiteSpace(email.PdfFileName))
                     {
-                        email.Status = "Failed";
-                        email.ErrorMessage =
-                            "Email subject or PDF filename is missing.";
-
-                        await context.SaveChangesAsync(
+                        await SetStatusAsync(context, emailId, "Failed",
+                            "Prepared report is missing an attachment or required email fields.",
                             cancellationToken);
-
                         continue;
                     }
 
-                    // Automatically send PDF to the doctor.
+                    // From this point on, a connection failure or crash may mean
+                    // SMTP accepted the message. Do not retry automatically.
+                    smtpAttemptStarted = true;
                     await emailService.SendReportAsync(
                         email.RecipientEmail,
                         email.Subject,
                         email.Body ?? string.Empty,
                         email.PdfFileName,
-                        email.PdfAttachment!,
+                        email.PdfAttachment,
                         cancellationToken);
 
-                    // Mark as successfully submitted to SMTP.
-                    email.Status = "Sent";
-                    email.SentAt = DateTime.UtcNow;
-                    email.ErrorMessage = null;
-
-                    await context.SaveChangesAsync(
-                        cancellationToken);
+                    // Record successful SMTP submission (not inbox delivery).
+                    await context.TechnicianSentEmails
+                        .Where(x => x.SentEmailId == emailId && x.Status == "Processing")
+                        .ExecuteUpdateAsync(
+                            setters => setters
+                                .SetProperty(x => x.Status, "Sent")
+                                .SetProperty(x => x.SentAt, DateTime.UtcNow)
+                                .SetProperty(x => x.ErrorMessage, (string?)null),
+                            CancellationToken.None);
 
                     _logger.LogInformation(
-                        "Laboratory report email {EmailId} accepted by SMTP.",
-                        emailId);
+                        "Final laboratory report email {EmailId} accepted by SMTP.", emailId);
                 }
-                catch (OperationCanceledException)
-                    when (cancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
+                    if (smtpAttemptStarted)
+                    {
+                        await TrySetStatusAsync(context, emailId, "DeliveryUncertain",
+                            "Shutdown occurred during SMTP submission. Check the mailbox and logs before any manual retry.");
+                    }
+                    // If preparation was interrupted, Processing stays held for review.
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(
-                        ex,
-                        "Laboratory email {EmailId} processing failed.",
-                        emailId);
-
-                    try
-                    {
-                        context.ChangeTracker.Clear();
-
-                        string errorMessage =
-                            ex.Message.Length > 1000
-                                ? ex.Message[..1000]
-                                : ex.Message;
-
-                        await context.TechnicianSentEmails
-                            .Where(x =>
-                                x.SentEmailId == emailId &&
-                                (x.Status == "Pending" ||
-                                 x.Status == "Processing"))
-                            .ExecuteUpdateAsync(
-                                setters => setters
-                                    .SetProperty(
-                                        x => x.Status,
-                                        "Failed")
-                                    .SetProperty(
-                                        x => x.ErrorMessage,
-                                        errorMessage),
-                                CancellationToken.None);
-                    }
-                    catch (Exception updateException)
-                    {
-                        _logger.LogError(
-                            updateException,
-                            "Unable to record failure for email {EmailId}.",
-                            emailId);
-                    }
+                    _logger.LogError(ex, "Laboratory email {EmailId} processing failed.", emailId);
+                    string error = ex.Message.Length > 800 ? ex.Message[..800] : ex.Message;
+                    await TrySetStatusAsync(context, emailId,
+                        smtpAttemptStarted ? "DeliveryUncertain" : "Failed",
+                        smtpAttemptStarted
+                            ? "SMTP outcome uncertain; do not automatically retry. " + error
+                            : "Report preparation failed. " + error);
                 }
+            }
+        }
+
+        private static async Task SetStatusAsync(
+            ApplicationDbContext context,
+            int emailId,
+            string status,
+            string message,
+            CancellationToken cancellationToken)
+        {
+            context.ChangeTracker.Clear();
+            await context.TechnicianSentEmails
+                .Where(x => x.SentEmailId == emailId && x.Status == "Processing")
+                .ExecuteUpdateAsync(
+                    setters => setters
+                        .SetProperty(x => x.Status, status)
+                        .SetProperty(x => x.ErrorMessage, message),
+                    cancellationToken);
+        }
+
+        private async Task TrySetStatusAsync(
+            ApplicationDbContext context,
+            int emailId,
+            string status,
+            string message)
+        {
+            try
+            {
+                await SetStatusAsync(context, emailId, status, message, CancellationToken.None);
+            }
+            catch (Exception updateException)
+            {
+                _logger.LogError(updateException,
+                    "Could not record {Status} for email {EmailId}.", status, emailId);
             }
         }
     }
 }
-

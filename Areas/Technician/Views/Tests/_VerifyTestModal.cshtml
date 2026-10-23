@@ -1,6 +1,32 @@
 ﻿@model NMB_HLabSys.Areas.Manager.Models.TestRequestTestTypeModel
 @using NMB_HLabSys.Areas.Technician.Models
+@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
 @{
+    // Resolve the original technician independently of how this modal is loaded.
+    // Reuse the Review page's dictionary when available.
+    var technicianNamesById = ViewData["TechnicianNamesById"] as Dictionary<string, string>;
+    string performedBy = "Technician name unavailable";
+    if (!string.IsNullOrWhiteSpace(Model.TechnicianId))
+    {
+        if (technicianNamesById != null &&
+            technicianNamesById.TryGetValue(Model.TechnicianId, out var cachedName) &&
+            !string.IsNullOrWhiteSpace(cachedName))
+        {
+            performedBy = cachedName;
+        }
+        else
+        {
+            var performingUser = await UserManager.FindByIdAsync(Model.TechnicianId);
+            if (performingUser != null)
+            {
+                var fullName = $"{performingUser.FirstName} {performingUser.LastName}".Trim();
+                if (!string.IsNullOrWhiteSpace(fullName))
+                    performedBy = fullName;
+            }
+        }
+    }
     var result = ViewData["VerificationResult"] as TestResultModel;
     var range = result == null || (result.ReferenceMin == null && result.ReferenceMax == null)
         ? "Not configured"
@@ -260,6 +286,7 @@
                             <div><div class="vt-label">Test ID</div><div class="vt-value">@Model.TestRequestTestTypeId</div></div>
                             <div><div class="vt-label">Status</div><div class="vt-value">@Model.Status</div></div>
                             <div><div class="vt-label">Completed (UTC)</div><div class="vt-value">@(Model.CompletionDateTime?.ToString("dd MMM yyyy HH:mm") ?? "N/A")</div></div>
+                            <div><div class="vt-label">Performed By</div><div class="vt-value">@performedBy</div></div>
                         </div>
                     </section>
                     <section class="vt-card" aria-label="Result verification checklist">

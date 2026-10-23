@@ -17,7 +17,7 @@ namespace NMBHLabSys.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -167,11 +167,13 @@ namespace NMBHLabSys.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -192,11 +194,13 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyCategoryId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -215,14 +219,16 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MedicalConditionCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -243,11 +249,13 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionCategoryId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -275,14 +283,16 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MedicationCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -303,11 +313,13 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationCategoryId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -518,11 +530,11 @@ namespace NMBHLabSys.Migrations
                         new
                         {
                             TestRequestId = 11,
-                            ClinicalNotes = "DEMO ONLY: urgent assessment workflow.",
+                            ClinicalNotes = "Synthetic case: urgent assessment of fever and suspected infection.",
                             DoctorId = "953f333d-2e68-46f6-ad26-0412fe75d908",
                             PatientId = "c0fbfbb4-daf5-44e3-bf57-acfded7baceb",
                             RequestDate = new DateTime(2026, 10, 15, 7, 30, 0, 0, DateTimeKind.Unspecified),
-                            RequestNumber = "NMB-REQ-DEMO-000011",
+                            RequestNumber = "NMB-REQ-000011",
                             Status = "SamplesReceived",
                             Urgency = 3
                         });
@@ -2165,9 +2177,6 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TestCategoryModelTestCategoryId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("TestRequestsModelTestRequestId")
                         .HasColumnType("int");
 
@@ -2183,8 +2192,6 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("SampleTypeId");
 
                     b.HasIndex("TestCategoryId");
-
-                    b.HasIndex("TestCategoryModelTestCategoryId");
 
                     b.HasIndex("TestRequestsModelTestRequestId");
 
@@ -3374,7 +3381,7 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 14, 9, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY - not for clinical use.",
+                            Notes = "Synthetic teaching-case result; not for clinical use.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
@@ -3388,7 +3395,7 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 14, 11, 0, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY - not for clinical use.",
+                            Notes = "Synthetic teaching-case result; not for clinical use.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
@@ -3402,7 +3409,7 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 13, 9, 15, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY - not for clinical use.",
+                            Notes = "Synthetic teaching-case result; not for clinical use.",
                             RequiresReview = true,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
@@ -3417,7 +3424,7 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 13, 11, 45, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY - not for clinical use.",
+                            Notes = "Synthetic teaching-case result; not for clinical use.",
                             RequiresReview = true,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
@@ -3432,11 +3439,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 14, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: morphology review",
+                            ResultValue = "Red cell morphology assessment pending confirmation",
                             TechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             TestRequestTestTypeId = 1106
                         },
@@ -3446,12 +3453,12 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 14, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = true,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: morphology review",
-                            ReviewNotes = "DEMO: repeat examination required",
+                            ResultValue = "Red cell morphology assessment pending confirmation",
+                            ReviewNotes = "Repeat film examination requested before final interpretation",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1107
                         },
@@ -3461,11 +3468,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 1, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1201,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3477,11 +3484,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 2, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1202,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3493,11 +3500,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 3, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1203,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3509,11 +3516,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 4, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1204,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3525,11 +3532,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 5, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1205,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3541,11 +3548,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 6, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1206,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3557,11 +3564,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 7, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1207,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3573,11 +3580,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 8, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1208,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3589,11 +3596,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 9, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1209,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3605,11 +3612,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 10, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1210,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3621,11 +3628,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 11, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1211,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3637,11 +3644,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 12, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1212,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3653,11 +3660,11 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 13, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1213,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
@@ -3669,15 +3676,193 @@ namespace NMBHLabSys.Migrations
                             CapturedDateTime = new DateTime(2026, 10, 14, 8, 50, 0, 0, DateTimeKind.Utc),
                             IsAbnormal = false,
                             MeasurementUnit = "Qualitative",
-                            Notes = "DEMO DATA ONLY",
+                            Notes = "Synthetic teaching-case result; not a patient laboratory measurement.",
                             RequiresReview = false,
                             ResultFlag = "Not Evaluated",
                             ResultName = "Peripheral Blood Film",
-                            ResultValue = "DEMO: no abnormal cells seen",
+                            ResultValue = "Normocytic, normochromic red cells; no significant morphological abnormalities observed",
                             TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             TestRequestTestTypeId = 1214,
                             VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             VerifiedDateTime = new DateTime(2026, 10, 14, 9, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2301,
+                            CapturedDateTime = new DateTime(2026, 10, 1, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = false,
+                            MeasurementUnit = "x10³/μL",
+                            Notes = "Synthetic teaching-case FBC component; not a complete full blood count.",
+                            ReferenceMax = 11.0m,
+                            ReferenceMin = 4.5m,
+                            RequiresReview = false,
+                            ResultFlag = "Normal",
+                            ResultName = "White Blood Cell Count",
+                            ResultValue = "7.2",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1301,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 1, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2302,
+                            CapturedDateTime = new DateTime(2026, 10, 6, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = false,
+                            MeasurementUnit = "%",
+                            Notes = "Synthetic teaching-case differential component; full differential requires other leukocyte fractions.",
+                            ReferenceMax = 75m,
+                            ReferenceMin = 40m,
+                            RequiresReview = false,
+                            ResultFlag = "Normal",
+                            ResultName = "Neutrophils",
+                            ResultValue = "58",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1306,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 6, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2303,
+                            CapturedDateTime = new DateTime(2026, 10, 11, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = false,
+                            MeasurementUnit = "mmol/L",
+                            Notes = "Synthetic teaching-case fasting plasma glucose result.",
+                            ReferenceMax = 5.5m,
+                            ReferenceMin = 3.9m,
+                            RequiresReview = false,
+                            ResultFlag = "Normal",
+                            ResultName = "Glucose (Fasting)",
+                            ResultValue = "5.1",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1311,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 11, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2304,
+                            CapturedDateTime = new DateTime(2026, 10, 2, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = true,
+                            MeasurementUnit = "%",
+                            Notes = "Synthetic teaching-case HbA1c for established diabetes monitoring; interpretation depends on clinical context.",
+                            ReferenceMax = 5.6m,
+                            ReferenceMin = 4.0m,
+                            RequiresReview = false,
+                            ResultFlag = "High",
+                            ResultName = "Hemoglobin A1C (HbA1c)",
+                            ResultValue = "6.8",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1316,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 2, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2305,
+                            CapturedDateTime = new DateTime(2026, 10, 12, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = false,
+                            MeasurementUnit = "Qualitative",
+                            Notes = "Synthetic teaching-case culture; final reporting requires completion of incubation and microbiology review.",
+                            RequiresReview = false,
+                            ResultFlag = "Normal",
+                            ResultName = "Blood Culture",
+                            ResultValue = "No growth after 5 days of incubation",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1321,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 12, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2310,
+                            CapturedDateTime = new DateTime(2026, 10, 2, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = false,
+                            MeasurementUnit = "seconds",
+                            Notes = "Synthetic teaching-case measurement; not for clinical use.",
+                            ReferenceMax = 13.5m,
+                            ReferenceMin = 11.0m,
+                            RequiresReview = false,
+                            ResultFlag = "Normal",
+                            ResultName = "Prothrombin Time (PT)",
+                            ResultValue = "12.4",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1302,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 2, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2311,
+                            CapturedDateTime = new DateTime(2026, 10, 7, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = true,
+                            MeasurementUnit = "seconds",
+                            Notes = "Synthetic teaching-case measurement; not for clinical use.",
+                            ReferenceMax = 35m,
+                            ReferenceMin = 25m,
+                            RequiresReview = false,
+                            ResultFlag = "High",
+                            ResultName = "Activated Partial Thromboplastin Time (aPTT)",
+                            ResultValue = "42.0",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1307,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 7, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2312,
+                            CapturedDateTime = new DateTime(2026, 10, 8, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = false,
+                            MeasurementUnit = "%",
+                            Notes = "Synthetic teaching-case measurement; not for clinical use.",
+                            ReferenceMax = 5.6m,
+                            ReferenceMin = 4.0m,
+                            RequiresReview = false,
+                            ResultFlag = "Normal",
+                            ResultName = "Hemoglobin A1C (HbA1c)",
+                            ResultValue = "5.3",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1308,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 8, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2313,
+                            CapturedDateTime = new DateTime(2026, 10, 9, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = true,
+                            MeasurementUnit = "x10³/μL",
+                            Notes = "Synthetic teaching-case measurement; not for clinical use.",
+                            ReferenceMax = 11.0m,
+                            ReferenceMin = 4.5m,
+                            RequiresReview = false,
+                            ResultFlag = "Low",
+                            ResultName = "White Blood Cell Count",
+                            ResultValue = "3.2",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1309,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 9, 11, 15, 0, 0, DateTimeKind.Utc)
+                        },
+                        new
+                        {
+                            TestResultId = 2314,
+                            CapturedDateTime = new DateTime(2026, 10, 10, 10, 45, 0, 0, DateTimeKind.Utc),
+                            IsAbnormal = true,
+                            MeasurementUnit = "seconds",
+                            Notes = "Synthetic teaching-case measurement; not for clinical use.",
+                            ReferenceMax = 13.5m,
+                            ReferenceMin = 11.0m,
+                            RequiresReview = false,
+                            ResultFlag = "High",
+                            ResultName = "Prothrombin Time (PT)",
+                            ResultValue = "16.8",
+                            TechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
+                            TestRequestTestTypeId = 1310,
+                            VerifiedByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
+                            VerifiedDateTime = new DateTime(2026, 10, 10, 11, 15, 0, 0, DateTimeKind.Utc)
                         });
                 });
 
@@ -3813,7 +3998,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ReturnedForReview",
                             ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             ActionDateTime = new DateTime(2026, 10, 14, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: verification attempt 1 returned",
+                            Notes = "Training scenario: verification attempt 1 returned",
                             TestResultId = 2002
                         },
                         new
@@ -3822,7 +4007,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ResubmittedForVerification",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 14, 13, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: corrected after attempt 1",
+                            Notes = "Training scenario: corrected after attempt 1",
                             TestResultId = 2002
                         },
                         new
@@ -3831,7 +4016,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ReturnedForReview",
                             ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             ActionDateTime = new DateTime(2026, 10, 14, 14, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: verification attempt 2 returned",
+                            Notes = "Training scenario: verification attempt 2 returned",
                             TestResultId = 2002
                         },
                         new
@@ -3840,7 +4025,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ResubmittedForVerification",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 14, 15, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: third verification now pending",
+                            Notes = "Training scenario: third verification now pending",
                             TestResultId = 2002
                         },
                         new
@@ -3849,7 +4034,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ResubmittedForVerification",
                             ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             ActionDateTime = new DateTime(2026, 10, 13, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: second verification requested",
+                            Notes = "Training scenario: second verification requested",
                             TestResultId = 2003
                         },
                         new
@@ -3858,7 +4043,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ReturnedForReview",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 13, 11, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: verification attempt 2 returned",
+                            Notes = "Training scenario: verification attempt 2 returned",
                             TestResultId = 2003
                         },
                         new
@@ -3867,7 +4052,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ResubmittedForVerification",
                             ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             ActionDateTime = new DateTime(2026, 10, 13, 12, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: third verification requested",
+                            Notes = "Training scenario: third verification requested",
                             TestResultId = 2003
                         },
                         new
@@ -3876,7 +4061,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ReturnedForReview",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 13, 13, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: verification attempt 3 returned, recapture pending",
+                            Notes = "Training scenario: verification attempt 3 returned, recapture pending",
                             TestResultId = 2003
                         },
                         new
@@ -3885,7 +4070,7 @@ namespace NMBHLabSys.Migrations
                             Action = "SubmittedForVerification",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: awaiting independent verification",
+                            Notes = "Training scenario: awaiting independent verification",
                             TestResultId = 2106
                         },
                         new
@@ -3894,7 +4079,7 @@ namespace NMBHLabSys.Migrations
                             Action = "SubmittedForVerification",
                             ActionByTechnicianId = "63950297-85b0-4b81-934a-bad2bf77f3cb",
                             ActionDateTime = new DateTime(2026, 10, 14, 9, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: submitted for review",
+                            Notes = "Training scenario: submitted for review",
                             TestResultId = 2107
                         },
                         new
@@ -3903,7 +4088,7 @@ namespace NMBHLabSys.Migrations
                             Action = "ReturnedForReview",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 14, 10, 0, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: correction required",
+                            Notes = "Training scenario: correction required",
                             TestResultId = 2107
                         },
                         new
@@ -3912,7 +4097,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 1, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2201
                         },
                         new
@@ -3921,7 +4106,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 2, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2202
                         },
                         new
@@ -3930,7 +4115,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 3, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2203
                         },
                         new
@@ -3939,7 +4124,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 4, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2204
                         },
                         new
@@ -3948,7 +4133,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 5, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2205
                         },
                         new
@@ -3957,7 +4142,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 6, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2206
                         },
                         new
@@ -3966,7 +4151,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 7, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2207
                         },
                         new
@@ -3975,7 +4160,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 8, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2208
                         },
                         new
@@ -3984,7 +4169,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 9, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2209
                         },
                         new
@@ -3993,7 +4178,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 10, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2210
                         },
                         new
@@ -4002,7 +4187,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 11, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2211
                         },
                         new
@@ -4011,7 +4196,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 12, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2212
                         },
                         new
@@ -4020,7 +4205,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 13, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2213
                         },
                         new
@@ -4029,7 +4214,7 @@ namespace NMBHLabSys.Migrations
                             Action = "Verified",
                             ActionByTechnicianId = "85a94ac3-e56a-4ae2-bea1-85d398486185",
                             ActionDateTime = new DateTime(2026, 10, 14, 9, 15, 0, 0, DateTimeKind.Utc),
-                            Notes = "DEMO: historical verification for report",
+                            Notes = "Training scenario: historical verification for report",
                             TestResultId = 2214
                         });
                 });
@@ -4519,14 +4704,10 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", "TestCategory")
-                        .WithMany()
+                        .WithMany("TestTypes")
                         .HasForeignKey("TestCategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", null)
-                        .WithMany("TestTypes")
-                        .HasForeignKey("TestCategoryModelTestCategoryId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", null)
                         .WithMany("TestTypes")

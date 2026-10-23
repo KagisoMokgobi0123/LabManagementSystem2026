@@ -86,8 +86,7 @@ namespace NMB_HLabSys.Areas.Technician.Models
         public string? Notes { get; set; }
 
         [Display(Name = "Captured Date")]
-        public DateTime CapturedDateTime { get; set; } =
-            DateTime.Now;
+        public DateTime CapturedDateTime { get; set; } = DateTime.UtcNow;
 
         // -----------------------------------------
         // Verification information

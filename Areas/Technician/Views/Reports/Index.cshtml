@@ -1,6 +1,8 @@
 ﻿@{
     ViewData["Title"] = "Technician Reports";
     Layout = "_TechnicianLayout";
+    var todayUtc = DateTime.UtcNow.Date;
+    var defaultStartDate = new DateTime(todayUtc.Year, todayUtc.Month, 1);
 }
 
 <style>
@@ -392,7 +394,7 @@
                                            id="startDate"
                                            name="startDate"
                                            class="reports-input"
-                                           value="2026-10-01"
+                                           value="@defaultStartDate.ToString("yyyy-MM-dd")"
                                            required />
 
                                     <div class="reports-help">
@@ -413,7 +415,7 @@
                                            id="endDate"
                                            name="endDate"
                                            class="reports-input"
-                                           value="2026-10-14"
+                                           value="@todayUtc.ToString("yyyy-MM-dd")"
                                            required />
 
                                     <div class="reports-help">
@@ -518,7 +520,7 @@
                                     Test Categories
                                 </div>
                                 <div class="reports-feature-description">
-                                    Completed tests organized by category.
+                                    Your completed or verified tests grouped by category.
                                 </div>
                             </div>
                         </div>

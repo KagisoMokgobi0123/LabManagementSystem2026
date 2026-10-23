@@ -4,11 +4,17 @@
     ViewData["Title"] = "Verify Test Results";
     Layout = "_TechnicianLayout";
 
+    var performingTechnicianName = ViewData["PerformingTechnicianName"] as string
+        ?? "Technician name unavailable";
+    var verifyingTechnicianName = ViewData["VerifyingTechnicianName"] as string
+        ?? "Technician name unavailable";
+    var isIndependentVerifier = ViewData["IsIndependentVerifier"] is true;
+
     var results = (ViewData["TestResults"] as IEnumerable<TestResultModel>)?.ToList()
                   ?? new List<TestResultModel>();
     var result = results.Count == 1 ? results[0] : null;
     var validResult = result != null && !string.IsNullOrWhiteSpace(result.ResultValue);
-    var canVerify = Model.Status == "Completed" && validResult && results.Count == 1;
+    var canVerify = Model.Status == "Completed" && validResult && results.Count == 1 && isIndependentVerifier;
     // The POST action independently enforces verifier identity and active assignment.
     var referenceRange = result == null || (result.ReferenceMin == null && result.ReferenceMax == null)
         ? "Not configured"
@@ -172,10 +178,20 @@
             <div><div class="tv-label">Test Name</div><div class="tv-value">@(Model.TestType?.Name ?? "—")</div></div>
             <div><div class="tv-label">Test ID</div><div class="tv-value">#@Model.TestRequestTestTypeId</div></div>
             <div><div class="tv-label">Status</div><span class="tv-badge">@Model.Status</span></div>
+            <div><div class="tv-label">Performed By</div><div class="tv-value">@performingTechnicianName</div></div>
+            <div><div class="tv-label">Verifying Technician</div><div class="tv-value">@verifyingTechnicianName</div></div>
             <div><div class="tv-label">Started</div><div class="tv-value">@(Model.StartDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</div></div>
             <div><div class="tv-label">Completed</div><div class="tv-value">@(Model.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</div></div>
         </div>
     </section>
+
+    @if (!isIndependentVerifier)
+    {
+        <div class="alert alert-warning" role="alert">
+            Independent verification is unavailable for this account. The performing technician
+            and verifying technician must be different authorised users.
+        </div>
+    }
 
     <section class="tv-card">
         <h2><i class="fas fa-clipboard-check mr-2"></i>Captured Test Result</h2>
@@ -255,8 +271,9 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
-        (function() {
+        (function () {
             'use strict';
             const form = document.getElementById('verifyForm');
             const notes = document.getElementById('verificationNotes');
@@ -265,28 +282,68 @@
             const decisionField = document.getElementById('verificationDecision');
             if (!form || !notes || !approve || !sendBack || !decisionField) return;
 
-            form.addEventListener('submit', function(event) {
+            let confirmedSubmission = false;
+            let processing = false;
+
+            form.addEventListener('submit', async function (event) {
+                if (confirmedSubmission) return;
+                event.preventDefault();
+                if (processing) return;
+
                 const submitter = event.submitter;
-                if (!submitter) { event.preventDefault(); return; }
-                const decision = submitter.dataset.decision;
-                if (decision !== 'Verify' && decision !== 'ReturnForReview') { event.preventDefault(); return; }
+                const decision = submitter?.dataset.decision;
+                if (decision !== 'Verify' && decision !== 'ReturnForReview') return;
+
+                if (typeof Swal === 'undefined') {
+                    const warning = document.createElement('div');
+                    warning.className = 'alert alert-danger mt-3';
+                    warning.setAttribute('role', 'alert');
+                    warning.textContent = 'The confirmation dialog could not load. Please check your connection and reload the page.';
+                    form.querySelector('.tv-actions')?.before(warning);
+                    return;
+                }
+
                 if (decision === 'ReturnForReview' && !notes.value.trim()) {
-                    event.preventDefault();
-                    alert('Please enter review notes before returning the test.');
+                    await Swal.fire({
+                        icon: 'warning',
+                        title: 'Review Notes Required',
+                        text: 'Please enter a reason before returning the test for correction.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#1976c9'
+                    });
                     notes.focus();
                     return;
                 }
-                const question = decision === 'Verify'
-                    ? 'Approve and verify this test result?'
-                    : 'Return this test to the original technician for correction?';
-                if (!confirm(question)) {
-                    event.preventDefault();
-                    return;
+
+                processing = true;
+                try {
+                    const isReturn = decision === 'ReturnForReview';
+                    const answer = await Swal.fire({
+                        icon: isReturn ? 'warning' : 'question',
+                        title: isReturn ? 'Return Test for Review?' : 'Approve and Verify Test?',
+                        text: isReturn
+                            ? 'This test will be sent back to the original technician for correction.'
+                            : 'Confirm that you have independently reviewed this test result.',
+                        showCancelButton: true,
+                        confirmButtonText: isReturn ? 'Yes, Return Test' : 'Yes, Verify Test',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: isReturn ? '#d97706' : '#15803d',
+                        cancelButtonColor: '#64748b',
+                        reverseButtons: true,
+                        focusCancel: true
+                    });
+                    if (!answer.isConfirmed) return;
+
+                    decisionField.value = decision;
+                    confirmedSubmission = true;
+                    approve.disabled = true;
+                    sendBack.disabled = true;
+                    // Submit through the browser's normal form pipeline with the
+                    // antiforgery token and all existing form fields intact.
+                    form.requestSubmit();
+                } finally {
+                    if (!confirmedSubmission) processing = false;
                 }
-                // A hidden field ensures the decision is posted even after buttons are disabled.
-                decisionField.value = decision;
-                approve.disabled = true;
-                sendBack.disabled = true;
             });
         })();
     </script>
