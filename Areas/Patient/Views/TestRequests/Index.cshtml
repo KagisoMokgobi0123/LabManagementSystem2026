@@ -70,7 +70,10 @@
                                     <td>@r.TestCount</td>
                                     <td><span class="badge bg-@statusClass">@statusText</span></td>
                                     <td class="text-end">
-                                        <a href="/Patient/TestRequests/Details/@r.Id" class="btn btn-outline-primary btn-sm">View details</a>
+                                        <a href="@Url.Action("Details", "TestRequests", new { area = "Patient", id = r.Id })"
+                                           class="btn btn-outline-primary btn-sm">
+                                            View details
+                                        </a>
                                     </td>
                                 </tr>
                             }
