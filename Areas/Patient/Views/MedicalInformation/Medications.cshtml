@@ -1,0 +1,50 @@
+﻿@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Medications";
+    var medications = ViewBag.Medications as List<NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel>
+                      ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel>();
+}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Medications</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">@ViewBag.PatientName</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            @if (!medications.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-pills fa-3x mb-3"></i>
+                    <h5>No Medications Recorded</h5>
+                </div>
+            }
+            else
+            {
+                @foreach (var m in medications)
+                {
+                    <div class="border-start border-primary border-3 ps-3 mb-3 p-2 rounded-end bg-light">
+                        <strong>@(m.Medication?.MedicationName ?? "Unknown")</strong>
+                        @if (!string.IsNullOrEmpty(m.Dosage))
+                        {
+                            <div class="text-muted small">Dosage: @m.Dosage</div>
+                        }
+                        @if (!string.IsNullOrEmpty(m.Frequency))
+                        {
+                            <div class="text-muted small">Frequency: @m.Frequency</div>
+                        }
+                        <div class="text-muted small">
+                            Started: @m.StartDate.ToString("dd MMM yyyy")
+                            @if (m.EndDate == null)
+                            {
+                                <span class="text-success">● Ongoing</span>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

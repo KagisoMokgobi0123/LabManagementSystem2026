@@ -8,356 +8,410 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="utf-8" />
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Create Account | NMB-HLabSys</title>
-
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet">
-    <link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
-
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <style>
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: #f4f8fb;
-        }
-
-        .register-wrapper {
-            min-height: 100vh;
-            display: flex;
-        }
-
+        body { margin: 0; font-family: 'Inter', sans-serif; background: #f4f8fb; }
+        .register-wrapper { min-height: 100vh; display: flex; }
         .register-banner {
-            width: 42%;
-            padding: 60px;
-
-            background:
-                linear-gradient(
-                    rgba(5, 40, 67, .80),
-                    rgba(0, 127, 153, .82)
-                ),
-                url('/assets/img/lab-patient.jpg');
-
-            background-size: cover;
-            background-position: center;
-
-            color: white;
-
-            display: flex;
-            align-items: flex-end;
+            width: 42%; padding: 60px;
+            background: linear-gradient(rgba(5,40,67,.80), rgba(0,127,153,.82)), url('/assets/img/lab-patient.jpg');
+            background-size: cover; background-position: center;
+            color: white; display: flex; align-items: flex-end;
         }
-
-        .register-banner h1 {
-            font-size: 40px;
-            font-weight: 800;
+        .register-banner h1 { font-size: 36px; font-weight: 800; }
+        .register-banner p { line-height: 1.8; color: #e2f4f8; }
+        .register-container { width: 58%; padding: 40px; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; }
+        .register-form { width: 100%; max-width: 620px; padding: 20px 0; }
+        .register-form h2 { color: #073b5c; font-weight: 800; margin-bottom: 4px; }
+        .subtitle { color: #64748b; margin-bottom: 24px; font-size: 0.92rem; }
+        .section-label {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.08em; color: #94a3b8;
+            border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;
+            margin-bottom: 16px; margin-top: 20px;
         }
-
-        .register-banner p {
-            line-height: 1.8;
-            color: #e2f4f8;
+        .form-label { font-size: 13px; font-weight: 600; color: #1e293b; margin-bottom: 5px; }
+        .form-control, .form-select {
+            height: 48px; border-radius: 9px;
+            border: 1.5px solid #d9e2ea; font-size: 0.92rem; color: #1e293b;
         }
-
-        .register-container {
-            width: 58%;
-            padding: 45px;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .register-form {
-            width: 100%;
-            max-width: 620px;
-        }
-
-        .register-form h2 {
-            color: #073b5c;
-            font-weight: 800;
-        }
-
-        .subtitle {
-            color: #64748b;
-            margin-bottom: 30px;
-        }
-
-        .form-label {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .form-control {
-            height: 50px;
-            border-radius: 9px;
-            border: 1px solid #d9e2ea;
-        }
-
-        .form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: #0088a9;
-
-            box-shadow:
-                0 0 0 .2rem rgba(0,136,169,.10);
+            box-shadow: 0 0 0 .2rem rgba(0,136,169,.12);
         }
-
+        .form-control.is-valid { border-color: #198754; background-image: none; }
+        .form-control.is-invalid, .form-select.is-invalid { border-color: #dc3545; background-image: none; }
+        .input-group .form-control { border-right: none; }
+        .input-group-text {
+            background: #f8fafc; border: 1.5px solid #d9e2ea;
+            border-left: none; border-radius: 0 9px 9px 0; color: #64748b;
+        }
+        .field-hint { font-size: 0.78rem; color: #94a3b8; margin-top: 3px; }
+        .valid-feedback-msg { font-size: 0.78rem; color: #198754; margin-top: 3px; display: none; }
         .btn-register {
-            width: 100%;
-            height: 52px;
-
-            border: 0;
-            border-radius: 10px;
-
-            color: white;
-
-            font-weight: 700;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #073b5c,
-                    #0088a9
-                );
+            width: 100%; height: 52px; border: 0; border-radius: 10px;
+            color: white; font-weight: 700; font-size: 1rem;
+            background: linear-gradient(135deg, #073b5c, #0088a9);
+            transition: opacity 0.2s;
         }
-
-        .login-link {
-            text-align: center;
-            margin-top: 22px;
-        }
-
-        .login-link a {
-            color: #007f9e;
-            font-weight: 700;
-            text-decoration: none;
-        }
-
+        .btn-register:hover { opacity: 0.92; }
+        .login-link { text-align: center; margin-top: 18px; font-size: 0.9rem; color: #64748b; }
+        .login-link a { color: #007f9e; font-weight: 700; text-decoration: none; }
+        .id-feedback { font-size: 0.78rem; margin-top: 3px; }
+        .password-strength { margin-top: 8px; }
+        .strength-bar { height: 4px; border-radius: 4px; background: #e2e8f0; margin-bottom: 4px; }
+        .strength-fill { height: 4px; border-radius: 4px; transition: width 0.3s, background 0.3s; width: 0%; }
+        .req-item { font-size: 0.78rem; padding: 1px 0; color: #94a3b8; }
+        .req-item.met { color: #198754; }
         @@media(max-width: 900px) {
-
-            .register-banner {
-                display: none;
-            }
-
-            .register-container {
-                width: 100%;
-            }
+            .register-banner { display: none; }
+            .register-container { width: 100%; }
         }
-
     </style>
-
 </head>
-
 <body>
-
 <div class="register-wrapper">
 
-
     <section class="register-banner">
-
         <div>
-
             <h1>Join NMB-HLabSys</h1>
-
-            <p>
-                Create your secure patient account to access
-                laboratory test requests, results and important
-                healthcare information.
-            </p>
-
+            <p>Create your secure patient account to access laboratory test requests, results and important healthcare information.</p>
         </div>
-
     </section>
 
-
     <section class="register-container">
-
         <div class="register-form">
 
             <h2>Create Account</h2>
+            <p class="subtitle">Register as a patient to get started.</p>
 
-            <p class="subtitle">
-                Register as a patient to get started.
-            </p>
+            <div asp-validation-summary="All" class="alert alert-danger py-2 mb-3" style="font-size:0.88rem;"></div>
 
-
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
-            </div>
-
-
-            <form asp-controller="Account"
-                  asp-action="Register"
-                  method="post">
-
+            <form asp-controller="Account" asp-action="Register" method="post" id="registerForm" novalidate>
                 @Html.AntiForgeryToken()
 
+                <!-- PERSONAL INFORMATION -->
+                <div class="section-label">Personal Information</div>
 
                 <div class="row">
-
                     <div class="col-md-6 mb-3">
-
-                        <label asp-for="FirstName"
-                               class="form-label">
-                        </label>
-
-                        <input asp-for="FirstName"
-                               class="form-control"
-                               placeholder="First name" />
-
-                        <span asp-validation-for="FirstName"
-                              class="text-danger small">
-                        </span>
-
+                        <label asp-for="FirstName" class="form-label">First Name <span class="text-danger">*</span></label>
+                        <input asp-for="FirstName" class="form-control" id="FirstName" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName" class="text-danger small"></span>
                     </div>
-
-
                     <div class="col-md-6 mb-3">
-
-                        <label asp-for="LastName"
-                               class="form-label">
-                        </label>
-
-                        <input asp-for="LastName"
-                               class="form-control"
-                               placeholder="Last name" />
-
-                        <span asp-validation-for="LastName"
-                              class="text-danger small">
-                        </span>
-
+                        <label asp-for="LastName" class="form-label">Last Name <span class="text-danger">*</span></label>
+                        <input asp-for="LastName" class="form-control" id="LastName" autocomplete="family-name" />
+                        <span asp-validation-for="LastName" class="text-danger small"></span>
                     </div>
-
                 </div>
-
 
                 <div class="mb-3">
-
-                    <label asp-for="Email"
-                           class="form-label">
-                    </label>
-
-                    <input asp-for="Email"
-                           class="form-control"
-                           placeholder="name@example.com" />
-
-                    <span asp-validation-for="Email"
-                          class="text-danger small">
-                    </span>
-
+                    <label asp-for="IdNumber" class="form-label">SA ID Number <span class="text-danger">*</span></label>
+                    <input asp-for="IdNumber" class="form-control" id="IdNumber"
+                           maxlength="13" inputmode="numeric"
+                           placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" />
+                    <div class="field-hint">13-digit South African ID number</div>
+                    <div id="idFeedback" class="id-feedback"></div>
+                    <span asp-validation-for="IdNumber" class="text-danger small"></span>
                 </div>
 
+                <div class="mb-3">
+                    <label asp-for="DateOfBirth" class="form-label">Date of Birth <span class="text-danger">*</span></label>
+                    <input asp-for="DateOfBirth" type="date" class="form-control" id="DateOfBirth" />
+                    <div id="dobFeedback" class="field-hint"></div>
+                    <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                </div>
+
+                <!-- CONTACT INFORMATION -->
+                <div class="section-label">Contact Information</div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                    <input asp-for="Email" class="form-control" id="Email"
+                           placeholder="yourname@email.com" autocomplete="email" />
+                    <div class="field-hint">This will be your username to log in</div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label">Cellphone Number <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <span class="input-group-text" style="border-left:1.5px solid #d9e2ea; border-radius:9px 0 0 9px;">&#127462;&#127466; +27</span>
+                        <input asp-for="PhoneNumber" class="form-control" id="PhoneNumber"
+                               maxlength="10" inputmode="numeric"
+                               placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" />
+                    </div>
+                    <div class="field-hint">10-digit number starting with 0 (e.g. 0821234567)</div>
+                    <div id="phoneFeedback" class="id-feedback"></div>
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+
+                <!-- ADDRESS -->
+                <div class="section-label">Home Address</div>
+
+                <div class="mb-3">
+                    <label asp-for="HomeAddress" class="form-label">Street Address <span class="text-danger">*</span></label>
+                    <input asp-for="HomeAddress" class="form-control" id="HomeAddress" />
+                    <span asp-validation-for="HomeAddress" class="text-danger small"></span>
+                </div>
 
                 <div class="row">
-
                     <div class="col-md-6 mb-3">
-
-                        <label asp-for="Password"
-                               class="form-label">
-                        </label>
-
-                        <input asp-for="Password"
-                               class="form-control"
-                               placeholder="Create password" />
-
-                        <span asp-validation-for="Password"
-                              class="text-danger small">
-                        </span>
-
+                        <label for="City" class="form-label">City / Town</label>
+                        <input type="text" id="City" name="City" class="form-control" />
                     </div>
-
-
                     <div class="col-md-6 mb-3">
-
-                        <label asp-for="ConfirmPassword"
-                               class="form-label">
-                        </label>
-
-                        <input asp-for="ConfirmPassword"
-                               class="form-control"
-                               placeholder="Confirm password" />
-
-                        <span asp-validation-for="ConfirmPassword"
-                              class="text-danger small">
-                        </span>
-
+                        <label for="Province" class="form-label">Province</label>
+                        <select id="Province" name="Province" class="form-select">
+                            <option value="" disabled selected>Select province</option>
+                            <option>Eastern Cape</option>
+                            <option>Free State</option>
+                            <option>Gauteng</option>
+                            <option>KwaZulu-Natal</option>
+                            <option>Limpopo</option>
+                            <option>Mpumalanga</option>
+                            <option>North West</option>
+                            <option>Northern Cape</option>
+                            <option>Western Cape</option>
+                        </select>
                     </div>
-
                 </div>
 
+                <!-- ACCOUNT SECURITY -->
+                <div class="section-label">Account Security</div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">Password <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input asp-for="Password" type="password" class="form-control" id="Password" autocomplete="new-password" />
+                        <span class="input-group-text" id="togglePw" style="cursor:pointer; border-left:1.5px solid #d9e2ea; border-radius:0 9px 9px 0;">
+                            <i class="fa fa-eye" id="eyeIcon"></i>
+                        </span>
+                    </div>
+                    <div class="password-strength mt-2">
+                        <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                        <div id="strengthLabel" class="field-hint"></div>
+                        <div class="mt-1">
+                            <div class="req-item" id="req-length"><i class="fa fa-circle me-1" style="font-size:6px;"></i> At least 8 characters</div>
+                            <div class="req-item" id="req-upper"><i class="fa fa-circle me-1" style="font-size:6px;"></i> At least 1 uppercase letter</div>
+                            <div class="req-item" id="req-number"><i class="fa fa-circle me-1" style="font-size:6px;"></i> At least 1 number</div>
+                            <div class="req-item" id="req-special"><i class="fa fa-circle me-1" style="font-size:6px;"></i> At least 1 special character</div>
+                        </div>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                    <div class="input-group">
+                        <input asp-for="ConfirmPassword" type="password" class="form-control" id="ConfirmPassword" autocomplete="new-password" />
+                        <span class="input-group-text" id="toggleConfirm" style="cursor:pointer; border-left:1.5px solid #d9e2ea; border-radius:0 9px 9px 0;">
+                            <i class="fa fa-eye" id="eyeIconConfirm"></i>
+                        </span>
+                    </div>
+                    <div id="confirmFeedback" class="id-feedback mt-1"></div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
 
                 <div class="form-check mb-4">
-
-                    <input asp-for="AcceptTerms"
-                           class="form-check-input" />
-
-                    <label asp-for="AcceptTerms"
-                           class="form-check-label">
-
-                        I agree to the Terms of Use and
-                        Privacy Policy.
-
+                    <input type="checkbox" id="AcceptTerms" name="AcceptTerms" value="true" class="form-check-input" />
+                    <input type="hidden" name="AcceptTerms" value="false" />
+                    <label class="form-check-label" for="AcceptTerms" style="font-size:0.88rem;">
+                        I agree to the <strong>Terms of Use</strong> and <strong>Privacy Policy</strong>.
                     </label>
-
-                    <br />
-
-                    <span asp-validation-for="AcceptTerms"
-                          class="text-danger small">
-                    </span>
-
+                    <div id="termsFeedback" class="text-danger small" style="display:none;">You must accept the terms and privacy policy.</div>
+                    <span asp-validation-for="AcceptTerms" class="text-danger small"></span>
                 </div>
 
-
-                <button type="submit"
-                        class="btn-register">
-
-                    <i class="fa-solid fa-user-plus me-2"></i>
-
-                    Create Account
-
+                <button type="submit" class="btn-register" id="submitBtn">
+                    <i class="fa-solid fa-user-plus me-2"></i> Create Account
                 </button>
 
             </form>
 
-
-            <div class="login-link">
-
-                Already have an account?
-
-                <a asp-controller="Account"
-                   asp-action="Login">
-                    Sign In
-                </a>
-
+            <div class="login-link mt-3">
+                Already have an account? <a asp-controller="Account" asp-action="Login">Sign In</a>
             </div>
 
         </div>
-
     </section>
-
 </div>
 
-
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
 <partial name="_ValidationScriptsPartial" />
 
+<script>
+// ── Numbers only ──────────────────────────────────────────
+document.getElementById('IdNumber').addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    validateIdNumber();
+});
+
+document.getElementById('PhoneNumber').addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    validatePhone();
+});
+
+// ── SA ID validation + auto-fill DOB ─────────────────────
+function validateIdNumber() {
+    var id = document.getElementById('IdNumber').value;
+    var feedback = document.getElementById('idFeedback');
+    var dobField = document.getElementById('DateOfBirth');
+    var dobFeedback = document.getElementById('dobFeedback');
+
+    if (id.length === 0) { feedback.textContent = ''; return; }
+
+    if (!/^\d{13}$/.test(id)) {
+        feedback.textContent = '✗ Must be exactly 13 digits.';
+        feedback.className = 'id-feedback text-danger';
+        document.getElementById('IdNumber').classList.add('is-invalid');
+        document.getElementById('IdNumber').classList.remove('is-valid');
+        return;
+    }
+
+    // Extract DOB from ID
+    var year  = id.substring(0, 2);
+    var month = id.substring(2, 4);
+    var day   = id.substring(4, 6);
+    var fullYear = parseInt(year) <= 6 ? '20' + year : '19' + year;
+    var dob = fullYear + '-' + month + '-' + day;
+
+    // Validate date
+    var dobDate = new Date(dob);
+    if (isNaN(dobDate.getTime()) || parseInt(month) > 12 || parseInt(day) > 31) {
+        feedback.textContent = '✗ ID number contains an invalid date.';
+        feedback.className = 'id-feedback text-danger';
+        document.getElementById('IdNumber').classList.add('is-invalid');
+        return;
+    }
+
+    // Auto-fill DOB
+    dobField.value = dob;
+    dobFeedback.textContent = '✓ Date of birth filled automatically from ID number.';
+    dobFeedback.style.color = '#198754';
+
+    feedback.textContent = '✓ Valid SA ID number.';
+    feedback.className = 'id-feedback text-success';
+    document.getElementById('IdNumber').classList.remove('is-invalid');
+    document.getElementById('IdNumber').classList.add('is-valid');
+}
+
+// ── Phone validation ──────────────────────────────────────
+function validatePhone() {
+    var phone = document.getElementById('PhoneNumber').value;
+    var feedback = document.getElementById('phoneFeedback');
+    var field = document.getElementById('PhoneNumber');
+    if (phone.length === 0) { feedback.textContent = ''; return; }
+    if (/^0[0-9]{9}$/.test(phone)) {
+        feedback.textContent = '✓ Valid cellphone number.';
+        feedback.className = 'id-feedback text-success';
+        field.classList.remove('is-invalid'); field.classList.add('is-valid');
+    } else {
+        feedback.textContent = '✗ Must be 10 digits starting with 0.';
+        feedback.className = 'id-feedback text-danger';
+        field.classList.add('is-invalid'); field.classList.remove('is-valid');
+    }
+}
+
+// ── Password strength ─────────────────────────────────────
+document.getElementById('Password').addEventListener('input', function () {
+    var pw = this.value;
+    var hasLen     = pw.length >= 8;
+    var hasUpper   = /[A-Z]/.test(pw);
+    var hasNumber  = /[0-9]/.test(pw);
+    var hasSpecial = /[^A-Za-z0-9]/.test(pw);
+
+    setReq('req-length',  hasLen);
+    setReq('req-upper',   hasUpper);
+    setReq('req-number',  hasNumber);
+    setReq('req-special', hasSpecial);
+
+    var score = [hasLen, hasUpper, hasNumber, hasSpecial].filter(Boolean).length;
+    var fill  = document.getElementById('strengthFill');
+    var label = document.getElementById('strengthLabel');
+
+    var configs = [
+        { w: '0%',   bg: '#e2e8f0', text: '' },
+        { w: '25%',  bg: '#dc3545', text: 'Weak' },
+        { w: '50%',  bg: '#fd7e14', text: 'Fair' },
+        { w: '75%',  bg: '#ffc107', text: 'Good' },
+        { w: '100%', bg: '#198754', text: 'Strong' }
+    ];
+
+    fill.style.width      = configs[score].w;
+    fill.style.background = configs[score].bg;
+    label.textContent     = configs[score].text;
+    label.style.color     = configs[score].bg;
+
+    checkConfirm();
+});
+
+function setReq(id, met) {
+    var el = document.getElementById(id);
+    if (met) { el.classList.add('met'); el.querySelector('i').style.color = '#198754'; }
+    else      { el.classList.remove('met'); el.querySelector('i').style.color = '#94a3b8'; }
+}
+
+// ── Confirm password ──────────────────────────────────────
+document.getElementById('ConfirmPassword').addEventListener('input', checkConfirm);
+
+function checkConfirm() {
+    var pw  = document.getElementById('Password').value;
+    var cpw = document.getElementById('ConfirmPassword').value;
+    var fb  = document.getElementById('confirmFeedback');
+    var field = document.getElementById('ConfirmPassword');
+    if (cpw.length === 0) { fb.textContent = ''; return; }
+    if (pw === cpw) {
+        fb.textContent = '✓ Passwords match.';
+        fb.className = 'id-feedback text-success';
+        field.classList.remove('is-invalid'); field.classList.add('is-valid');
+    } else {
+        fb.textContent = '✗ Passwords do not match.';
+        fb.className = 'id-feedback text-danger';
+        field.classList.add('is-invalid'); field.classList.remove('is-valid');
+    }
+}
+
+// ── Show/hide password ────────────────────────────────────
+document.getElementById('togglePw').addEventListener('click', function () {
+    var input = document.getElementById('Password');
+    var icon  = document.getElementById('eyeIcon');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
+});
+
+document.getElementById('toggleConfirm').addEventListener('click', function () {
+    var input = document.getElementById('ConfirmPassword');
+    var icon  = document.getElementById('eyeIconConfirm');
+    input.type = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'password' ? 'fa fa-eye' : 'fa fa-eye-slash';
+});
+
+// ── Submit validation ─────────────────────────────────────
+document.getElementById('submitBtn').addEventListener('click', function (e) {
+    var checkbox = document.getElementById('AcceptTerms');
+    var termsFb  = document.getElementById('termsFeedback');
+    if (!checkbox.checked) {
+        e.preventDefault();
+        termsFb.style.display = 'block';
+        checkbox.focus();
+        return false;
+    }
+    termsFb.style.display = 'none';
+});
+
+document.getElementById('AcceptTerms').addEventListener('change', function () {
+    document.getElementById('termsFeedback').style.display = this.checked ? 'none' : 'block';
+});
+</script>
 </body>
 </html>

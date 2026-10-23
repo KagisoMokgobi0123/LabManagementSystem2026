@@ -1,0 +1,202 @@
+﻿@model NMB_HLabSys.Areas.Patient.Controllers.RequestDetailsViewModel
+@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Request " + Model.RequestNumber;
+
+    var steps = new[] { "Submitted", "Samples received", "In progress", "Completed", "Released" };
+    var descs = new[]
+    {
+        "Your doctor sent the request",
+        "The laboratory received your samples",
+        "Your tests are being performed",
+        "Testing and checks are finished",
+        "Your doctor released the results"
+    };
+
+    var statusClass = Model.Status switch
+    {
+        "Submitted" => "primary",
+        "Samples Received" => "info text-dark",
+        "InProgress" => "warning text-dark",
+        "Completed" => "success",
+        "ReleasedByDoctor" => "success",
+        "Cancelled" => "danger",
+        _ => "secondary"
+    };
+    var statusText = Model.Status switch
+    {
+        "ReleasedByDoctor" => "Released by doctor",
+        "InProgress" => "In progress",
+        _ => Model.Status
+    };
+    var urgencyClass = Model.Urgency == "Stat" ? "danger" : Model.Urgency == "Urgent" ? "warning text-dark" : "secondary";
+}
+
+<style>
+    .rq-steps { display: flex; justify-content: space-between; position: relative; }
+    .rq-steps::before { content: ""; position: absolute; top: 19px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; }
+    .rq-step { flex: 1; text-align: center; position: relative; z-index: 1; padding: 0 4px; }
+    .rq-dot { width: 38px; height: 38px; border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b; font-weight: 700; border: 3px solid #fff; }
+    .rq-step.done .rq-dot { background: #16a34a; color: #fff; }
+    .rq-step.current .rq-dot { background: #0284c7; color: #fff; box-shadow: 0 0 0 4px rgba(2,132,199,.2); }
+    .rq-label { font-size: 12px; font-weight: 700; color: #334155; }
+    .rq-desc { font-size: 11px; color: #94a3b8; }
+    .rq-fact-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 700; }
+    .rq-fact-value { font-size: 0.95rem; font-weight: 600; color: #0f172a; }
+    .rq-abnormal { background: #fef2f2; }
+</style>
+
+<div class="container-fluid p-4">
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Request @Model.RequestNumber</h4>
+            <span class="badge bg-@statusClass">@statusText</span>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/Patient/TestRequests/Index" class="btn btn-outline-secondary btn-sm">&larr; All my requests</a>
+            <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">Dashboard</a>
+        </div>
+    </div>
+
+    @if (Model.Cancelled)
+    {
+        <div class="alert alert-danger">
+            <strong>This request was cancelled.</strong>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Progress</h6>
+                <div class="rq-steps">
+                    @for (int s = 0; s < steps.Length; s++)
+                    {
+                        var cls = (s + 1 < Model.Step) ? "done" : ((s + 1 == Model.Step) ? "current" : "");
+                        var mark = (s + 1 < Model.Step) ? "✓" : (s + 1).ToString();
+                        <div class="rq-step @cls">
+                            <div class="rq-dot">@mark</div>
+                            <div class="rq-label">@steps[s]</div>
+                            <div class="rq-desc">@descs[s]</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-6 col-md-3">
+                    <div class="rq-fact-label">Requested on</div>
+                    <div class="rq-fact-value">@Model.RequestDate.ToString("dd MMM yyyy")</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="rq-fact-label">Requested by</div>
+                    <div class="rq-fact-value">@Model.Doctor</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="rq-fact-label">Urgency</div>
+                    <div class="rq-fact-value"><span class="badge bg-@urgencyClass">@Model.Urgency</span></div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="rq-fact-label">Number of tests</div>
+                    <div class="rq-fact-value">@Model.Tests.Count</div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.ClinicalNotes))
+                {
+                    <div class="col-12">
+                        <div class="rq-fact-label">Why these tests were requested</div>
+                        <div class="rq-fact-value" style="font-weight:500;">@Model.ClinicalNotes</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h6 class="fw-bold mb-0">Tests in this request</h6>
+                @if (Model.Released && Model.Tests.Any())
+                {
+                    <a href="/Patient/Reports/Index?dateFrom=@Model.RequestDate.ToString("yyyy-MM-dd")&dateTo=@DateTime.Now.ToString("yyyy-MM-dd")"
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-file-pdf me-1"></i> View &amp; Download PDF
+                    </a>
+                }
+            </div>
+
+            @if (!Model.Released && !Model.Cancelled)
+            {
+                <div class="alert alert-info" style="font-size:0.88rem;">
+                    Results are shown here once your doctor has reviewed and released them.
+                </div>
+            }
+
+            @if (Model.Released && Model.AbnormalCount > 0)
+            {
+                <div class="alert alert-warning" style="font-size:0.88rem;">
+                    <strong>@Model.AbnormalCount result(s) are outside the normal range</strong> and are highlighted below.
+                    This does not always mean there is a problem. Please talk to your doctor about them.
+                </div>
+            }
+
+            @if (!Model.Tests.Any())
+            {
+                <p class="text-muted mb-0">No tests have been added to this request yet.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Test</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Category</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Result</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Normal range</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Flag</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model.Tests)
+                            {
+                                <tr class="@(t.Abnormal ? "rq-abnormal" : "")">
+                                    <td class="fw-semibold">@t.TestName</td>
+                                    <td class="text-muted">@t.Category</td>
+                                    <td>
+                                        @if (t.Value.HasValue)
+                                        {
+                                            <span class="@(t.Abnormal ? "fw-bold text-danger" : "fw-bold")">@t.Value.Value.ToString("0.##") @t.Unit</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not released yet</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted">@t.Range @(t.Range == "-" ? "" : t.Unit)</td>
+                                    <td>
+                                        @if (t.Value.HasValue)
+                                        {
+                                            if (t.Abnormal)
+                                            {
+                                                <span class="badge bg-danger">Outside normal range</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">Normal</span>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
