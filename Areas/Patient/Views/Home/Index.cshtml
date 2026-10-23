@@ -549,7 +549,7 @@
         <!-- STAT CARDS -->
         <div class="row">
             <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/Patient/TestRequests/Index" class="stat-card-link">
+                <a href="@Url.Action("Index","TestRequests",new {area = "Patient"})" class="stat-card-link">
                     <div class="stat-card">
                         <div class="stat-top">
                             <div>
@@ -564,7 +564,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/Patient/TestRequests/Active" class="stat-card-link">
+                <a href="@Url.Action("Index", "TestRequests", new { area = "Patient" })" class="stat-card-link">
                     <div class="stat-card">
                         <div class="stat-top">
                             <div>
@@ -579,7 +579,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/Patient/Results/Index" class="stat-card-link">
+                <a href="@Url.Action("Index", "Results", new { area = "Patient" })" class="stat-card-link">
                     <div class="stat-card">
                         <div class="stat-top">
                             <div>
@@ -594,7 +594,7 @@
             </div>
 
             <div class="col-xl-3 col-md-6 mb-4">
-                <a href="/Patient/Consent/Index" class="stat-card-link">
+                <a href="@Url.Action("Index", "Consent", new { area = "Patient" })" class="stat-card-link">
                     <div class="stat-card">
                         <div class="stat-top">
                             <div>
@@ -772,7 +772,7 @@
                         <h4 class="dashboard-title">Recent Test Requests</h4>
                         <p class="dashboard-subtitle">Track the latest laboratory requests linked to your account</p>
                     </div>
-                    <a href="/Patient/TestRequests/Index" class="btn btn-outline-primary btn-sm">View All</a>
+                    <a href="@Url.Action("Index", "TestRequests", new { area = "Patient"})" class="btn btn-outline-primary btn-sm">View All</a>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -827,7 +827,10 @@
                                             @r.ClinicalNotes
                                         </td>
                                         <td>
-                                            <a href="/Patient/TestRequests/Details/@r.TestRequestId" class="btn btn-outline-primary btn-sm">View details</a>
+                                            <a href="@Url.Action("Details", "TestRequests", new { area = "Patient", id = r.TestRequestId })"
+                                               class="btn btn-outline-primary btn-sm">
+                                                View details
+                                            </a>
                                         </td>
                                     </tr>
                                 }
