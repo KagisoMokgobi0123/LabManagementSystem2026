@@ -217,9 +217,7 @@ public sealed class PatientsController : Controller
                 Province = model.Province.Trim(),
                 PostalCode = model.PostalCode?.Trim() ?? "",
                 CreatedDate = DateTime.Now,
-                NoKnownMedicalConditions = model.NoKnownMedicalConditions,
-                NoKnownAllergies = model.NoKnownAllergies,
-                NoCurrentMedications = model.NoCurrentMedications
+                
             };
             _db.Patients.Add(patient);
             await _db.SaveChangesAsync();

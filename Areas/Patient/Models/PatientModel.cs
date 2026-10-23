@@ -59,8 +59,12 @@ namespace NMB_HLabSys.Areas.Patient.Models
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime? LastUpdatedDate { get; set; }
 
-        // Navigation Properties
-        public ICollection<PatientConditionModel> PatientConditions { get; set; }
+        public bool NoKnownMedicalConditions { get; set; }
+          public bool NoKnownAllergies {get; set; }
+           public bool NoCurrentMedications { get; set; }
+
+// Navigation Properties
+public ICollection<PatientConditionModel> PatientConditions { get; set; }
             = new List<PatientConditionModel>();
         public ICollection<PatientAllergyModel> PatientAllergies { get; set; }
             = new List<PatientAllergyModel>();
