@@ -18,7 +18,9 @@
             </p>
         </div>
 
-        <a href="@Url.Action("PrepareReport", "SentEmails", new { area = "Technician" })"
+        <a asp-area="Technician"
+           asp-controller="SentEmails"
+           asp-action="PrepareReport"
            class="btn btn-primary">
             <i class="fas fa-file-pdf me-2"></i>
             Prepare Laboratory Report
@@ -144,7 +146,10 @@
                                         @if (email.PdfAttachment != null &&
                                              email.PdfAttachment.Length > 0)
                                         {
-                                            <a href="@Url.Action("DownloadPdf", "SentEmails", new { area = "Technician", id = email.SentEmailId })"
+                                            <a asp-area="Technician"
+                                               asp-controller="SentEmails"
+                                               asp-action="DownloadPdf"
+                                               asp-route-id="@email.SentEmailId"
                                                class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-download me-1"></i>
                                                 Download PDF

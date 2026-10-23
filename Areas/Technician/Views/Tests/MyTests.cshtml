@@ -494,7 +494,7 @@
 
             <!-- IN PROGRESS -->
             <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-                <a href="/Technician/Tests/MyTests?status=In%20Progress#myTestsTable"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" asp-route-status="In Progress" asp-fragment="myTestsTable"
                    class="mytests-card-link" aria-label="View InProgress tests">
                     <div class="mytests-summary">
                         <div>
@@ -510,7 +510,7 @@
 
             <!-- COMPLETED -->
             <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-                <a href="/Technician/Tests/MyTests?status=Completed#myTestsTable"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" asp-route-status="Completed" asp-fragment="myTestsTable"
                    class="mytests-card-link" aria-label="View Completed tests">
                     <div class="mytests-summary">
                         <div>
@@ -526,7 +526,7 @@
 
             <!-- TO BE REVIEWED -->
             <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-                <a href="/Technician/Tests/MyTests?status=To%20Be%20Reviewed#myTestsTable"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="MyTests" asp-route-status="To Be Reviewed" asp-fragment="myTestsTable"
                    class="mytests-card-link" aria-label="View ToBeReviewed tests">
                     <div class="mytests-summary">
                         <div>
@@ -559,7 +559,7 @@
 
             <!-- OVERDUE -->
             <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-                <a href="/Technician/Tests/Overdue"
+                <a asp-area="Technician" asp-controller="Tests" asp-action="Overdue"
                    class="mytests-card-link" aria-label="View Overdue tests">
                     <div class="mytests-summary">
                         <div>
@@ -724,7 +724,7 @@
                 <h5 class="modal-title" id="myTestEditTitle"><i class="fas fa-edit mr-2"></i>Edit Test Details</h5>
                 <button type="button" class="close js-close-edit" aria-label="Close" style="color:white"><span aria-hidden="true">&times;</span></button>
             </div>
-            <form id="myTestEditForm" method="post" action="@Url.Action("UpdateMyTestDetails", "Tests", new { area = "Technician" })">
+            <form id="myTestEditForm" method="post" asp-area="Technician" asp-controller="Tests" asp-action="UpdateMyTestDetails">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="testRequestTestTypeId" id="editMyTestId" />
                 <div class="modal-body">
@@ -839,7 +839,7 @@
                 <h5 class="modal-title" id="myTestDeactivateTitle"><i class="fas fa-ban mr-2"></i> De-Activate Test</h5>
                 <button type="button" class="close js-close-deactivate" aria-label="Close" style="color:white"><span aria-hidden="true">&times;</span></button>
             </div>
-            <form id="myTestDeactivateForm" method="post" action="@Url.Action("DeactivateMyTest", "Tests", new { area = "Technician" })">
+            <form id="myTestDeactivateForm" method="post" asp-area="Technician" asp-controller="Tests" asp-action="DeactivateMyTest">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="testRequestTestTypeId" id="deactivateMyTestId" />
                 <div class="modal-body">

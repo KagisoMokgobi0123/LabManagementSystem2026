@@ -15,7 +15,7 @@
                 </div>
                 <button type="button" class="close text-white js-close-correction" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
-            <form action="@Url.Action("CaptureResults", "Tests", new { area = "Technician" })" method="post" id="correctTestForm">
+            <form asp-area="Technician" asp-controller="Tests" asp-action="CaptureResults" method="post" id="correctTestForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="testRequestTestTypeId" value="@Model.TestRequestTestTypeId" />
                 <div class="modal-body" style="background:#f8fafc;max-height:65vh;overflow-y:auto">

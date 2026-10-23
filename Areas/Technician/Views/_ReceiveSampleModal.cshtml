@@ -7,79 +7,53 @@
 <style>
 
     /* =========================================================
-       MODAL
-       ========================================================= */
+           MODAL
+           ========================================================= */
 
     .receive-modal-header {
         position: relative;
         overflow: hidden;
-
         padding: 22px 24px;
-
         border: 0;
-
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 55%,
-            #0284c7 100%
-        );
-
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 55%, #0284c7 100% );
         color: #fff;
     }
 
-    .receive-modal-header::after {
-        content: "";
-
-        position: absolute;
-
-        width: 150px;
-        height: 150px;
-
-        right: -45px;
-        top: -80px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.07);
-    }
+        .receive-modal-header::after {
+            content: "";
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            right: -45px;
+            top: -80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.07);
+        }
 
     .modal-title-area {
         position: relative;
-
         z-index: 2;
-
         display: flex;
-
         align-items: center;
-
         gap: 12px;
     }
 
     .modal-header-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 43px;
         height: 43px;
-
         min-width: 43px;
-
         border: 1px solid rgba(255,255,255,.20);
         border-radius: 10px;
-
         background: rgba(255,255,255,.13);
-
         font-size: 17px;
     }
 
     .receive-modal-title {
         margin: 0;
-
         color: #fff;
-
         font-size: 17px;
         font-weight: 700;
     }
@@ -87,100 +61,75 @@
     .receive-modal-subtitle {
         margin-top: 3px;
         margin-bottom: 0;
-
         color: rgba(255,255,255,.75);
-
         font-size: 11px;
     }
 
     .receive-modal-header .close {
         position: relative;
-
         z-index: 3;
-
         color: #fff;
-
         opacity: .85;
-
         text-shadow: none;
     }
 
-    .receive-modal-header .close:hover {
-        color: #fff;
-
-        opacity: 1;
-    }
+        .receive-modal-header .close:hover {
+            color: #fff;
+            opacity: 1;
+        }
 
 
     /* =========================================================
-       BODY
-       ========================================================= */
+           BODY
+           ========================================================= */
 
     .receive-modal-body {
         padding: 22px 24px;
-
         background: #f8fafc;
     }
 
 
     /* =========================================================
-       REQUEST SUMMARY
-       ========================================================= */
+           REQUEST SUMMARY
+           ========================================================= */
 
     .request-summary {
         margin-bottom: 18px;
-
         padding: 16px 18px;
-
         border: 1px solid #dbeafe;
         border-radius: 10px;
-
         background: #eff6ff;
     }
 
     .summary-heading {
         display: flex;
-
         align-items: center;
-
         gap: 7px;
-
         margin-bottom: 13px;
-
         color: #075985;
-
         font-size: 12px;
         font-weight: 700;
     }
 
     .summary-grid {
         display: grid;
-
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
-
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 13px;
     }
 
     .summary-label {
         margin-bottom: 3px;
-
         color: #64748b;
-
         font-size: 9px;
         font-weight: 700;
-
         text-transform: uppercase;
-
         letter-spacing: .4px;
     }
 
     .summary-value {
         color: #1e293b;
-
         font-size: 12px;
         font-weight: 600;
-
         word-break: break-word;
     }
 
@@ -190,39 +139,29 @@
 
 
     /* =========================================================
-       VERIFICATION PANEL
-       ========================================================= */
+           VERIFICATION PANEL
+           ========================================================= */
 
     .verification-card {
         overflow: hidden;
-
         border: 1px solid #e2e8f0;
         border-radius: 11px;
-
         background: #fff;
-
-        box-shadow:
-            0 2px 8px rgba(15,23,42,.03);
+        box-shadow: 0 2px 8px rgba(15,23,42,.03);
     }
 
     .verification-header {
         display: flex;
-
         align-items: center;
         justify-content: space-between;
-
         gap: 10px;
-
         padding: 14px 17px;
-
         border-bottom: 1px solid #eef2f7;
     }
 
     .verification-title {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 13px;
         font-weight: 700;
     }
@@ -230,35 +169,26 @@
     .verification-description {
         margin-top: 3px;
         margin-bottom: 0;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
     .verification-counter {
         display: inline-flex;
-
         align-items: center;
-
         gap: 5px;
-
         padding: 5px 9px;
-
         border-radius: 50px;
-
         background: #f1f5f9;
-
         color: #64748b;
-
         font-size: 10px;
         font-weight: 700;
     }
 
 
     /* =========================================================
-       CHECK ITEMS
-       ========================================================= */
+           CHECK ITEMS
+           ========================================================= */
 
     .verification-list {
         padding: 0;
@@ -266,180 +196,134 @@
 
     .verification-item {
         display: flex;
-
         align-items: center;
-
         padding: 14px 17px;
-
         border-bottom: 1px solid #f1f5f9;
-
         cursor: pointer;
-
         transition: .15s ease;
     }
 
-    .verification-item:last-child {
-        border-bottom: 0;
-    }
+        .verification-item:last-child {
+            border-bottom: 0;
+        }
 
-    .verification-item:hover {
-        background: #f8fcff;
-    }
+        .verification-item:hover {
+            background: #f8fcff;
+        }
 
-    .verification-item.checked {
-        background: #f0fdf4;
-    }
+        .verification-item.checked {
+            background: #f0fdf4;
+        }
 
     .verification-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 36px;
         height: 36px;
-
         min-width: 36px;
-
         margin-right: 12px;
-
         border-radius: 9px;
-
         background: #e0f2fe;
-
         color: #0284c7;
-
         font-size: 13px;
     }
 
     .verification-item.checked
     .verification-icon {
         background: #dcfce7;
-
         color: #16a34a;
     }
 
     .verification-content {
         flex: 1;
-
         min-width: 0;
     }
 
     .verification-label {
         margin-bottom: 3px;
-
         color: #64748b;
-
         font-size: 10px;
         font-weight: 600;
     }
 
     .verification-value {
         color: #1e293b;
-
         font-size: 12px;
         font-weight: 700;
-
         word-break: break-word;
     }
 
 
     /* =========================================================
-       CUSTOM CHECKBOX
-       ========================================================= */
+           CUSTOM CHECKBOX
+           ========================================================= */
 
     .verify-check {
         position: relative;
-
         width: 22px;
         height: 22px;
-
         min-width: 22px;
-
         margin-left: 12px;
     }
 
-    .verify-check input {
-        position: absolute;
-
-        width: 100%;
-        height: 100%;
-
-        margin: 0;
-
-        opacity: 0;
-
-        cursor: pointer;
-
-        z-index: 2;
-    }
+        .verify-check input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
 
     .check-display {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 22px;
         height: 22px;
-
         border: 2px solid #cbd5e1;
         border-radius: 6px;
-
         background: #fff;
-
         color: transparent;
-
         font-size: 10px;
-
         transition: .15s ease;
     }
 
-    .verify-check input:checked
-    + .check-display {
+    .verify-check input:checked + .check-display {
         border-color: #16a34a;
-
         background: #16a34a;
-
         color: #fff;
     }
 
 
     /* =========================================================
-       INFORMATION
-       ========================================================= */
+           INFORMATION
+           ========================================================= */
 
     .security-note {
         display: flex;
-
         align-items: flex-start;
-
         gap: 10px;
-
         margin-top: 16px;
-
         padding: 11px 13px;
-
         border: 1px solid #e0f2fe;
         border-radius: 8px;
-
         background: #f0f9ff;
-
         color: #0369a1;
-
         font-size: 10px;
-
         line-height: 1.6;
     }
 
-    .security-note i {
-        margin-top: 2px;
-    }
+        .security-note i {
+            margin-top: 2px;
+        }
 
 
     /* =========================================================
-       VALIDATION
-       ========================================================= */
+           VALIDATION
+           ========================================================= */
 
     .validation-summary-valid {
         display: none;
@@ -447,116 +331,87 @@
 
     .validation-summary-errors {
         margin-bottom: 15px;
-
         padding: 11px 14px;
-
         border: 1px solid #fecaca;
         border-radius: 8px;
-
         background: #fef2f2;
-
         color: #b91c1c;
-
         font-size: 11px;
     }
 
-    .validation-summary-errors ul {
-        margin: 0;
-
-        padding-left: 18px;
-    }
+        .validation-summary-errors ul {
+            margin: 0;
+            padding-left: 18px;
+        }
 
 
     /* =========================================================
-       FOOTER
-       ========================================================= */
+           FOOTER
+           ========================================================= */
 
     .receive-modal-footer {
         display: flex;
-
         align-items: center;
         justify-content: space-between;
-
         padding: 15px 24px;
-
         border-top: 1px solid #e2e8f0;
-
         background: #fff;
     }
 
     .verification-status {
         display: flex;
-
         align-items: center;
-
         gap: 6px;
-
         color: #94a3b8;
-
         font-size: 10px;
         font-weight: 600;
     }
 
-    .verification-status.ready {
-        color: #16a34a;
-    }
+        .verification-status.ready {
+            color: #16a34a;
+        }
 
     .btn-modal-cancel,
     .btn-confirm-receive {
         display: inline-flex;
-
         align-items: center;
         justify-content: center;
-
         gap: 6px;
-
         padding: 9px 15px;
-
         border-radius: 7px;
-
         font-size: 11px;
         font-weight: 600;
-
         transition: .2s ease;
     }
 
     .btn-modal-cancel {
         border: 1px solid #e2e8f0;
-
         background: #fff;
-
         color: #64748b;
     }
 
     .btn-confirm-receive {
         border: 0;
-
         background: #0284c7;
-
         color: #fff;
-
-        box-shadow:
-            0 3px 8px rgba(2,132,199,.20);
+        box-shadow: 0 3px 8px rgba(2,132,199,.20);
     }
 
-    .btn-confirm-receive:hover:not(:disabled) {
-        transform: translateY(-1px);
+        .btn-confirm-receive:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: #0369a1;
+        }
 
-        background: #0369a1;
-    }
-
-    .btn-confirm-receive:disabled {
-        background: #cbd5e1;
-
-        cursor: not-allowed;
-
-        box-shadow: none;
-    }
+        .btn-confirm-receive:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
 
 
     /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+           RESPONSIVE
+           ========================================================= */
 
     @@media(max-width: 767px) {
 
@@ -566,21 +421,18 @@
 
         .receive-modal-footer {
             flex-direction: column;
-
             align-items: stretch;
-
             gap: 12px;
         }
 
         .modal-footer-actions {
             display: flex;
-
             gap: 7px;
         }
 
-        .modal-footer-actions button {
-            flex: 1;
-        }
+            .modal-footer-actions button {
+                flex: 1;
+            }
     }
 
 </style>
@@ -664,6 +516,7 @@
            type="hidden" />
 
     <input asp-for="DateTimeReceived"
+           asp-format="{0:yyyy-MM-ddTHH:mm:ss}"
            type="hidden" />
 
 
@@ -1061,7 +914,7 @@
                         <div class="verification-value">
 
                             @Model.DateTimeReceived
-                                .ToString("dd MMM yyyy HH:mm")
+                            .ToString("dd MMM yyyy HH:mm")
 
                         </div>
 
@@ -1164,7 +1017,7 @@
 
 <script>
 
-    (function () {
+    (function() {
 
         // ============================================================
         // ELEMENTS
@@ -1214,7 +1067,7 @@
 
 
             checkboxes.forEach(
-                function (checkbox) {
+                function(checkbox) {
 
                     const item =
                         checkbox.closest(
@@ -1263,14 +1116,14 @@
 
                 verificationStatus.innerHTML = `
 
-                    <i class="fas fa-circle-check"></i>
+                        <i class="fas fa-circle-check"></i>
 
-                    <span>
-                        Verification complete.
-                        Sample ready for reception.
-                    </span>
+                        <span>
+                            Verification complete.
+                            Sample ready for reception.
+                        </span>
 
-                `;
+                    `;
             }
             else {
 
@@ -1281,19 +1134,19 @@
 
                 verificationStatus.innerHTML = `
 
-                    <i class="fas fa-circle-info"></i>
+                        <i class="fas fa-circle-info"></i>
 
-                    <span>
-                        Complete all 5 verification checks.
-                    </span>
+                        <span>
+                            Complete all 5 verification checks.
+                        </span>
 
-                `;
+                    `;
             }
         }
 
 
         checkboxes.forEach(
-            function (checkbox) {
+            function(checkbox) {
 
                 checkbox.addEventListener(
                     "change",
@@ -1312,7 +1165,7 @@
 
         form.addEventListener(
             "submit",
-            function (event) {
+            function(event) {
 
                 event.preventDefault();
 
@@ -1370,7 +1223,7 @@
                     confirmButtonColor:
                         "#0284c7"
 
-                }).then(function (result) {
+                }).then(function(result) {
 
 
                     if (!result.isConfirmed) {
@@ -1388,15 +1241,15 @@
 
                     confirmButton.innerHTML = `
 
-                        <span class="spinner-border
-                                     spinner-border-sm"
-                              role="status"
-                              aria-hidden="true">
-                        </span>
+                            <span class="spinner-border
+                                         spinner-border-sm"
+                                  role="status"
+                                  aria-hidden="true">
+                            </span>
 
-                        Receiving...
+                            Receiving...
 
-                    `;
+                        `;
 
 
                     // ------------------------------------------------
@@ -1416,7 +1269,7 @@
 
 
                         success:
-                            function (response) {
+                            function(response) {
 
 
                                 // ------------------------------------
@@ -1448,7 +1301,7 @@
                                             "#0284c7"
 
                                     }).then(
-                                        function () {
+                                        function() {
 
                                             window.location.reload();
 
@@ -1470,11 +1323,11 @@
 
                                 confirmButton.innerHTML = `
 
-                                    <i class="fas fa-check-circle"></i>
+                                        <i class="fas fa-check-circle"></i>
 
-                                    Confirm Reception
+                                        Confirm Reception
 
-                                `;
+                                    `;
 
 
                                 Swal.fire({
@@ -1494,7 +1347,7 @@
 
 
                         error:
-                            function (xhr) {
+                            function(xhr) {
 
 
                                 confirmButton.disabled =
@@ -1503,11 +1356,11 @@
 
                                 confirmButton.innerHTML = `
 
-                                    <i class="fas fa-check-circle"></i>
+                                        <i class="fas fa-check-circle"></i>
 
-                                    Confirm Reception
+                                        Confirm Reception
 
-                                `;
+                                    `;
 
 
                                 let message =

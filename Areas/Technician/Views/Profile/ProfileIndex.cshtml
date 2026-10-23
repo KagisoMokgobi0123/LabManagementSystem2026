@@ -45,18 +45,18 @@
         margin-bottom: 25px;
     }
 
-    .profile-header h2 {
-        margin: 0;
-        color: #0f172a;
-        font-size: 25px;
-        font-weight: 700;
-    }
+        .profile-header h2 {
+            margin: 0;
+            color: #0f172a;
+            font-size: 25px;
+            font-weight: 700;
+        }
 
-    .profile-header p {
-        margin-top: 5px;
-        color: #64748b;
-        font-size: 13px;
-    }
+        .profile-header p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 13px;
+        }
 
     .profile-card {
         overflow: hidden;
@@ -68,12 +68,7 @@
 
     .profile-banner {
         height: 130px;
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 50%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 50%, #0284c7 100% );
     }
 
     .profile-main {
@@ -84,21 +79,15 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 95px;
         height: 95px;
-
         margin-top: -48px;
         margin-bottom: 15px;
-
         border: 5px solid #fff;
         border-radius: 50%;
-
         background: #0284c7;
         color: #fff;
-
         box-shadow: 0 4px 15px rgba(15, 23, 42, .15);
-
         font-size: 32px;
         font-weight: 700;
     }
@@ -132,14 +121,11 @@
     .info-item {
         display: flex;
         align-items: center;
-
         min-height: 65px;
         margin-bottom: 12px;
         padding: 13px 15px;
-
         border: 1px solid #e8edf3;
         border-radius: 10px;
-
         background: #fff;
     }
 
@@ -147,15 +133,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-
         width: 40px;
         height: 40px;
         min-width: 40px;
-
         margin-right: 12px;
-
         border-radius: 9px;
-
         background: #e0f2fe;
         color: #0284c7;
     }
@@ -176,10 +158,8 @@
 
     .security-card {
         padding: 20px;
-
         border: 1px solid #e8edf3;
         border-radius: 12px;
-
         background: #f8fafc;
     }
 
@@ -198,10 +178,10 @@
         white-space: nowrap;
     }
 
-    .id-toggle:hover, .id-toggle:focus {
-        background: #e0f2fe;
-        color: #075985;
-    }
+        .id-toggle:hover, .id-toggle:focus {
+            background: #e0f2fe;
+            color: #075985;
+        }
 </style>
 
 
@@ -348,7 +328,7 @@
 
                                 <div class="col-md-6">
 
-                                    <a href="/Technician/Profile/ChangePhoneNumber"
+                                    <a asp-area="Technician" asp-controller="Profile" asp-action="ChangePhoneNumber"
                                        class="text-decoration-none">
 
                                         <div class="info-item phone-clickable">
@@ -463,7 +443,7 @@
 
                         </div>
 
-                        <a href="/Technician/Profile/ChangePassword"
+                        <a asp-area="Technician" asp-controller="Profile" asp-action="ChangePassword"
                            class="btn btn-primary btn-sm btn-block">
 
                             <i class="fas fa-key mr-1"></i>
@@ -475,7 +455,7 @@
                     </div>
 
 
-                    <a href="/Technician/Home/Index"
+                    <a asp-area="Technician" asp-controller="Home" asp-action="Index"
                        class="btn btn-outline-secondary btn-sm btn-block mt-3">
 
                         <i class="fas fa-arrow-left mr-1"></i>
@@ -494,7 +474,7 @@
 
 </div>
 <script>
-    (function () {
+    (function() {
         "use strict";
         const button = document.getElementById("toggleIdNumber");
         const display = document.getElementById("idNumberDisplay");
@@ -504,7 +484,7 @@
         const masked = "•••••••••••••";
         let visible = false;
 
-        button.addEventListener("click", function () {
+        button.addEventListener("click", function() {
             visible = !visible;
             display.textContent = visible ? idNumber : masked;
             button.setAttribute("aria-pressed", String(visible));

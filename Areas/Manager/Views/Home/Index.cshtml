@@ -630,7 +630,7 @@
                 <div class="row">
 
                     <div class="col-md-6">
-                        <a href="/Manager/User/Index" class="quick-action">
+                        <a href="@Url.Action("Index","User",new {area = "Manager"})"  class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-user-doctor"></i>
                             </div>
@@ -645,7 +645,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <a href="/Manager/User/Index" class="quick-action">
+                        <a href="@Url.Action("Index", "User", new { area = "Manager" })" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-user-gear"></i>
                             </div>
@@ -660,7 +660,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <a href="/Manager/TechnicianAssignments/Index" class="quick-action">
+                        <a href="@Url.Action("Index", "TechnicianAssignments", new { area = "Manager" })" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-list-check"></i>
                             </div>
@@ -675,7 +675,7 @@
                     </div>
 
                     <div class="col-md-6">
-                        <a href="/Manager/Reports/Index" class="quick-action">
+                        <a href="@Url.Action("Index", "Reports", new { area = "Manager" })" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-chart-column"></i>
                             </div>
@@ -735,7 +735,7 @@
 
                     <div class="card-body">
 
-                        <a href="/Manager/Consumable/Index" class="attention-item">
+                        <a href="@Url.Action("Index", "Consumable", new { area = "Manager" })" class="attention-item">
                             <div class="attention-icon icon-red">
                                 <i class="fas fa-box-open"></i>
                             </div>
@@ -747,7 +747,7 @@
                             </div>
                         </a>
 
-                        <a href="/Manager/StockAdjustment/Index" class="attention-item">
+                        <a href="@Url.Action("Index", "StockAdjustment", new { area = "Manager" })" class="attention-item">
                             <div class="attention-icon icon-orange">
                                 <i class="fas fa-cart-shopping"></i>
                             </div>
@@ -759,7 +759,7 @@
                             </div>
                         </a>
 
-                        <a href="/Manager/TechnicianAssignments/Index" class="attention-item">
+                        <a href="@Url.Action("Index", "TechnicianAssignments", new { area = "Manager" })" class="attention-item">
                             <div class="attention-icon icon-purple">
                                 <i class="fas fa-user-check"></i>
                             </div>
@@ -771,7 +771,7 @@
                             </div>
                         </a>
 
-                        <a href="/Manager/Order/Index" class="attention-item">
+                        <a href="@Url.Action("Index", "Order", new { area = "Manager" })" class="attention-item">
                             <div class="attention-icon icon-green">
                                 <i class="fas fa-plus"></i>
                             </div>
@@ -801,7 +801,7 @@
                     </div>
 
                     <div class="col-md-4 text-md-right mt-2 mt-md-0">
-                        <a href="/Manager/Consumable/Index"
+                        <a href="@Url.Action("Index", "Consumable", new { area = "Manager" })"
                            class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-boxes-stacked mr-1"></i>
                             Manage Stock
@@ -853,7 +853,7 @@
                                             }
                                         </td>
                                         <td>
-                                            <a href="/Manager/Consumable/Index"
+                                            <a href="@Url.Action(" Index", "Consumable" , new { area="Manager" })"
                                                class="btn btn-outline-primary btn-sm">View</a>
                                         </td>
                                     </tr>
@@ -866,7 +866,7 @@
                                         <i class="fas fa-boxes-stacked fa-2x mb-3 d-block"></i>
                                         No consumable stock records are available.
                                         <div class="mt-3">
-                                            <a href="/Manager/Consumable/Index"
+                                            <a href="@Url.Action(" Index", "Consumable", new { area = "Manager" })"
                                                class="btn btn-primary btn-sm">
                                                 <i class="fas fa-eye mr-1"></i>
                                                 View Consumables
@@ -892,7 +892,7 @@
                 <div class="row">
 
                     <div class="col-md-4">
-                        <a href="/Manager/Order/Index" class="quick-action">
+                        <a href="@Url.Action(" Index", "Order", new { area = "Manager" })" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-cart-plus"></i>
                             </div>
@@ -907,7 +907,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <a href="/Manager/StockAdjustment/Index" class="quick-action">
+                        <a href="@Url.Action(" Index", "StockAdjustment", new { area = "Manager" })" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-truck-ramp-box"></i>
                             </div>
@@ -922,7 +922,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <a href="/Manager/Supplier/Index" class="quick-action">
+                        <a href="@Url.Action(" Index", "Supplier", new { area = "Manager" })" class="quick-action">
                             <div class="quick-action-icon">
                                 <i class="fas fa-truck"></i>
                             </div>

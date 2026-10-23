@@ -9,13 +9,13 @@
 }
 
 <style>
-    
-.vr-btn {
-    position: relative;
-    z-index: 2;
-    cursor: pointer;
-    pointer-events: auto;
-}
+
+    .vr-btn {
+        position: relative;
+        z-index: 2;
+        cursor: pointer;
+        pointer-events: auto;
+    }
 
     .vr-hero {
         background: linear-gradient(120deg, #103a76, #1976c9);
@@ -171,14 +171,14 @@
                                 <td>@(item.CompletionDateTime?.ToString("dd MMM yyyy, HH:mm") ?? "—")</td>
                                 <td><span class="vr-pill"><i class="fas fa-check-circle mr-1"></i>Verified</span></td>
                                 <td>
-                               
-<a class="vr-btn"
-   href="@Url.Action("VerificationHistoryIndex", "Tests", new { area = "Technician" })"
-   title="View verification history"
-   aria-label="View verification history">
-    <i class="fas fa-history mr-1"></i>
-    View History
-</a>
+
+                                    <a class="vr-btn"
+                                       asp-area="Technician" asp-controller="Tests" asp-action="VerificationHistoryIndex"
+                                       title="View verification history"
+                                       aria-label="View verification history">
+                                        <i class="fas fa-history mr-1"></i>
+                                        View History
+                                    </a>
 
                                 </td>
                             </tr>

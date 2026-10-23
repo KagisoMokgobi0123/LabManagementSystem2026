@@ -93,23 +93,28 @@
                 color: #b91c1c;
             }
 
-    .stat-summary-link { cursor: pointer; position: relative; z-index: 5; pointer-events: auto; }
-
-    .stat-summary-link[aria-current="page"] {
-        outline: 2px solid #0284c7;
-        outline-offset: 2px;
+    .stat-summary-link {
+        cursor: pointer;
+        position: relative;
+        z-index: 5;
+        pointer-events: auto;
     }
 
-    .stat-summary-link, .stat-summary-link:hover, .stat-summary-link:focus {
-        color: inherit;
-        text-decoration: none !important;
-    }
-
-        .stat-summary-link:focus-visible {
-            outline: 3px solid #0284c7;
-            outline-offset: 3px;
-            border-radius: 13px;
+        .stat-summary-link[aria-current="page"] {
+            outline: 2px solid #0284c7;
+            outline-offset: 2px;
         }
+
+        .stat-summary-link, .stat-summary-link:hover, .stat-summary-link:focus {
+            color: inherit;
+            text-decoration: none !important;
+        }
+
+            .stat-summary-link:focus-visible {
+                outline: 3px solid #0284c7;
+                outline-offset: 3px;
+                border-radius: 13px;
+            }
 
     .stat-hero {
         position: relative;
@@ -269,15 +274,15 @@
         }
 
         <div class="stat-summary" aria-label="STAT test summary">
-            <a href="/Technician/Tests/Urgent#statTestsTable" class="stat-summary-link stat-summary-item">
+            <a asp-area="Technician" asp-controller="Tests" asp-action="Urgent" asp-fragment="statTestsTable" class="stat-summary-link stat-summary-item">
                 <div><div class="stat-label">Total STAT Tests</div><span class="stat-number">@tests.Count</span></div>
                 <span class="stat-symbol red"><i class="fas fa-bolt"></i></span>
             </a>
-            <a href="/Technician/Tests/Urgent?status=Submitted#statTestsTable" class="stat-summary-link stat-summary-item">
+            <a asp-area="Technician" asp-controller="Tests" asp-action="Urgent" asp-route-status="Submitted" asp-fragment="statTestsTable" class="stat-summary-link stat-summary-item">
                 <div><div class="stat-label">Submitted</div><span class="stat-number">@submittedCount</span></div>
                 <span class="stat-symbol orange"><i class="fas fa-clipboard-list"></i></span>
             </a>
-            <a href="/Technician/Tests/Urgent?status=In%20Progress#statTestsTable" class="stat-summary-link stat-summary-item">
+            <a asp-area="Technician" asp-controller="Tests" asp-action="Urgent" asp-route-status="In Progress" asp-fragment="statTestsTable" class="stat-summary-link stat-summary-item">
                 <div><div class="stat-label">In Progress</div><span class="stat-number">@inProgressCount</span></div>
                 <span class="stat-symbol"><i class="fas fa-spinner"></i></span>
             </a>
@@ -333,16 +338,13 @@
                                             }
                                             else if (item.Status == "In Progress")
                                             {
-                                              
-<a href="@Url.Action("Details", "Tests", new {
-    area = "Technician",
-    id = item.TestRequestTestTypeId
-})"
-   class="stat-btn"
-   title="View test details">
-    <i class="fas fa-eye mr-1"></i>
-    View Test
-</a>
+
+                                                <a asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@item.TestRequestTestTypeId"
+                                                   class="stat-btn"
+                                                   title="View test details">
+                                                    <i class="fas fa-eye mr-1"></i>
+                                                    View Test
+                                                </a>
 
                                             }
                                             else

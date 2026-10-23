@@ -452,7 +452,7 @@
                                     <!-- REQUEST STATUS -->
                                     <td>
                                         <span class="select-pill @(isDeactivated ? "danger" : requestStatus == "InProgress" ? "success" :
-                                                                                                                                                                   requestStatus == "SamplesReceived" ? "primary" : "")">
+                                                                                                                                                                                                               requestStatus == "SamplesReceived" ? "primary" : "")">
                                             @(isDeactivated ? "De-Activated" : requestStatus == "SamplesReceived" ? "Sample Received" :
                                               requestStatus == "InProgress" ? "In Progress" :
                                               requestStatus)
@@ -625,6 +625,9 @@
 <form id="selectSoftDeleteAntiforgery" class="d-none">@Html.AntiForgeryToken()</form>
 
 @section Scripts {
+    <a id="aspEndpointSelectTestClinicalContext" asp-area="Technician" asp-controller="Tests" asp-action="SelectTestClinicalContext" hidden aria-hidden="true" tabindex="-1"></a>
+    <a id="aspEndpointUpdateSelectedTestDetails" asp-area="Technician" asp-controller="Tests" asp-action="UpdateSelectedTestDetails" hidden aria-hidden="true" tabindex="-1"></a>
+    <a id="aspEndpointDeactivateRequestedTest" asp-area="Technician" asp-controller="Tests" asp-action="DeactivateRequestedTest" hidden aria-hidden="true" tabindex="-1"></a>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
@@ -645,7 +648,7 @@
                 const id = button.attr('data-test-id');
                 button.prop('disabled', true);
                 try {
-                    const data = await $.get('@Url.Action("SelectTestClinicalContext", "Tests", new { area = "Technician" })', { id: id });
+                    const data = await $.get(document.getElementById("aspEndpointSelectTestClinicalContext").href, { id: id });
                     $('#selectClinicalIdentity').text((data.patientName || 'Patient') + ' | ' +
                         (data.requestNumber || '') + ' | ' + (data.testType || ''));
                     $('#selectMedicalConditions').text(data.medicalConditions || 'Not recorded');
@@ -746,7 +749,7 @@
                 const btn = $('#saveEditPatientTest').prop('disabled', true);
                 try {
                     const response = await $.ajax({
-                        url: '@Url.Action("UpdateSelectedTestDetails", "Tests", new { area = "Technician" })',
+                        url: document.getElementById("aspEndpointUpdateSelectedTestDetails").href,
                         method: 'POST',
                         data: $(this).serialize()
                     });
@@ -801,7 +804,7 @@
                     preConfirm: async (value) => {
                         try {
                             const response = await $.ajax({
-                                url: '@Url.Action("DeactivateRequestedTest", "Tests", new { area = "Technician" })',
+                                url: document.getElementById("aspEndpointDeactivateRequestedTest").href,
                                 type: 'POST',
                                 data: {
                                     testRequestTestTypeId: testId,

@@ -36,8 +36,8 @@
 <style>
 
     /* =========================================================
-       PAGE
-       ========================================================= */
+           PAGE
+           ========================================================= */
 
     .received-page {
         min-height: 100vh;
@@ -46,51 +46,37 @@
 
 
     /* =========================================================
-       HERO
-       ========================================================= */
+           HERO
+           ========================================================= */
 
     .received-hero {
         position: relative;
         overflow: hidden;
         padding: 38px 0 82px;
-
-        background: linear-gradient(
-            135deg,
-            #073b5c 0%,
-            #075985 45%,
-            #0284c7 100%
-        );
+        background: linear-gradient( 135deg, #073b5c 0%, #075985 45%, #0284c7 100% );
     }
 
-    .received-hero::before {
-        content: "";
-        position: absolute;
+        .received-hero::before {
+            content: "";
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            right: 200px;
+            bottom: -210px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.05);
+        }
 
-        width: 280px;
-        height: 280px;
-
-        right: 200px;
-        bottom: -210px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.05);
-    }
-
-    .received-hero::after {
-        content: "";
-        position: absolute;
-
-        width: 380px;
-        height: 380px;
-
-        right: -100px;
-        top: -220px;
-
-        border-radius: 50%;
-
-        background: rgba(255,255,255,.06);
-    }
+        .received-hero::after {
+            content: "";
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            right: -100px;
+            top: -220px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+        }
 
     .hero-content {
         position: relative;
@@ -100,76 +86,58 @@
     .hero-badge {
         display: inline-flex;
         align-items: center;
-
         gap: 7px;
-
         padding: 7px 13px;
         margin-bottom: 14px;
-
         border: 1px solid rgba(255,255,255,.20);
         border-radius: 50px;
-
         background: rgba(255,255,255,.13);
-
         color: #fff;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .received-hero h1 {
         margin-bottom: 7px;
-
         color: #fff;
-
         font-size: 30px;
         font-weight: 700;
     }
 
     .received-hero p {
         max-width: 700px;
-
         margin: 0;
-
         color: rgba(255,255,255,.82);
-
         font-size: 14px;
     }
 
 
     /* =========================================================
-       HERO BUTTONS
-       ========================================================= */
+           HERO BUTTONS
+           ========================================================= */
 
     .hero-actions {
         display: flex;
         justify-content: flex-end;
         flex-wrap: wrap;
-
         gap: 10px;
     }
 
     .hero-btn {
         display: inline-flex;
         align-items: center;
-
         gap: 7px;
-
         padding: 10px 17px;
-
         border-radius: 8px;
-
         font-size: 13px;
         font-weight: 600;
-
         text-decoration: none !important;
-
         transition: .2s ease;
     }
 
-    .hero-btn:hover {
-        transform: translateY(-2px);
-    }
+        .hero-btn:hover {
+            transform: translateY(-2px);
+        }
 
     .hero-btn-primary {
         background: #fff;
@@ -178,105 +146,78 @@
 
     .hero-btn-outline {
         border: 1px solid rgba(255,255,255,.50);
-
         background: rgba(255,255,255,.08);
-
         color: #fff !important;
     }
 
 
     /* =========================================================
-       PAGE CONTENT
-       ========================================================= */
+           PAGE CONTENT
+           ========================================================= */
 
     .received-content {
         position: relative;
-
         z-index: 5;
-
         margin-top: -48px;
-
         padding-bottom: 50px;
     }
 
 
     /* =========================================================
-       SUMMARY CARDS
-       ========================================================= */
+           SUMMARY CARDS
+           ========================================================= */
 
     .summary-card {
         height: 100%;
-
         padding: 20px;
-
         border: 1px solid transparent;
         border-radius: 13px;
-
         background: #fff;
-
-        box-shadow:
-            0 4px 18px rgba(15,23,42,.07);
-
+        box-shadow: 0 4px 18px rgba(15,23,42,.07);
         transition: .2s ease;
     }
 
-    .summary-card:hover {
-        transform: translateY(-3px);
-
-        border-color: #bae6fd;
-
-        box-shadow:
-            0 10px 25px rgba(15,23,42,.10);
-    }
+        .summary-card:hover {
+            transform: translateY(-3px);
+            border-color: #bae6fd;
+            box-shadow: 0 10px 25px rgba(15,23,42,.10);
+        }
 
     .summary-top {
         display: flex;
-
         align-items: flex-start;
         justify-content: space-between;
-
         gap: 15px;
     }
 
     .summary-title {
         margin-bottom: 7px;
-
         color: #64748b;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .summary-number {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 28px;
         font-weight: 700;
     }
 
     .summary-note {
         margin-top: 7px;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
     .summary-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 44px;
         height: 44px;
-
         min-width: 44px;
-
         border-radius: 11px;
-
         font-size: 17px;
     }
 
@@ -302,34 +243,26 @@
 
 
     /* =========================================================
-       MAIN CARD
-       ========================================================= */
+           MAIN CARD
+           ========================================================= */
 
     .samples-card {
         margin-top: 24px;
-
         overflow: hidden;
-
         border: 0;
         border-radius: 13px;
-
         background: #fff;
-
-        box-shadow:
-            0 4px 18px rgba(15,23,42,.06);
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
     }
 
     .samples-card-header {
         padding: 18px 20px;
-
         border-bottom: 1px solid #eef2f7;
     }
 
     .samples-title {
         margin: 0;
-
         color: #0f172a;
-
         font-size: 15px;
         font-weight: 700;
     }
@@ -337,140 +270,109 @@
     .samples-subtitle {
         margin-top: 4px;
         margin-bottom: 0;
-
         color: #94a3b8;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       SEARCH
-       ========================================================= */
+           SEARCH
+           ========================================================= */
 
     .search-wrapper {
         position: relative;
     }
 
-    .search-wrapper i {
-        position: absolute;
-
-        top: 50%;
-        left: 13px;
-
-        color: #94a3b8;
-
-        transform: translateY(-50%);
-    }
+        .search-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94a3b8;
+            transform: translateY(-50%);
+        }
 
     .sample-search {
         height: 37px;
-
         padding-left: 36px;
-
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-
         font-size: 12px;
     }
 
-    .sample-search:focus {
-        border-color: #38bdf8;
-
-        box-shadow:
-            0 0 0 3px rgba(14,165,233,.10);
-    }
+        .sample-search:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(14,165,233,.10);
+        }
 
 
     /* =========================================================
-       TABLE
-       ========================================================= */
+           TABLE
+           ========================================================= */
 
     .samples-table {
         margin-bottom: 0;
     }
 
-    .samples-table thead th {
-        padding: 12px 13px;
+        .samples-table thead th {
+            padding: 12px 13px;
+            border-top: 0;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            white-space: nowrap;
+        }
 
-        border-top: 0;
-        border-bottom: 1px solid #e2e8f0;
+        .samples-table tbody td {
+            padding: 14px 13px;
+            vertical-align: middle;
+            border-color: #f1f5f9;
+            color: #334155;
+            font-size: 12px;
+        }
 
-        background: #f8fafc;
+        .samples-table tbody tr {
+            transition: .15s ease;
+        }
 
-        color: #64748b;
-
-        font-size: 10px;
-        font-weight: 700;
-
-        text-transform: uppercase;
-
-        letter-spacing: .4px;
-
-        white-space: nowrap;
-    }
-
-    .samples-table tbody td {
-        padding: 14px 13px;
-
-        vertical-align: middle;
-
-        border-color: #f1f5f9;
-
-        color: #334155;
-
-        font-size: 12px;
-    }
-
-    .samples-table tbody tr {
-        transition: .15s ease;
-    }
-
-    .samples-table tbody tr:hover {
-        background: #f8fcff;
-    }
+            .samples-table tbody tr:hover {
+                background: #f8fcff;
+            }
 
 
     /* =========================================================
-       REQUEST
-       ========================================================= */
+           REQUEST
+           ========================================================= */
 
     .request-number {
         color: #075985;
-
         font-weight: 700;
     }
 
     .request-date {
         display: block;
-
         margin-top: 3px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* =========================================================
-       BARCODE
-       ========================================================= */
+           BARCODE
+           ========================================================= */
 
     .barcode-value {
         display: inline-flex;
         align-items: center;
-
         gap: 6px;
-
         padding: 5px 9px;
-
         border: 1px solid #e2e8f0;
         border-radius: 6px;
-
         background: #f8fafc;
-
         color: #334155;
-
         font-family: Consolas, monospace;
         font-size: 11px;
         font-weight: 600;
@@ -478,46 +380,36 @@
 
 
     /* =========================================================
-       PERSON
-       ========================================================= */
+           PERSON
+           ========================================================= */
 
     .person-name {
         color: #334155;
-
         font-size: 12px;
         font-weight: 600;
     }
 
     .person-label {
         display: block;
-
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* =========================================================
-       BADGES
-       ========================================================= */
+           BADGES
+           ========================================================= */
 
     .status-badge,
     .urgency-badge {
         display: inline-flex;
-
         align-items: center;
-
         gap: 5px;
-
         padding: 5px 9px;
-
         border-radius: 50px;
-
         font-size: 10px;
         font-weight: 700;
-
         white-space: nowrap;
     }
 
@@ -543,110 +435,85 @@
 
 
     /* =========================================================
-       SAMPLE TYPE
-       ========================================================= */
+           SAMPLE TYPE
+           ========================================================= */
 
     .sample-type {
         display: flex;
-
         align-items: center;
-
         gap: 7px;
     }
 
     .sample-type-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 30px;
         height: 30px;
-
         border-radius: 7px;
-
         background: #e0f2fe;
-
         color: #0284c7;
-
         font-size: 11px;
     }
 
 
     /* =========================================================
-       RECEIVED DATE
-       ========================================================= */
+           RECEIVED DATE
+           ========================================================= */
 
     .received-date {
         color: #334155;
-
         font-weight: 600;
     }
 
     .received-time {
         display: block;
-
         margin-top: 2px;
-
         color: #94a3b8;
-
         font-size: 10px;
     }
 
 
     /* =========================================================
-       EMPTY STATE
-       ========================================================= */
+           EMPTY STATE
+           ========================================================= */
 
     .empty-state {
         padding: 65px 20px;
-
         text-align: center;
     }
 
     .empty-icon {
         display: flex;
-
         align-items: center;
         justify-content: center;
-
         width: 65px;
         height: 65px;
-
         margin: 0 auto 16px;
-
         border-radius: 50%;
-
         background: #e0f2fe;
-
         color: #0284c7;
-
         font-size: 24px;
     }
 
     .empty-state h5 {
         margin-bottom: 7px;
-
         color: #334155;
-
         font-size: 15px;
         font-weight: 700;
     }
 
     .empty-state p {
         max-width: 430px;
-
         margin: auto;
-
         color: #94a3b8;
-
         font-size: 12px;
     }
 
 
     /* =========================================================
-       RESPONSIVE
-       ========================================================= */
+           RESPONSIVE
+           ========================================================= */
 
     @@media(max-width: 768px) {
 
@@ -654,13 +521,12 @@
             padding-top: 25px;
         }
 
-        .received-hero h1 {
-            font-size: 24px;
-        }
+            .received-hero h1 {
+                font-size: 24px;
+            }
 
         .hero-actions {
             justify-content: flex-start;
-
             margin-top: 20px;
         }
 
@@ -1152,7 +1018,7 @@
                                             <span class="received-date">
 
                                                 @sample.DateReceived.Value
-                                                    .ToString("dd MMM yyyy")
+                                                .ToString("dd MMM yyyy")
 
                                             </span>
 
@@ -1161,7 +1027,7 @@
                                                 <i class="far fa-clock mr-1"></i>
 
                                                 @sample.DateReceived.Value
-                                                    .ToString("HH:mm")
+                                                .ToString("HH:mm")
 
                                             </span>
                                         }
@@ -1307,7 +1173,7 @@
 
     <script>
 
-        $(document).ready(function () {
+        $(document).ready(function() {
 
             if (!$("#receivedSamplesTable").length) {
                 return;
@@ -1340,15 +1206,15 @@
 
                 dom:
                     "<'row align-items-center mb-3'" +
-                        "<'col-md-6'l>" +
-                        "<'col-md-6 text-md-right'B>" +
+                    "<'col-md-6'l>" +
+                    "<'col-md-6 text-md-right'B>" +
                     ">" +
                     "<'row'" +
-                        "<'col-sm-12'tr>" +
+                    "<'col-sm-12'tr>" +
                     ">" +
                     "<'row align-items-center mt-3'" +
-                        "<'col-md-5'i>" +
-                        "<'col-md-7'p>" +
+                    "<'col-md-5'i>" +
+                    "<'col-md-7'p>" +
                     ">",
 
 
@@ -1469,7 +1335,7 @@
                             }
                         },
 
-                        customize: function (doc) {
+                        customize: function(doc) {
 
                             doc.pageMargins =
                                 [25, 40, 25, 40];
@@ -1527,7 +1393,7 @@
                             // ----------------------------------------
 
                             var table =
-                                doc.content.find(function (item) {
+                                doc.content.find(function(item) {
                                     return item.table;
                                 });
 
@@ -1552,7 +1418,7 @@
                             // ----------------------------------------
 
                             doc.footer =
-                                function (
+                                function(
                                     currentPage,
                                     pageCount
                                 ) {
@@ -1680,7 +1546,7 @@
 
             $("#sampleSearch").on(
                 "keyup change",
-                function () {
+                function() {
 
                     table
                         .search(this.value)

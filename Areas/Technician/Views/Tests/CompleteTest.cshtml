@@ -18,31 +18,168 @@
 }
 
 <style>
-    .finish-page { min-height: 100vh; background: #f4f7fb; padding: 35px 20px 70px; }
-    .finish-container { max-width: 850px; margin: 0 auto; }
-    .finish-header { background: linear-gradient(135deg, #073b5c, #0284c7); padding: 30px; border-radius: 15px; color: #fff; margin-bottom: 25px; }
-    .finish-header h2 { font-size: 25px; font-weight: 800; margin-bottom: 10px; }
-    .finish-header p { margin: 0; color: #dbeafe; font-size: 13px; }
-    .finish-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 15px; overflow: hidden; box-shadow: 0 8px 25px rgba(15,23,42,.05); }
-    .finish-card-heading { padding: 23px 26px; border-bottom: 1px solid #e2e8f0; color: #073b5c; font-size: 17px; font-weight: 800; }
-    .finish-card-body { padding: 28px; }
-    .finish-info-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px; margin-bottom: 25px; }
-    .finish-info-label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 7px; }
-    .finish-info-value { font-size: 14px; font-weight: 700; color: #0f172a; overflow-wrap: anywhere; }
-    .finish-badge { display: inline-block; background: #e0f2fe; color: #0369a1; border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 700; }
-    .finish-warning { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 18px; color: #92400e; font-size: 13px; line-height: 1.8; margin-bottom: 25px; }
-    .finish-result { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 18px; margin-bottom: 25px; }
-    .finish-result.abnormal { background: #fff1f2; border-color: #fecdd3; }
-    .finish-actions { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; }
-    .finish-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; text-decoration: none !important; cursor: pointer; }
-    .finish-btn-back { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; }
-    .finish-btn-submit { background: #16a34a; border: 1px solid #16a34a; color: white; }
-    .finish-btn-submit:hover { background: #15803d; color: white; }
-    .finish-btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+    .finish-page {
+        min-height: 100vh;
+        background: #f4f7fb;
+        padding: 35px 20px 70px;
+    }
+
+    .finish-container {
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    .finish-header {
+        background: linear-gradient(135deg, #073b5c, #0284c7);
+        padding: 30px;
+        border-radius: 15px;
+        color: #fff;
+        margin-bottom: 25px;
+    }
+
+        .finish-header h2 {
+            font-size: 25px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .finish-header p {
+            margin: 0;
+            color: #dbeafe;
+            font-size: 13px;
+        }
+
+    .finish-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(15,23,42,.05);
+    }
+
+    .finish-card-heading {
+        padding: 23px 26px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #073b5c;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .finish-card-body {
+        padding: 28px;
+    }
+
+    .finish-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 22px;
+        margin-bottom: 25px;
+    }
+
+    .finish-info-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        margin-bottom: 7px;
+    }
+
+    .finish-info-value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        overflow-wrap: anywhere;
+    }
+
+    .finish-badge {
+        display: inline-block;
+        background: #e0f2fe;
+        color: #0369a1;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .finish-warning {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 10px;
+        padding: 18px;
+        color: #92400e;
+        font-size: 13px;
+        line-height: 1.8;
+        margin-bottom: 25px;
+    }
+
+    .finish-result {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 25px;
+    }
+
+        .finish-result.abnormal {
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+    .finish-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .finish-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none !important;
+        cursor: pointer;
+    }
+
+    .finish-btn-back {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #334155;
+    }
+
+    .finish-btn-submit {
+        background: #16a34a;
+        border: 1px solid #16a34a;
+        color: white;
+    }
+
+        .finish-btn-submit:hover {
+            background: #15803d;
+            color: white;
+        }
+
+        .finish-btn-submit:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
     @@media (max-width: 600px) {
-        .finish-info-grid { grid-template-columns: 1fr; }
-        .finish-actions { flex-direction: column; align-items: stretch; }
-        .finish-btn { width: 100%; }
+        .finish-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .finish-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .finish-btn {
+            width: 100%;
+        }
     }
 </style>
 
@@ -113,7 +250,7 @@
                 </div>
 
                 @if (isResubmission)
-                { 
+                {
                     <div class="alert alert-info" role="status">
                         <i class="fas fa-redo me-2"></i>
                         This test was returned for review. Confirm that you have addressed the verifier's
@@ -153,7 +290,7 @@
 </div>
 
 <script>
-    document.getElementById('finishTestForm')?.addEventListener('submit', function (event) {
+    document.getElementById('finishTestForm')?.addEventListener('submit', function(event) {
         if (!confirm('Submit this test as Completed for independent verification? This does not verify the result or notify the doctor.')) {
             event.preventDefault();
             return;
