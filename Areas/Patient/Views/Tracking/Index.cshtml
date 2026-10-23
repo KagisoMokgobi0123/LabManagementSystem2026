@@ -1,0 +1,245 @@
+﻿@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Track Results";
+    var options = ViewBag.TestTypes as List<NMB_HLabSys.Areas.Patient.Controllers.TestTypeOption>
+                  ?? new List<NMB_HLabSys.Areas.Patient.Controllers.TestTypeOption>();
+}
+
+<div class="container-fluid p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Track My Test Results</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">
+                See how one test has changed over time. Only results released by your doctor are shown.
+            </p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">&larr; Back to Dashboard</a>
+    </div>
+
+    @if (!options.Any())
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No results to track yet</h5>
+                <p class="text-muted mb-0" style="font-size:0.88rem;">
+                    When your doctor releases results, you can follow how each test changes here.
+                </p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-4">
+
+                <div class="row g-3 align-items-end mb-4">
+                    <div class="col-md-5">
+                        <label for="testType" class="form-label fw-semibold">Test</label>
+                        <select id="testType" class="form-select">
+                            @foreach (var o in options)
+                            {
+                                <option value="@o.Id">@(o.Name + " (" + o.Points + " results)")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="dateFrom" class="form-label fw-semibold">From</label>
+                        <input type="date" id="dateFrom" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label for="dateTo" class="form-label fw-semibold">To</label>
+                        <input type="date" id="dateTo" class="form-control" />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" id="loadBtn" class="btn btn-primary w-100">Show</button>
+                    </div>
+                </div>
+
+                <div id="chartMessage" class="alert alert-info d-none"></div>
+
+                <div style="position:relative; height:380px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+
+                <div id="pointsWrap" class="mt-4 d-none">
+                    <h6 class="fw-bold mb-2">Results in this view</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Request</th>
+                                    <th>Result</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pointsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script>
+        (function () {
+            var select = document.getElementById('testType');
+            if (!select) { return; }
+
+            var chart = null;
+            var message = document.getElementById('chartMessage');
+            var tableBody = document.getElementById('pointsBody');
+            var tableWrap = document.getElementById('pointsWrap');
+
+            function showMessage(text) {
+                message.textContent = text;
+                message.classList.remove('d-none');
+            }
+
+            function clearMessage() {
+                message.classList.add('d-none');
+            }
+
+            function clearChart() {
+                if (chart) { chart.destroy(); chart = null; }
+                tableWrap.classList.add('d-none');
+            }
+
+            function fillTable(points, unit) {
+                tableBody.innerHTML = '';
+                points.forEach(function (p) {
+                    var tr = document.createElement('tr');
+                    var cells = [
+                        p.date,
+                        p.requestNumber,
+                        p.value + (unit ? ' ' + unit : ''),
+                        p.abnormal ? 'Abnormal' : 'Normal'
+                    ];
+                    cells.forEach(function (text, index) {
+                        var td = document.createElement('td');
+                        td.textContent = text;
+                        if (index === 3) {
+                            td.className = p.abnormal ? 'text-danger fw-bold' : 'text-success';
+                        }
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+                tableWrap.classList.remove('d-none');
+            }
+
+            function render(d) {
+                clearMessage();
+
+                if (typeof Chart === 'undefined') {
+                    clearChart();
+                    showMessage('The chart library did not load. Check your internet connection and refresh the page.');
+                    return;
+                }
+
+                if (!d.points || d.points.length === 0) {
+                    clearChart();
+                    showMessage('No released results for this test in the selected period.');
+                    return;
+                }
+
+                if (d.points.length === 1) {
+                    showMessage('Only one result is available for this test, so a trend line cannot be drawn yet.');
+                }
+
+                var labels = d.points.map(function (p) { return p.date; });
+                var values = d.points.map(function (p) { return p.value; });
+                var pointColors = d.points.map(function (p) { return p.abnormal ? '#dc2626' : '#0284c7'; });
+
+                var datasets = [{
+                    label: d.testName + (d.unit ? ' (' + d.unit + ')' : ''),
+                    data: values,
+                    borderColor: '#0284c7',
+                    backgroundColor: 'rgba(2,132,199,0.12)',
+                    pointBackgroundColor: pointColors,
+                    pointBorderColor: pointColors,
+                    pointRadius: 6,
+                    tension: 0.25,
+                    fill: false
+                }];
+
+                if (d.hasRange) {
+                    datasets.push({
+                        label: 'Normal minimum',
+                        data: labels.map(function () { return d.min; }),
+                        borderColor: '#16a34a',
+                        borderDash: [6, 6],
+                        pointRadius: 0,
+                        fill: false
+                    });
+                    datasets.push({
+                        label: 'Normal maximum',
+                        data: labels.map(function () { return d.max; }),
+                        borderColor: '#16a34a',
+                        borderDash: [6, 6],
+                        pointRadius: 0,
+                        fill: false
+                    });
+                }
+
+                if (chart) { chart.destroy(); }
+
+                chart = new Chart(document.getElementById('trendChart'), {
+                    type: 'line',
+                    data: { labels: labels, datasets: datasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } },
+                        scales: {
+                            y: { title: { display: !!d.unit, text: d.unit || '' } }
+                        }
+                    }
+                });
+
+                fillTable(d.points, d.unit);
+            }
+
+            function load() {
+                var from = document.getElementById('dateFrom').value;
+                var to = document.getElementById('dateTo').value;
+
+                if (from && to && from > to) {
+                    clearChart();
+                    showMessage('The start date must be on or before the end date.');
+                    return;
+                }
+
+                var params = new URLSearchParams({
+                    testTypeId: select.value,
+                    dateFrom: from,
+                    dateTo: to
+                });
+
+                fetch('/Patient/Tracking/Data?' + params.toString(), {
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin'
+                })
+                    .then(function (r) {
+                        if (!r.ok) { throw new Error('status ' + r.status); }
+                        return r.json();
+                    })
+                    .then(render)
+                    .catch(function () {
+                        clearChart();
+                        showMessage('Could not load your results. Please try again.');
+                    });
+            }
+
+            document.getElementById('loadBtn').addEventListener('click', load);
+            select.addEventListener('change', load);
+            load();
+        })();
+    </script>
+}

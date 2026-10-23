@@ -1,0 +1,381 @@
+﻿@model NMB_HLabSys.Areas.Patient.Models.PatientModel
+@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "My Profile";
+}
+
+<style>
+    .profile-hero {
+        background: linear-gradient(135deg, #073b5c 0%, #0284c7 100%);
+        border-radius: 16px;
+        padding: 30px;
+        color: white;
+        margin-bottom: 24px;
+    }
+
+    .profile-avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        color: white;
+        border: 3px solid rgba(255,255,255,0.4);
+    }
+
+    .profile-section {
+        background: white;
+        border-radius: 13px;
+        box-shadow: 0 4px 18px rgba(15,23,42,.06);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .profile-section-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #eef2f7;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .profile-field {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f8fafc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .profile-field:last-child {
+            border-bottom: none;
+        }
+
+    .profile-field-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        font-weight: 600;
+        min-width: 140px;
+    }
+
+    .profile-field-value {
+        font-size: 0.92rem;
+        color: #0f172a;
+        font-weight: 500;
+        flex: 1;
+    }
+
+    .edit-inline-form {
+        display: none;
+        flex: 1;
+    }
+
+        .edit-inline-form.show {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .edit-inline-form input, .edit-inline-form select {
+            flex: 1;
+            height: 36px;
+            border: 1.5px solid #0284c7;
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.88rem;
+        }
+
+    .btn-edit {
+        background: none;
+        border: none;
+        color: #0284c7;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 8px;
+    }
+
+        .btn-edit:hover {
+            text-decoration: underline;
+        }
+
+    .security-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f8fafc;
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.15s;
+    }
+
+        .security-link:hover {
+            background: #f8fafc;
+        }
+
+        .security-link:last-child {
+            border-bottom: none;
+        }
+
+    .security-link-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .security-link-desc {
+        font-size: 0.78rem;
+        color: #94a3b8;
+    }
+</style>
+
+<div class="container-fluid p-4">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-3">
+            ✅ @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-3">
+            ❌ @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Profile Hero -->
+    <div class="profile-hero">
+        <div class="d-flex align-items-center gap-4">
+            <div class="profile-avatar">
+                @Model.Name.Substring(0, 1).ToUpper()
+            </div>
+            <div>
+                <h4 class="mb-1 fw-bold">@Model.Name @Model.Surname</h4>
+                <div style="opacity:0.8; font-size:0.88rem;">
+                    <i class="fas fa-envelope me-2"></i>@Model.Email
+                </div>
+                <div style="opacity:0.8; font-size:0.88rem; margin-top:4px;">
+                    <i class="fas fa-id-card me-2"></i>Patient
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+
+            <!-- Personal Information -->
+            <div class="profile-section">
+                <div class="profile-section-header">
+                    <i class="fas fa-user text-primary"></i>
+                    Personal Information
+                </div>
+
+                <!-- Read-only fields -->
+                <div class="profile-field">
+                    <span class="profile-field-label">Full Name</span>
+                    <span class="profile-field-value">@Model.Name @Model.Surname</span>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-field-label">SA ID Number</span>
+                    <span class="profile-field-value">@Model.IDNumber</span>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-field-label">Date of Birth</span>
+                    <span class="profile-field-value">@Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+                </div>
+
+                <div class="profile-field">
+                    <span class="profile-field-label">Email</span>
+                    <span class="profile-field-value">@Model.Email</span>
+                </div>
+
+                <!-- Editable: Phone -->
+                <div class="profile-field" id="phoneField">
+                    <span class="profile-field-label">Phone Number</span>
+                    <span class="profile-field-value" id="phoneDisplay">
+                        @(string.IsNullOrEmpty(Model.ContactNumber) ? "Not set" : Model.ContactNumber)
+                    </span>
+                    <button class="btn-edit" onclick="toggleEdit('phone')">
+                        <i class="fas fa-pen me-1"></i>Edit
+                    </button>
+                    <form class="edit-inline-form" id="phoneForm"
+                          asp-area="Patient" asp-controller="Profile"
+                          asp-action="UpdatePhone" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="tel" name="contactNumber"
+                               value="@Model.ContactNumber"
+                               maxlength="10" placeholder="0821234567" />
+                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleEdit('phone')">
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Editable: Address -->
+                <div class="profile-field" id="addressField">
+                    <span class="profile-field-label">Street Address</span>
+                    <span class="profile-field-value" id="addressDisplay">
+                        @(string.IsNullOrEmpty(Model.Address) ? "Not set" : Model.Address)
+                    </span>
+                    <button class="btn-edit" onclick="toggleEdit('address')">
+                        <i class="fas fa-pen me-1"></i>Edit
+                    </button>
+                    <form class="edit-inline-form" id="addressForm"
+                          asp-area="Patient" asp-controller="Profile"
+                          asp-action="UpdateAddress" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="text" name="address" value="@Model.Address" />
+                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleEdit('address')">
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Editable: City -->
+                <div class="profile-field">
+                    <span class="profile-field-label">City</span>
+                    <span class="profile-field-value" id="cityDisplay">
+                        @(string.IsNullOrEmpty(Model.City) ? "Not set" : Model.City)
+                    </span>
+                    <button class="btn-edit" onclick="toggleEdit('city')">
+                        <i class="fas fa-pen me-1"></i>Edit
+                    </button>
+                    <form class="edit-inline-form" id="cityForm"
+                          asp-area="Patient" asp-controller="Profile"
+                          asp-action="UpdateCity" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="text" name="city" value="@Model.City" />
+                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleEdit('city')">
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Editable: Province -->
+                <div class="profile-field">
+                    <span class="profile-field-label">Province</span>
+                    <span class="profile-field-value">
+                        @(string.IsNullOrEmpty(Model.Province) ? "Not set" : Model.Province)
+                    </span>
+                    <button class="btn-edit" onclick="toggleEdit('province')">
+                        <i class="fas fa-pen me-1"></i>Edit
+                    </button>
+                    <form class="edit-inline-form" id="provinceForm"
+                          asp-area="Patient" asp-controller="Profile"
+                          asp-action="UpdateProvince" method="post">
+                        @Html.AntiForgeryToken()
+                        <select name="province">
+                            <option value="">Select province</option>
+                            @foreach (var p in new[] { "Eastern Cape", "Free State", "Gauteng", "KwaZulu-Natal", "Limpopo", "Mpumalanga", "North West", "Northern Cape", "Western Cape" })
+                            {
+                                <option value="@p" selected="@(Model.Province == p ? "selected" : null)">@p</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                onclick="toggleEdit('province')">
+                            Cancel
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Account & Security -->
+            <div class="profile-section">
+                <div class="profile-section-header">
+                    <i class="fas fa-shield-halved text-primary"></i>
+                    Account & Security
+                </div>
+
+                <a href="/Patient/Profile/ChangePassword" class="security-link">
+                    <div>
+                        <div class="security-link-title">
+                            <i class="fas fa-key me-2 text-primary"></i>Change Password
+                        </div>
+                        <div class="security-link-desc">Update your account password</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </a>
+
+                <a href="/Patient/Profile/ChangePhoneNumber" class="security-link">
+                    <div>
+                        <div class="security-link-title">
+                            <i class="fas fa-phone me-2 text-primary"></i>Change Phone Number
+                        </div>
+                        <div class="security-link-desc">Update your contact number</div>
+                    </div>
+                    <i class="fas fa-chevron-right text-muted"></i>
+                </a>
+
+                <div class="p-3">
+                    <form asp-area="" asp-controller="Account"
+                          asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-outline-danger w-100">
+                            <i class="fas fa-sign-out-alt me-2"></i>Secure Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Info -->
+            <div class="profile-section">
+                <div class="profile-section-header">
+                    <i class="fas fa-info-circle text-primary"></i>
+                    Account Info
+                </div>
+                <div class="profile-field">
+                    <span class="profile-field-label">Member Since</span>
+                    <span class="profile-field-value">
+                        @(Model.CreatedDate.HasValue ? Model.CreatedDate.Value.ToString("dd MMM yyyy") : "N/A")
+                    </span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-field-label">Account Type</span>
+                    <span class="profile-field-value">
+                        <span class="badge bg-primary">Patient</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleEdit(field) {
+        var form = document.getElementById(field + 'Form');
+        var display = document.getElementById(field + 'Display');
+        if (form.classList.contains('show')) {
+            form.classList.remove('show');
+            if (display) display.style.display = '';
+        } else {
+            form.classList.add('show');
+            if (display) display.style.display = 'none';
+        }
+    }
+</script>

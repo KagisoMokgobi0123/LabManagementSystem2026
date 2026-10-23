@@ -1,40 +1,152 @@
 ﻿@{
     ViewBag.Title = "Consent Management";
-
-    var consents = ViewBag.Consents as List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>
-                   ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientDoctorConsentModel>();
-
-    var doctors = ViewBag.Doctors as List<NMB_HLabSys.Models.Identity.ApplicationUser>
-                  ?? new List<NMB_HLabSys.Models.Identity.ApplicationUser>();
-
+    var consents = ViewBag.Consents as List<NMB_HLabSys.Areas.Patient.Controllers.ConsentRow>
+                   ?? new List<NMB_HLabSys.Areas.Patient.Controllers.ConsentRow>();
+    var consentItems = ViewBag.ConsentItems as Dictionary<int, List<NMB_HLabSys.Areas.Patient.Controllers.ConsentItemRow>>
+                       ?? new Dictionary<int, List<NMB_HLabSys.Areas.Patient.Controllers.ConsentItemRow>>();
+    var doctors = ViewBag.Doctors as List<(string Id, string Name)>
+                  ?? new List<(string Id, string Name)>();
     var testRequests = ViewBag.TestRequests as List<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
                        ?? new List<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>();
 }
 
-
 <style>
-    .consent-page { background: #f5f7fb; min-height: calc(100vh - 70px); padding: 30px; }
-    .page-card { background: white; border-radius: 16px; padding: 25px 30px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-    .consent-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1.5px solid #e5e7eb; }
-    .consent-card-header { padding: 18px 25px; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; background: #f9fafb; }
-    .consent-card-header h5 { margin: 0; font-weight: 700; color: #1f2937; font-size: 1rem; }
-    .active-badge { background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
-    .revoked-badge { background: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; }
-    .record-item { padding: 12px 25px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center; }
-    .record-item:last-child { border-bottom: none; }
-    .record-info strong { font-size: 0.88rem; color: #1f2937; }
-    .record-info small { color: #6b7280; display: block; font-size: 0.8rem; }
-    .grant-modal-form { background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 25px; margin-bottom: 25px; display: none; }
-    .grant-modal-form.show { display: block; }
-    .security-note { margin-top: 20px; padding: 15px 18px; background: #eff6ff; border: 1px solid #dbeafe; border-radius: 10px; color: #1e40af; font-size: 0.88rem; }
-    .empty-state { text-align: center; padding: 50px 20px; color: #6b7280; }
-    .step-badge { background: #0d6efd; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; margin-right: 8px; }
-    .revoke-zone { background: #fff5f5; border-top: 1px solid #fee2e2; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; }
+    .consent-page {
+        background: #f5f7fb;
+        min-height: calc(100vh - 70px);
+        padding: 30px;
+    }
+
+    .page-card {
+        background: white;
+        border-radius: 16px;
+        padding: 25px 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .consent-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        border: 1.5px solid #e5e7eb;
+    }
+
+    .consent-card-header {
+        padding: 18px 25px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f9fafb;
+    }
+
+        .consent-card-header h5 {
+            margin: 0;
+            font-weight: 700;
+            color: #1f2937;
+            font-size: 1rem;
+        }
+
+    .active-badge {
+        background: #dcfce7;
+        color: #166534;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .revoked-badge {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .record-item {
+        padding: 12px 25px;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+    .record-info strong {
+        font-size: 0.88rem;
+        color: #1f2937;
+    }
+
+    .record-info small {
+        color: #6b7280;
+        display: block;
+        font-size: 0.8rem;
+    }
+
+    .grant-modal-form {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 25px;
+        display: none;
+    }
+
+        .grant-modal-form.show {
+            display: block;
+        }
+
+    .security-note {
+        margin-top: 20px;
+        padding: 15px 18px;
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        color: #1e40af;
+        font-size: 0.88rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6b7280;
+    }
+
+    .step-badge {
+        background: #0d6efd;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-right: 8px;
+    }
+
+    .revoke-zone {
+        background: #fff5f5;
+        border-top: 1px solid #fee2e2;
+        padding: 12px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 </style>
 
 <div class="consent-page">
 
-    <a href="/PatientDashboard/Index" class="btn btn-outline-secondary mb-4">
+    <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">
         ← Back to Dashboard
     </a>
 
@@ -70,7 +182,7 @@
         </div>
     }
 
-    <!-- GRANT CONSENT FORM - hidden by default, shown on button click -->
+    <!-- GRANT CONSENT FORM -->
     <div class="grant-modal-form" id="grantForm">
         <h5 class="fw-bold mb-1">
             <span class="step-badge">1</span> Select a Doctor
@@ -87,7 +199,7 @@
                     <option value="" disabled selected>Choose a doctor...</option>
                     @foreach (var d in doctors)
                     {
-                        <option value="@d.Id">@d.FullName</option>
+                        <option value="@d.Id">@d.Name</option>
                     }
                 </select>
                 @if (!doctors.Any())
@@ -171,7 +283,7 @@
                 <!-- Doctor Header -->
                 <div class="consent-card-header">
                     <div>
-                        <h5>👨‍⚕️ @(c.Doctor?.FullName ?? "Unknown Doctor")</h5>
+                        <h5>👨‍⚕️ @c.DoctorName</h5>
                         <small class="text-muted">
                             Access granted: @c.GrantedDate.ToString("dd MMM yyyy")
                             @if (c.RevokedDate.HasValue)
@@ -193,7 +305,7 @@
                 </div>
 
                 <!-- Records This Doctor Can See -->
-                @if (c.ConsentRequestItems != null && c.ConsentRequestItems.Any())
+                @if (consentItems.ContainsKey(c.ConsentId) && consentItems[c.ConsentId].Any())
                 {
                     <div class="px-4 pt-3 pb-1">
                         <small class="fw-semibold text-muted text-uppercase" style="font-size:0.73rem; letter-spacing:0.05em;">
@@ -201,24 +313,19 @@
                         </small>
                     </div>
 
-                    @foreach (var item in c.ConsentRequestItems)
+                    @foreach (var item in consentItems[c.ConsentId])
                     {
                         <div class="record-item">
                             <div class="record-info">
-                                <strong>
-                                    📋 @(item.TestRequest?.RequestNumber ?? "Unknown Request")
-                                </strong>
-                                <small>
-                                    @(item.TestRequest?.RequestDate.ToString("dd MMM yyyy"))
-                                    — @(item.TestRequest?.ClinicalNotes)
-                                </small>
+                                <strong>📋 @item.RequestNumber</strong>
+                                <small>@item.RequestDate.ToString("dd MMM yyyy") — @item.ClinicalNotes</small>
                             </div>
                             @if (c.IsActive)
                             {
                                 <form asp-action="RevokeConsentItem" method="post"
-                                      onsubmit="return confirm('Remove this record from this doctor access? The doctor will no longer see this test result.')">
+                                      onsubmit="return confirm('Remove this record from this doctor access?')">
                                     @Html.AntiForgeryToken()
-                                    <input type="hidden" name="itemId" value="@item.ConsentRequestItemId" />
+                                    <input type="hidden" name="itemId" value="@item.ItemId" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger">
                                         Remove Record
                                     </button>
@@ -234,17 +341,17 @@
                     </div>
                 }
 
-                <!-- Revoke All — Last Resort -->
+                <!-- Revoke All -->
                 @if (c.IsActive)
                 {
                     <div class="revoke-zone">
                         <small class="text-danger">
-                            ⚠️ This will remove <strong>@(c.Doctor?.FullName ?? "this doctor")</strong> completely from your consent list.
+                            ⚠️ This will remove <strong>@c.DoctorName</strong> completely from your consent list.
                         </small>
                         <form asp-action="RevokeConsent" method="post"
-                              onsubmit="return confirm('Are you sure you want to revoke ALL access for @(c.Doctor?.FullName ?? "this doctor")? They will no longer be able to see any of your records.')">
+                              onsubmit="return confirm('Are you sure you want to revoke ALL access for @c.DoctorName?')">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="consentId" value="@c.PatientDoctorConsentId" />
+                            <input type="hidden" name="consentId" value="@c.ConsentId" />
                             <button type="submit" class="btn btn-sm btn-danger">
                                 Revoke All Access
                             </button>

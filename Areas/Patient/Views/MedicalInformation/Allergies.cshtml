@@ -1,0 +1,46 @@
+﻿@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Allergies";
+    var allergies = ViewBag.Allergies as List<NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel>
+                    ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel>();
+}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Allergies</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">@ViewBag.PatientName</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            @if (!allergies.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-check-circle fa-3x mb-3 text-success"></i>
+                    <h5>No Allergies Recorded</h5>
+                </div>
+            }
+            else
+            {
+                @foreach (var a in allergies)
+                {
+                    <div class="border-start border-warning border-3 ps-3 mb-3 p-2 rounded-end bg-light">
+                        <div class="d-flex justify-content-between">
+                            <strong>@(a.Allergy?.AllergyName ?? "Unknown")</strong>
+                            @if (!string.IsNullOrEmpty(a.Severity))
+                            {
+                                var sev = a.Severity == "Severe" ? "danger" : a.Severity == "Moderate" ? "warning" : "success";
+                                <span class="badge bg-@sev">@a.Severity</span>
+                            }
+                        </div>
+                        @if (!string.IsNullOrEmpty(a.Notes))
+                        {
+                            <div class="text-muted small">@a.Notes</div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

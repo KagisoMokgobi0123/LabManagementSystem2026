@@ -1,0 +1,69 @@
+﻿@using NMB_HLabSys.Areas.Doctor.Models
+@model List<TestRequestsModel>
+@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Result History";
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Result History</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">Full history of all your test requests</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No History Yet</h5>
+                    <p class="text-muted" style="font-size:0.88rem;">Your test request history will appear here.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Request #</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Date</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Urgency</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Status</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold" style="color:#075985;">@r.RequestNumber</td>
+                                    <td>@r.RequestDate.ToString("dd MMM yyyy")</td>
+                                    <td><span class="badge bg-secondary">@r.Urgency</span></td>
+                                    <td>
+                                        @{
+                                            var sc = r.Status switch
+                                            {
+                                                "Completed" => "success",
+                                                "ReleasedByDoctor" => "success",
+                                                "Cancelled" => "danger",
+                                                "InProgress" => "warning",
+                                                _ => "primary"
+                                            };
+                                        }
+                                        <span class="badge bg-@sc">@r.Status</span>
+                                    </td>
+                                    <td style="font-size:0.85rem; color:#64748b;">@r.ClinicalNotes</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

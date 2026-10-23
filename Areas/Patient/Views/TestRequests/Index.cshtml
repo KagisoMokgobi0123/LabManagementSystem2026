@@ -1,0 +1,83 @@
+﻿@model List<NMB_HLabSys.Areas.Patient.Controllers.RequestRow>
+@{
+    Layout = "_PatientLayout";
+    var heading = ViewBag.Heading as string ?? "My Test Requests";
+    var sub = ViewBag.Subheading as string ?? "";
+    var emptyText = ViewBag.Empty as string ?? "Nothing to show yet.";
+    ViewData["Title"] = heading;
+}
+
+<div class="container-fluid p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">@heading</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem; max-width:720px;">@sub</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">&larr; Back to Dashboard</a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center py-5 px-3">
+                    <i class="fas fa-flask fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Nothing here yet</h5>
+                    <p class="text-muted mb-0" style="font-size:0.88rem;">@emptyText</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Request</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Requested</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Doctor</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Urgency</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Tests</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;">Status</th>
+                                <th style="font-size:11px; text-transform:uppercase; color:#64748b;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model)
+                            {
+                                var urgencyClass = r.Urgency == "Stat" ? "danger" : r.Urgency == "Urgent" ? "warning text-dark" : "secondary";
+                                var statusClass = r.Status switch
+                                {
+                                    "Submitted" => "primary",
+                                    "Samples Received" => "info text-dark",
+                                    "InProgress" => "warning text-dark",
+                                    "Completed" => "success",
+                                    "ReleasedByDoctor" => "success",
+                                    "Cancelled" => "danger",
+                                    _ => "secondary"
+                                };
+                                var statusText = r.Status switch
+                                {
+                                    "ReleasedByDoctor" => "Released by doctor",
+                                    "InProgress" => "In progress",
+                                    _ => r.Status
+                                };
+                                <tr>
+                                    <td class="fw-bold" style="color:#075985;">@r.RequestNumber</td>
+                                    <td>@r.Date.ToString("dd MMM yyyy")</td>
+                                    <td>@r.Doctor</td>
+                                    <td><span class="badge bg-@urgencyClass">@r.Urgency</span></td>
+                                    <td>@r.TestCount</td>
+                                    <td><span class="badge bg-@statusClass">@statusText</span></td>
+                                    <td class="text-end">
+                                        <a href="/Patient/TestRequests/Details/@r.Id" class="btn btn-outline-primary btn-sm">View details</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

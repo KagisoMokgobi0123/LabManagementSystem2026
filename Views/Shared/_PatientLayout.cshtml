@@ -5,8 +5,9 @@
 @{
     var currentUser = await UserManager.GetUserAsync(User);
 
-    var patientName =
-        currentUser?.FullName ?? "Patient";
+    var patientName = !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+    ? (currentUser.FirstName + " " + (currentUser.LastName ?? "")).Trim()
+    : "Patient";
 
     var patientInitial =
         !string.IsNullOrWhiteSpace(currentUser?.FirstName)
@@ -663,6 +664,7 @@
                 z-index: 1040;
                 display: none;
                 background: rgba(15,23,42,.55);
+                pointer-events: none;
             }
 
 
@@ -685,6 +687,7 @@
 
                 .sidebar-backdrop.show {
                     display: block;
+                    pointer-events: auto;
                 }
 
 
@@ -841,7 +844,47 @@
                     max-width: 86vw;
                 }
             }
+                        /* Force main content to be clickable */
+            .patient-main {
+                position: relative;
+                z-index: 1;
+                pointer-events: auto;
+            }
 
+            /* Make sure sidebar doesn't bleed over */
+            .patient-sidebar {
+                z-index: 1050;
+                pointer-events: auto;
+            }
+
+            /* Kill any overlay that might be covering content */
+            .patient-backdrop,
+            .sidebar-backdrop,
+            .mobile-backdrop,
+            .overlay {
+                pointer-events: none !important;
+                display: none !important;
+            }
+
+            /* Fix hero section */
+            .patient-hero-content {
+                position: relative;
+                z-index: 10;
+                pointer-events: auto;
+            }
+
+            .patient-hero-content a,
+            .patient-hero-content button {
+                position: relative;
+                z-index: 11;
+                pointer-events: auto !important;
+            }
+
+            /* Fix all cards and links in main */
+            .patient-main a,
+            .patient-main button {
+                pointer-events: auto !important;
+            }
     </style>
 
 
@@ -964,11 +1007,10 @@
 
 
             <!-- =================================================
-             NAVIGATION
-             ================================================= -->
+     NAVIGATION
+     ================================================= -->
 
             <nav class="sidebar-navigation">
-
 
                 <!-- ================= MAIN ================= -->
 
@@ -976,66 +1018,40 @@
                     Main
                 </div>
 
-
-                <a href="/Patient/Home/Index"
+                <a asp-area="Patient" asp-controller="Home" asp-action="Index"
                    title="Dashboard"
-                   class="sidebar-link @(controller == "Home" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-gauge-high"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Dashboard
-                    </span>
-
+                   class="sidebar-link @(controller == "Home" && action == "Index" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-gauge-high"></i></span>
+                    <span class="sidebar-link-text">Dashboard</span>
                 </a>
 
 
 
                 <!-- ================= TEST REQUESTS ================= -->
 
+                <!-- ================= LABORATORY TESTS ================= -->
+
                 <div class="sidebar-section">
                     Laboratory Tests
                 </div>
 
-
-                <a href="/Patient/TestRequests/Index"
+                <a asp-area="Patient" asp-controller="TestRequests" asp-action="Index"
                    title="My Test Requests"
                    class="sidebar-link @(controller == "TestRequests" && action == "Index" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-clipboard-list"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        My Test Requests
-                    </span>
-
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-clipboard-list"></i></span>
+                    <span class="sidebar-link-text">My Test Requests</span>
                 </a>
 
-
-                <a href="/Patient/TestRequests/Active"
+                <a asp-area="Patient" asp-controller="TestRequests" asp-action="Active"
                    title="Active Tests"
                    class="sidebar-link @(controller == "TestRequests" && action == "Active" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-flask-vial"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Active Tests
-                    </span>
-
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-flask-vial"></i></span>
+                    <span class="sidebar-link-text">Active Tests</span>
                 </a>
 
 
+
+                <!-- ================= RESULTS ================= -->
 
                 <!-- ================= RESULTS ================= -->
 
@@ -1043,141 +1059,89 @@
                     Results
                 </div>
 
-
-                <a href="/Patient/Results/Index"
+                <a asp-area="Patient" asp-controller="Home" asp-action="Results"
                    title="My Results"
-                   class="sidebar-link @(controller == "Results" && action == "Index" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-file-medical"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        My Results
-                    </span>
-
+                   class="sidebar-link @(controller == "Home" && action == "Results" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-file-medical"></i></span>
+                    <span class="sidebar-link-text">My Results</span>
                 </a>
 
-
-                <a href="/Patient/Results/History"
+                <a asp-area="Patient" asp-controller="Home" asp-action="History"
                    title="Result History"
-                   class="sidebar-link @(controller == "Results" && action == "History" ? "active" : "")">
+                   class="sidebar-link @(controller == "Home" && action == "History" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                    <span class="sidebar-link-text">Result History</span>
+                </a>
 
-                    <span class="sidebar-link-icon">
+                <a asp-area="Patient" asp-controller="Tracking" asp-action="Index"
+                   title="Track Results"
+                   class="sidebar-link @(controller == "Tracking" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-chart-line"></i></span>
+                    <span class="sidebar-link-text">Track Results</span>
+                </a>
 
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Result History
-                    </span>
-
+                <a asp-area="Patient" asp-controller="Reports" asp-action="Index"
+                   title="Patient Reports"
+                   class="sidebar-link @(controller == "Reports" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-file-pdf"></i></span>
+                    <span class="sidebar-link-text">Patient Reports</span>
                 </a>
 
 
-
-                <!-- ================= MEDICAL INFORMATION ================= -->
+                <!-- ================= MY HEALTH ================= -->
 
                 <div class="sidebar-section">
                     My Health
                 </div>
 
-
-                <a href="/Patient/MedicalInformation/Index"
+                <a asp-area="Patient" asp-controller="Home" asp-action="MedicalHistory"
                    title="Medical Information"
-                   class="sidebar-link @(controller == "MedicalInformation" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-notes-medical"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Medical Information
-                    </span>
-
+                   class="sidebar-link @(controller == "Home" && action == "MedicalHistory" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-notes-medical"></i></span>
+                    <span class="sidebar-link-text">Medical Information</span>
                 </a>
 
-
-                <a href="/Patient/MedicalInformation/Conditions"
+                <a asp-area="Patient" asp-controller="Home" asp-action="Conditions"
                    title="Medical Conditions"
-                   class="sidebar-link @(controller == "MedicalInformation" && action == "Conditions" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-heart-pulse"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Medical Conditions
-                    </span>
-
+                   class="sidebar-link @(controller == "Home" && action == "Conditions" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-heart-pulse"></i></span>
+                    <span class="sidebar-link-text">Medical Conditions</span>
                 </a>
 
-
-                <a href="/Patient/MedicalInformation/Allergies"
+                <a asp-area="Patient" asp-controller="Home" asp-action="Allergies"
                    title="Allergies"
-                   class="sidebar-link @(controller == "MedicalInformation" && action == "Allergies" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Allergies
-                    </span>
-
+                   class="sidebar-link @(controller == "Home" && action == "Allergies" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                    <span class="sidebar-link-text">Allergies</span>
                 </a>
 
-
-                <a href="/Patient/MedicalInformation/Medications"
+                <a asp-area="Patient" asp-controller="Home" asp-action="Medications"
                    title="Medications"
-                   class="sidebar-link @(controller == "MedicalInformation" && action == "Medications" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-pills"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Medications
-                    </span>
-
+                   class="sidebar-link @(controller == "Home" && action == "Medications" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-pills"></i></span>
+                    <span class="sidebar-link-text">Medications</span>
                 </a>
 
 
-
-                <!-- ================= NOTIFICATIONS ================= -->
+                <!-- ================= COMMUNICATION ================= -->
 
                 <div class="sidebar-section">
                     Communication
                 </div>
 
-
-                <a href="/Patient/Notifications/Index"
+                <a asp-area="Patient" asp-controller="Notifications" asp-action="Index"
                    title="Notifications"
                    class="sidebar-link @(controller == "Notifications" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-bell"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Notifications
-                    </span>
-
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-bell"></i></span>
+                    <span class="sidebar-link-text">Notifications</span>
                 </a>
 
+                <a asp-area="Patient" asp-controller="Consent" asp-action="Index"
+                   title="Doctor Access / Consent"
+                   class="sidebar-link @(controller == "Consent" ? "active" : "")">
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-user-shield"></i></span>
+                    <span class="sidebar-link-text">Doctor Access</span>
+                </a>
 
 
                 <!-- ================= ACCOUNT ================= -->
@@ -1186,57 +1150,26 @@
                     Account
                 </div>
 
-
-                <a href="/Patient/Profile/Index"
+                <a asp-area="Patient" asp-controller="Profile" asp-action="Index"
                    title="My Profile"
                    class="sidebar-link @(controller == "Profile" && action == "Index" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-user"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        My Profile
-                    </span>
-
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-user"></i></span>
+                    <span class="sidebar-link-text">My Profile</span>
                 </a>
 
-
-                <a href="/Patient/Profile/ChangePhoneNumber"
+                <a asp-area="Patient" asp-controller="Profile" asp-action="ChangePhoneNumber"
                    title="Change Phone Number"
                    class="sidebar-link @(controller == "Profile" && action == "ChangePhoneNumber" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-phone"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Change Phone Number
-                    </span>
-
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-phone"></i></span>
+                    <span class="sidebar-link-text">Change Phone Number</span>
                 </a>
 
-
-                <a href="/Patient/Profile/ChangePassword"
+                <a asp-area="Patient" asp-controller="Profile" asp-action="ChangePassword"
                    title="Change Password"
                    class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
-
-                    <span class="sidebar-link-icon">
-
-                        <i class="fa-solid fa-key"></i>
-
-                    </span>
-
-                    <span class="sidebar-link-text">
-                        Change Password
-                    </span>
-
+                    <span class="sidebar-link-icon"><i class="fa-solid fa-key"></i></span>
+                    <span class="sidebar-link-text">Change Password</span>
                 </a>
-
 
             </nav>
 
@@ -1249,8 +1182,7 @@
             <div class="sidebar-bottom">
 
 
-                <form action="/Patient/Profile/Logout"
-                      method="post">
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
 
                     @Html.AntiForgeryToken()
 
@@ -1866,6 +1798,7 @@
 
                 }
             );
+
 
     </script>
 

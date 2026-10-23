@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NMB_HLabSys.Areas.Technician.Models;
+using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Identity;
+using System.Security.Claims;
 
 namespace NMB_HLabSys.Areas.Patient.Controllers
 {
@@ -10,260 +12,224 @@ namespace NMB_HLabSys.Areas.Patient.Controllers
     [Authorize(Roles = "Patient")]
     public class ProfileController : Controller
     {
+        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-
-        private readonly ILogger<ProfileController> _logger;
-
 
         public ProfileController(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            ILogger<ProfileController> logger)
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
+            _context = context;
             _userManager = userManager;
-            _signInManager = signInManager;
-            _logger = logger;
         }
 
+        // SHA256 helper — matches AccountController.HashPassword pattern
+        private static string HashPassword(string password)
+        {
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var bytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return Convert.ToBase64String(bytes);
+        }
 
-        // =========================================================
-        // MY PROFILE
-        // GET: /Technician/Profile
-        // =========================================================
-
-        [HttpGet]
+        // ============================================================
+        // 1. My Profile
+        // ============================================================
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient == null) return RedirectToAction("Index", "Home");
 
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var model = new TechnicianProfileViewModel
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                FullName = user.FullName,
-                Email = user.Email ?? "",
-                PhoneNumber = user.PhoneNumber ?? ""
-            };
-
-            return View(model);
+            ViewBag.PatientName = patient.Name + " " + patient.Surname;
+            return View(patient);
         }
 
-
-        // =========================================================
-        // CHANGE PASSWORD
-        // GET: /Technician/Profile/ChangePassword
-        // =========================================================
-
+        // ============================================================
+        // 2. Change Password — GET (page)
+        // ============================================================
         [HttpGet]
         public IActionResult ChangePassword()
         {
-            return View(new ChangePasswordViewModel());
+            return View();
         }
 
-
-        // =========================================================
-        // CHANGE PASSWORD
-        // POST: /Technician/Profile/ChangePassword
-        // =========================================================
-
+        // ============================================================
+        // 2. Change Password — POST
+        // Uses SHA256 (session auth), NOT UserManager.ChangePasswordAsync
+        // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(
-            ChangePasswordViewModel model)
+            string currentPassword,
+            string newPassword,
+            string confirmPassword)
         {
-            if (!ModelState.IsValid)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null) return RedirectToAction("Index", "Home");
+
+            // Verify current password using SHA256
+            if (user.PasswordHash != HashPassword(currentPassword))
             {
-                return View(model);
+                TempData["Error"] = "Current password is incorrect.";
+                return RedirectToAction("ChangePassword");
             }
 
-            var user = await _userManager.GetUserAsync(User);
+            // Validate new password rules
+            var ok = !string.IsNullOrEmpty(newPassword)
+                     && newPassword.Length >= 8
+                     && newPassword.Any(char.IsUpper)
+                     && newPassword.Any(char.IsDigit)
+                     && newPassword.Any(c => !char.IsLetterOrDigit(c));
 
-            if (user == null)
+            if (!ok)
             {
-                return NotFound();
+                TempData["Error"] = "New password must be at least 8 characters with one uppercase, one number, and one special character.";
+                return RedirectToAction("ChangePassword");
             }
 
-            var result = await _userManager.ChangePasswordAsync(
-                user,
-                model.CurrentPassword,
-                model.NewPassword);
-
-            if (result.Succeeded)
+            if (newPassword != confirmPassword)
             {
-                // Refresh authentication cookie
-                await _signInManager.RefreshSignInAsync(user);
-
-                TempData["SuccessMessage"] =
-                    "Your password has been changed successfully.";
-
-                return RedirectToAction(nameof(ChangePassword));
+                TempData["Error"] = "New passwords do not match.";
+                return RedirectToAction("ChangePassword");
             }
 
-            foreach (var error in result.Errors)
+            if (newPassword == currentPassword)
             {
-                ModelState.AddModelError("", error.Description);
+                TempData["Error"] = "New password must be different from the current password.";
+                return RedirectToAction("ChangePassword");
             }
 
-            return View(model);
+            user.PasswordHash = HashPassword(newPassword);
+            user.MustChangePassword = false;
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Password changed successfully.";
+            return RedirectToAction("Index");
         }
-        // =========================================================
-        // CHANGE PHONE NUMBER
-        // GET: /Technician/Profile/ChangePhoneNumber
-        // =========================================================
 
+        // ============================================================
+        // 3. Change Phone Number
+        // ============================================================
         [HttpGet]
         public async Task<IActionResult> ChangePhoneNumber()
         {
-            var user =
-                await _userManager.GetUserAsync(User);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            var model =
-                new UpdatePhoneNumberViewModel
-                {
-                    PhoneNumber =
-                        user.PhoneNumber ?? ""
-                };
-
-            return View(model);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient == null) return RedirectToAction("Index", "Home");
+            return View(patient);
         }
-
-
-        // =========================================================
-        // CHANGE PHONE NUMBER
-        // POST: /Technician/Profile/ChangePhoneNumber
-        // =========================================================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ChangePhoneNumber(
-            UpdatePhoneNumberViewModel model)
+        public async Task<IActionResult> ChangePhoneNumber(string contactNumber)
         {
-            if (!ModelState.IsValid)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient == null) return RedirectToAction("Index", "Home");
+
+            if (string.IsNullOrWhiteSpace(contactNumber))
             {
-                return View(model);
+                TempData["Error"] = "Phone number cannot be empty.";
+                return RedirectToAction("ChangePhoneNumber");
             }
 
+            patient.ContactNumber = contactNumber.Trim();
+            patient.LastUpdatedDate = DateTime.Now;
+            await _context.SaveChangesAsync();
 
-            var user =
-                await _userManager.GetUserAsync(User);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-
-            var phoneNumber =
-                model.PhoneNumber.Trim();
-
-
-            // No change
-            if (user.PhoneNumber == phoneNumber)
-            {
-                TempData["InfoMessage"] =
-                    "Your phone number has not changed.";
-
-                return RedirectToAction(
-                    nameof(ChangePhoneNumber)
-                );
-            }
-
-
-            // Update through Identity
-            var result =
-                await _userManager.SetPhoneNumberAsync(
-                    user,
-                    phoneNumber
-                );
-
-
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(
-                        "",
-                        error.Description
-                    );
-                }
-
-                return View(model);
-            }
-
-
-            // Refresh authentication cookie
-            await _signInManager.RefreshSignInAsync(user);
-
-
-            TempData["SuccessMessage"] =
-                "Your phone number has been updated successfully.";
-
-
-            return RedirectToAction(
-                nameof(ChangePhoneNumber)
-            );
+            TempData["Success"] = "Phone number updated successfully.";
+            return RedirectToAction("Index");
         }
-        // =========================================================
-        // LOGOUT
-        // POST: /Technician/Profile/Logout
-        // =========================================================
 
+        // ============================================================
+        // 3. Inline Update — Phone (used by Profile page inline form)
+        // ============================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> UpdatePhone(string contactNumber)
         {
-            // Get user before signing out
-            var user =
-                await _userManager.GetUserAsync(User);
-
-
-            var email =
-                user?.Email ??
-                User.Identity?.Name ??
-                "Unknown";
-
-
-            // =====================================================
-            // SIGN OUT
-            // =====================================================
-
-            await _signInManager.SignOutAsync();
-
-
-            _logger.LogInformation(
-                "Lab Technician {Email} logged out successfully.",
-                email
-            );
-
-
-            // =====================================================
-            // REDIRECT TO TECHNICIAN LOGIN
-            //
-            // area = "" is VERY IMPORTANT.
-            // TechnicianLogin is in the main AccountController,
-            // not inside the Technician area.
-            // =====================================================
-
-            return RedirectToAction(
-                "TechnicianLogin",
-                "Account",
-                new
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient != null)
+            {
+                if (string.IsNullOrWhiteSpace(contactNumber))
                 {
-                    area = ""
+                    TempData["Error"] = "Phone number cannot be empty.";
                 }
-            );
+                else
+                {
+                    patient.ContactNumber = contactNumber.Trim();
+                    patient.LastUpdatedDate = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Phone number updated.";
+                }
+            }
+            return RedirectToAction("Index");
         }
 
+        // ============================================================
+        // 3. Inline Update — Address
+        // ============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateAddress(string address)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient != null)
+            {
+                if (string.IsNullOrWhiteSpace(address))
+                {
+                    TempData["Error"] = "Address cannot be empty.";
+                }
+                else
+                {
+                    patient.Address = address.Trim();
+                    patient.LastUpdatedDate = DateTime.Now;
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Address updated.";
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        // ============================================================
+        // 3. Inline Update — City
+        // ============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCity(string city)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient != null)
+            {
+                patient.City = city?.Trim();
+                patient.LastUpdatedDate = DateTime.Now;
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "City updated.";
+            }
+            return RedirectToAction("Index");
+        }
+
+        // ============================================================
+        // 3. Inline Update — Province
+        // ============================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProvince(string province)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await _context.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (patient != null)
+            {
+                patient.Province = province?.Trim();
+                patient.LastUpdatedDate = DateTime.Now;
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Province updated.";
+            }
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -73,9 +73,7 @@
 </style>
 <div class="container-fluid py-4">
 
-    <!-- =========================================================
-         PAGE HEADER
-         ========================================================= -->
+  
 
     <div class="d-flex flex-wrap justify-content-between
         align-items-center mb-4">
@@ -103,9 +101,6 @@
     </div>
 
 
-    <!-- =========================================================
-         MESSAGES
-         ========================================================= -->
     @if (TempData["ErrorMessage"] != null)
     {
         <div class="alert alert-danger alert-dismissible
@@ -143,9 +138,7 @@
     }
 
 
-    <!-- =========================================================
-         REPORT INFORMATION
-         ========================================================= -->
+    <!-- report information -->
 
     <div class="alert alert-info border-0 shadow-sm">
 
@@ -178,9 +171,7 @@
     </div>
 
 
-    <!-- =========================================================
-         DATE RANGE FILTER
-         ========================================================= -->
+    <!--Filter -->
 
     <div class="card border-0 shadow-sm mb-4">
 
@@ -310,7 +301,7 @@
 
                 <!-- GENERATE PDF REPORT -->
                 <form method="get"
-                      action="/Manager/Reports/GeneratePdf"
+                      action="@Url.Action("GeneratePdf", "Reports", new { area = "Manager" })"
                       target="_blank"
                       class="no-print">
 

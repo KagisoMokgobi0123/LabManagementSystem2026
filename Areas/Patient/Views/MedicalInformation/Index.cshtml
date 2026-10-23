@@ -1,0 +1,145 @@
+﻿@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Medical Information";
+    var conditions = ViewBag.Conditions as List<NMB_HLabSys.Areas.Patient.Models.PatientConditionModel>
+                     ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientConditionModel>();
+    var allergies = ViewBag.Allergies as List<NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel>
+                    ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientAllergyModel>();
+    var medications = ViewBag.Medications as List<NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel>
+                      ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientMedicationModel>();
+}
+
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Medical Information</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">@ViewBag.PatientName</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+
+    <div class="row">
+        <!-- CONDITIONS -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header rounded-top-4 text-white" style="background:#dc3545;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-heart-pulse me-2"></i>Medical Conditions</span>
+                        <span class="badge bg-white text-danger">@conditions.Count</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!conditions.Any())
+                    {
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-clipboard fa-2x mb-2"></i>
+                            <p style="font-size:0.85rem;">No conditions recorded.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var c in conditions)
+                        {
+                            <div class="border-start border-danger border-3 ps-3 mb-3 rounded-end">
+                                <strong style="font-size:0.9rem;">@(c.MedicalCondition?.ConditionName ?? "Unknown")</strong>
+                                <div class="text-muted" style="font-size:0.78rem;">
+                                    <i class="fas fa-calendar me-1"></i>@c.DateDiagnosed.ToString("dd MMM yyyy")
+                                </div>
+                                @if (!string.IsNullOrEmpty(c.Notes))
+                                {
+                                    <div class="text-muted" style="font-size:0.78rem;">@c.Notes</div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- ALLERGIES -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header rounded-top-4 text-dark" style="background:#ffc107;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-hand-dots me-2"></i>Allergies</span>
+                        <span class="badge bg-dark text-white">@allergies.Count</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!allergies.Any())
+                    {
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                            <p style="font-size:0.85rem;">No allergies recorded.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var a in allergies)
+                        {
+                            <div class="border-start border-warning border-3 ps-3 mb-3 rounded-end">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <strong style="font-size:0.9rem;">@(a.Allergy?.AllergyName ?? "Unknown")</strong>
+                                    @if (!string.IsNullOrEmpty(a.Severity))
+                                    {
+                                        var sev = a.Severity == "Severe" ? "danger" : a.Severity == "Moderate" ? "warning" : "success";
+                                        <span class="badge bg-@sev" style="font-size:0.7rem;">@a.Severity</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(a.Notes))
+                                {
+                                    <div class="text-muted" style="font-size:0.78rem;">@a.Notes</div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- MEDICATIONS -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header rounded-top-4 text-white" style="background:#0284c7;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-pills me-2"></i>Current Medications</span>
+                        <span class="badge bg-white text-primary">@medications.Count</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!medications.Any())
+                    {
+                        <div class="text-center py-3 text-muted">
+                            <i class="fas fa-pills fa-2x mb-2"></i>
+                            <p style="font-size:0.85rem;">No medications recorded.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var m in medications)
+                        {
+                            <div class="border-start border-primary border-3 ps-3 mb-3 rounded-end">
+                                <strong style="font-size:0.9rem;">@(m.Medication?.MedicationName ?? "Unknown")</strong>
+                                @if (!string.IsNullOrEmpty(m.Dosage))
+                                {
+                                    <div class="text-muted" style="font-size:0.78rem;"><i class="fas fa-syringe me-1"></i>@m.Dosage</div>
+                                }
+                                @if (!string.IsNullOrEmpty(m.Frequency))
+                                {
+                                    <div class="text-muted" style="font-size:0.78rem;"><i class="fas fa-clock me-1"></i>@m.Frequency</div>
+                                }
+                                <div class="text-muted" style="font-size:0.78rem;">
+                                    Started: @m.StartDate.ToString("dd MMM yyyy")
+                                    @if (m.EndDate == null)
+                                    {
+                                        <span class="text-success ms-1">● Ongoing</span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

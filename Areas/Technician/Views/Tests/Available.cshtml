@@ -5,6 +5,7 @@
     var testTypes = Model?.ToList() ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.TechnicianAssignmentRowViewModel>();
     var managerNames = ViewBag.ManagerNamesByTestType as Dictionary<int, string> ?? new Dictionary<int, string>();
     var requestNumbers = ViewBag.RequestNumbersByTestType as Dictionary<int, List<string>> ?? new Dictionary<int, List<string>>();
+    var deadlineRows = ViewBag.DeadlineRowsByTestType as Dictionary<int, List<string[]>> ?? new Dictionary<int, List<string[]>>();
     var assignmentDates = ViewBag.AssignmentDatesByTestType as Dictionary<int, DateTime> ?? new Dictionary<int, DateTime>();
     var requestTechnicians = ViewBag.TechniciansByTestTypeRequest as Dictionary<int, Dictionary<string, List<string>>>
         ?? new Dictionary<int, Dictionary<string, List<string>>>();
@@ -30,7 +31,13 @@
     .assigned-table th:nth-child(4), .assigned-table th:nth-child(5) { min-width:105px; }
     .assigned-table th:nth-child(6) { min-width:135px; }
     .assigned-table th:nth-child(7) { min-width:135px; }
-    .assigned-table th:nth-child(8) { min-width:195px; }
+    .assigned-table th:nth-child(8) { min-width:180px; }
+    .assigned-table th:nth-child(9) { min-width:195px; }
+    .deadline-overdue { display:inline-block; padding:5px 9px; border-radius:6px; background:#fee2e2; color:#991b1b; font-weight:750; font-size:11px; }
+    .deadline-ok { display:inline-block; padding:5px 9px; border-radius:6px; background:#e0f2fe; color:#075985; font-weight:700; font-size:11px; }
+    .deadline-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .deadline-table th,.deadline-table td { padding:9px 7px; border-bottom:1px solid #e2e8f0; text-align:left; vertical-align:top; }
+    .deadline-table th { color:#475569; background:#f8fafc; }
     .assigned-table td { vertical-align:middle; }
     .assigned-table .name { max-width:200px; line-height:1.55; }
     .assigned-table .assignment-row:hover td { background:#f7fbff; }
@@ -115,7 +122,7 @@
             <div class="table-responsive" style="overflow-x:auto">
                 <table class="assigned-table" id="managerAssignmentsTable">
                     <thead><tr>
-                        <th>Test Type</th><th>Associated Request Number(s)</th><th>Technicians Per Request</th><th>Category</th><th>Sample Type</th><th>Manager Full Name</th><th>Authorization Status</th><th>Action</th>
+                        <th>Test Type</th><th>Associated Request Number(s)</th><th>Technicians Per Request</th><th>Category</th><th>Sample Type</th><th>Manager Full Name</th><th>Authorization Status</th><th>Test Deadlines</th><th>Action</th>
                     </tr></thead>
                     <tbody>
                     @foreach (var test in testTypes)
@@ -160,6 +167,24 @@
                             <td>@(managerNames.TryGetValue(test.TestTypeId, out var manager) ? manager : "Manager not recorded")</td>
                             <td><span class="assigned-active"><i class="fas fa-check-circle mr-1"></i> Manager Assigned</span></td>
                             <td>
+                                @if (deadlineRows.TryGetValue(test.TestTypeId, out var deadlines) && deadlines.Any())
+                                {
+                                    var overdueCount = deadlines.Count(x => x[4] == "Overdue");
+                                    <div class="assigned-meta">
+                                        @if (overdueCount > 0)
+                                        {
+                                            <span class="deadline-overdue"><i class="fas fa-exclamation-triangle mr-1"></i> @overdueCount overdue</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="deadline-ok">No overdue tests</span>
+                                        }
+                                        <button type="button" class="assigned-more" data-modal-target="deadlines-@test.TestTypeId">View expected completion</button>
+                                    </div>
+                                }
+                                else { <span class="assigned-muted">No test deadlines</span> }
+                            </td>
+                            <td>
                                 <div class="assigned-actions">
                                     <button type="button" class="assigned-action action-details" data-modal-target="details-@test.TestTypeId" title="View authorization details"><i class="fas fa-eye"></i> Details</button>
                                     <button type="button" class="assigned-action action-requests" data-modal-target="requests-@test.TestTypeId" title="View associated requests"><i class="fas fa-clipboard-list"></i> Requests</button>
@@ -171,7 +196,7 @@
                     }
                     @if (!testTypes.Any())
                     {
-                        <tr class="empty-row"><td colspan="8" class="assigned-empty">No active test types have been assigned to you by the Laboratory Manager.</td></tr>
+                        <tr class="empty-row"><td colspan="9" class="assigned-empty">No active test types have been assigned to you by the Laboratory Manager.</td></tr>
                     }
                     </tbody>
                 </table>
@@ -184,6 +209,30 @@
     {
         var hasRequests = requestNumbers.TryGetValue(test.TestTypeId, out var numbersForModal) && numbersForModal.Any();
         var hasTeams = requestTechnicians.TryGetValue(test.TestTypeId, out var teamsForModal) && teamsForModal.Any();
+        <div class="assigned-modal" id="deadlines-@test.TestTypeId" role="dialog" aria-modal="true" aria-label="Test deadlines for @test.Name" hidden>
+            <div class="assigned-modal-panel" style="width:min(850px,100%)">
+                <div class="assigned-modal-header"><h3>Expected Completion — @test.Name</h3><button type="button" class="assigned-modal-close" aria-label="Close dialog">&times;</button></div>
+                <div class="assigned-modal-content">
+                    <p class="text-muted">Deadlines are calculated separately for each test from its UTC start time and turnaround time.</p>
+                    @if (deadlineRows.TryGetValue(test.TestTypeId, out var details) && details.Any())
+                    {
+                        <div class="table-responsive"><table class="deadline-table">
+                            <thead><tr><th>Request</th><th>Started</th><th>Turnaround</th><th>Expected completion</th><th>Deadline status</th></tr></thead>
+                            <tbody>
+                            @foreach (var entry in details)
+                            {
+                                <tr>
+                                    <td>@entry[0]</td><td>@entry[1]</td><td>@entry[2]</td><td>@entry[3]</td>
+                                    <td>@if (entry[4] == "Overdue") { <span class="deadline-overdue">Overdue</span> } else { <span class="deadline-ok">@entry[4]</span> }</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table></div>
+                    }
+                    else { <p class="text-muted">No associated test deadlines available.</p> }
+                </div>
+            </div>
+        </div>
         <div class="assigned-modal" id="details-@test.TestTypeId" role="dialog" aria-modal="true" aria-label="Assignment details for @test.Name" hidden>
             <div class="assigned-modal-panel">
                 <div class="assigned-modal-header"><h3>Assignment Details — @test.Name</h3><button type="button" class="assigned-modal-close" aria-label="Close dialog">&times;</button></div>

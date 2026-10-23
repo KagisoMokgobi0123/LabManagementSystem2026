@@ -715,23 +715,19 @@
 
                             <!-- ACCEPT TERMS -->
 
-                            <div class="form-check mb-3">
-
-                                <input asp-for="AcceptTerms"
+                            <div class="form-check mb-4">
+                                <input type="checkbox"
+                                       id="AcceptTerms"
+                                       name="AcceptTerms"
+                                       value="true"
                                        class="form-check-input" />
+                                <input type="hidden" name="AcceptTerms" value="false" />
 
-                                <label asp-for="AcceptTerms"
-                                       class="form-check-label">
-
-                                    I agree to the Terms of Use and
-                                    Privacy Policy.
-
+                                <label for="AcceptTerms" class="form-check-label" style="cursor:pointer;">
+                                    I agree to the Terms of Use and Privacy Policy.
                                 </label>
 
-                                <span asp-validation-for="AcceptTerms"
-                                      class="text-danger small d-block">
-                                </span>
-
+                                <span asp-validation-for="AcceptTerms" class="text-danger small d-block"></span>
                             </div>
 
                         </div>
@@ -1200,6 +1196,46 @@
         });
 
     </script>
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var form = document.querySelector("form");
+                var terms = document.getElementById("AcceptTerms");
 
+                if (form && terms) {
+                    form.addEventListener("submit", function (e) {
+                        if (!terms.checked) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            // Show error message
+                            var errorSpan = document.querySelector("[data-valmsg-for='AcceptTerms']");
+                            if (errorSpan) {
+                                errorSpan.textContent = "You must accept the terms and privacy policy.";
+                                errorSpan.classList.remove("field-validation-valid");
+                                errorSpan.classList.add("field-validation-error");
+                            }
+
+                            // Focus the checkbox
+                            terms.focus();
+
+                            return false;
+                        }
+                    });
+
+                    // Clear error when user checks the box
+                    terms.addEventListener("change", function () {
+                        if (terms.checked) {
+                            var errorSpan = document.querySelector("[data-valmsg-for='AcceptTerms']");
+                            if (errorSpan) {
+                                errorSpan.textContent = "";
+                                errorSpan.classList.remove("field-validation-error");
+                                errorSpan.classList.add("field-validation-valid");
+                            }
+                        }
+                    });
+                }
+            });
+    </script>
++
 </body>
 </html>

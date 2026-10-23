@@ -1,0 +1,40 @@
+﻿@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Medical Conditions";
+    var conditions = ViewBag.Conditions as List<NMB_HLabSys.Areas.Patient.Models.PatientConditionModel>
+                     ?? new List<NMB_HLabSys.Areas.Patient.Models.PatientConditionModel>();
+}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Medical Conditions</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">@ViewBag.PatientName</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            @if (!conditions.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-clipboard fa-3x mb-3"></i>
+                    <h5>No Conditions Recorded</h5>
+                </div>
+            }
+            else
+            {
+                @foreach (var c in conditions)
+                {
+                    <div class="border-start border-danger border-3 ps-3 mb-3 p-2 rounded-end bg-light">
+                        <strong>@(c.MedicalCondition?.ConditionName ?? "Unknown")</strong>
+                        <div class="text-muted small">Diagnosed: @c.DateDiagnosed.ToString("dd MMM yyyy")</div>
+                        @if (!string.IsNullOrEmpty(c.Notes))
+                        {
+                            <div class="text-muted small">@c.Notes</div>
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

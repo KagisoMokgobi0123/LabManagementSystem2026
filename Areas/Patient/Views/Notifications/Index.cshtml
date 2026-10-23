@@ -1,0 +1,23 @@
+﻿@{
+    Layout = "_PatientLayout";
+    ViewData["Title"] = "Notifications";
+}
+<div class="container-fluid p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="fw-bold mb-1">Notifications</h4>
+            <p class="text-muted mb-0" style="font-size:0.88rem;">Your latest alerts and updates</p>
+        </div>
+        <a href="/Patient/Home/Index" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+    </div>
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-bell fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No Notifications</h5>
+            <p class="text-muted" style="font-size:0.88rem;">
+                You will be notified here when your test results are ready<br />
+                or when your doctor releases results to you.
+            </p>
+        </div>
+    </div>
+</div>
