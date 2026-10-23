@@ -74,10 +74,7 @@ builder.Services.AddScoped<LaboratoryPdfService>();
 builder.Services.AddScoped<LaboratoryReportDeliveryService>();
 builder.Services.AddScoped<LaboratoryEmailService>();
 
-// Explicit opt-in. This worker may SEND email, not merely generate PDFs.
-// Leave disabled until the dispatcher, recipients and test data are checked.
-// For a controlled test, set LaboratoryReports:EnableDispatcher=true
-// only in a private environment with a safe test SMTP destination.
+
 var enableDispatcher = builder.Configuration.GetValue<bool>(
     "LaboratoryReports:EnableDispatcher", false);
 if (enableDispatcher)
