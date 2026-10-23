@@ -5,9 +5,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace NMB_HLabSys.Areas.Doctor.Services;
 
@@ -487,39 +484,24 @@ public static class DoctorPdfReportBuilder
     {
         var candidates = new[]
         {
-            Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot", "assets", "img", "nmb-report-logo.png"),
+        Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot", "assets", "img", "nmb-report-logo.jpg"),
 
-            Path.Combine(
-                AppContext.BaseDirectory,
-                "wwwroot", "assets", "img", "nmb-report-logo.png"),
+        Path.Combine(
+            AppContext.BaseDirectory,
+            "wwwroot", "assets", "img", "nmb-report-logo.jpg"),
 
-            Path.GetFullPath(Path.Combine(
-                AppContext.BaseDirectory,
-                "..", "..", "..", "..",
-                "wwwroot", "assets", "img", "nmb-report-logo.png"))
-        };
+        Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory,
+            "..", "..", "..", "..",
+            "wwwroot", "assets", "img", "nmb-report-logo.jpg"))
+    };
 
         var path = candidates.FirstOrDefault(File.Exists);
 
-        if (path == null)
-            return null;
-
-        using var image = Image.Load<Rgba32>(path);
-
-        // Flatten transparency onto the same blue used in the PDF header.
-        image.Mutate(x =>
-            x.BackgroundColor(SixLabors.ImageSharp.Color.Parse("#0A4066")));
-
-        image.Mutate(x => x.Resize(360, 240));
-
-        using var output = new MemoryStream();
-        image.SaveAsJpeg(output);
-
-        return output.ToArray();
+        return path == null ? null : File.ReadAllBytes(path);
     }
-
     private static byte[] BuildPdf(IReadOnlyList<byte[]> objects)
     {
         using var output = new MemoryStream();
