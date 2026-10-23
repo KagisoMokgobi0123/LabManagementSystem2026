@@ -1,12 +1,28 @@
 ﻿@model IEnumerable<NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel>
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.AspNetCore.Identity
+@using NMB_HLabSys.Models.Identity
+@inject UserManager<ApplicationUser> UserManager
 @{
     ViewData["Title"] = "Test Requests";
     Layout = "_DoctorLayout";
     var filter = ViewBag.StatusFilter as string;
+     var currentUser = await UserManager.GetUserAsync(User);
+
+    var doctorName = currentUser?.FullName ?? "Doctor";
+    var doctorEmail = currentUser?.Email ?? "";
+
+    var doctorInitial =
+        !string.IsNullOrWhiteSpace(currentUser?.FirstName)
+            ? currentUser.FirstName.Substring(0, 1).ToUpper()
+            : "D";
 }
+
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-        <div><h2>Test requests</h2><p class="text-muted mb-0">Requests created by you, sorted newest first.</p></div>
+        <div><h1>
+                            Created by Dr @doctorName
+                        </h1><p class="text-muted mb-0">Requests created by you, sorted newest first.</p></div>
         <a class="btn btn-primary" asp-action="Create">Create request</a>
     </div>
     @if (TempData["SuccessMessage"] != null) { <div class="alert alert-success">@TempData["SuccessMessage"]</div> }

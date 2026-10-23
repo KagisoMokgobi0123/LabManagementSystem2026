@@ -56,12 +56,6 @@ namespace NMB_HLabSys.Areas.Patient.Models
         [StringLength(4)]
         public string PostalCode { get; set; } = string.Empty;
 
-        // Explicitly record that a category was reviewed and nothing was reported.
-        public bool NoKnownMedicalConditions { get; set; }
-        public bool NoKnownAllergies { get; set; }
-        public bool NoCurrentMedications { get; set; }
-
-
         public DateTime? CreatedDate { get; set; } = DateTime.Now;
         public DateTime? LastUpdatedDate { get; set; }
 

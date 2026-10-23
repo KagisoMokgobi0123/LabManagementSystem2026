@@ -17,7 +17,7 @@ namespace NMBHLabSys.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.2")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -167,11 +167,13 @@ namespace NMBHLabSys.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -192,11 +194,13 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AllergyCategoryId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -215,14 +219,16 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MedicalConditionCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -243,11 +249,13 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicalConditionCategoryId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -275,14 +283,16 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MedicationCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -303,11 +313,13 @@ namespace NMBHLabSys.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MedicationCategoryId"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -2165,9 +2177,6 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("TestCategoryId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("TestCategoryModelTestCategoryId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("TestRequestsModelTestRequestId")
                         .HasColumnType("int");
 
@@ -2183,8 +2192,6 @@ namespace NMBHLabSys.Migrations
                     b.HasIndex("SampleTypeId");
 
                     b.HasIndex("TestCategoryId");
-
-                    b.HasIndex("TestCategoryModelTestCategoryId");
 
                     b.HasIndex("TestRequestsModelTestRequestId");
 
@@ -2474,6 +2481,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<int>("AllergyId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -2497,6 +2507,7 @@ namespace NMBHLabSys.Migrations
                         {
                             PatientAllergyId = 6001,
                             AllergyId = 1,
+                            IsDeleted = false,
                             Notes = "Reported rash after previous penicillin exposure; confirmation pending.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                             Severity = "Moderate"
@@ -2505,6 +2516,7 @@ namespace NMBHLabSys.Migrations
                         {
                             PatientAllergyId = 6002,
                             AllergyId = 2,
+                            IsDeleted = false,
                             Notes = "Reported itching after peanut exposure; confirmation pending.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
                             Severity = "Mild"
@@ -2521,6 +2533,9 @@ namespace NMBHLabSys.Migrations
 
                     b.Property<DateTime>("DateDiagnosed")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MedicalConditionId")
                         .HasColumnType("int");
@@ -2545,6 +2560,7 @@ namespace NMBHLabSys.Migrations
                         {
                             PatientConditionId = 5001,
                             DateDiagnosed = new DateTime(2024, 3, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
                             MedicalConditionId = 1,
                             Notes = "Recorded history: blood pressure monitoring recommended.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15"
@@ -2553,6 +2569,7 @@ namespace NMBHLabSys.Migrations
                         {
                             PatientConditionId = 5002,
                             DateDiagnosed = new DateTime(2025, 6, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
                             MedicalConditionId = 2,
                             Notes = "Recorded history: periodic HbA1c and fasting glucose monitoring.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15"
@@ -2612,6 +2629,9 @@ namespace NMBHLabSys.Migrations
                     b.Property<string>("Frequency")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<int>("MedicationId")
                         .HasColumnType("int");
 
@@ -2639,6 +2659,7 @@ namespace NMBHLabSys.Migrations
                             PatientMedicationId = 7001,
                             Dosage = "500 mg",
                             Frequency = "Twice daily",
+                            IsDeleted = false,
                             MedicationId = 1,
                             Notes = "Medication history entered for training; verify at every encounter.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
@@ -2649,6 +2670,7 @@ namespace NMBHLabSys.Migrations
                             PatientMedicationId = 7002,
                             Dosage = "10 mg",
                             Frequency = "Once daily",
+                            IsDeleted = false,
                             MedicationId = 2,
                             Notes = "Medication history entered for training; verify at every encounter.",
                             PatientId = "f71c5f4a-6a9e-4c8d-91b2-7e6d2f304a15",
@@ -4519,14 +4541,10 @@ namespace NMBHLabSys.Migrations
                         .IsRequired();
 
                     b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", "TestCategory")
-                        .WithMany()
+                        .WithMany("TestTypes")
                         .HasForeignKey("TestCategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.HasOne("NMB_HLabSys.Areas.Manager.Models.TestCategoryModel", null)
-                        .WithMany("TestTypes")
-                        .HasForeignKey("TestCategoryModelTestCategoryId");
 
                     b.HasOne("NMB_HLabSys.Areas.Doctor.Models.TestRequestsModel", null)
                         .WithMany("TestTypes")

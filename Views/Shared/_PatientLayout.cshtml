@@ -35,8 +35,8 @@
         @ViewData["Title"] - NMB-HLabSys
     </title>
 
-    <link rel="icon" href="~/assets/img/icon1.svg" asp-append-version="true" />
 
+    <!-- Bootstrap -->
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
@@ -45,6 +45,8 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
+
+    <!-- Site CSS -->
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
@@ -92,12 +94,18 @@
         }
 
 
+        /* =====================================================
+           APPLICATION
+           ===================================================== */
+
         .patient-app {
             min-height: 100vh;
         }
 
 
-        /* side bar*/
+        /* =====================================================
+           SIDEBAR
+           ===================================================== */
 
         .patient-sidebar {
             position: fixed;
@@ -133,6 +141,10 @@
                 transform .25s ease;
         }
 
+
+        /* =====================================================
+           BRAND
+           ===================================================== */
 
         .sidebar-brand {
             min-height: 105px;
@@ -180,6 +192,10 @@
             }
 
 
+            /* =====================================================
+                       SIDEBAR CONTROLS
+                       ===================================================== */
+
             .sidebar-controls {
                 display: flex;
                 align-items: center;
@@ -212,6 +228,10 @@
                     transform: translateY(-1px);
                 }
 
+
+            /* =====================================================
+                       PATIENT USER
+                       ===================================================== */
 
             .sidebar-user {
                 display: flex;
@@ -262,6 +282,10 @@
                 font-size: 9px;
             }
 
+
+            /* =====================================================
+                       NAVIGATION
+                       ===================================================== */
 
             .sidebar-navigation {
                 flex: 1;
@@ -337,6 +361,10 @@
             }
 
 
+            /* =====================================================
+                       SIDEBAR BOTTOM
+                       ===================================================== */
+
             .sidebar-bottom {
                 padding: 12px;
                 border-top: 1px solid rgba(255,255,255,.10);
@@ -369,13 +397,21 @@
                     color: #fff;
                 }
 
-/*main content*/
+
+            /* =====================================================
+                       MAIN CONTENT
+                       ===================================================== */
 
             .patient-main {
                 min-height: 100vh;
                 margin-left: var(--sidebar-width);
                 transition: margin-left .25s ease, width .25s ease;
             }
+
+
+            /* =====================================================
+                       COLLAPSED SIDEBAR
+                       ===================================================== */
 
             body.sidebar-collapsed
             .patient-sidebar {
@@ -519,6 +555,11 @@
                     display: none;
                 }
 
+
+            /* =====================================================
+                       FULL WIDTH MODE
+                       ===================================================== */
+
             body.sidebar-hidden
             .patient-sidebar {
                 transform: translateX(-100%) !important;
@@ -530,6 +571,11 @@
                 margin-left: 0 !important;
                 width: 100% !important;
             }
+
+
+            /* =====================================================
+                       RESTORE BUTTON
+                       ===================================================== */
 
             .sidebar-restore-btn {
                 position: fixed;
@@ -562,6 +608,12 @@
             .sidebar-restore-btn {
                 display: flex;
             }
+
+
+            /* =====================================================
+                       MOBILE HEADER
+                       ===================================================== */
+
             .patient-mobile-header {
                 display: none;
                 height: 64px;
@@ -601,7 +653,9 @@
             }
 
 
-
+            /* =====================================================
+                       MOBILE BACKDROP
+                       ===================================================== */
 
             .sidebar-backdrop {
                 position: fixed;
@@ -611,6 +665,10 @@
                 background: rgba(15,23,42,.55);
             }
 
+
+            /* =====================================================
+                       RESPONSIVE
+                       ===================================================== */
 
             @@media(max-width: 991.98px) {
 
@@ -801,12 +859,17 @@
     <div class="patient-app">
 
 
-        <!-- side bar-->
+        <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
 
         <aside class="patient-sidebar"
                id="patientSidebar">
 
 
+            <!-- =================================================
+             LOGO
+             ================================================= -->
 
             <a href="/Patient/Home/Index"
                class="sidebar-brand"
@@ -834,6 +897,9 @@
 
 
 
+            <!-- =================================================
+             SIDEBAR CONTROLS
+             ================================================= -->
 
             <div class="sidebar-controls">
 
@@ -865,6 +931,9 @@
 
 
 
+            <!-- =================================================
+             PATIENT
+             ================================================= -->
 
             <div class="sidebar-user">
 
@@ -894,9 +963,14 @@
 
 
 
-            <!-- navigations -->
+            <!-- =================================================
+             NAVIGATION
+             ================================================= -->
 
             <nav class="sidebar-navigation">
+
+
+                <!-- ================= MAIN ================= -->
 
                 <div class="sidebar-section">
                     Main
@@ -919,6 +993,9 @@
 
                 </a>
 
+
+
+                <!-- ================= TEST REQUESTS ================= -->
 
                 <div class="sidebar-section">
                     Laboratory Tests
@@ -959,6 +1036,9 @@
                 </a>
 
 
+
+                <!-- ================= RESULTS ================= -->
+
                 <div class="sidebar-section">
                     Results
                 </div>
@@ -998,6 +1078,8 @@
                 </a>
 
 
+
+                <!-- ================= MEDICAL INFORMATION ================= -->
 
                 <div class="sidebar-section">
                     My Health
@@ -1072,6 +1154,9 @@
                 </a>
 
 
+
+                <!-- ================= NOTIFICATIONS ================= -->
+
                 <div class="sidebar-section">
                     Communication
                 </div>
@@ -1093,6 +1178,9 @@
 
                 </a>
 
+
+
+                <!-- ================= ACCOUNT ================= -->
 
                 <div class="sidebar-section">
                     Account
@@ -1153,6 +1241,11 @@
             </nav>
 
 
+
+            <!-- =================================================
+             LOGOUT
+             ================================================= -->
+
             <div class="sidebar-bottom">
 
 
@@ -1190,6 +1283,12 @@
 
         </aside>
 
+
+
+        <!-- =====================================================
+         RESTORE SIDEBAR
+         ===================================================== -->
+
         <button type="button"
                 class="sidebar-restore-btn"
                 id="sidebarRestoreButton"
@@ -1202,15 +1301,24 @@
 
 
 
+        <!-- =====================================================
+         MOBILE BACKDROP
+         ===================================================== -->
+
         <div class="sidebar-backdrop"
              id="sidebarBackdrop">
         </div>
 
 
 
-        <!-- main Content-->
+        <!-- =====================================================
+         MAIN CONTENT
+         ===================================================== -->
 
         <main class="patient-main">
+
+
+            <!-- MOBILE HEADER -->
 
             <div class="patient-mobile-header">
 
@@ -1243,6 +1351,11 @@
 
             </div>
 
+
+
+            <!-- =================================================
+             PAGE CONTENT
+             ================================================= -->
             @RenderBody()
 
 
@@ -1252,6 +1365,10 @@
     </div>
 
 
+
+    <!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
@@ -1318,7 +1435,9 @@
 
 
 
-                    /* mobile*/
+                    /* =====================================================
+                       MOBILE SIDEBAR
+                       ===================================================== */
 
                     function openMobileSidebar() {
 
@@ -1407,6 +1526,11 @@
 
                     }
 
+
+
+                    /* =====================================================
+                       COLLAPSE SIDEBAR
+                       ===================================================== */
 
                     function updateCollapseIcon() {
 
@@ -1501,6 +1625,9 @@
 
 
 
+                    /* =====================================================
+                       FULL WIDTH / HIDE SIDEBAR
+                       ===================================================== */
 
                     if (fullScreenToggle) {
 
@@ -1536,6 +1663,9 @@
 
 
 
+                    /* =====================================================
+                       RESTORE SIDEBAR
+                       ===================================================== */
 
                     if (restoreButton) {
 
@@ -1581,6 +1711,11 @@
                     }
 
 
+
+                    /* =====================================================
+                       RESTORE SAVED STATE
+                       ===================================================== */
+
                     const savedCollapsed =
                         localStorage.getItem(
                             "patientSidebarCollapsed"
@@ -1603,7 +1738,9 @@
 
 
 
-                    /* window */
+                    /* =====================================================
+                       WINDOW RESIZE
+                       ===================================================== */
 
                     window.addEventListener(
                         "resize",
@@ -1662,6 +1799,11 @@
                         }
                     );
 
+
+
+                    /* =====================================================
+                       ESCAPE KEY
+                       ===================================================== */
 
                     document.addEventListener(
                         "keydown",

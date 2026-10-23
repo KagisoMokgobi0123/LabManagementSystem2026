@@ -61,7 +61,6 @@
 	<ItemGroup>
 		<Folder Include="Areas\Doctor\Data\" />
 		<Folder Include="Areas\Patient\Data\" />
-		<Folder Include="Migrations\" />
 	</ItemGroup>
 
 </Project>

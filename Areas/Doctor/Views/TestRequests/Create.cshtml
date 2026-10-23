@@ -2,8 +2,19 @@
 @using NMB_HLabSys.Areas.Manager.Models
 @using NMB_HLabSys.Areas.Technician.Models
 @{ ViewData["Title"] = "Create Test Request"; Layout = "_DoctorLayout"; var tests = ViewBag.TestTypes as List<TestTypeModel> ?? new(); var sampleTypes = ViewBag.SampleTypes as List<SampleTypeModel> ?? new(); var patient = ViewBag.Patient as NMB_HLabSys.Areas.Patient.Models.PatientModel; }
-<div class="container py-4"><div class="mb-3"><a asp-action="Index">← Test requests</a><h2 class="mt-2">Create test request</h2><p class="text-muted">Request date and initial status are assigned automatically.</p></div>
+<div class="container py-4">
+    <div class="mb-3">
+      <a asp-area="Doctor"
+   asp-controller="Home"
+   asp-action="Index"
+   class="btn btn-secondary">
+    <i class="bi bi-house-door me-1"></i> Dashboard
+</a>
 
+        <p class="text-muted">
+            Request date and initial status are assigned automatically.
+        </p>
+    </div>
     <form asp-action="Create" method="post" class="card card-body shadow-sm" id="requestForm">
         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 

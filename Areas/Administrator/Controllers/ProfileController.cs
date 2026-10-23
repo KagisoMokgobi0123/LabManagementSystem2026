@@ -223,46 +223,22 @@ namespace NMB_HLabSys.Areas.Administrator.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // Get user before signing out
-            var user =
-                await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
-
-            var email =
-                user?.Email ??
-                User.Identity?.Name ??
-                "Unknown";
-
-
-            // =====================================================
-            // SIGN OUT
-            // =====================================================
+            var email = user?.Email
+                ?? User.Identity?.Name
+                ?? "Unknown";
 
             await _signInManager.SignOutAsync();
 
-
             _logger.LogInformation(
-                "Lab Technician {Email} logged out successfully.",
-                email
-            );
-
-
-            // =====================================================
-            // REDIRECT TO TECHNICIAN LOGIN
-            //
-            // area = "" is VERY IMPORTANT.
-            // TechnicianLogin is in the main AccountController,
-            // not inside the Technician area.
-            // =====================================================
+                "Administrator {Email} logged out successfully.",
+                email);
 
             return RedirectToAction(
-                "AdministratorLogin",
+                "Login",
                 "Account",
-                new
-                {
-                    area = ""
-                }
-            );
+                new { area = "" });
         }
 
     }
