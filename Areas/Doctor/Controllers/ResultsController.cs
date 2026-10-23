@@ -76,8 +76,10 @@ public sealed class ResultsController : Controller
             TempData["ErrorMessage"] = "Only email notification is currently supported.";
             return RedirectToAction(nameof(Details), new { id });
         }
+
         var request = await _db.TestRequests.Include(r => r.Patient).Include(r => r.Samples).Include(r => r.RequestedTestTypes)
             .FirstOrDefaultAsync(r => r.TestRequestId == id && r.DoctorId == doctorId);
+
         if (request == null) return NotFound();
         var items = await _db.TestRequestTestTypes.Include(x => x.TestType)
             .Where(x => x.TestRequestId == id).ToListAsync();
