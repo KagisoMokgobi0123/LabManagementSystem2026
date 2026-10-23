@@ -4,6 +4,8 @@
     ViewData["Title"] = "Select Patient Test";
     Layout = "_TechnicianLayout";
 
+    var managerNames = ViewBag.AssigningManagerNames as Dictionary<int, string> ?? new Dictionary<int, string>();
+
     var tests = Model?.ToList()
         ?? new List<NMB_HLabSys.Areas.Technician.ViewModels.SelectPatientTestViewModel>();
 }
@@ -176,9 +178,36 @@
             cursor: not-allowed;
         }
 
-    .select-action-buttons { display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 12px; }
-    .select-btn.edit-test { background: #d97706; }
-    .select-btn.edit-test:hover { background: #b45309; }
+    .select-action-buttons {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+        gap: 8px;
+        min-width: 145px;
+    }
+
+        .select-action-buttons .select-btn {
+            width: 100%;
+        }
+
+    .clinical-context-value {
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 45px;
+    }
+
+    .select-btn.edit-test {
+        background: #d97706;
+    }
+
+        .select-btn.edit-test:hover {
+            background: #b45309;
+        }
 
     .select-empty {
         padding: 55px 20px;
@@ -224,6 +253,16 @@
             max-width: 100%;
         }
     }
+
+    .dt-buttons .btn-copy-visible, .dt-buttons .btn-copy-visible:hover {
+        color: #fff !important;
+        background: #475569 !important;
+        border-color: #475569 !important;
+    }
+
+    .dt-buttons .btn {
+        margin: 2px;
+    }
 </style>
 
 <div class="select-page">
@@ -245,13 +284,13 @@
                 </p>
             </div>
 
-            <a class="select-back"
-               asp-area="Technician"
+            <a asp-area="Technician"
                asp-controller="Tests"
-               asp-action="Available">
-
+               asp-action="Available"
+               class="select-back"
+               title="Back to My Assigned Test Types">
                 <i class="fas fa-arrow-left mr-1"></i>
-                My Assigned Test Types
+                <span>My Assigned Test Types</span>
             </a>
 
         </div>
@@ -314,17 +353,18 @@
                         <thead>
                             <tr>
                                 <th>Request Number</th>
-                                  <th>Priority</th>
+                                <th>Priority</th>
                                 <th>Patient</th>
-                             @*    <th>ID Number</th> *@
+                                @*    <th>ID Number</th> *@
+                                <th>Assigning Manager</th>
                                 <th>Doctor Full Name</th>
                                 <th>Doctor Username</th>
                                 <th>Clinical Notes</th>
                                 <th>Test Type</th>
-                                
-                             @*    <th>Turnaround</th> *@
+
+                                @*    <th>Turnaround</th> *@
                                 <th>Status</th>
-                               @*  <th>Sample Status</th> *@
+                                @*  <th>Sample Status</th> *@
                                 <th class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -344,7 +384,7 @@
                                             ? "warning"
                                             : "";
 
-                                <tr data-search="@($"{test.RequestReference} {test.PatientName} {test.PatientIdNumber} {test.DoctorFullName} {test.DoctorUsername} {test.ClinicalNotes} {test.TestTypeName} {test.Priority} {test.RequestStatus} {test.TestStatus}".ToLowerInvariant())">
+                                <tr data-search="@($"{test.RequestReference} {test.PatientName} {test.PatientIdNumber} {test.DoctorFullName} {test.DoctorUsername} {(managerNames.TryGetValue(test.RequestedTestId, out var searchManager) ? searchManager : "")} {test.ClinicalNotes} {test.TestTypeName} {test.Priority} {test.RequestStatus} {test.TestStatus}".ToLowerInvariant())">
 
                                     <!-- REQUEST NUMBER -->
                                     <td>
@@ -367,9 +407,15 @@
 
 
                                     <!-- PATIENT ID -->
-                                   @*  <td>
+                                    @*  <td>
                                         @test.PatientIdNumber
                                     </td> *@
+
+                                    <!-- Manager who assigned this test type to the logged-in technician. -->
+                                    <td>
+                                        @(managerNames.TryGetValue(test.RequestedTestId, out var managerFullName)
+                                            ? managerFullName : "Manager not recorded")
+                                    </td>
 
                                     <!-- DOCTOR FULL NAME -->
                                     <td>
@@ -406,7 +452,7 @@
                                     <!-- REQUEST STATUS -->
                                     <td>
                                         <span class="select-pill @(isDeactivated ? "danger" : requestStatus == "InProgress" ? "success" :
-                                                                           requestStatus == "SamplesReceived" ? "primary" : "")">
+                                                                                                                                                                   requestStatus == "SamplesReceived" ? "primary" : "")">
                                             @(isDeactivated ? "De-Activated" : requestStatus == "SamplesReceived" ? "Sample Received" :
                                               requestStatus == "InProgress" ? "In Progress" :
                                               requestStatus)
@@ -414,7 +460,7 @@
                                     </td>
 
                                     <!-- TEST STATUS -->
-                                   @*  <td>
+                                    @*  <td>
                                         <span class="select-pill @(testStatus == "SamplesReceived" ? "success" : "")">
                                             <i class="fas fa-check-circle"></i>
                                             @testStatus
@@ -434,44 +480,51 @@
                                         else
                                         {
                                             <div class="select-action-buttons">
-                                    <!-- OPEN PERFORM TEST MODAL -->
+                                                <!-- VIEW CLINICAL DETAILS -->
+                                                <button type="button" class="select-btn js-view-clinical"
+                                                        style="background:#0f766e"
+                                                        data-test-id="@test.RequestedTestId">
+                                                    <i class="fas fa-notes-medical mr-1"></i> View Medical Details
+                                                </button>
+                                                <!-- OPEN PERFORM TEST MODAL -->
 
-                                        <button type="button"
-                                                class="select-btn open-perform-modal"
-                                                data-username="@test.DoctorUsername"
-                                                data-request-status="@test.RequestStatus"
-                                                data-test-id="@test.RequestedTestId"
-                                                data-request="@test.RequestReference"
-                                                data-patient="@test.PatientName"
-                                                data-patient-id="@test.PatientIdNumber"
-                                                data-doctor="@test.DoctorFullName"
-                                                data-test="@test.TestTypeName"
-                                                data-notes="@test.ClinicalNotes"
-                                                data-priority="@test.Priority"
-                                                data-turnaround="@test.TurnaroundDisplay"
-                                                data-status="@test.TestStatus">
-                                            <i class="fas fa-play-circle mr-1"></i>
-                                            Select Test
-                                        </button>
+                                                <button type="button"
+                                                        class="select-btn open-perform-modal"
+                                                        data-username="@test.DoctorUsername"
+                                                        data-request-status="@test.RequestStatus"
+                                                        data-test-id="@test.RequestedTestId"
+                                                        data-request="@test.RequestReference"
+                                                        data-patient="@test.PatientName"
+                                                        data-patient-id="@test.PatientIdNumber"
+                                                        data-doctor="@test.DoctorFullName"
+                                                        data-test="@test.TestTypeName"
+                                                        data-notes="@test.ClinicalNotes"
+                                                        data-priority="@test.Priority"
+                                                        data-turnaround="@test.TurnaroundDisplay"
+                                                        data-status="@test.TestStatus">
+                                                    <i class="fas fa-play-circle mr-1"></i>
+                                                    Select Test
+                                                </button>
 
 
-                                             <button type="button" class="select-btn edit-test js-edit-test"
-                                                     data-test-id="@test.RequestedTestId"
-                                                     data-request="@test.RequestReference"
-                                                     data-patient="@test.PatientName"
-                                                     data-doctor="@test.DoctorFullName"
-                                                     data-test="@test.TestTypeName"
-                                                     data-priority="@test.Priority"
-                                                     data-notes="@test.ClinicalNotes">
-                                                 <i class="fas fa-edit mr-1"></i> Edit
-                                             </button>
+                                                @*    <button type="button" class="select-btn edit-test js-edit-test"
+                                                        data-test-id="@test.RequestedTestId"
+                                                        data-request="@test.RequestReference"
+                                                        data-patient="@test.PatientName"
+                                                        data-doctor="@test.DoctorFullName"
+                                                        data-test="@test.TestTypeName"
+                                                        data-priority="@test.Priority"
+                                                        data-notes="@test.ClinicalNotes">
+                                                    <i class="fas fa-edit mr-1"></i> Edit
+                                                </button> *@
 
-                                            <button type="button" class="select-btn js-deactivate-test"
-                                                    style="background:#b91c1c"
-                                                    data-test-id="@test.RequestedTestId"
-                                                    data-test-name="@test.TestTypeName">
-                                                <i class="fas fa-ban mr-1"></i> De-Activate
-                                             </button>
+                                                <button type="button" class="select-btn js-deactivate-test"
+                                                        style="background:#b91c1c"
+                                                        data-test-id="@test.RequestedTestId"
+                                                        data-test-name="@test.TestTypeName"
+                                                        data-request-number="@test.RequestReference">
+                                                    <i class="fas fa-ban mr-1"></i> De-Activate
+                                                </button>
                                             </div>
                                         }
                                     </td>
@@ -510,6 +563,27 @@
 
     </div>
 
+</div>
+
+
+<!-- Read-only medical information for the authorised technician. -->
+<div class="modal fade" id="selectClinicalModal" tabindex="-1" aria-labelledby="selectClinicalModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectClinicalModalLabel"><i class="fas fa-notes-medical mr-2"></i>Patient Medical Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p id="selectClinicalIdentity" class="font-weight-bold"></p>
+                <div class="form-group"><label>Medical Conditions</label><div id="selectMedicalConditions" class="clinical-context-value"></div></div>
+                <div class="form-group"><label>Allergies</label><div id="selectAllergies" class="clinical-context-value"></div></div>
+                <div class="form-group"><label>Medications</label><div id="selectMedications" class="clinical-context-value"></div></div>
+                <div class="form-group"><label>Doctor's Clinical Notes</label><div id="selectDoctorClinicalNotes" class="clinical-context-value"></div></div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button></div>
+        </div>
+    </div>
 </div>
 
 <!-- Edit details modal: patient and doctor are read-only; only clinical notes are editable. -->
@@ -552,20 +626,100 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap4.min.css" />
+    <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
     <script>
         $(function() {
-            $('#selectSearch').on('input', function() {
-                var query = (this.value || '').toLowerCase();
-                var visible = 0;
-                $('#selectTestsTable tbody tr').each(function() {
-                    var match = ($(this).attr('data-search') || $(this).text().toLowerCase()).indexOf(query) !== -1;
-                    $(this).toggle(match);
-                    if (match) visible++;
-                });
-                $('#selectVisibleCount').text('Showing ' + visible + ' matching patient test(s).');
+
+            $(document).on('click', '.js-view-clinical', async function() {
+                const button = $(this);
+                const id = button.attr('data-test-id');
+                button.prop('disabled', true);
+                try {
+                    const data = await $.get('@Url.Action("SelectTestClinicalContext", "Tests", new { area = "Technician" })', { id: id });
+                    $('#selectClinicalIdentity').text((data.patientName || 'Patient') + ' | ' +
+                        (data.requestNumber || '') + ' | ' + (data.testType || ''));
+                    $('#selectMedicalConditions').text(data.medicalConditions || 'Not recorded');
+                    $('#selectAllergies').text(data.allergies || 'Not recorded');
+                    $('#selectMedications').text(data.medications || 'Not recorded');
+                    $('#selectDoctorClinicalNotes').text(data.clinicalNotes || 'Not recorded');
+                    const modal = document.getElementById('selectClinicalModal');
+                    if (window.bootstrap && window.bootstrap.Modal)
+                        window.bootstrap.Modal.getOrCreateInstance(modal).show();
+                    else if ($.fn.modal) $('#selectClinicalModal').modal('show');
+                    else alert('Bootstrap modal JavaScript is not loaded.');
+                } catch (xhr) {
+                    const message = xhr.responseJSON?.message || 'Unable to load patient medical details. Check your access and refresh.';
+                    if (typeof Swal !== 'undefined') Swal.fire({ icon: 'error', title: 'Medical details unavailable', text: message });
+                    else alert(message);
+                } finally { button.prop('disabled', false); }
+            });
+            $('#selectClinicalModal [data-dismiss="modal"]').on('click', function() {
+                if (window.bootstrap && window.bootstrap.Modal)
+                    window.bootstrap.Modal.getOrCreateInstance(document.getElementById('selectClinicalModal')).hide();
+                else if ($.fn.modal) $('#selectClinicalModal').modal('hide');
             });
 
-            $(document).on('click', '.js-edit-test', function () {
+            // DataTables provides search, paging, sorting and exports.
+            if ($('#selectTestsTable').length && $.fn.DataTable) {
+                const selectTable = $('#selectTestsTable').DataTable({
+                    processing: true,
+                    autoWidth: false,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+                    paging: true,
+                    pagingType: 'full_numbers',
+                    scrollX: true,
+                    scrollY: '500px',
+                    scrollCollapse: true,
+                    order: [[0, 'desc']],
+                    columnDefs: [{ targets: -1, orderable: false, searchable: false }],
+                    dom: "<'row align-items-center mb-3'<'col-lg-4 col-md-6'l><'col-lg-8 col-md-6 text-md-right'B>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row align-items-center mt-3'<'col-md-5'i><'col-md-7'p>>",
+                    buttons: [
+                        { extend: 'copyHtml5', text: '<i class="fas fa-copy mr-1"></i> Copy', className: 'btn btn-secondary btn-sm btn-copy-visible', title: 'NMB-HLabSys - Available Patient Tests' },
+                        { extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Excel', className: 'btn btn-success btn-sm', title: 'NMB-HLabSys - Available Patient Tests', filename: 'NMB-HLabSys_Available_Patient_Tests', sheetName: 'Patient Tests' },
+                        {
+                            extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf mr-1"></i> PDF', className: 'btn btn-danger btn-sm', title: 'NMB-HLabSys - Available Patient Tests', filename: 'NMB-HLabSys_Available_Patient_Tests', orientation: 'landscape', pageSize: 'A3', customize: function(doc) {
+                                doc.pageMargins = [20, 45, 20, 40];
+                                doc.defaultStyle.fontSize = 7;
+                                doc.styles.tableHeader.fontSize = 7;
+                                doc.styles.title.fontSize = 15;
+                                doc.styles.title.alignment = 'center';
+                                doc.content.splice(1, 0, { text: 'Laboratory Available Patient Tests Report', alignment: 'center', fontSize: 10, margin: [0, 0, 0, 4] }, { text: 'Generated: ' + new Date().toLocaleString(), alignment: 'center', fontSize: 8, margin: [0, 0, 0, 12] });
+                                const tableContent = doc.content.find(x => x.table);
+                                if (tableContent) tableContent.table.widths = Array(tableContent.table.body[0].length).fill('*');
+                                doc.footer = function(page, pages) { return { columns: [{ text: 'NMB-HLabSys | Available Patient Tests', alignment: 'left' }, { text: 'Page ' + page + ' of ' + pages, alignment: 'right' }], margin: [20, 0, 20, 0], fontSize: 7, color: '#64748b' }; };
+                            }
+                        },
+                        { extend: 'print', text: '<i class="fas fa-print mr-1"></i> Print', className: 'btn btn-primary btn-sm', title: 'NMB-HLabSys - Available Patient Tests', messageTop: 'Laboratory Available Patient Tests Report' }
+                    ].map(function(button) {
+                        button.exportOptions = {
+                            columns: ':not(:last-child)',
+                            modifier: { search: 'applied', order: 'applied', page: 'all' },
+                            format: { body: function(data, row, column, node) { return $(node).text().replace(/\s+/g, ' ').trim(); } }
+                        };
+                        return button;
+                    }),
+                    language: { emptyTable: 'No patient tests are available.', zeroRecords: 'No matching patient tests found.', info: 'Showing _START_ to _END_ of _TOTAL_ tests', infoEmpty: 'Showing 0 tests', infoFiltered: '(filtered from _MAX_ total tests)', lengthMenu: 'Show _MENU_ records' }
+                });
+                $('#selectSearch').on('keyup change input', function() { selectTable.search(this.value).draw(); });
+                selectTable.on('draw', function() {
+                    $('#selectVisibleCount').text('Showing ' + selectTable.rows({ search: 'applied' }).count() + ' matching patient test(s).');
+                });
+            }
+
+            $(document).on('click', '.js-edit-test', function() {
                 const b = $(this);
                 $('#editRequestedTestId').val(b.attr('data-test-id'));
                 $('#editRequestReference').val(b.attr('data-request'));
@@ -581,13 +735,13 @@
                 else alert('Bootstrap modal JavaScript is not loaded.');
             });
 
-            $('#editPatientTestModal [data-dismiss="modal"]').on('click', function () {
+            $('#editPatientTestModal [data-dismiss="modal"]').on('click', function() {
                 if (window.bootstrap && window.bootstrap.Modal)
                     window.bootstrap.Modal.getOrCreateInstance(document.getElementById('editPatientTestModal')).hide();
                 else if ($.fn.modal) $('#editPatientTestModal').modal('hide');
             });
 
-            $('#editPatientTestForm').on('submit', async function (event) {
+            $('#editPatientTestForm').on('submit', async function(event) {
                 event.preventDefault();
                 const btn = $('#saveEditPatientTest').prop('disabled', true);
                 try {
@@ -606,48 +760,79 @@
                 } finally { btn.prop('disabled', false); }
             });
 
-            $(document).on('click', '.js-deactivate-test', async function () {
+            // Same SweetAlert2 confirmation and inline AJAX validation pattern as Receive Samples.
+            $(document).on('click', '.js-deactivate-test', async function(event) {
+                event.preventDefault();
+                const button = $(this);
+                if (button.prop('disabled')) return;
+
                 if (typeof Swal === 'undefined') {
-                    alert('SweetAlert2 could not load. Please check your network connection.');
+                    alert('SweetAlert2 is not loaded. Please contact the administrator.');
                     return;
                 }
-                const button = $(this);
-                const id = button.attr('data-test-id');
-                const name = button.attr('data-test-name') || 'this test';
-                const result = await Swal.fire({
-                    title: 'De-Activate Patient Test?',
-                    text: 'Enter a reason for de-activating ' + name + '.',
+
+                const testId = Number(button.attr('data-test-id'));
+                const testName = button.attr('data-test-name') || 'Selected test';
+                const requestNumber = button.attr('data-request-number') || 'N/A';
+
+                if (!Number.isInteger(testId) || testId <= 0) {
+                    await Swal.fire({ icon: 'error', title: 'Invalid Test', text: 'Test ID is missing.' });
+                    return;
+                }
+
+                const confirmation = await Swal.fire({
                     icon: 'warning',
+                    title: 'De-Activate Patient Test?',
+                    text: `Request: ${requestNumber} | Test: ${testName}. A reason is mandatory and will be recorded in the audit trail.`,
                     input: 'textarea',
-                    inputPlaceholder: 'Reason for de-activation (required)',
-                    inputAttributes: { maxlength: '500', 'aria-label': 'De-activation reason' },
+                    inputLabel: 'Reason for de-activation (required)',
+                    inputPlaceholder: 'Explain why this test must be de-activated...',
+                    inputAttributes: { maxlength: '500', 'aria-label': 'Reason for de-activation' },
+                    inputValidator: (value) => {
+                        if (!value || !value.trim()) return 'Please provide a reason for de-activation.';
+                        if (value.trim().length > 500) return 'The reason must not exceed 500 characters.';
+                    },
                     showCancelButton: true,
-                    confirmButtonText: 'De-Activate',
-                    confirmButtonColor: '#b91c1c',
-                    inputValidator: value => {
-                        if (!value || !value.trim()) return 'A de-activation reason is required.';
-                        if (value.trim().length > 500) return 'Reason cannot exceed 500 characters.';
+                    confirmButtonText: 'Yes, De-Activate',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#dc2626',
+                    showLoaderOnConfirm: true,
+                    allowOutsideClick: () => !Swal.isLoading(),
+                    preConfirm: async (value) => {
+                        try {
+                            const response = await $.ajax({
+                                url: '@Url.Action("DeactivateRequestedTest", "Tests", new { area = "Technician" })',
+                                type: 'POST',
+                                data: {
+                                    testRequestTestTypeId: testId,
+                                    reason: value.trim(),
+                                    __RequestVerificationToken: $('#selectSoftDeleteAntiforgery input[name="__RequestVerificationToken"]').val()
+                                }
+                            });
+                            if (!response || !response.success) {
+                                Swal.showValidationMessage(response?.message || 'De-activation failed.');
+                                return false;
+                            }
+                            return response;
+                        } catch (xhr) {
+                            const message = xhr.responseJSON?.message ||
+                                (xhr.status === 401 || xhr.status === 403
+                                    ? 'Your session has expired or you are not authorized.'
+                                    : 'Unable to de-activate the test. Please try again.');
+                            Swal.showValidationMessage(message);
+                            return false;
+                        }
                     }
                 });
-                if (!result.isConfirmed) return;
-                button.prop('disabled', true);
-                try {
-                    const response = await $.ajax({
-                        url: '@Url.Action("DeactivateRequestedTest", "Tests", new { area = "Technician" })',
-                        method: 'POST',
-                        data: {
-                            testRequestTestTypeId: id,
-                            reason: result.value.trim(),
-                            __RequestVerificationToken: $('#selectSoftDeleteAntiforgery input[name="__RequestVerificationToken"]').val()
-                        }
+
+                if (confirmation.isConfirmed && confirmation.value?.success) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Patient Test De-Activated',
+                        text: confirmation.value.message || 'The test and audit record were saved.',
+                        confirmButtonText: 'OK'
                     });
-                    if (!response.success) throw new Error(response.message || 'Unable to de-activate.');
-                    await Swal.fire({ icon: 'success', title: 'De-Activated', text: response.message });
                     window.location.reload();
-                } catch (xhr) {
-                    button.prop('disabled', false);
-                    const message = xhr.responseJSON?.message || xhr.message || 'Unable to de-activate the test.';
-                    await Swal.fire({ icon: 'error', title: 'De-activation failed', text: message });
                 }
             });
 

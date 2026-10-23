@@ -2,13 +2,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Areas.Administrator.Models;
 using NMB_HLabSys.Areas.Doctor.Models;
 using NMB_HLabSys.Areas.Manager.Models;
 using NMB_HLabSys.Areas.Technician.Models;
 using NMB_HLabSys.Data;
+
 using System.Data;
 using NMB_HLabSys.Models.Identity;
 using NMB_HLabSys.Areas.Technician.ViewModels;
+using NMB_HLabSys.Areas.Patient.Models;
 
 namespace NMB_HLabSys.Areas.Technician.Controllers
 {
@@ -61,108 +64,149 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
+        // Manager-authorized test types ONLY. Patient-request tests are shown elsewhere.
+        // One technician may be authorized for many types; one request may have
+        // multiple requested-test rows owned by different technicians.
         [HttpGet]
         public async Task<IActionResult> Available()
         {
-            // STEP 1: Identify logged-in technician
             var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId)) return Challenge();
 
-            if (string.IsNullOrWhiteSpace(technicianId))
-                return Challenge();
-
-            // STEP 2: Retrieve Laboratory Manager assignments
-            // Include active and revoked assignments.
-            var assignmentRecords = await (
-                from assignment in _context.TechnicianTestTypes
-                    .AsNoTracking()
-                join test in _context.TestTypes
-                    .AsNoTracking()
-                    on assignment.TestTypeId equals test.TestTypeId
-                where assignment.TechnicianId == technicianId
-                select new TechnicianAssignmentRowViewModel
-                {
-                    TestTypeId = test.TestTypeId,
-                    Name = test.Name,
-
-                    Category = test.TestCategory != null
-                        ? test.TestCategory.Description
-                        : null,
-
-                    SampleType = test.SampleType != null
-                        ? test.SampleType.Name
-                        : null,
-
-                    IsActive = assignment.IsActive
-                }
-            ).ToListAsync();
-
-            // STEP 3: Keep one display row per assigned test type
-            var assignments = assignmentRecords
-                .GroupBy(x => x.TestTypeId)
-                .Select(g => g
-                    .OrderByDescending(x => x.IsActive)
-                    .First())
-                .OrderBy(x => x.Name)
-                .ToList();
-
-            // STEP 4: Retrieve selected tests
-            // Include the ApplicationUser patient and doctor.
-            var selectedTests = await _context.TestRequestTestTypes
+            var assignmentRecords = await _context.TechnicianTestTypes
                 .AsNoTracking()
-                .Include(x => x.TestType)
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Patient)
-                .Include(x => x.TestRequest)
-                    .ThenInclude(r => r!.Doctor)
-                .Where(x => x.TechnicianId == technicianId)
-                .OrderByDescending(x => x.StartDateTime)
-                .ThenBy(x => x.TestRequestTestTypeId)
+                .Where(a => a.TechnicianId == technicianId && a.IsActive)
+                .Select(a => new
+                {
+                    a.TestTypeId,
+                    a.ManagerId,
+                    a.AssignedDate,
+                    TestName = a.TestType != null ? a.TestType.Name : null,
+                    Category = a.TestType != null && a.TestType.TestCategory != null
+                        ? a.TestType.TestCategory.Description : null,
+                    SampleType = a.TestType != null && a.TestType.SampleType != null
+                        ? a.TestType.SampleType.Name : null
+                })
                 .ToListAsync();
 
-            // STEP 5: Map selected tests and deadlines
-            var deadlineRows = selectedTests.Select(x =>
-            {
-                var request = x.TestRequest;
+            // The latest active manager authorization per test type.
+            var latestAssignments = assignmentRecords
+                .GroupBy(a => a.TestTypeId)
+                .Select(g => g.OrderByDescending(a => a.AssignedDate).First())
+                .OrderBy(a => a.TestName)
+                .ToList();
 
-                // Patient is an ApplicationUser
-                var patient = request?.Patient;
+            var managerIds = latestAssignments
+                .Select(a => a.ManagerId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct()
+                .ToList();
 
-                var patientName =
-                    !string.IsNullOrWhiteSpace(patient?.FullName)
-                        ? patient.FullName
-                        : "Patient not found";
+            var managers = await _userManager.Users.AsNoTracking()
+                .Where(u => managerIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.FirstName, u.LastName, u.UserName })
+                .ToListAsync();
 
-                return new TechnicianDeadlineRowViewModel
+            var managerNames = managers.ToDictionary(
+                u => u.Id,
+                u => !string.IsNullOrWhiteSpace((u.FirstName + " " + u.LastName).Trim())
+                    ? (u.FirstName + " " + u.LastName).Trim()
+                    : u.UserName ?? "Manager not recorded");
+
+            ViewBag.ManagerNamesByTestType = latestAssignments.ToDictionary(
+                a => a.TestTypeId,
+                a => !string.IsNullOrWhiteSpace(a.ManagerId) &&
+                     managerNames.TryGetValue(a.ManagerId, out var name)
+                    ? name : "Manager not recorded");
+            ViewBag.AssignmentDatesByTestType = latestAssignments.ToDictionary(
+                a => a.TestTypeId, a => a.AssignedDate);
+
+            // Request references associated with authorized test types. Show only
+            // tests already owned by this technician or not yet claimed by anyone;
+            // another technician's private work is not exposed on this page.
+            var authorizedTypeIds = latestAssignments.Select(a => a.TestTypeId).ToList();
+            var associatedRequests = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Where(t => authorizedTypeIds.Contains(t.TestTypeId)
+                    && !t.IsDeleted
+                    && (t.TechnicianId == technicianId ||
+                        (t.TechnicianId == null || t.TechnicianId == ""))
+                    && t.TestRequest != null
+                    && !t.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                .Select(t => new
                 {
-                    RequestReference =
-                        request?.RequestNumber
-                        ?? x.TestRequestId.ToString(),
+                    t.TestTypeId,
+                    t.TestRequestId,
+                    RequestNumber = t.TestRequest!.RequestNumber
+                })
+                .ToListAsync();
 
-                    PatientName = patientName,
+            ViewBag.RequestNumbersByTestType = associatedRequests
+                .GroupBy(t => t.TestTypeId)
+                .ToDictionary(g => g.Key, g => g
+                    .GroupBy(t => t.TestRequestId)
+                    .Select(r => r.First().RequestNumber)
+                    .OrderBy(number => number)
+                    .ToList());
 
-                    TestTypeName =
-                        x.TestType?.Name
-                        ?? "Unknown Test",
+            // Technician teams for request numbers visible on this page.
+            // Reveal other technicians only for requests on which the current
+            // technician is already assigned to at least one active test.
+            var participatingRequestIds = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Where(t => t.TechnicianId == technicianId && !t.IsDeleted)
+                .Select(t => t.TestRequestId)
+                .Distinct()
+                .ToListAsync();
 
-                    Status = x.Status,
+            var visibleParticipatingRequestIds = associatedRequests
+                .Where(r => participatingRequestIds.Contains(r.TestRequestId))
+                .Select(r => r.TestRequestId).Distinct().ToList();
 
-                    // StartDateTime is stored in UTC
-                    StartDateTimeUtc = x.StartDateTime,
+            var requestTeamRows = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Where(t => visibleParticipatingRequestIds.Contains(t.TestRequestId)
+                    && !t.IsDeleted && t.TechnicianId != null && t.TechnicianId != "")
+                .Select(t => new { t.TestRequestId, t.TechnicianId })
+                .Distinct()
+                .ToListAsync();
 
-                    TurnaroundHours =
-                        x.TestType == null
-                            ? null
-                            : (double?)x.TestType.TurnAroundTimeHours
-                };
+            var teamUserIds = requestTeamRows.Select(t => t.TechnicianId!)
+                .Distinct().ToList();
+            var teamUsers = await _userManager.Users.AsNoTracking()
+                .Where(u => teamUserIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.FirstName, u.LastName, u.UserName })
+                .ToListAsync();
+            var teamNamesById = teamUsers.ToDictionary(u => u.Id,
+                u => !string.IsNullOrWhiteSpace((u.FirstName + " " + u.LastName).Trim())
+                    ? (u.FirstName + " " + u.LastName).Trim()
+                    : u.UserName ?? "Unknown technician");
+
+            // Key: TestTypeId; Value: request number -> participating technicians.
+            // Unclaimed requests do not expose other technicians' identities.
+            var teamByRequestId = requestTeamRows.GroupBy(t => t.TestRequestId)
+                .ToDictionary(g => g.Key, g => g.Select(t =>
+                    teamNamesById.TryGetValue(t.TechnicianId!, out var fullName)
+                        ? fullName : "Unknown technician")
+                    .Distinct().OrderBy(n => n).ToList());
+            ViewBag.TechniciansByTestTypeRequest = associatedRequests
+                .GroupBy(r => r.TestTypeId)
+                .ToDictionary(g => g.Key, g => g.GroupBy(r => r.TestRequestId)
+                    .ToDictionary(r => r.First().RequestNumber, r =>
+                        teamByRequestId.TryGetValue(r.Key, out var team)
+                            ? team : new List<string>()));
+
+            var model = latestAssignments.Select(a => new TechnicianAssignmentRowViewModel
+            {
+                TestTypeId = a.TestTypeId,
+                Name = a.TestName ?? "Unknown test type",
+                Category = a.Category,
+                SampleType = a.SampleType,
+                IsActive = true
             }).ToList();
 
-            // STEP 6: Pass selected tests to the unified table
-            ViewBag.SelectedTests = deadlineRows;
-
-            // STEP 7: Return the existing single-table view
-            return View("Available", assignments);
+            return View("Available", model);
         }
-
 
 
         [HttpGet]
@@ -178,7 +222,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 join t in _context.TestTypes.AsNoTracking()
                     on a.TestTypeId equals t.TestTypeId
                 where a.TechnicianId == technicianId
-                      && a.TestTypeId == id
+                      && a.TestTypeId == id && a.IsActive
                 select new TechnicianAssignmentRowViewModel
                 {
                     TestTypeId = t.TestTypeId,
@@ -202,7 +246,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         // StartDateTime is stored in UTC; convert to local time only when displaying it.
 
 
-        public async Task<IActionResult> Select()
+        public async Task<IActionResult> Select(int? testTypeId = null)
         {
             // STEP 1: Get logged-in technician
             var technician = await _userManager.GetUserAsync(User);
@@ -227,6 +271,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .Include(x => x.TestRequest)
                 .Where(x =>
                     assignedTestTypeIds.Contains(x.TestTypeId) &&
+                    (!testTypeId.HasValue || x.TestTypeId == testTypeId.Value) &&
                     (x.Status == "Submitted" || x.Status == "SamplesReceived") &&
                     (x.TechnicianId == null || x.TechnicianId == "") &&
                     x.TestRequest != null &&
@@ -236,7 +281,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                      x.TestRequest.Status == "SamplesReceived" ||
                      x.TestRequest.Status == "InProgress" ||
                      x.TestRequest.Status == "In Progress") &&
-                    (x.IsDeleted || _context.Samples.Any(sample =>
+                    (!x.IsDeleted && _context.Samples.Any(sample =>
                         sample.TestRequestId == x.TestRequestId &&
                         sample.SampleTypeId == x.TestType.SampleTypeId &&
                         sample.IsReceived && !sample.IsDeleted)))
@@ -278,6 +323,42 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 .AsNoTracking()
                 .Where(x => doctorIds.Contains(x.Id))
                 .ToDictionaryAsync(x => x.Id);
+
+            // The laboratory manager assigned the test TYPE to this technician.
+            // This is not the doctor who requested the patient's test.
+            var relevantTestTypeIds = availableTests.Select(t => t.TestTypeId).Distinct().ToList();
+            var managerAssignments = await _context.TechnicianTestTypes
+                .AsNoTracking()
+                .Where(a => a.TechnicianId == technician.Id &&
+                            relevantTestTypeIds.Contains(a.TestTypeId))
+                .Select(a => new { a.TestTypeId, a.ManagerId, a.AssignedDate, a.IsActive })
+                .ToListAsync();
+
+            var managerIds = managerAssignments
+                .Select(a => a.ManagerId)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct().ToList();
+            var managersById = await _userManager.Users.AsNoTracking()
+                .Where(u => managerIds.Contains(u.Id))
+                .Select(u => new { u.Id, u.FirstName, u.LastName })
+                .ToDictionaryAsync(u => u.Id, u => (u.FirstName + " " + u.LastName).Trim());
+
+            var managerNamesByTestType = managerAssignments
+                .GroupBy(a => a.TestTypeId)
+                .ToDictionary(g => g.Key, g =>
+                {
+                    var assignment = g.OrderByDescending(a => a.IsActive)
+                        .ThenByDescending(a => a.AssignedDate).First();
+                    return !string.IsNullOrWhiteSpace(assignment.ManagerId) &&
+                           managersById.TryGetValue(assignment.ManagerId, out var name) &&
+                           !string.IsNullOrWhiteSpace(name)
+                        ? name : "Manager not recorded";
+                });
+
+            ViewBag.AssigningManagerNames = availableTests.ToDictionary(
+                t => t.TestRequestTestTypeId,
+                t => managerNamesByTestType.TryGetValue(t.TestTypeId, out var name)
+                    ? name : "Manager not recorded");
 
             // STEP 8: Map results to the view model
             var model = availableTests.Select(x =>
@@ -362,10 +443,121 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 };
             }).ToList();
 
+            // Dates are read from the requested-test records (UTC), never generated for display.
+            ViewBag.SelectTestDates = availableTests.ToDictionary(
+                x => x.TestRequestTestTypeId,
+                x => new string[]
+                {
+                    x.StartDateTime.HasValue
+                        ? x.StartDateTime.Value.ToString("dd MMM yyyy HH:mm") + " UTC"
+                        : "Not started",
+                    x.CompletionDateTime.HasValue
+                        ? x.CompletionDateTime.Value.ToString("dd MMM yyyy HH:mm") + " UTC"
+                        : "Not completed"
+                });
+
             // STEP 9: Return the Select view
             return View("Select", model);
         }
 
+
+
+
+        // Read-only clinical context for an eligible, unclaimed test.
+        [HttpGet]
+        public async Task<IActionResult> SelectTestClinicalContext(int id)
+        {
+            var technicianId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(technicianId)) return Challenge();
+
+            var test = await _context.TestRequestTestTypes
+                .AsNoTracking()
+                .Include(t => t.TestRequest).ThenInclude(r => r!.Patient)
+                .Include(t => t.TestType)
+                .FirstOrDefaultAsync(t => t.TestRequestTestTypeId == id);
+
+            if (test == null || test.IsDeleted ||
+                !string.IsNullOrWhiteSpace(test.TechnicianId) ||
+                (test.Status != "Submitted" && test.Status != "SamplesReceived") ||
+                test.TestRequest == null || test.TestType == null ||
+                test.TestRequest.RequestNumber.StartsWith("NMB-REQ-DEMO-"))
+                return NotFound();
+
+            var authorised = await _context.TechnicianTestTypes.AsNoTracking().AnyAsync(a =>
+                a.TechnicianId == technicianId && a.TestTypeId == test.TestTypeId && a.IsActive);
+            if (!authorised) return Forbid();
+
+            var received = await _context.Samples.AsNoTracking().AnyAsync(s =>
+                s.TestRequestId == test.TestRequestId &&
+                s.SampleTypeId == test.TestType.SampleTypeId &&
+                s.IsReceived && !s.IsDeleted);
+            if (!received) return NotFound();
+
+            var patientUserId = test.TestRequest.PatientId;
+            var record = await _context.Patients.AsNoTracking()
+                .Include(p => p.PatientConditions)
+                .Include(p => p.PatientAllergies)
+                .Include(p => p.PatientMedications)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(p => p.UserId == patientUserId);
+
+
+            var conditions = await _context.Set<MedicalConditionModel>().AsNoTracking()
+                .ToDictionaryAsync(x => x.MedicalConditionId, x => x.ConditionName);
+            var allergies = await _context.Set<AllergyModel>().AsNoTracking()
+                .ToDictionaryAsync(x => x.AllergyId, x => x.AllergyName);
+            var medications = await _context.Set<MedicationModel>().AsNoTracking()
+                .ToDictionaryAsync(x => x.MedicationId, x => x.MedicationName);
+
+            static string Lines(IEnumerable<string> entries)
+            {
+                var values = entries.Where(x => !string.IsNullOrWhiteSpace(x)).ToList();
+                return values.Count == 0 ? "Not recorded" : string.Join("\n", values);
+            }
+
+            var medicalConditions = Lines(record?.PatientConditions.Select(c =>
+                string.Join(" · ", new[]
+                {
+                    conditions.TryGetValue(c.MedicalConditionId, out var name) ? name : "Condition not catalogued",
+                    c.Notes
+                }.Where(x => !string.IsNullOrWhiteSpace(x)))) ?? Enumerable.Empty<string>());
+
+            var patientAllergies = Lines(record?.PatientAllergies.Select(a =>
+                string.Join(" · ", new[]
+                {
+                    allergies.TryGetValue(a.AllergyId, out var name) ? name : "Allergy not catalogued",
+                    a.Severity,
+                    a.Notes
+                }.Where(x => !string.IsNullOrWhiteSpace(x)))) ?? Enumerable.Empty<string>());
+
+            var patientMedications = Lines(record?.PatientMedications.Select(m =>
+                string.Join(" · ", new[]
+                {
+                    medications.TryGetValue(m.MedicationId, out var name) ? name : "Medication not catalogued",
+                    m.Dosage,
+                    m.Frequency,
+                    m.Notes
+                }.Where(x => !string.IsNullOrWhiteSpace(x)))) ?? Enumerable.Empty<string>());
+
+            return Json(new
+            {
+                patientName = test.TestRequest.Patient?.FullName ?? "Not available",
+                requestNumber = test.TestRequest.RequestNumber,
+                testType = test.TestType.Name,
+                assignedTechnician = "Not yet assigned",
+                startDateTime = test.StartDateTime.HasValue
+                    ? test.StartDateTime.Value.ToString("dd MMM yyyy HH:mm") + " UTC"
+                    : "Not started",
+                completionDateTime = test.CompletionDateTime.HasValue
+                    ? test.CompletionDateTime.Value.ToString("dd MMM yyyy HH:mm") + " UTC"
+                    : "Not completed",
+                medicalConditions,
+                allergies = patientAllergies,
+                medications = patientMedications,
+                clinicalNotes = string.IsNullOrWhiteSpace(test.TestRequest.ClinicalNotes)
+                    ? "Not recorded" : test.TestRequest.ClinicalNotes
+            });
+        }
 
 
         // Edit clinical notes on an eligible, unclaimed patient request.
@@ -836,6 +1028,7 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
                     .Where(x =>
                         x.TechnicianId == technician.Id &&
+                        !x.IsDeleted &&
                         (
                             x.Status == "In Progress"
                             ||
@@ -2125,10 +2318,9 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                         });
                 }
 
-                // IMPORTANT: Do NOT update the parent TestRequest.Status here.
-                // Do NOT send the doctor's PDF/email here.
-                // The verification workflow must do that only after ALL tests
-                // belonging to the request have reached the 'Verified' status.
+                // Recheck the entire request after the final test is completed.
+                // Completed results are preliminary until independently verified.
+                await QueueCombinedReportIfReadyAsync(test.TestRequestId, now);
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -2921,70 +3113,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 // 6. CHECK ALL ACTIVE TESTS ON THE REQUEST
                 // ==========================================
 
-                var allSamplesReceived =
-                    await _context.Samples.AnyAsync(s =>
-                        s.TestRequestId == test.TestRequestId && !s.IsDeleted) &&
-                    !await _context.Samples.AnyAsync(s =>
-                        s.TestRequestId == test.TestRequestId &&
-                        !s.IsDeleted && !s.IsReceived);
-
-                var allTestsVerified =
-                    decision == "Verify" &&
-                    allSamplesReceived &&
-                    await _context.TestRequestTestTypes.AnyAsync(x =>
-                        x.TestRequestId == test.TestRequestId && !x.IsDeleted) &&
-                    !await _context.TestRequestTestTypes.AnyAsync(x =>
-                        x.TestRequestId == test.TestRequestId &&
-                        !x.IsDeleted && x.Status != "Verified");
-
-                // ==========================================
-                // 7. UPDATE THE REQUEST AND QUEUE FINAL REPORT
-                // ==========================================
-                // Individual verified results are exposed directly through
-                // Doctor/ReceivedReports/PortalRecent and PortalDownload.
-                // No outgoing email is created for portal-only reports.
-
-                if (allTestsVerified && test.TestRequest != null)
-                {
-                    test.TestRequest.Status =
-                        TestRequestStatus.Completed.ToString();
-
-                    // A Final report must not be confused with other
-                    // report types for the same request.
-                    var finalAlreadyQueued =
-                        await _context.TechnicianSentEmails.AnyAsync(x =>
-                            x.TestRequestId == test.TestRequestId &&
-                            x.ReportType == "Final");
-
-                    if (!finalAlreadyQueued)
-                    {
-                        _context.TechnicianSentEmails.Add(
-                            new TechnicianSentEmailModel
-                            {
-                                TestRequestId = test.TestRequestId,
-                                TestRequestTestTypeId = null,
-                                ReportType = "Final",
-                                RecipientEmail = "Pending recipient resolution",
-                                Subject = $"Laboratory Results - Request #{test.TestRequestId}",
-                                Body = "Your verified laboratory results report is ready.",
-                                PdfFileName = $"LaboratoryReport_{test.TestRequestId}.pdf",
-                                PdfAttachment = null,
-                                Status = "Pending",
-                                CreatedAt = now,
-                                SentAt = null,
-                                ErrorMessage = null
-                            });
-                    }
-                }
-                else if (test.TestRequest != null &&
-                         test.TestRequest.Status ==
-                             TestRequestStatus.Completed.ToString())
-                {
-                    // A parent cannot remain Completed while any active child
-                    // test is not Verified, regardless of the current decision.
-                    test.TestRequest.Status =
-                        TestRequestStatus.InProgress.ToString();
-                }
+                bool allTestsReady = await QueueCombinedReportIfReadyAsync(
+                    test.TestRequestId, now);
 
                 // ==========================================
                 // 8. SAVE EVERYTHING ATOMICALLY
@@ -3001,8 +3131,8 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
                 if (decision == "Verify")
                 {
                     TempData["SuccessMessage"] =
-                        allTestsVerified
-                            ? "Test verified successfully. All active tests are verified; the final-report workflow has been checked."
+                        allTestsReady
+                            ? "Test verified successfully. All active tests are Verified or Completed; the final-report workflow has been checked."
                             : "Test result verified successfully. It is available to the authorised doctor through the portal when the request is Completed.";
                 }
                 else
@@ -3081,6 +3211,83 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
 
 
 
+
+
+        // Invoked from both completion and verification, inside their existing
+        // serializable transactions. Never requeue previously sent/failed reports
+        // automatically: a human must review those before another delivery.
+        private async Task<bool> QueueCombinedReportIfReadyAsync(int requestId, DateTime now)
+        {
+            var request = await _context.TestRequests
+                .FirstOrDefaultAsync(r => r.TestRequestId == requestId);
+            if (request == null) return false;
+
+            var tests = await _context.TestRequestTestTypes
+                .Where(t => t.TestRequestId == requestId && !t.IsDeleted)
+                .ToListAsync();
+
+            bool ready = tests.Count > 0 && tests.All(t =>
+                t.Status == "Verified" || t.Status == "Completed");
+
+            if (!ready)
+            {
+                if (request.Status == TestRequestStatus.Completed.ToString())
+                    request.Status = TestRequestStatus.InProgress.ToString();
+                return false;
+            }
+
+            // Check the records before queuing; the delivery service validates
+            // again immediately before constructing the attachment.
+            var ids = tests.Select(t => t.TestRequestTestTypeId).ToList();
+            var results = await _context.TestResults
+                .Where(r => ids.Contains(r.TestRequestTestTypeId))
+                .ToListAsync();
+
+            bool valid = results.Count == tests.Count && tests.All(t =>
+            {
+                var matches = results.Where(r =>
+                    r.TestRequestTestTypeId == t.TestRequestTestTypeId).ToList();
+                if (matches.Count != 1) return false;
+                var r = matches[0];
+                if (string.IsNullOrWhiteSpace(r.ResultValue) ||
+                    r.ResultValue.Trim().Equals("DEMO - NO CLINICAL RESULT",
+                        StringComparison.OrdinalIgnoreCase) ||
+                    string.IsNullOrWhiteSpace(t.TechnicianId) ||
+                    r.TechnicianId != t.TechnicianId || r.RequiresReview)
+                    return false;
+                bool verified = !string.IsNullOrWhiteSpace(r.VerifiedByTechnicianId) &&
+                    r.VerifiedDateTime.HasValue &&
+                    r.VerifiedByTechnicianId != r.TechnicianId;
+                return t.Status == "Verified" ? verified :
+                    string.IsNullOrWhiteSpace(r.VerifiedByTechnicianId) &&
+                    !r.VerifiedDateTime.HasValue;
+            });
+            if (!valid) return false;
+
+            request.Status = TestRequestStatus.Completed.ToString();
+
+            bool alreadyExists = await _context.TechnicianSentEmails.AnyAsync(e =>
+                e.TestRequestId == requestId && e.ReportType == "Final");
+            if (!alreadyExists)
+            {
+                _context.TechnicianSentEmails.Add(new TechnicianSentEmailModel
+                {
+                    TestRequestId = requestId,
+                    TestRequestTestTypeId = null,
+                    ReportType = "Final",
+                    RecipientEmail = "Pending recipient resolution",
+                    Subject = $"Laboratory Results - Request #{requestId}",
+                    Body = "Combined laboratory results are attached.",
+                    PdfFileName = $"LaboratoryReport_{requestId}.pdf",
+                    PdfAttachment = null,
+                    Status = "Pending",
+                    CreatedAt = now,
+                    SentAt = null,
+                    ErrorMessage = null
+                });
+            }
+            return true;
+        }
 
     }
 }

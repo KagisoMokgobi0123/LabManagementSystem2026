@@ -126,6 +126,9 @@ namespace NMB_HLabSys.Services
             return document.GeneratePdf();
         }
 
+        // Combined report: independently verified and completed-but-unverified
+        // results are clearly distinguished. Callers must check request ownership,
+        // result completeness and recipient authorization before distribution.
         public byte[] GenerateLaboratoryReport(
             int testRequestId,
             string patientName,
@@ -133,235 +136,144 @@ namespace NMB_HLabSys.Services
             List<TestResultModel> results)
         {
             if (results == null || results.Count == 0)
-            {
-                throw new InvalidOperationException(
-                    "Cannot generate a laboratory report without results.");
-            }
+                throw new InvalidOperationException("Cannot generate a laboratory report without results.");
 
-            var reportDate = DateTime.Now;
+            if (results.Any(r => r == null || string.IsNullOrWhiteSpace(r.ResultValue) ||
+                                 r.RequiresReview ||
+                                 r.ResultValue.Trim().StartsWith("DEMO - NO CLINICAL RESULT", StringComparison.OrdinalIgnoreCase)))
+                throw new InvalidOperationException("Report contains a missing or review-required result.");
 
-            var document = Document.Create(container =>
+            bool IsVerified(TestResultModel r) =>
+                !string.IsNullOrWhiteSpace(r.VerifiedByTechnicianId) &&
+                r.VerifiedDateTime.HasValue &&
+                !string.IsNullOrWhiteSpace(r.TechnicianId) &&
+                r.VerifiedByTechnicianId != r.TechnicianId;
+
+            bool allVerified = results.All(IsVerified);
+            var generatedUtc = DateTime.UtcNow;
+
+            return Document.Create(doc =>
             {
-                container.Page(page =>
+                doc.Page(page =>
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(35);
-                    page.DefaultTextStyle(x =>
-                        x.FontSize(10).FontColor(Colors.Grey.Darken3));
-
-                    // ================================
-                    // HEADER
-                    // ================================
-                    page.Header().Column(column =>
+                    page.DefaultTextStyle(x => x.FontSize(10).FontColor(Colors.Grey.Darken3));
+                    page.Header().Column(h =>
                     {
-                        column.Item().Text(
-                            "NMB HEALTH LABORATORY SYSTEM")
-                            .Bold()
-                            .FontSize(19)
-                            .FontColor(Colors.Blue.Darken3);
-
-                        column.Item().PaddingTop(4).Text(
-                            "VERIFIED LABORATORY RESULTS REPORT")
-                            .SemiBold()
-                            .FontSize(12)
-                            .FontColor(Colors.Blue.Medium);
-
-                        column.Item()
-                            .PaddingTop(10)
-                            .LineHorizontal(1)
-                            .LineColor(Colors.Grey.Lighten1);
+                        h.Spacing(5);
+                        h.Item().Text("NMB HEALTH LABORATORY SYSTEM")
+                            .Bold().FontSize(18).FontColor(Colors.Blue.Darken3);
+                        h.Item().Text(allVerified
+                                ? "VERIFIED LABORATORY RESULTS REPORT"
+                                : "LABORATORY RESULTS — INCLUDES UNVERIFIED RESULTS")
+                            .Bold().FontSize(12)
+                            .FontColor(allVerified ? Colors.Blue.Darken3 : Colors.Red.Darken2);
+                        if (!allVerified)
+                            h.Item().Text("NOT A FULLY VERIFIED FINAL REPORT")
+                                .Bold().FontColor(Colors.Red.Darken2);
+                        h.Item().PaddingTop(8).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
                     });
 
-                    // ================================
-                    // MAIN CONTENT
-                    // ================================
-                    page.Content().PaddingVertical(20).Column(column =>
+                    page.Content().PaddingVertical(15).Column(c =>
                     {
-                        column.Spacing(15);
+                        c.Spacing(12);
+                        c.Item().Background(Colors.Grey.Lighten4).Padding(12).Column(info =>
+                        {
+                            info.Spacing(5);
+                            info.Item().Text($"Request ID: {testRequestId}");
+                            info.Item().Text($"Patient: {patientName}");
+                            info.Item().Text($"Requesting Doctor: {doctorName}");
+                            info.Item().Text($"Generated (UTC): {generatedUtc:dd MMM yyyy HH:mm}");
+                        });
 
-                        // PATIENT AND REQUEST DETAILS
-                        column.Item()
-                            .Background(Colors.Grey.Lighten4)
-                            .Padding(14)
-                            .Column(info =>
-                            {
-                                info.Spacing(6);
+                        if (!allVerified)
+                            c.Item().Text("WARNING: Results labelled COMPLETED — NOT VERIFIED have not been independently verified and may change after review.")
+                                .Bold().FontColor(Colors.Red.Darken2);
 
-                                info.Item().Text("REPORT INFORMATION")
-                                    .Bold()
-                                    .FontSize(11);
-
-                                info.Item().Text(
-                                    $"Request ID: {testRequestId}");
-
-                                info.Item().Text(
-                                    $"Patient: {patientName}");
-
-                                info.Item().Text(
-                                    $"Requesting Doctor: {doctorName}");
-
-                                info.Item().Text(
-                                    $"Report Generated: {reportDate:dd MMM yyyy HH:mm}");
-                            });
-
-                        // TEST RESULTS
-                        column.Item().Text("LABORATORY TEST RESULTS")
-                            .Bold()
-                            .FontSize(13)
+                        c.Item().Text("LABORATORY TEST RESULTS").Bold().FontSize(12)
                             .FontColor(Colors.Blue.Darken3);
-
-                        column.Item().Table(table =>
+                        c.Item().Table(table =>
                         {
                             table.ColumnsDefinition(columns =>
                             {
-                                columns.RelativeColumn(2.2f);
-                                columns.RelativeColumn(1.4f);
-                                columns.RelativeColumn(1.1f);
-                                columns.RelativeColumn(1.6f);
-                                columns.RelativeColumn(1.1f);
+                                columns.RelativeColumn(2.0f);
+                                columns.RelativeColumn(1.3f);
+                                columns.RelativeColumn(0.9f);
+                                columns.RelativeColumn(1.3f);
+                                columns.RelativeColumn(1.0f);
+                                columns.RelativeColumn(1.7f);
                             });
-
                             table.Header(header =>
                             {
-                                void HeaderCell(string value)
-                                {
-                                    header.Cell()
-                                        .Background(Colors.Blue.Darken3)
-                                        .Padding(7)
-                                        .Text(value)
-                                        .Bold()
-                                        .FontSize(8)
-                                        .FontColor(Colors.White);
-                                }
-
-                                HeaderCell("Test / Result");
-                                HeaderCell("Value");
-                                HeaderCell("Unit");
-                                HeaderCell("Reference");
-                                HeaderCell("Flag");
+                                void Head(string value) => header.Cell().Background(Colors.Blue.Darken3)
+                                    .Padding(6).Text(value).Bold().FontSize(7).FontColor(Colors.White);
+                                Head("Test / Result");
+                                Head("Value");
+                                Head("Unit");
+                                Head("Reference");
+                                Head("Flag");
+                                Head("Verification");
                             });
-
-                            foreach (var result in results)
+                            foreach (var r in results)
                             {
-                                var reference =
-                                    result.ReferenceMin.HasValue &&
-                                    result.ReferenceMax.HasValue
-                                        ? $"{result.ReferenceMin} - {result.ReferenceMax}"
-                                        : "N/A";
-
-                                var flag = !string.IsNullOrWhiteSpace(
-                                    result.ResultFlag)
-                                        ? result.ResultFlag
-                                        : result.IsAbnormal
-                                            ? "Abnormal"
-                                            : "Normal";
-
-                                var background = result.IsAbnormal
-                                    ? Colors.Red.Lighten5
-                                    : Colors.White;
-
-                                void ResultCell(string value)
-                                {
-                                    table.Cell()
-                                        .Background(background)
-                                        .BorderBottom(0.5f)
-                                        .BorderColor(Colors.Grey.Lighten2)
-                                        .Padding(7)
-                                        .Text(value)
-                                        .FontSize(8);
-                                }
-
-                                ResultCell(
-                                    result.ResultName ?? "Laboratory Result");
-
-                                ResultCell(
-                                    result.ResultValue ?? "N/A");
-
-                                ResultCell(
-                                    result.MeasurementUnit ?? "-");
-
-                                ResultCell(reference);
-
-                                ResultCell(flag);
+                                var reference = r.ReferenceMin.HasValue && r.ReferenceMax.HasValue
+                                    ? $"{r.ReferenceMin} - {r.ReferenceMax}" : "Not available";
+                                var flag = !string.IsNullOrWhiteSpace(r.ResultFlag)
+                                    ? r.ResultFlag : (r.IsAbnormal ? "Abnormal" : "Not evaluated");
+                                var verified = IsVerified(r);
+                                var background = verified ? Colors.White : Colors.Yellow.Lighten4;
+                                void Cell(string value) => table.Cell().Background(background)
+                                    .BorderBottom(0.5f).BorderColor(Colors.Grey.Lighten2)
+                                    .Padding(6).Text(value).FontSize(7);
+                                Cell(r.ResultName ?? "Laboratory Result");
+                                Cell(r.ResultValue ?? "N/A");
+                                Cell(r.MeasurementUnit ?? "-");
+                                Cell(reference);
+                                Cell(flag);
+                                Cell(verified ? "VERIFIED" : "COMPLETED — NOT VERIFIED");
                             }
                         });
 
-                        // NOTES
-                        column.Item().Text("RESULT NOTES")
-                            .Bold()
-                            .FontSize(11)
+                        c.Item().Text("RESULT AND VERIFICATION DETAILS").Bold().FontSize(11)
                             .FontColor(Colors.Blue.Darken3);
-
-                        foreach (var result in results)
+                        foreach (var r in results)
                         {
-                            if (!string.IsNullOrWhiteSpace(result.Notes))
+                            var verified = IsVerified(r);
+                            c.Item().Column(detail =>
                             {
-                                column.Item().Text(
-                                    $"{result.ResultName}: {result.Notes}")
-                                    .FontSize(9);
-                            }
+                                detail.Spacing(3);
+                                detail.Item().Text($"{r.ResultName ?? "Laboratory Result"} (Test ID: {r.TestRequestTestTypeId})")
+                                    .Bold().FontSize(9);
+                                if (verified)
+                                {
+                                    var verifier = r.VerifiedByTechnician?.FullName
+                                        ?? r.VerifiedByTechnicianId;
+                                    detail.Item().Text($"Verified by: {verifier} | Verified (UTC): {r.VerifiedDateTime:dd MMM yyyy HH:mm}")
+                                        .FontSize(8);
+                                }
+                                else
+                                    detail.Item().Text("COMPLETED — NOT INDEPENDENTLY VERIFIED")
+                                        .Bold().FontColor(Colors.Red.Darken2).FontSize(8);
+                                if (!string.IsNullOrWhiteSpace(r.Notes))
+                                    detail.Item().Text($"Notes: {r.Notes}").FontSize(8);
+                            });
                         }
-
-                        // VERIFICATION DETAILS
-                        column.Item().Text("VERIFICATION DETAILS")
-                            .Bold()
-                            .FontSize(11)
-                            .FontColor(Colors.Blue.Darken3);
-
-                        foreach (var result in results)
-                        {
-                            var verifier =
-                                result.VerifiedByTechnician?.FullName
-                                ?? result.VerifiedByTechnicianId
-                                ?? "Unknown";
-
-                            var verifiedDate =
-                                result.VerifiedDateTime.HasValue
-                                    ? result.VerifiedDateTime.Value
-                                        .ToString("dd MMM yyyy HH:mm")
-                                    : "Not recorded";
-
-                            column.Item().Text(
-                                $"{result.ResultName} — " +
-                                $"Verified by: {verifier} | " +
-                                $"Date: {verifiedDate}")
-                                .FontSize(9);
-                        }
-
-                        // DISCLAIMER
-                        column.Item()
-                            .PaddingTop(15)
-                            .LineHorizontal(1)
-                            .LineColor(Colors.Grey.Lighten2);
-
-                        column.Item().Text(
-                            "This report contains confidential medical " +
-                            "information intended only for the authorized " +
-                            "requesting healthcare professional.")
-                            .Italic()
-                            .FontSize(8)
-                            .FontColor(Colors.Grey.Darken1);
+                        c.Item().PaddingTop(8).Text(
+                            "Confidential laboratory information intended only for the authorized requesting healthcare professional.")
+                            .Italic().FontSize(8);
                     });
-
-                    // ================================
-                    // FOOTER
-                    // ================================
-                    page.Footer().AlignCenter().Text(text =>
+                    page.Footer().AlignCenter().Text(t =>
                     {
-                        text.Span(
-                            "NMB Health Laboratory System | Page ");
-
-                        text.CurrentPageNumber();
-
-                        text.Span(" of ");
-
-                        text.TotalPages();
+                        t.Span("NMB-HLabSys | Page ");
+                        t.CurrentPageNumber();
+                        t.Span(" of ");
+                        t.TotalPages();
                     });
                 });
-            });
-
-            return document.GeneratePdf();
+            }).GeneratePdf();
         }
+
         // Portal-only partial report. Only independently verified saved results
         // should be supplied; missing test IDs must be disclosed explicitly.
         public byte[] GeneratePartialVerifiedReport(

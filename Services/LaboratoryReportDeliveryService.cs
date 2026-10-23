@@ -69,6 +69,8 @@ namespace NMB_HLabSys.Services
 
                 var result = results[0];
                 if (string.IsNullOrWhiteSpace(result.ResultValue) ||
+                    result.ResultValue.Trim().Equals("DEMO - NO CLINICAL RESULT", StringComparison.OrdinalIgnoreCase) ||
+                    string.IsNullOrWhiteSpace(test.TechnicianId) ||
                     result.TechnicianId != test.TechnicianId ||
                     result.RequiresReview ||
                     !string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) ||
@@ -81,18 +83,18 @@ namespace NMB_HLabSys.Services
                     "An individual laboratory test has been completed. " +
                     "Its preliminary result is attached.\n\n" +
                     "IMPORTANT: THIS RESULT HAS NOT BEEN INDEPENDENTLY VERIFIED. " +
-                    "A final verified report will follow after verification.\n\n" +
+                    "A verified report may follow after independent verification.\n\n" +
                     "Kind regards,\nNMB-HLabSys Laboratory";
                 email.PdfFileName = $"Preliminary_Test_{testId}_Request_{request.TestRequestId}.pdf";
-                if (email.PdfAttachment == null || email.PdfAttachment.Length == 0)
-                    email.PdfAttachment = _pdfService.GeneratePreliminaryReport(
-                        request.TestRequestId, testId, request.Patient.FullName,
-                        request.Doctor.FullName, result);
+                // Always regenerate so the PDF reflects the current validated result.
+                email.PdfAttachment = _pdfService.GeneratePreliminaryReport(
+                    request.TestRequestId, testId, request.Patient.FullName,
+                    request.Doctor.FullName, result);
             }
             else if (email.ReportType == "Final")
             {
                 if (email.TestRequestTestTypeId.HasValue)
-                    return Block(sentEmailId, "Final report must not target an individual test.");
+                    return Block(sentEmailId, "Combined report must not target an individual test.");
 
                 if (request.Status != TestRequestStatus.Completed.ToString())
                     return Block(sentEmailId, "Request is not Completed.");
@@ -101,8 +103,9 @@ namespace NMB_HLabSys.Services
                     .Where(x => x.TestRequestId == request.TestRequestId && !x.IsDeleted)
                     .ToListAsync(cancellationToken);
 
-                if (tests.Count == 0 || tests.Any(x => x.Status != "Verified"))
-                    return Block(sentEmailId, "Not all active tests are Verified.");
+                if (tests.Count == 0 || tests.Any(x =>
+                    x.Status != "Verified" && x.Status != "Completed"))
+                    return Block(sentEmailId, "Not all active tests are Verified or Completed.");
 
                 var testIds = tests.Select(x => x.TestRequestTestTypeId).ToList();
                 var results = await _context.TestResults.AsNoTracking()
@@ -113,8 +116,9 @@ namespace NMB_HLabSys.Services
                     .ToListAsync(cancellationToken);
 
                 if (results.Count != tests.Count)
-                    return Block(sentEmailId, "Final report has an incorrect result count.");
+                    return Block(sentEmailId, "Combined report has an incorrect result count.");
 
+                bool hasUnverified = false;
                 foreach (var test in tests)
                 {
                     var matching = results.Where(x =>
@@ -124,26 +128,52 @@ namespace NMB_HLabSys.Services
 
                     var result = matching[0];
                     if (string.IsNullOrWhiteSpace(result.ResultValue) ||
+                        result.ResultValue.Trim().Equals("DEMO - NO CLINICAL RESULT", StringComparison.OrdinalIgnoreCase) ||
                         string.IsNullOrWhiteSpace(test.TechnicianId) ||
                         result.TechnicianId != test.TechnicianId ||
-                        string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) ||
-                        !result.VerifiedDateTime.HasValue ||
-                        result.VerifiedByTechnicianId == result.TechnicianId ||
                         result.RequiresReview)
-                        return Block(sentEmailId, "A result failed independent verification checks.");
+                        return Block(sentEmailId, "A result is missing, invalid or requires review.");
+
+                    bool verified =
+                        !string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) &&
+                        result.VerifiedDateTime.HasValue &&
+                        result.VerifiedByTechnicianId != result.TechnicianId;
+
+                    if (test.Status == "Verified" && !verified)
+                        return Block(sentEmailId, "A Verified test lacks independent verification evidence.");
+
+                    if (test.Status == "Completed")
+                    {
+                        // A completed test may be included, but not represented as verified.
+                        if (!string.IsNullOrWhiteSpace(result.VerifiedByTechnicianId) ||
+                            result.VerifiedDateTime.HasValue)
+                            return Block(sentEmailId, "Completed test has inconsistent verification metadata.");
+                        hasUnverified = true;
+                    }
                 }
 
-                email.Subject = $"Verified Laboratory Results - {request.RequestNumber}";
-                email.Body =
-                    "Dear Doctor,\n\n" +
-                    "All active tests on your laboratory request have been independently " +
-                    "verified. The combined final report is attached.\n\n" +
-                    "Kind regards,\nNMB-HLabSys Laboratory";
-                email.PdfFileName = $"LaboratoryReport_{request.TestRequestId}.pdf";
-                if (email.PdfAttachment == null || email.PdfAttachment.Length == 0)
-                    email.PdfAttachment = _pdfService.GenerateLaboratoryReport(
-                        request.TestRequestId, request.Patient.FullName,
-                        request.Doctor.FullName, results);
+                email.Subject = hasUnverified
+                    ? $"PRELIMINARY - Combined Laboratory Results - {request.RequestNumber}"
+                    : $"Verified Laboratory Results - {request.RequestNumber}";
+                email.Body = hasUnverified
+                    ? "Dear Doctor,\n\nAll active tests on your laboratory request have reached Completed or Verified status. " +
+                      "The combined laboratory report is attached.\n\n" +
+                      "IMPORTANT: THIS REPORT INCLUDES RESULTS THAT HAVE NOT BEEN INDEPENDENTLY VERIFIED. " +
+                      "These results are preliminary and subject to correction. " +
+                      "Please review the verification status of each result in the attached PDF.\n\n" +
+                      "Kind regards,\nNMB-HLabSys Laboratory"
+                    : "Dear Doctor,\n\nAll active tests on your laboratory request have been independently " +
+                      "verified. The combined final report is attached.\n\n" +
+                      "Kind regards,\nNMB-HLabSys Laboratory";
+
+                email.PdfFileName = hasUnverified
+                    ? $"Preliminary_Combined_LaboratoryReport_{request.TestRequestId}.pdf"
+                    : $"LaboratoryReport_{request.TestRequestId}.pdf";
+
+                // The updated PDF service must label each unverified result explicitly.
+                email.PdfAttachment = _pdfService.GenerateLaboratoryReport(
+                    request.TestRequestId, request.Patient.FullName,
+                    request.Doctor.FullName, results);
             }
             else
             {
@@ -160,7 +190,6 @@ namespace NMB_HLabSys.Services
             return true;
         }
 
-        // Retain compatibility with callers that still use the old method.
         public async Task<bool> PrepareReportAsync(int testRequestId)
         {
             var emailId = await _context.TechnicianSentEmails.AsNoTracking()
