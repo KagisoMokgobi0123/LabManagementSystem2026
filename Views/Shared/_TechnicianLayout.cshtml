@@ -47,7 +47,7 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 
-    <link rel="stylesheet"href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
 
     <style>
@@ -86,7 +86,7 @@
             }
 
 
-/*Side bar style*/
+            /*Side bar style*/
 
             .technician-sidebar {
                 position: fixed;
@@ -146,7 +146,7 @@
                 white-space: nowrap;
             }
 
-/*Side bar controlls*/
+            /*Side bar controlls*/
             .sidebar-controls {
                 display: flex;
                 align-items: center;
@@ -655,7 +655,7 @@
                 .sidebar-controls {
                     display: none;
                 }
-           
+
                 body.sidebar-collapsed
                 .technician-sidebar {
                     width: 265px;
@@ -912,18 +912,18 @@
         <aside class="technician-sidebar"
                id="technicianSidebar">
 
-            <a href="/Technician/Home/Index"
+            <a asp-area="Technician"
+               asp-controller="Home"
+               asp-action="Index"
                class="sidebar-brand"
                title="NMB-HLabSys Dashboard">
 
-
                 <img src="~/assets/img/logo.png"
+                     asp-append-version="true"
                      class="sidebar-logo"
                      alt="NMB-HLabSys Logo" />
 
-
                 <div class="sidebar-brand-text">
-
                     <div class="sidebar-brand-name">
                         NMB-HLabSys
                     </div>
@@ -931,9 +931,7 @@
                     <div class="sidebar-brand-subtitle">
                         Haematology Laboratory
                     </div>
-
                 </div>
-
             </a>
 
             <div class="sidebar-controls">
@@ -1003,14 +1001,15 @@
                 </div>
 
 
-                <a href="/Technician/Home/Index"
+               
+                <a asp-area="Technician"
+                   asp-controller="Home"
+                   asp-action="Index"
                    title="Dashboard"
                    class="sidebar-link @(controller == "Home" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fa-solid fa-gauge-high"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1018,6 +1017,7 @@
                     </span>
 
                 </a>
+
 
                 <a asp-area="Technician"
                    asp-controller="SentEmails"
@@ -1076,14 +1076,15 @@
                 </div>
 
 
-                <a href="/Technician/Tests/Available"
+               
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Available"
                    title="Available Tests"
                    class="sidebar-link @(controller == "Tests" && action == "Available" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-clipboard-list"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1094,14 +1095,16 @@
 
 
 
-                <a href="/Technician/Tests/MyTests"
+
+               
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="MyTests"
                    title="My Selected Tests"
                    class="sidebar-link @(controller == "Tests" && action == "MyTests" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-microscope"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1109,6 +1112,7 @@
                     </span>
 
                 </a>
+
 
 
 
@@ -1122,14 +1126,15 @@
                     <span class="sidebar-link-text">Test Results</span>
                 </a>
 
-                <a href="/Technician/Tests/Review"
+              
+                <a asp-area="Technician"
+                   asp-controller="Tests"
+                   asp-action="Review"
                    title="To Be Reviewed"
                    class="sidebar-link @(controller == "Tests" && action == "Review" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fa-solid fa-rotate-left"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1137,6 +1142,7 @@
                     </span>
 
                 </a>
+
 
               
 
@@ -1222,14 +1228,15 @@
                 </div>
 
 
-                <a href="/Technician/Reports/Index"
+               
+                <a asp-area="Technician"
+                   asp-controller="Reports"
+                   asp-action="Index"
                    title="Reports"
                    class="sidebar-link @(controller == "Reports" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-file-pdf"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1240,14 +1247,17 @@
 
 
 
-                <a href="/Technician/Profile/ProfileIndex"
+
+              
+                <!-- My Profile -->
+                <a asp-area="Technician"
+                   asp-controller="Profile"
+                   asp-action="ProfileIndex"
                    title="My Profile"
                    class="sidebar-link @(controller == "Profile" && action == "ProfileIndex" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-user"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1257,15 +1267,15 @@
                 </a>
 
 
-
-                <a href="/Technician/Profile/ChangePhoneNumber"
+                <!-- Change Phone Number -->
+                <a asp-area="Technician"
+                   asp-controller="Profile"
+                   asp-action="ChangePhoneNumber"
                    title="Change Phone Number"
                    class="sidebar-link @(controller == "Profile" && action == "ChangePhoneNumber" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-phone"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1275,15 +1285,15 @@
                 </a>
 
 
-
-                <a href="/Technician/Profile/ChangePassword"
+                <!-- Change Password -->
+                <a asp-area="Technician"
+                   asp-controller="Profile"
+                   asp-action="ChangePassword"
                    title="Change Password"
                    class="sidebar-link @(controller == "Profile" && action == "ChangePassword" ? "active" : "")">
 
                     <span class="sidebar-link-icon">
-
                         <i class="fas fa-key"></i>
-
                     </span>
 
                     <span class="sidebar-link-text">
@@ -1293,36 +1303,33 @@
                 </a>
 
 
+
             </nav>
 
             <div class="sidebar-bottom">
 
 
-                <form action="/Technician/Profile/Logout"
+
+                <form asp-area="Technician"
+                      asp-controller="Profile"
+                      asp-action="Logout"
                       method="post">
 
                     @Html.AntiForgeryToken()
-
 
                     <button type="submit"
                             class="sidebar-logout"
                             title="Secure Logout">
 
-
                         <span class="sidebar-link-icon">
-
                             <i class="fas fa-sign-out-alt"></i>
-
                         </span>
-
 
                         <span class="sidebar-link-text">
                             Secure Logout
                         </span>
 
-
                     </button>
-
 
                 </form>
 
@@ -1386,22 +1393,39 @@
             </div>
 
             <div class="technician-top-toolbar">
-                <a href="/Technician/Notifications"
+
+                <!-- Technician Notifications -->
+                <a asp-area="Technician"
+                   asp-controller="Notifications"
+                   asp-action="Index"
                    class="technician-notification-link"
                    title="My Notifications"
                    aria-label="Open my notifications">
+
                     <i class="fa-solid fa-bell" aria-hidden="true"></i>
+
                     <span id="technicianNotificationCount"
                           class="technician-notification-badge"
                           style="display:none;"
                           aria-live="polite">0</span>
                 </a>
-                <a href="/Technician/Profile/ProfileIndex"
+
+
+                <!-- Technician Profile -->
+                <a asp-area="Technician"
+                   asp-controller="Profile"
+                   asp-action="ProfileIndex"
                    class="technician-toolbar-profile"
                    title="My Profile">
-                    <span class="technician-toolbar-avatar" aria-hidden="true">@technicianInitial</span>
-                    <span class="technician-toolbar-name">@technicianName</span>
+
+                    <span class="technician-toolbar-avatar"
+                          aria-hidden="true">@technicianInitial</span>
+
+                    <span class="technician-toolbar-name">
+                        @technicianName
+                    </span>
                 </a>
+
             </div>
 
             @RenderBody()
@@ -1883,6 +1907,8 @@
 
 
 
+    <a id="technicianUnreadCountEndpoint" asp-area="Technician" asp-controller="Notifications" asp-action="UnreadCount" hidden aria-hidden="true" tabindex="-1"></a>
+
     <script>
             // Poll the existing NotificationsController.UnreadCount action.
             document.addEventListener("DOMContentLoaded", function() {
@@ -1891,7 +1917,7 @@
 
                 async function refreshTechnicianNotificationCount() {
                     try {
-                        const response = await fetch("/Technician/Notifications/UnreadCount", {
+                        const response = await fetch(document.getElementById("technicianUnreadCountEndpoint").href, {
                             credentials: "same-origin",
                             headers: { "Accept": "application/json" },
                             cache: "no-store"

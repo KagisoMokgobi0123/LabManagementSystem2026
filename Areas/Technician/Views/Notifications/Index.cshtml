@@ -108,6 +108,7 @@
     {
         <div class="test-notification-panel">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
+
                 <div>
                     <strong>
                         <i class="fas fa-flask mr-1"></i>
@@ -119,7 +120,9 @@
                     </p>
                 </div>
 
-                <form action="/Technician/Notifications/CreateTestNotification"
+                <form asp-area="Technician"
+                      asp-controller="Notifications"
+                      asp-action="CreateTestNotification"
                       method="post"
                       class="mt-2">
 
@@ -130,6 +133,7 @@
                         <i class="fas fa-plus-circle mr-1"></i>
                         Create Test Notification
                     </button>
+
                 </form>
             </div>
         </div>
@@ -153,10 +157,14 @@
                 @unreadCount Unread
             </span>
 
-            <a href="/Technician/Home/Index"
+            <a asp-area="Technician"
+               asp-controller="Home"
+               asp-action="Index"
                class="btn btn-outline-secondary btn-sm ml-2">
+
                 <i class="fas fa-arrow-left mr-1"></i>
                 Dashboard
+
             </a>
         </div>
     </div>
@@ -165,6 +173,7 @@
     {
         <div class="alert alert-success alert-dismissible fade show"
              role="alert">
+
             <i class="fas fa-check-circle mr-1"></i>
             @TempData["SuccessMessage"]
 
@@ -174,6 +183,7 @@
                     aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
+
         </div>
     }
 
@@ -222,14 +232,15 @@
                     </div>
 
                     <i class="fas fa-bell text-primary"></i>
-
                 </div>
 
                 <div class="notification-actions">
 
                     @if (!notification.IsRead)
                     {
-                        <form action="/Technician/Notifications/MarkAsRead"
+                        <form asp-area="Technician"
+                              asp-controller="Notifications"
+                              asp-action="MarkAsRead"
                               method="post">
 
                             @Html.AntiForgeryToken()
@@ -240,8 +251,10 @@
 
                             <button type="submit"
                                     class="btn btn-primary btn-sm">
+
                                 <i class="fas fa-check mr-1"></i>
                                 Mark as Read
+
                             </button>
                         </form>
                     }
@@ -254,8 +267,10 @@
                     {
                         <a href="@notification.ActionUrl"
                            class="btn btn-outline-primary btn-sm">
+
                             <i class="fas fa-external-link-alt mr-1"></i>
                             View Details
+
                         </a>
                     }
 
@@ -263,4 +278,5 @@
             </div>
         }
     }
+
 </div>

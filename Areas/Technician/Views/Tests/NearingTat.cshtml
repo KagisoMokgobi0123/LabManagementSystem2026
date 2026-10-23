@@ -89,7 +89,7 @@
         </div>
 
         <a class="tat-button"
-           href="/Technician/Tests/MyTests">
+           asp-area="Technician" asp-controller="Tests" asp-action="MyTests">
             Back to My Tests
         </a>
     </div>
@@ -161,7 +161,7 @@
                             <td>@test.Status</td>
 
                             <td>
-                                <a href="/Technician/Tests/Details/@test.TestRequestTestTypeId">
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@test.TestRequestTestTypeId">
                                     View Test
                                 </a>
                             </td>

@@ -77,7 +77,7 @@
             <h2>Overdue Tests (@tests.Count)</h2>
             <p class="tat-muted">SUBOverdue Tests. Times shown in UTC.</p>
         </div>
-        <a class="tat-button" href="/Technician/Tests/MyTests">Back to My Tests</a>
+        <a class="tat-button" asp-area="Technician" asp-controller="Tests" asp-action="MyTests">Back to My Tests</a>
     </div>
     @if (tests.Count == 0)
     {
@@ -132,7 +132,7 @@
                             <td>@test.Status</td>
 
                             <td>
-                                <a href="/Technician/Tests/Details/@test.TestRequestTestTypeId">
+                                <a asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@test.TestRequestTestTypeId">
                                     View Test
                                 </a>
                             </td>

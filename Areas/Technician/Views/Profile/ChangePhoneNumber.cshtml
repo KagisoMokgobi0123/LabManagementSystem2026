@@ -127,7 +127,9 @@
         <div class="phone-container">
 
             <div class="mb-3">
-                <a href="/Technician/Profile/ProfileIndex"
+                <a asp-area="Technician"
+                   asp-controller="Profile"
+                   asp-action="ProfileIndex"
                    class="btn btn-outline-secondary btn-sm">
                     <i class="fas fa-arrow-left mr-1"></i>
                     Back to Profile
@@ -155,7 +157,9 @@
                     </div>
 
                     <form id="changePhoneForm"
-                          action="@Url.Action("ChangePhoneNumber", "Profile", new { area = "Technician" })"
+                          asp-area="Technician"
+                          asp-controller="Profile"
+                          asp-action="ChangePhoneNumber"
                           method="post">
 
                         @Html.AntiForgeryToken()
@@ -166,7 +170,7 @@
 
                         <div class="form-group">
 
-                            <label for="PhoneNumber"
+                            <label asp-for="PhoneNumber"
                                    class="form-label">
                                 Cellphone Number
                             </label>
@@ -179,11 +183,9 @@
                                     </span>
                                 </div>
 
-                                <input id="PhoneNumber"
-                                       name="PhoneNumber"
+                                <input asp-for="PhoneNumber"
                                        type="tel"
                                        class="form-control"
-                                       value="@Model?.PhoneNumber"
                                        placeholder="e.g. 0712345678"
                                        autocomplete="tel"
                                        inputmode="tel"
@@ -235,16 +237,16 @@
             const submitButton = document.getElementById("updatePhoneBtn");
 
             const successMessage = @Html.Raw(
-                                            System.Text.Json.JsonSerializer.Serialize(successMessage));
+                                                                                                    System.Text.Json.JsonSerializer.Serialize(successMessage));
 
             const infoMessage = @Html.Raw(
-                                            System.Text.Json.JsonSerializer.Serialize(infoMessage));
+                                                                                                    System.Text.Json.JsonSerializer.Serialize(infoMessage));
 
             const errorMessage = @Html.Raw(
-                                            System.Text.Json.JsonSerializer.Serialize(errorMessage));
+                                                                                                    System.Text.Json.JsonSerializer.Serialize(errorMessage));
 
             const validationErrors = @Html.Raw(
-                                            System.Text.Json.JsonSerializer.Serialize(validationErrors));
+                                                                                                    System.Text.Json.JsonSerializer.Serialize(validationErrors));
 
             // SweetAlert2 must be available.
             if (typeof Swal === "undefined") {

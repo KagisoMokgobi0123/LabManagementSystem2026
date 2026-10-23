@@ -376,7 +376,7 @@
 </div>
 
 <script>
-    $(function () {
+    $(function() {
         var modal = $('#performTestModal');
         function updateVerification() {
             var checks = modal.find('.perform-verify');
@@ -387,7 +387,7 @@
             modal.find('#performCheckIcon').attr('class', complete ? 'fas fa-check-circle mr-2' : 'fas fa-exclamation-triangle mr-2');
             modal.find('#performSubmit').prop('disabled', !complete);
         }
-        $(document).on('click', '.open-perform-modal', function () {
+        $(document).on('click', '.open-perform-modal', function() {
             var b = $(this);
             var values = {
                 performTestId: b.attr('data-test-id'),
@@ -403,7 +403,7 @@
                 performTurnaround: b.attr('data-turnaround'),
                 performStatus: b.attr('data-status')
             };
-            Object.keys(values).forEach(function (id) {
+            Object.keys(values).forEach(function(id) {
                 if (id === 'performTestId') modal.find('#' + id).val(values[id] || '');
                 else modal.find('#' + id).text(values[id] || 'Not available');
             });
@@ -413,7 +413,7 @@
             updateVerification();
         });
         modal.on('change', '.perform-verify', updateVerification);
-        modal.find('#performTestForm').on('submit', function (event) {
+        modal.find('#performTestForm').on('submit', function(event) {
             if (modal.find('.perform-verify:checked').length !== 5 || !modal.find('#performTestId').val()) {
                 event.preventDefault();
                 updateVerification();

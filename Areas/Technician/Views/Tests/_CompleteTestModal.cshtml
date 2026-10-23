@@ -116,8 +116,16 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form id="completeTestForm" method="post">
+
+            @* Confirm that TestsController exposes a POST action named CompleteTest.
+               If TestResults.cshtml sets form.action dynamically, that JavaScript can still override this generated URL. *@
+            <form id="completeTestForm"
+                  asp-area="Technician"
+                  asp-controller="Tests"
+                  asp-action="CompleteTest"
+                  method="post">
                 @Html.AntiForgeryToken()
+
                 <div class="modal-body">
                     <h6 class="ctm-section-title"><i class="fas fa-flask mr-2"></i>Test Details</h6>
                     <div class="row">

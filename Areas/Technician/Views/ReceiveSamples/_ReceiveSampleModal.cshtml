@@ -7,8 +7,8 @@
 <style>
 
     /* ============================================================
-               MODAL
-               ============================================================ */
+                   MODAL
+                   ============================================================ */
 
     .receive-modal-header {
         padding: 20px 24px;
@@ -58,8 +58,8 @@
 
 
     /* ============================================================
-               BODY
-               ============================================================ */
+                   BODY
+                   ============================================================ */
 
     .receive-modal-body {
         padding: 24px;
@@ -132,8 +132,8 @@
 
 
     /* ============================================================
-               INFORMATION
-               ============================================================ */
+                   INFORMATION
+                   ============================================================ */
 
     .information-label {
         display: block;
@@ -179,8 +179,8 @@
 
 
     /* ============================================================
-               VERIFICATION INTRO
-               ============================================================ */
+                   VERIFICATION INTRO
+                   ============================================================ */
 
     .verification-information {
         display: flex;
@@ -201,8 +201,8 @@
 
 
     /* ============================================================
-               VERIFICATION ITEM
-               ============================================================ */
+                   VERIFICATION ITEM
+                   ============================================================ */
 
     .verification-item {
         display: block;
@@ -218,9 +218,9 @@
 
 
     /*
-               Keep the real checkbox in the document.
-               We only make it visually hidden.
-            */
+                   Keep the real checkbox in the document.
+                   We only make it visually hidden.
+                */
 
     .verification-checkbox {
         position: absolute;
@@ -252,8 +252,8 @@
 
 
     /* ============================================================
-               CUSTOM CHECKBOX
-               ============================================================ */
+                   CUSTOM CHECKBOX
+                   ============================================================ */
 
     .verification-check-icon {
         display: flex;
@@ -292,8 +292,8 @@
 
 
     /* ============================================================
-               CHECKED STATE
-               ============================================================ */
+                   CHECKED STATE
+                   ============================================================ */
 
     .verification-checkbox:checked + .verification-content {
         border-color: #22c55e;
@@ -317,8 +317,8 @@
 
 
     /* ============================================================
-               VERIFICATION STATUS
-               ============================================================ */
+                   VERIFICATION STATUS
+                   ============================================================ */
 
     .verification-status {
         display: flex;
@@ -347,8 +347,8 @@
 
 
     /* ============================================================
-               FOOTER
-               ============================================================ */
+                   FOOTER
+                   ============================================================ */
 
     .receive-modal-footer {
         display: flex;
@@ -367,8 +367,8 @@
 
 
     /* ============================================================
-               RESPONSIVE
-               ============================================================ */
+                   RESPONSIVE
+                   ============================================================ */
 
     @@media (max-width: 767px) {
 
@@ -393,8 +393,10 @@
 
 
 <form id="receiveSampleForm"
-      method="post"
-      action="/Technician/ReceiveSamples/Receive">
+      asp-area="Technician"
+      asp-controller="ReceiveSamples"
+      asp-action="Receive"
+      method="post">
 
     @Html.AntiForgeryToken()
 
@@ -404,30 +406,15 @@
          ============================================================ -->
     <!-- Critical IDs -->
 
-    <input type="hidden"
-           id="TestRequestId"
-           name="TestRequestId"
-           value="@Model.TestRequestId" />
+    <input asp-for="TestRequestId" type="hidden" />
 
-    <input type="hidden"
-           id="SampleID"
-           name="SampleID"
-           value="@Model.SampleID" />
+    <input asp-for="SampleID" type="hidden" />
 
-    <input type="hidden"
-           id="SampleTypeId"
-           name="SampleTypeId"
-           value="@Model.SampleTypeId" />
+    <input asp-for="SampleTypeId" type="hidden" />
 
-    <input type="hidden"
-           id="RequestNumber"
-           name="RequestNumber"
-           value="@Model.RequestNumber" />
+    <input asp-for="RequestNumber" type="hidden" />
 
-    <input type="hidden"
-           id="Barcode"
-           name="Barcode"
-           value="@Model.Barcode" />
+    <input asp-for="Barcode" type="hidden" />
 
     <input type="hidden"
            id="DateTimeReceived"

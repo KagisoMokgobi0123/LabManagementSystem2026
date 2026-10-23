@@ -66,7 +66,7 @@
    <p>Audit trail of test submissions, corrections, independent verification decisions and returns for review.</p>
   </section>
   <section class="vh-stats" aria-label="History statistics">
-   <a href="/Technician/Tests/VerificationHistoryIndex#vhTable" class="vh-stat vh-stat-link" data-card-action="" aria-label="View all verification history">
+   <a asp-area="Technician" asp-controller="Tests" asp-action="VerificationHistoryIndex" asp-fragment="vhTable" class="vh-stat vh-stat-link" data-card-action="" aria-label="View all verification history">
     <div><div class="vh-stat-label">Tests with activity</div><div class="vh-stat-value">@testCount</div></div>
     <span class="vh-stat-icon"><i class="fas fa-flask" aria-hidden="true"></i></span>
    </a>
@@ -130,7 +130,7 @@
           <td>
            @if (test != null)
            {
-                                        <a class="vh-link" href="@Url.Action("Details", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"><i class="fas fa-eye me-1"></i> View Details</a>
+                                        <a class="vh-link" asp-area="Technician" asp-controller="Tests" asp-action="Details" asp-route-id="@test.TestRequestTestTypeId"><i class="fas fa-eye me-1"></i> View Details</a>
            }
           </td>
          </tr>

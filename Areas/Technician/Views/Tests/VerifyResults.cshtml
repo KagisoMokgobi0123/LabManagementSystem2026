@@ -273,7 +273,7 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
     <script>
-        (function () {
+        (function() {
             'use strict';
             const form = document.getElementById('verifyForm');
             const notes = document.getElementById('verificationNotes');
@@ -285,7 +285,7 @@
             let confirmedSubmission = false;
             let processing = false;
 
-            form.addEventListener('submit', async function (event) {
+            form.addEventListener('submit', async function(event) {
                 if (confirmedSubmission) return;
                 event.preventDefault();
                 if (processing) return;

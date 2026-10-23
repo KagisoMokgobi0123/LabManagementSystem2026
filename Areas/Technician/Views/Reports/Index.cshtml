@@ -202,8 +202,8 @@
         <h2>Technician Activity Report</h2>
         <p>Select a UTC completion-date range to preview your laboratory activity and download a PDF.</p>
         <form method="get" asp-area="Technician" asp-controller="Reports" asp-action="Index" class="report-filters">
-            <div><label for="startDate">Start date</label><input id="startDate" name="startDate" type="date" required value="@Model.StartDate.ToString("yyyy-MM-dd")" /></div>
-            <div><label for="endDate">End date</label><input id="endDate" name="endDate" type="date" required value="@Model.EndDate.ToString("yyyy-MM-dd")" /></div>
+            <div><label asp-for="StartDate">Start date</label><input asp-for="StartDate" asp-format="{0:yyyy-MM-dd}" type="date" required /></div>
+            <div><label asp-for="EndDate">End date</label><input asp-for="EndDate" asp-format="{0:yyyy-MM-dd}" type="date" required /></div>
             <button class="report-btn" type="submit">Generate Preview</button>
             @if (Model.Generated)
             {

@@ -86,33 +86,49 @@
         justify-content: space-between;
         gap: 12px;
     }
-    .results-summary .label {
-        color: #64748b;
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 7px;
-    }
-    .results-summary .number {
-        font-size: 28px;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0;
-    }
-    .results-summary .symbol {
-        flex: 0 0 44px;
-        width: 44px;
-        height: 44px;
-        border-radius: 11px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #e0f2fe;
-        color: #0284c7;
-        font-size: 19px;
-    }
-    .results-summary .symbol.green { background: #dcfce7; color: #15803d; }
-    .results-summary .symbol.red { background: #fee2e2; color: #b91c1c; }
-    .results-summary .symbol.orange { background: #ffedd5; color: #c2410c; }
+
+        .results-summary .label {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+
+        .results-summary .number {
+            font-size: 28px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .results-summary .symbol {
+            flex: 0 0 44px;
+            width: 44px;
+            height: 44px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0f2fe;
+            color: #0284c7;
+            font-size: 19px;
+        }
+
+            .results-summary .symbol.green {
+                background: #dcfce7;
+                color: #15803d;
+            }
+
+            .results-summary .symbol.red {
+                background: #fee2e2;
+                color: #b91c1c;
+            }
+
+            .results-summary .symbol.orange {
+                background: #ffedd5;
+                color: #c2410c;
+            }
+
     a.results-summary-link,
     a.results-summary-link:link,
     a.results-summary-link:visited,
@@ -122,19 +138,28 @@
         text-decoration: none !important;
         cursor: pointer;
     }
-    a.results-summary-link { transition: transform .2s ease, box-shadow .2s ease; }
-    a.results-summary-link:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 28px rgba(2,132,199,.18);
+
+    a.results-summary-link {
+        transition: transform .2s ease, box-shadow .2s ease;
     }
-    a.results-summary-link:focus-visible {
-        outline: 3px solid #0284c7;
-        outline-offset: 3px;
-    }
-    a.results-summary-link.is-active {
-        box-shadow: 0 0 0 2px #0284c7, 0 4px 18px rgba(15,23,42,.07);
-    }
-    a.results-summary-link * { text-decoration: none !important; }
+
+        a.results-summary-link:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 28px rgba(2,132,199,.18);
+        }
+
+        a.results-summary-link:focus-visible {
+            outline: 3px solid #0284c7;
+            outline-offset: 3px;
+        }
+
+        a.results-summary-link.is-active {
+            box-shadow: 0 0 0 2px #0284c7, 0 4px 18px rgba(15,23,42,.07);
+        }
+
+        a.results-summary-link * {
+            text-decoration: none !important;
+        }
 
     .results-card {
         margin-top: 24px;
@@ -169,10 +194,26 @@
         font-size: 12px;
     }
 
-    .results-scroll-top { overflow-x: auto; overflow-y: hidden; height: 18px; margin: 0 16px; scrollbar-width: auto; }
-    .results-scroll-top-inner { height: 1px; }
-    .results-scroll-bottom { overflow-x: auto; overflow-y: auto; width: 100%; }
-    .results-table { min-width: 1700px;
+    .results-scroll-top {
+        overflow-x: auto;
+        overflow-y: hidden;
+        height: 18px;
+        margin: 0 16px;
+        scrollbar-width: auto;
+    }
+
+    .results-scroll-top-inner {
+        height: 1px;
+    }
+
+    .results-scroll-bottom {
+        overflow-x: auto;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    .results-table {
+        min-width: 1700px;
         margin: 0;
     }
 
@@ -262,14 +303,61 @@
         color: #0369a1;
     }
 
-    .consumable-pill-group { display:flex; flex-wrap:wrap; gap:6px; min-width:190px; }
-    .consumable-pill { display:inline-flex; align-items:center; padding:6px 11px; border-radius:50rem; font-size:11px; font-weight:700; line-height:1.45; white-space:normal; border:1px solid transparent; }
-    .consumable-pill.c-blue { background:#dbeafe; color:#1d4ed8; border-color:#bfdbfe; }
-    .consumable-pill.c-green { background:#dcfce7; color:#166534; border-color:#bbf7d0; }
-    .consumable-pill.c-orange { background:#ffedd5; color:#9a3412; border-color:#fed7aa; }
-    .consumable-pill.c-purple { background:#f3e8ff; color:#6b21a8; border-color:#e9d5ff; }
-    .consumable-pill.c-teal { background:#ccfbf1; color:#115e59; border-color:#99f6e4; }
-    .consumable-pill.c-pink { background:#fce7f3; color:#9d174d; border-color:#fbcfe8; }
+    .consumable-pill-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        min-width: 190px;
+    }
+
+    .consumable-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 11px;
+        border-radius: 50rem;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.45;
+        white-space: normal;
+        border: 1px solid transparent;
+    }
+
+        .consumable-pill.c-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .consumable-pill.c-green {
+            background: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .consumable-pill.c-orange {
+            background: #ffedd5;
+            color: #9a3412;
+            border-color: #fed7aa;
+        }
+
+        .consumable-pill.c-purple {
+            background: #f3e8ff;
+            color: #6b21a8;
+            border-color: #e9d5ff;
+        }
+
+        .consumable-pill.c-teal {
+            background: #ccfbf1;
+            color: #115e59;
+            border-color: #99f6e4;
+        }
+
+        .consumable-pill.c-pink {
+            background: #fce7f3;
+            color: #9d174d;
+            border-color: #fbcfe8;
+        }
+
     .consumable-stock {
         display: block;
         color: #334155;
@@ -286,7 +374,10 @@
         white-space: nowrap;
     }
 
-    .result-action { cursor: pointer; position: relative; z-index: 2;
+    .result-action {
+        cursor: pointer;
+        position: relative;
+        z-index: 2;
         gap: 6px;
         width: auto;
         min-width: 82px;
@@ -305,8 +396,15 @@
         text-decoration: none;
     }
 
-    .result-action-edit { background: #fff3df; color: #a95400; }
-    .result-action-edit:hover { background: #d97706; color: #fff; }
+    .result-action-edit {
+        background: #fff3df;
+        color: #a95400;
+    }
+
+        .result-action-edit:hover {
+            background: #d97706;
+            color: #fff;
+        }
 
     .result-action-delete {
         background: #fee2e2;
@@ -328,7 +426,9 @@
         color: white;
     }
 
-    .result-actions { position: relative; z-index: 1;
+    .result-actions {
+        position: relative;
+        z-index: 1;
         display: flex;
         align-items: center;
         flex-wrap: nowrap;
@@ -380,15 +480,50 @@
     }
 
     /* Register tools and pagination match the Receive Samples table. */
-    .results-table-tools { padding: 14px 18px 5px; }
-    .results-table-tools .dt-buttons { display:flex; gap:7px; flex-wrap:wrap; }
-    .results-table-tools .dt-button { border-radius:7px !important; font-size:12px; font-weight:650; margin:0 !important; }
-    .results-table-tools .btn-copy-visible, .results-table-tools .btn-copy-visible:hover { background:#475569 !important; border-color:#475569 !important; color:#fff !important; }
-    .results-table-tools .dataTables_length select { width:auto; display:inline-block; margin:0 5px; }
-    .results-table-footer { padding:12px 18px 18px; }
-    .results-table-footer .pagination { flex-wrap:wrap; }
-    .results-table thead th { cursor:pointer; }
-    .results-table thead th:last-child { cursor:default; }
+    .results-table-tools {
+        padding: 14px 18px 5px;
+    }
+
+        .results-table-tools .dt-buttons {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .results-table-tools .dt-button {
+            border-radius: 7px !important;
+            font-size: 12px;
+            font-weight: 650;
+            margin: 0 !important;
+        }
+
+        .results-table-tools .btn-copy-visible, .results-table-tools .btn-copy-visible:hover {
+            background: #475569 !important;
+            border-color: #475569 !important;
+            color: #fff !important;
+        }
+
+        .results-table-tools .dataTables_length select {
+            width: auto;
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+    .results-table-footer {
+        padding: 12px 18px 18px;
+    }
+
+        .results-table-footer .pagination {
+            flex-wrap: wrap;
+        }
+
+    .results-table thead th {
+        cursor: pointer;
+    }
+
+        .results-table thead th:last-child {
+            cursor: default;
+        }
 </style>
 
 <div class="results-page">
@@ -436,7 +571,7 @@
         <div class="row">
             <div class="col-xl-3 col-md-6 mb-3">
                 <a class="results-summary results-summary-link"
-                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "all" })"
+                   asp-area="Technician" asp-controller="Tests" asp-action="Results" asp-route-resultFilter="all"
                    data-result-filter="all"
                    aria-label="Filter laboratory results: Total Results">
                     <div>
@@ -450,7 +585,7 @@
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
                 <a class="results-summary results-summary-link"
-                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "verified" })"
+                   asp-area="Technician" asp-controller="Tests" asp-action="Results" asp-route-resultFilter="verified"
                    data-result-filter="verified"
                    aria-label="Filter laboratory results: Verified Results">
                     <div>
@@ -464,7 +599,7 @@
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
                 <a class="results-summary results-summary-link"
-                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "abnormal" })"
+                   asp-area="Technician" asp-controller="Tests" asp-action="Results" asp-route-resultFilter="abnormal"
                    data-result-filter="abnormal"
                    aria-label="Filter laboratory results: Abnormal Results">
                     <div>
@@ -478,7 +613,7 @@
             </div>
             <div class="col-xl-3 col-md-6 mb-3">
                 <a class="results-summary results-summary-link"
-                   href="@Url.Action("Results", "Tests", new { area = "Technician", resultFilter = "review" })"
+                   asp-area="Technician" asp-controller="Tests" asp-action="Results" asp-route-resultFilter="review"
                    data-result-filter="review"
                    aria-label="Filter laboratory results: Require Review">
                     <div>
@@ -573,28 +708,28 @@
                             var hasStock = remainingByResultId.TryGetValue(result.TestResultId, out var stockText);
                             var stockColors = new[] { "c-blue", "c-green", "c-orange", "c-purple", "c-teal", "c-pink" };
                             var stockColor = stockColors[(int)((uint)(test?.TestTypeId ?? 0) % (uint)stockColors.Length)];
-                             // Quantitative values come from stored records; no synthetic UI values.
-                             var displayValue = result.ResultValue?.Trim() ?? "Not recorded";
-                             var displayUnit = string.IsNullOrWhiteSpace(result.MeasurementUnit)
-                                 ? "Unit not recorded" : result.MeasurementUnit;
-                             var hasRange = result.ReferenceMin.HasValue || result.ReferenceMax.HasValue;
-                             var validRange = hasRange && !(result.ReferenceMin == 0m && result.ReferenceMax == 0m);
-                             var displayRange = validRange
-                                 ? $"{(result.ReferenceMin?.ToString("0.##") ?? "—")} to {(result.ReferenceMax?.ToString("0.##") ?? "—")}" 
-                                 : "Not recorded";
-                             var storedFlag = result.ResultFlag?.Trim() ?? "";
-                             var isNormal = storedFlag.Equals("Normal", StringComparison.OrdinalIgnoreCase);
-                             var isAbnormal = result.IsAbnormal ||
-                                 storedFlag.Equals("Abnormal", StringComparison.OrdinalIgnoreCase) ||
-                                 storedFlag.Equals("High", StringComparison.OrdinalIgnoreCase) ||
-                                 storedFlag.Equals("Low", StringComparison.OrdinalIgnoreCase);
-                             var displayFlag = isAbnormal
-                                 ? (storedFlag.Equals("High", StringComparison.OrdinalIgnoreCase) ||
-                                    storedFlag.Equals("Low", StringComparison.OrdinalIgnoreCase)
-                                    ? storedFlag.ToUpperInvariant() : "ABNORMAL")
-                                 : (isNormal ? "NORMAL" : "NOT EVALUATED");
-                             var flagClass = isAbnormal ? "abnormal" : (isNormal ? "normal" : "review");
-                             var isFlagAbnormal = isAbnormal;
+                            // Quantitative values come from stored records; no synthetic UI values.
+                            var displayValue = result.ResultValue?.Trim() ?? "Not recorded";
+                            var displayUnit = string.IsNullOrWhiteSpace(result.MeasurementUnit)
+                                ? "Unit not recorded" : result.MeasurementUnit;
+                            var hasRange = result.ReferenceMin.HasValue || result.ReferenceMax.HasValue;
+                            var validRange = hasRange && !(result.ReferenceMin == 0m && result.ReferenceMax == 0m);
+                            var displayRange = validRange
+                                ? $"{(result.ReferenceMin?.ToString("0.##") ?? "—")} to {(result.ReferenceMax?.ToString("0.##") ?? "—")}"
+                                : "Not recorded";
+                            var storedFlag = result.ResultFlag?.Trim() ?? "";
+                            var isNormal = storedFlag.Equals("Normal", StringComparison.OrdinalIgnoreCase);
+                            var isAbnormal = result.IsAbnormal ||
+                                storedFlag.Equals("Abnormal", StringComparison.OrdinalIgnoreCase) ||
+                                storedFlag.Equals("High", StringComparison.OrdinalIgnoreCase) ||
+                                storedFlag.Equals("Low", StringComparison.OrdinalIgnoreCase);
+                            var displayFlag = isAbnormal
+                                ? (storedFlag.Equals("High", StringComparison.OrdinalIgnoreCase) ||
+                                   storedFlag.Equals("Low", StringComparison.OrdinalIgnoreCase)
+                                   ? storedFlag.ToUpperInvariant() : "ABNORMAL")
+                                : (isNormal ? "NORMAL" : "NOT EVALUATED");
+                            var flagClass = isAbnormal ? "abnormal" : (isNormal ? "normal" : "review");
+                            var isFlagAbnormal = isAbnormal;
 
 
                             <tr class="@(isDeleted ? "result-row-deleted" : "")" data-result-id="@result.TestResultId"
@@ -632,7 +767,7 @@
 
                                 <td>@result.ResultName</td>
 
-                                                                <td>
+                                <td>
                                     <span class="result-main">@displayValue</span>
                                 </td>
 
@@ -647,7 +782,7 @@
                                 <td>
                                     <span class="result-pill @flagClass">@displayFlag</span>
                                 </td>
-<td>
+                                <td>
                                     @if (hasStock)
                                     {
                                         <div class="consumable-pill-group">
@@ -747,7 +882,7 @@
                                             @* The href is the POST destination; JS opens confirmation modal. *@
                                             @if (test != null)
                                             {
-                                                <a href="@Url.Action("CompleteTest", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"
+                                                <a asp-area="Technician" asp-controller="Tests" asp-action="CompleteTest" asp-route-id="@test.TestRequestTestTypeId"
                                                    class="result-action result-action-complete js-complete-test"
                                                    data-clinical-url="@Url.Action("CompleteTestClinicalContext", "Tests", new { area = "Technician", id = test.TestRequestTestTypeId })"
                                                    data-patient="@(patient?.FullName ?? "Patient unavailable")"
@@ -842,8 +977,10 @@
                 const deadline = button.attr('data-deadline') || 'the scheduled turnaround time';
                 const message = `Request ${requestNumber} (${testName}) passed its deadline (${deadline}). The technician cannot edit this result. Please contact the laboratory manager for an authorised extension.`;
                 if (typeof Swal !== 'undefined') {
-                    Swal.fire({ icon:'warning', title:'Test Overdue - Editing Locked', text:message,
-                        confirmButtonText:'Understood', confirmButtonColor:'#075985' });
+                    Swal.fire({
+                        icon: 'warning', title: 'Test Overdue - Editing Locked', text: message,
+                        confirmButtonText: 'Understood', confirmButtonColor: '#075985'
+                    });
                 } else { alert(message); }
             });
 
@@ -1045,13 +1182,13 @@
 
             function showLoading(title) {
                 $content.html(`
-                            <div class="modal-body text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Loading...</span>
-                                </div>
-                                <h6 class="mt-3 mb-1">Loading...</h6>
-                                <p class="text-muted mb-0"></p>
-                            </div>`);
+                                    <div class="modal-body text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                        <h6 class="mt-3 mb-1">Loading...</h6>
+                                        <p class="text-muted mb-0"></p>
+                                    </div>`);
                 $content.find('.text-muted').text(title || 'Loading test result information...');
             }
 
@@ -1135,7 +1272,7 @@
                     }
                 }).fail(function(xhr) {
                     const message = xhr.responseJSON?.message || xhr.responseText || ('Save failed (HTTP ' + xhr.status + ').');
-                    if (typeof Swal !== 'undefined') Swal.fire({icon:'warning', title:'Unable to Edit Result', text:message});
+                    if (typeof Swal !== 'undefined') Swal.fire({ icon: 'warning', title: 'Unable to Edit Result', text: message });
                     else alert(message);
                 }).always(function() {
                     $button.prop('disabled', false);
@@ -1157,7 +1294,7 @@
                 $('.results-summary-link').each(function() {
                     const selected = this.getAttribute('data-result-filter') === activeFilter;
                     $(this).toggleClass('is-active', selected)
-                           .attr('aria-current', selected ? 'true' : null);
+                        .attr('aria-current', selected ? 'true' : null);
                 });
             }
 
@@ -1172,39 +1309,49 @@
                     processing: true,
                     autoWidth: false,
                     pageLength: 10,
-                    lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
+                    lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
                     pagingType: 'full_numbers',
-                    order: [[12,'desc']],
-                    columnDefs: [{targets:13, orderable:false, searchable:false}],
+                    order: [[12, 'desc']],
+                    columnDefs: [{ targets: 13, orderable: false, searchable: false }],
                     // Keep existing upper/lower horizontal scrollers, not DataTables scrollX.
                     dom: 'lBrtip',
                     buttons: [
-                        { extend:'copyHtml5', text:'<i class="fas fa-copy mr-1"></i> Copy',
-                          className:'btn btn-secondary btn-sm btn-copy-visible',
-                          title:'NMB-HLabSys - Laboratory Test Results', exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} },
-                        { extend:'csvHtml5', text:'<i class="fas fa-file-csv mr-1"></i> CSV',
-                          className:'btn btn-info btn-sm', filename:'NMB-HLabSys_Test_Results',
-                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} },
-                        { extend:'excelHtml5', text:'<i class="fas fa-file-excel mr-1"></i> Excel',
-                          className:'btn btn-success btn-sm', filename:'NMB-HLabSys_Test_Results',
-                          title:'NMB-HLabSys - Laboratory Test Results',
-                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} },
-                        { extend:'pdfHtml5', text:'<i class="fas fa-file-pdf mr-1"></i> PDF',
-                          className:'btn btn-danger btn-sm', filename:'NMB-HLabSys_Test_Results',
-                          title:'NMB-HLabSys - Laboratory Test Results', orientation:'landscape', pageSize:'A3',
-                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}},
-                          customize:function(doc) { doc.defaultStyle.fontSize=7; doc.styles.tableHeader.fontSize=7; doc.pageMargins=[20,25,20,25]; } },
-                        { extend:'print', text:'<i class="fas fa-print mr-1"></i> Print',
-                          className:'btn btn-primary btn-sm', title:'NMB-HLabSys - Laboratory Test Results',
-                          exportOptions:{columns:':not(:last-child)',modifier:{search:'applied',order:'applied'}} }
+                        {
+                            extend: 'copyHtml5', text: '<i class="fas fa-copy mr-1"></i> Copy',
+                            className: 'btn btn-secondary btn-sm btn-copy-visible',
+                            title: 'NMB-HLabSys - Laboratory Test Results', exportOptions: { columns: ':not(:last-child)', modifier: { search: 'applied', order: 'applied' } }
+                        },
+                        {
+                            extend: 'csvHtml5', text: '<i class="fas fa-file-csv mr-1"></i> CSV',
+                            className: 'btn btn-info btn-sm', filename: 'NMB-HLabSys_Test_Results',
+                            exportOptions: { columns: ':not(:last-child)', modifier: { search: 'applied', order: 'applied' } }
+                        },
+                        {
+                            extend: 'excelHtml5', text: '<i class="fas fa-file-excel mr-1"></i> Excel',
+                            className: 'btn btn-success btn-sm', filename: 'NMB-HLabSys_Test_Results',
+                            title: 'NMB-HLabSys - Laboratory Test Results',
+                            exportOptions: { columns: ':not(:last-child)', modifier: { search: 'applied', order: 'applied' } }
+                        },
+                        {
+                            extend: 'pdfHtml5', text: '<i class="fas fa-file-pdf mr-1"></i> PDF',
+                            className: 'btn btn-danger btn-sm', filename: 'NMB-HLabSys_Test_Results',
+                            title: 'NMB-HLabSys - Laboratory Test Results', orientation: 'landscape', pageSize: 'A3',
+                            exportOptions: { columns: ':not(:last-child)', modifier: { search: 'applied', order: 'applied' } },
+                            customize: function(doc) { doc.defaultStyle.fontSize = 7; doc.styles.tableHeader.fontSize = 7; doc.pageMargins = [20, 25, 20, 25]; }
+                        },
+                        {
+                            extend: 'print', text: '<i class="fas fa-print mr-1"></i> Print',
+                            className: 'btn btn-primary btn-sm', title: 'NMB-HLabSys - Laboratory Test Results',
+                            exportOptions: { columns: ':not(:last-child)', modifier: { search: 'applied', order: 'applied' } }
+                        }
                     ],
-                    language:{emptyTable:'No laboratory results found.'}
+                    language: { emptyTable: 'No laboratory results found.' }
                 });
                 const $wrapper = $(resultsDataTable.table().container());
                 $('#resultsTableTools').append($wrapper.find('.dataTables_length'), $wrapper.find('.dt-buttons'));
                 $('#resultsTableFooter').append($wrapper.find('.dataTables_info'), $wrapper.find('.dataTables_paginate'));
                 resultsDataTable.on('draw', function() {
-                    $('#resultsCount').text('Showing ' + resultsDataTable.rows({search:'applied'}).count() + ' matching result(s).');
+                    $('#resultsCount').text('Showing ' + resultsDataTable.rows({ search: 'applied' }).count() + ' matching result(s).');
                     $('#resultsScrollTopInner').width(Math.max(document.getElementById('resultsTable').scrollWidth, document.getElementById('resultsScrollBottom').clientWidth + 1));
                 });
             }
@@ -1230,9 +1377,9 @@
                 event.preventDefault();
                 activeFilter = this.getAttribute('data-result-filter') || 'all';
                 const url = new URL(this.href, window.location.href);
-                window.history.pushState({resultFilter:activeFilter}, '', url);
+                window.history.pushState({ resultFilter: activeFilter }, '', url);
                 applyResultFilters();
-                document.getElementById('resultsTable').scrollIntoView({behavior:'smooth',block:'start'});
+                document.getElementById('resultsTable').scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
             $(window).on('popstate', function() {
                 activeFilter = new URLSearchParams(window.location.search).get('resultFilter') || 'all';
