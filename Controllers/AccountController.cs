@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using NMB_HLabSys.Data;
 using NMB_HLabSys.Models.Account;
 using NMB_HLabSys.Models.Identity;
+using NMB_HLabSys.Areas.Patient.Models;
 
 namespace NMB_HLabSys.Controllers
 {
@@ -11,42 +14,226 @@ namespace NMB_HLabSys.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<AccountController> _logger;
+        private readonly ApplicationDbContext _context;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _context = context;
         }
-        // Login
 
-        [AllowAnonymous]//Add this(KG)
+        // ============================================================
+        // REGISTER - GET
+        // ============================================================
+
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            return View(new RegisterViewModel());
         }
 
-        [AllowAnonymous]//Add this(KG)
+        // ============================================================
+        // REGISTER - POST
+        // ============================================================
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            model.Role = "Patient";
+
+            var email = model.Email?.Trim();
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                ModelState.AddModelError(nameof(model.Email), "Email is required.");
+                return View(model);
+            }
+
+            // Check for an existing email.
+            var existingUser = await _userManager.FindByEmailAsync(email);
+
+            if (existingUser != null)
+            {
+                ModelState.AddModelError(
+                    nameof(model.Email),
+                    "An account with this email already exists.");
+
+                return View(model);
+            }
+
+            // Check for an existing South African ID number.
+            if (!string.IsNullOrWhiteSpace(model.IdNumber))
+            {
+                var idExists = await _context.Patients
+                    .AnyAsync(p => p.IDNumber == model.IdNumber);
+
+                if (idExists)
+                {
+                    ModelState.AddModelError(
+                        nameof(model.IdNumber),
+                        "An account with this SA ID number already exists.");
+
+                    return View(model);
+                }
+            }
+
+            // Create the Identity user.
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                IsActive = true,
+                MustChangePassword = false,
+                IsProfileCompleted = true,
+                CreatedDate = DateTime.UtcNow
+            };
+
+            var createResult = await _userManager.CreateAsync(
+                user,
+                model.Password);
+
+            if (!createResult.Succeeded)
+            {
+                foreach (var error in createResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+
+                    _logger.LogWarning(
+                        "Registration failed for {Email}: {Error}",
+                        email,
+                        error.Description);
+                }
+
+                return View(model);
+            }
+
+            try
+            {
+                // Assign the Patient role.
+                var roleResult = await _userManager.AddToRoleAsync(
+                    user,
+                    "Patient");
+
+                if (!roleResult.Succeeded)
+                {
+                    foreach (var error in roleResult.Errors)
+                    {
+                        ModelState.AddModelError(
+                            string.Empty,
+                            error.Description);
+                    }
+
+                    await _userManager.DeleteAsync(user);
+
+                    return View(model);
+                }
+
+                // Create the associated patient profile.
+                var patient = new PatientModel
+                {
+                    PatientId = Guid.NewGuid().ToString(),
+                    UserId = user.Id,
+                    Name = model.FirstName,
+                    Surname = model.LastName,
+                    IDNumber = model.IdNumber ?? "",
+                    DateOfBirth = model.DateOfBirth ?? DateTime.Now,
+                    ContactNumber = model.PhoneNumber ?? "",
+                    Email = email,
+                    Address = model.HomeAddress ?? "",
+                    Suburb = "",
+                    City = model.City ?? "",
+                    Province = model.Province ?? "",
+                    PostalCode = "",
+                    CreatedDate = DateTime.Now
+                };
+
+                await using (var transaction =
+                    await _context.Database.BeginTransactionAsync())
+                {
+                    _context.Patients.Add(patient);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+
+                // Sign in the new patient.
+                await _signInManager.SignInAsync(
+                    user,
+                    isPersistent: false);
+
+                _logger.LogInformation(
+                    "New patient registered: {Email}",
+                    email);
+
+                return RedirectToAction(
+                    "Index",
+                    "Home",
+                    new { area = "Patient" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Error creating patient profile for {Email}",
+                    email);
+
+                // Remove the partially created account if profile creation fails.
+                await _userManager.DeleteAsync(user);
+
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Registration could not be completed. Please check your details and try again.");
+
+                return View(model);
+            }
+        }
+
+        // ============================================================
+        // ALTERNATE REGISTRATION ROUTE
+        // ============================================================
+
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult RegisterUser()
         {
-            return View();
+            return RedirectToAction(nameof(Register));
         }
+
+        // ============================================================
+        // LOGIN - GET
+        // ============================================================
 
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View(new LoginViewModel());
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult LoginUser()
+        {
+            return RedirectToAction(nameof(PatientLogin));
+        }
 
-  
-        // ADMIN LOGIN
+        // ============================================================
+        // ROLE-SPECIFIC LOGIN PAGES
+        // ============================================================
 
         [AllowAnonymous]
         [HttpGet]
@@ -55,17 +242,12 @@ namespace NMB_HLabSys.Controllers
             return View(new LoginViewModel());
         }
 
-
-        // Patient login
-
         [AllowAnonymous]
         [HttpGet]
         public IActionResult PatientLogin()
         {
             return View(new LoginViewModel());
         }
-   
-        // Doc login
 
         [AllowAnonymous]
         [HttpGet]
@@ -74,17 +256,12 @@ namespace NMB_HLabSys.Controllers
             return View(new LoginViewModel());
         }
 
-        // Lab technician login
-
         [AllowAnonymous]
         [HttpGet]
         public IActionResult TechnicianLogin()
         {
             return View(new LoginViewModel());
         }
-
-
-        // Manager login
 
         [AllowAnonymous]
         [HttpGet]
@@ -93,7 +270,9 @@ namespace NMB_HLabSys.Controllers
             return View(new LoginViewModel());
         }
 
-        // Shared  role login
+        // ============================================================
+        // ROLE LOGIN - POST
+        // ============================================================
 
         [AllowAnonymous]
         [HttpPost]
@@ -108,20 +287,24 @@ namespace NMB_HLabSys.Controllers
                     string.Empty,
                     "Invalid login portal.");
 
-                return View("Login");
+                return View("Login", model);
             }
 
-
             if (!ModelState.IsValid)
+                return ReturnLoginView(role, model);
+
+            var email = model.Email?.Trim();
+
+            if (string.IsNullOrWhiteSpace(email))
             {
+                ModelState.AddModelError(
+                    string.Empty,
+                    "Email address is required.");
+
                 return ReturnLoginView(role, model);
             }
 
-
-            // Find user
-            var user = await _userManager.FindByEmailAsync(
-                model.Email.Trim());
-
+            var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
@@ -132,12 +315,7 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
-            // Verify role
-            var belongsToRole =
-                await _userManager.IsInRoleAsync(
-                    user,
-                    role);
-
+            var belongsToRole = await _userManager.IsInRoleAsync(user, role);
 
             if (!belongsToRole)
             {
@@ -148,14 +326,7 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
-
-
-            // Check account state
-            // Staff with a temporary password can still login so that they can change the temporary password.
-    
-
-            if (!user.IsActive &&
-                !user.MustChangePassword)
+            if (!user.IsActive && !user.MustChangePassword)
             {
                 ModelState.AddModelError(
                     string.Empty,
@@ -164,31 +335,20 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
+            var result = await _signInManager.PasswordSignInAsync(
+                user,
+                model.Password,
+                model.RememberMe,
+                lockoutOnFailure: true);
 
-
-            // Authenticate
-            var result =
-                await _signInManager.PasswordSignInAsync(
-                    user,
-                    model.Password,
-                    model.RememberMe,
-                    lockoutOnFailure: true);
-
-
-
-            // Locked account
             if (result.IsLockedOut)
             {
                 ModelState.AddModelError(
                     string.Empty,
-                    "Your account has been temporarily locked. " +
-                    "Please try again later.");
+                    "Your account has been temporarily locked. Please try again later.");
 
                 return ReturnLoginView(role, model);
             }
-
-
-            // Invalid password
 
             if (!result.Succeeded)
             {
@@ -199,17 +359,12 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
-
-
-            // Temporary password
             if (user.MustChangePassword)
             {
                 return RedirectToAction(
                     nameof(ChangeTemporaryPassword));
             }
 
-
-            // Account must be active
             if (!user.IsActive)
             {
                 await _signInManager.SignOutAsync();
@@ -221,103 +376,74 @@ namespace NMB_HLabSys.Controllers
                 return ReturnLoginView(role, model);
             }
 
-            // Update last login
             user.LastLoginDate = DateTime.UtcNow;
 
-            await _userManager.UpdateAsync(user);
+            var updateResult = await _userManager.UpdateAsync(user);
 
+            if (!updateResult.Succeeded)
+            {
+                _logger.LogWarning(
+                    "Could not update last login for {Email}",
+                    user.Email);
+            }
 
             _logger.LogInformation(
                 "User {Email} logged into the {Role} portal.",
                 user.Email,
                 role);
 
-
-            // Redirect to the Dashboard depending on the role
             return RedirectToDashboard(role);
         }
 
-        // Return the login page depending on the user.
         private IActionResult ReturnLoginView(
             string role,
             LoginViewModel model)
         {
             return role switch
             {
-                "Administrator" =>
-                    View("AdminLogin", model),
-
-                "Patient" =>
-                    View("PatientLogin", model),
-
-                "Doctor" =>
-                    View("DoctorLogin", model),
-
-                "LabTechnician" =>
-                    View("TechnicianLogin", model),
-
-                "Manager" =>
-                    View("ManagerLogin", model),
-
-                _ =>
-                    View("PatientLogin", model)
+                "Administrator" => View("AdminLogin", model),
+                "Patient" => View("PatientLogin", model),
+                "Doctor" => View("DoctorLogin", model),
+                "LabTechnician" => View("TechnicianLogin", model),
+                "Manager" => View("ManagerLogin", model),
+                _ => View("Login", model)
             };
         }
-
-        // This will redirect the user after entered correct login detials to their dahsboard
 
         private IActionResult RedirectToDashboard(string role)
         {
             return role switch
             {
-                "Administrator" =>
-                    RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Administrator" }),
+                "Administrator" => RedirectToAction(
+                    "Index", "Home", new { area = "Administrator" }),
 
-                "Patient" =>
-                    RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Patient" }),
+                "Patient" => RedirectToAction(
+                    "Index", "Home", new { area = "Patient" }),
 
-                "Doctor" =>
-                    RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Doctor" }),
+                "Doctor" => RedirectToAction(
+                    "Index", "Home", new { area = "Doctor" }),
 
-                "LabTechnician" =>
-                    RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Technician" }),
+                "LabTechnician" => RedirectToAction(
+                    "Index", "Home", new { area = "Technician" }),
 
-                "Manager" =>
-                    RedirectToAction(
-                        "Index",
-                        "Home",
-                        new { area = "Manager" }),
+                "Manager" => RedirectToAction(
+                    "Index", "Home", new { area = "Manager" }),
 
-                _ =>
-                    RedirectToAction(
-                        nameof(Login))
+                _ => RedirectToAction(nameof(Login))
             };
         }
 
+        // ============================================================
+        // CHANGE TEMPORARY PASSWORD
+        // ============================================================
 
-
-        // User will have to change their  temporary passwords
         [Authorize]
         [HttpGet]
         public IActionResult ChangeTemporaryPassword()
         {
-            return View(
-                new ChangeTemporaryPasswordViewModel());
+            return View(new ChangeTemporaryPasswordViewModel());
         }
 
-         
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -325,172 +451,115 @@ namespace NMB_HLabSys.Controllers
             ChangeTemporaryPasswordViewModel model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
-
-            var user =
-                await _userManager.GetUserAsync(User);
-
+            var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
             {
                 await _signInManager.SignOutAsync();
-
-                return RedirectToAction(
-                    nameof(Login));
+                return RedirectToAction(nameof(Login));
             }
 
-
-            var result =
-                await _userManager.ChangePasswordAsync(
-                    user,
-                    model.CurrentPassword,
-                    model.NewPassword);
-
+            var result = await _userManager.ChangePasswordAsync(
+                user,
+                model.CurrentPassword,
+                model.NewPassword);
 
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        error.Description);
-                }
+                    ModelState.AddModelError(string.Empty, error.Description);
 
                 return View(model);
             }
 
-            // Retrieve an active account
             user.MustChangePassword = false;
 
-            user.IsActive = true;
-
-
-            var updateResult =
-                await _userManager.UpdateAsync(user);
-
+            // Do not automatically activate an account that an administrator
+            // or manager has deliberately left inactive.
+            var updateResult = await _userManager.UpdateAsync(user);
 
             if (!updateResult.Succeeded)
             {
                 foreach (var error in updateResult.Errors)
-                {
-                    ModelState.AddModelError(
-                        string.Empty,
-                        error.Description);
-                }
+                    ModelState.AddModelError(string.Empty, error.Description);
 
                 return View(model);
             }
 
-
-            // Refresh authentication cookie
             await _signInManager.RefreshSignInAsync(user);
-
 
             TempData["Success"] =
                 "Your password has been changed successfully.";
 
-            // Determine user's role
-            var roles =
-                await _userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
 
-
-            var role =
-                roles.FirstOrDefault();
-
-
-            if (string.IsNullOrWhiteSpace(role))
+            if (roles.Count == 0)
             {
                 await _signInManager.SignOutAsync();
-
-                return RedirectToAction(
-                    nameof(Login));
+                return RedirectToAction(nameof(Login));
             }
 
+            // Prefer the role used to enter the portal, if available.
+            var role = roles.FirstOrDefault(r =>
+                r == "Administrator" ||
+                r == "Patient" ||
+                r == "Doctor" ||
+                r == "LabTechnician" ||
+                r == "Manager");
+
+            if (role == null)
+            {
+                await _signInManager.SignOutAsync();
+                return RedirectToAction(nameof(Login));
+            }
 
             return RedirectToDashboard(role);
         }
 
+        // ============================================================
+        // LOGOUT
+        // ============================================================
 
-
-        // Safe logout
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            // Get currently logged-in user
-            var user =
-                await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
 
             if (user == null)
             {
                 await _signInManager.SignOutAsync();
-
                 return RedirectToAction(nameof(Login));
             }
 
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
+            var email = user.Email;
 
-            // Get user's role before signing out
-            var roles =
-                await _userManager.GetRolesAsync(user);
-
-            var role =
-                roles.FirstOrDefault();
-
-            var email =
-                user.Email;
-
-
-            // Sign user out
             await _signInManager.SignOutAsync();
-
 
             _logger.LogInformation(
                 "User {Email} with role {Role} logged out.",
                 email,
-                role
-            );
+                role);
 
-
-            // Redirect each role to its own login page
             return role switch
             {
-                "Admin" =>
-                    RedirectToAction(
-                        nameof(AdminLogin)
-                    ),
-
-                "Manager" =>
-                    RedirectToAction(
-                        nameof(ManagerLogin)
-                    ),
-
-                "Doctor" =>
-                    RedirectToAction(
-                        nameof(DoctorLogin)
-                    ),
-
-                "LabTechnician" =>
-                    RedirectToAction(
-                        nameof(TechnicianLogin)
-                    ),
-
-                "Patient" =>
-                    RedirectToAction(
-                        nameof(PatientLogin)
-                    ),
-
-                _ =>
-                    RedirectToAction(
-                        nameof(Login)
-                    )
+                "Administrator" => RedirectToAction(nameof(AdminLogin)),
+                "Manager" => RedirectToAction(nameof(ManagerLogin)),
+                "Doctor" => RedirectToAction(nameof(DoctorLogin)),
+                "LabTechnician" => RedirectToAction(nameof(TechnicianLogin)),
+                "Patient" => RedirectToAction(nameof(PatientLogin)),
+                _ => RedirectToAction(nameof(Login))
             };
         }
 
-        // For purpose of wrong login details access will be denied and this view will handle it.
+        // ============================================================
+        // ACCESS DENIED
+        // ============================================================
 
         [AllowAnonymous]
         [HttpGet]
