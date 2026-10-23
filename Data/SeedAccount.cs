@@ -159,6 +159,32 @@ namespace NMB_HLabSys.Data
             Console.WriteLine(
                 "Allan Khauli's development password reset succeeded.");
         }
+        public static async Task SeedManager1Async(IServiceProvider services)
+        {
+            var roleManager =
+                services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            var userManager =
+                services.GetRequiredService<UserManager<ApplicationUser>>();
+
+            // Ensure the Manager role exists.
+            if (!await roleManager.RoleExistsAsync(ManagerRole))
+            {
+                var roleResult = await roleManager.CreateAsync(
+                    new IdentityRole(ManagerRole));
+
+                EnsureSucceeded(roleResult, $"create role '{ManagerRole}'");
+            }
+
+            // Create only the new manager.
+            await CreateUserAsync(
+                userManager,
+                "manager1@nmbhlab.co.za",
+                "Manager1@123",
+                "Derick",
+                "Sethole",
+                ManagerRole);
+        }
 
         private static async Task CreateRolesAsync(
             RoleManager<IdentityRole> roleManager)
