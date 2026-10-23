@@ -447,70 +447,90 @@
 
 
     /* =========================================================
-           TABLE
+           RECENT REQUESTS TABLE
+           Columns: Request # | Patient | Request Date | Urgency | Status | Action
            ========================================================= */
 
     .doctor-table {
+        width: 100%;
         margin-bottom: 0;
+        table-layout: fixed;
+        border-collapse: collapse;
     }
 
-        .doctor-table thead th {
-            padding: 12px 10px;
-            border-top: 0;
-            border-bottom: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .4px;
-        }
+    /* One consistent box model for every header and cell */
+    .doctor-table th,
+    .doctor-table td {
+        box-sizing: border-box;
+        display: table-cell !important;
+        float: none !important;
+        position: static !important;
+        padding: 14px 16px !important;
+        vertical-align: middle !important;
+        text-align: left;
+    }
 
-        .doctor-table tbody td {
-            padding: 13px 10px;
-            vertical-align: middle;
-            border-color: #f1f5f9;
-            color: #334155;
-            font-size: 12px;
-        }
-
-    .status-badge {
-        display: inline-block;
-        padding: 5px 9px;
-        border-radius: 50px;
+    .doctor-table thead th {
+        border-top: 0;
+        border-bottom: 1px solid #e2e8f0;
+        color: #64748b;
         font-size: 10px;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        white-space: nowrap;
     }
 
-    .status-submitted {
-        background: #e0f2fe;
-        color: #0369a1;
+    .doctor-table tbody td {
+        border-top: 1px solid #f1f5f9;
+        color: #334155;
+        font-size: 12px;
+        line-height: 1.4;
+        overflow-wrap: break-word;
     }
 
-    .status-received {
-        background: #cffafe;
-        color: #0e7490;
+    /* Column widths (total 100%) */
+    .doctor-table .dt-col-request { width: 16%; }
+    .doctor-table .dt-col-patient { width: 22%; }
+    .doctor-table .dt-col-date    { width: 22%; }
+    .doctor-table .dt-col-urgency { width: 12%; }
+    .doctor-table .dt-col-status  { width: 16%; }
+    .doctor-table .dt-col-action  { width: 12%; }
+
+    /* Keep identifiers and dates on one line so rows stay level */
+    .doctor-table .dt-cell-request,
+    .doctor-table .dt-cell-date {
+        white-space: nowrap;
     }
 
-    .status-progress {
-        background: #fef3c7;
-        color: #b45309;
+    /* Action column: header and button share the same centered axis */
+    .doctor-table .dt-cell-action {
+        text-align: center;
     }
 
-    .status-completed {
-        background: #dcfce7;
-        color: #15803d;
+        .doctor-table .dt-cell-action .btn {
+            display: inline-block;
+            min-width: 64px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+    /* Urgency and status are coloured inline text (see the span style in the markup).
+       Guard: every cell stays a real table cell so columns can never merge. */
+    .doctor-content table.doctor-table.table > thead > tr > th,
+    .doctor-content table.doctor-table.table > tbody > tr > td,
+    .doctor-main table.doctor-table.table > thead > tr > th,
+    .doctor-main table.doctor-table.table > tbody > tr > td {
+        display: table-cell !important;
+        float: none !important;
+        position: static !important;
     }
 
-    .status-released {
-        background: #d1fae5;
-        color: #047857;
+    @@media (max-width: 768px) {
+        .doctor-table {
+            min-width: 850px;
+        }
     }
-
-    .status-cancelled {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
-
 
     /* =========================================================
            PROFILE
@@ -1778,33 +1798,30 @@
 
                     <table class="table doctor-table">
 
+                        <colgroup>
+                            <col class="dt-col-request" />
+                            <col class="dt-col-patient" />
+                            <col class="dt-col-date" />
+                            <col class="dt-col-urgency" />
+                            <col class="dt-col-status" />
+                            <col class="dt-col-action" />
+                        </colgroup>
+
                         <thead>
 
                             <tr>
 
-                                <th>
-                                    Request #
-                                </th>
+                                <th>Request #</th>
 
-                                <th>
-                                    Patient
-                                </th>
+                                <th>Patient</th>
 
-                                <th>
-                                    Request Date
-                                </th>
+                                <th>Request Date</th>
 
-                                <th>
-                                    Urgency
-                                </th>
+                                <th>Urgency</th>
 
-                                <th>
-                                    Status
-                                </th>
+                                <th>Status</th>
 
-                                <th>
-                                    Action
-                                </th>
+                                <th class="dt-cell-action">Action</th>
 
                             </tr>
 
@@ -1826,21 +1843,21 @@
                             {
                                 foreach (var request in Model.RecentRequests)
                                 {
-                                    var statusClass = request.Status.Contains("cancel", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" :
-                                        request.Status.Contains("complete", StringComparison.OrdinalIgnoreCase) ? "status-completed" :
-                                        request.Status.Contains("release", StringComparison.OrdinalIgnoreCase) ? "status-released" :
-                                        request.Status.Contains("progress", StringComparison.OrdinalIgnoreCase) ? "status-progress" :
-                                        request.Status.Contains("received", StringComparison.OrdinalIgnoreCase) ? "status-received" :
-                                        request.Status.Contains("pending", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-submitted";
-                                    var urgencyClass = request.Urgency.ToString().Equals("Stat", StringComparison.OrdinalIgnoreCase) ? "urgency-stat" :
-                                        request.Urgency.ToString().Equals("Urgent", StringComparison.OrdinalIgnoreCase) ? "urgency-urgent" : "urgency-routine";
+                                    var statusColor = request.Status.Contains("cancel", StringComparison.OrdinalIgnoreCase) ? "#b91c1c" :
+                                        request.Status.Contains("complete", StringComparison.OrdinalIgnoreCase) ? "#15803d" :
+                                        request.Status.Contains("release", StringComparison.OrdinalIgnoreCase) ? "#047857" :
+                                        request.Status.Contains("progress", StringComparison.OrdinalIgnoreCase) ? "#b45309" :
+                                        request.Status.Contains("received", StringComparison.OrdinalIgnoreCase) ? "#0e7490" :
+                                        request.Status.Contains("pending", StringComparison.OrdinalIgnoreCase) ? "#b45309" : "#0369a1";
+                                    var urgencyColor = request.Urgency.ToString().Equals("Stat", StringComparison.OrdinalIgnoreCase) ? "#b91c1c" :
+                                        request.Urgency.ToString().Equals("Urgent", StringComparison.OrdinalIgnoreCase) ? "#c2410c" : "#475569";
                                     <tr>
-                                        <td>@request.RequestNumber</td>
+                                        <td class="dt-cell-request">@request.RequestNumber</td>
                                         <td>@request.PatientName</td>
-                                        <td>@request.RequestDate.ToString("dd MMM yyyy HH:mm")</td>
-                                        <td><span class="urgency-badge @urgencyClass">@request.Urgency</span></td>
-                                        <td><span class="status-badge @statusClass">@request.Status</span></td>
-                                        <td><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Details" asp-route-id="@request.TestRequestId" class="btn btn-outline-primary btn-sm">View</a></td>
+                                        <td class="dt-cell-date">@request.RequestDate.ToString("dd MMM yyyy HH:mm")</td>
+                                        <td><span style="color:@urgencyColor;font-weight:700">@request.Urgency</span></td>
+                                        <td><span style="color:@statusColor;font-weight:700">@request.Status</span></td>
+                                        <td class="dt-cell-action"><a asp-area="Doctor" asp-controller="TestRequests" asp-action="Details" asp-route-id="@request.TestRequestId" class="btn btn-outline-primary btn-sm">View</a></td>
                                     </tr>
                                 }
                             }

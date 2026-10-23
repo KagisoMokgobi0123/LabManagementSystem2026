@@ -277,7 +277,8 @@
 
                     <input type="hidden"
                            id="MedicalConditionCategoryId"
-                           name="MedicalConditionCategoryId" />
+                           name="MedicalConditionCategoryId"
+                           value="0" />
 
 
                     <div class="mb-3">
@@ -737,7 +738,7 @@
 
             document.getElementById(
                 "MedicalConditionCategoryId"
-            ).value = "";
+            ).value = "0";
 
             document.getElementById(
                 "Name"
@@ -770,7 +771,7 @@
             document.getElementById(
                 "Name"
             ).value =
-                name;
+                name || "";
 
             document.getElementById(
                 "conditionCategoryForm"
@@ -803,7 +804,7 @@
             document.getElementById(
                 "deleteCategoryName"
             ).innerText =
-                name;
+                name || "";
 
             document.getElementById(
                 "deleteCategoryForm"

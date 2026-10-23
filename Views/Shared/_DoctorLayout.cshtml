@@ -1220,15 +1220,15 @@
             <header class="doctor-top-toolbar">
                 <div>
                     <h1 class="doctor-page-title">@title</h1>
-                    <div class="doctor-page-subtitle">Doctor / Healthcare Provider</div>
+                    <div class="doctor-page-subtitle">Doctor</div>
                 </div>
                 <div class="doctor-toolbar-actions">
                     <div class="dropdown">
-                        <button class="doctor-notification-link" type="button" id="reportNotificationButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Received laboratory PDF reports" title="Received PDF reports">
+                        @* <button class="doctor-notification-link" type="button" id="reportNotificationButton" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Received laboratory PDF reports" title="Received PDF reports">
                             <i class="fa-solid fa-file-pdf"></i>
                             <span class="doctor-notification-badge" id="reportCount" style="display:none;" aria-live="polite">0</span>
-                        </button>
-                        <div class="dropdown-menu dropdown-menu-end report-dropdown" aria-labelledby="reportNotificationButton">
+                        </button> *@
+                        @* <div class="dropdown-menu dropdown-menu-end report-dropdown" aria-labelledby="reportNotificationButton">
                             <div class="report-head">
                                 <strong style="font-size:13px">Received PDF Reports</strong>
                                 <button type="button" class="btn btn-sm btn-link" id="refreshReports">Refresh</button>
@@ -1237,7 +1237,7 @@
                             <div class="p-2 text-center border-top">
                                 <a asp-area="Doctor" asp-controller="Results" asp-action="Index" class="small text-decoration-none">View laboratory results</a>
                             </div>
-                        </div>
+                        </div> *@
                     </div>
                     <a asp-area="Doctor" asp-controller="Alerts" asp-action="Index" class="doctor-notification-link" title="Doctor alerts" aria-label="Doctor alerts">
                         <i class="fa-solid fa-bell"></i>
