@@ -3019,11 +3019,6 @@ namespace NMB_HLabSys.Areas.Technician.Controllers
         }
 
 
-
-        // Paste these two actions INSIDE your existing TestsController.
-        // Replace the old VerifyResult GET and POST; do not append duplicates.
-        // Uses existing project models and DbSets shown in your original actions.
-        // Add this GET action inside TestsController. Keep your existing VerifyResultDecision POST unchanged.
         [HttpGet]
         [Authorize(Roles = "LabTechnician")]
         public async Task<IActionResult> VerifyTest(int id)

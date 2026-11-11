@@ -77,8 +77,7 @@ namespace NMB_HLabSys.Areas.Patient.Controllers
                                    i.IsAbnormal
                                }).ToListAsync();
 
-            var categories = await _context.TestCategories
-                .ToDictionaryAsync(c => c.TestCategoryId, c => c.Description);
+            var categories = await _context.TestCategories.ToDictionaryAsync(c => c.TestCategoryId, c => c.Description);
             var units = await _context.MeasurementUnits
                 .ToDictionaryAsync(u => u.MeasurementUnitId, u => u.Unit);
 

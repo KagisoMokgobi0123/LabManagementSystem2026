@@ -81,88 +81,52 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
         {
             try
             {
-                model.OrderNumber =
-                    model.OrderNumber?.Trim() ?? string.Empty;
-
-                model.Items ??=
-                    new List<CreateOrderItemViewModel>();
-
+                model.OrderNumber =model.OrderNumber?.Trim() ?? string.Empty;
+                model.Items ??=new List<CreateOrderItemViewModel>();
                 // server Validation
-
                 await ValidateCreateOrder(model);
-
                 if (!ModelState.IsValid)
                 {
                     await LoadOrderData();
                     return View("Index", await GetOrders());
                 }
-
-                model.Items = model.Items
-                    .Where(i => i != null)
-                    .ToList();
+                model.Items = model.Items.Where(i => i != null).ToList();
 
                 if (!model.Items.Any())
                 {
-                    ModelState.AddModelError(
-                        nameof(model.Items),
-                        "At least one consumable must be added.");
-
+                    ModelState.AddModelError(nameof(model.Items),"At least one consumable must be added.");
                     await LoadOrderData();
                     return View("Index", await GetOrders());
                 }
-
                 // duplication check of consumable names
-
-                bool hasDuplicates = model.Items
-                    .GroupBy(i => i.ConsumableId)
-                    .Any(g => g.Count() > 1);
+                bool hasDuplicates = model.Items .GroupBy(i => i.ConsumableId).Any(g => g.Count() > 1);
 
                 if (hasDuplicates)
                 {
-                    ModelState.AddModelError(
-                        nameof(model.Items),
-                        "The same consumable cannot be added more than once.");
-
+                    ModelState.AddModelError( nameof(model.Items), "The same consumable cannot be added more than once.");
                     await LoadOrderData();
                     return View("Index", await GetOrders());
                 }
-
                 // load suppliers
 
-                var supplier = await _context.Suppliers
-                    .FirstOrDefaultAsync(s =>
-                        s.SupplierId == model.SupplierId &&
-                        !s.IsDeleted);
+                var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierId == model.SupplierId && !s.IsDeleted);
 
                 if (supplier == null)
                 {
-                    ModelState.AddModelError(
-                        nameof(model.SupplierId),
-                        "The selected supplier does not exist.");
-
+                    ModelState.AddModelError( nameof(model.SupplierId),"The selected supplier does not exist.");
                     await LoadOrderData();
                     return View("Index", await GetOrders());
                 }
 
                 // load consumables
 
-                var consumableIds = model.Items
-                    .Select(i => i.ConsumableId)
-                    .Distinct()
-                    .ToList();
+                var consumableIds = model.Items.Select(i => i.ConsumableId).Distinct().ToList();
 
-                var consumables = await _context.Consumables
-                    .Where(c =>
-                        consumableIds.Contains(c.ConsumableId) &&
-                        !c.IsDeleted)
-                    .ToListAsync();
+                var consumables = await _context.Consumables.Where(c => consumableIds.Contains(c.ConsumableId) && !c.IsDeleted).ToListAsync();
 
                 if (consumables.Count != consumableIds.Count)
                 {
-                    ModelState.AddModelError(
-                        nameof(model.Items),
-                        "One or more selected consumables could not be found.");
-
+                    ModelState.AddModelError(nameof(model.Items), "One or more selected consumables could not be found.");
                     await LoadOrderData();
                     return View("Index", await GetOrders());
                 }
@@ -171,39 +135,27 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
                 foreach (var item in model.Items)
                 {
-                    var consumable = consumables
-                        .FirstOrDefault(c =>
-                            c.ConsumableId == item.ConsumableId);
+                    var consumable = consumables.FirstOrDefault(c => c.ConsumableId == item.ConsumableId);
 
                     if (consumable == null)
                     {
-                        ModelState.AddModelError(
-                            nameof(model.Items),
-                            "One or more selected consumables are invalid.");
-
+                        ModelState.AddModelError( nameof(model.Items),"One or more selected consumables are invalid.");
                         continue;
                     }
 
                     if (item.QuantityOrdered <= 0)
                     {
-                        ModelState.AddModelError(
-                            nameof(model.Items),
-                            $"Quantity for '{consumable.Name}' must be greater than zero.");
+                        ModelState.AddModelError(nameof(model.Items),$"Quantity for '{consumable.Name}' must be greater than zero.");
                     }
 
                     if (consumable.SupplierId != model.SupplierId)
                     {
-                        ModelState.AddModelError(
-                            nameof(model.Items),
-                            $"'{consumable.Name}' does not belong to the selected supplier.");
+                        ModelState.AddModelError( nameof(model.Items),$"'{consumable.Name}' does not belong to the selected supplier.");
                     }
 
-                    if (consumable.StockStatus != StockStatus.ReorderNow &&
-                        consumable.StockStatus != StockStatus.OutOfStock)
+                    if (consumable.StockStatus != StockStatus.ReorderNow && consumable.StockStatus != StockStatus.OutOfStock)
                     {
-                        ModelState.AddModelError(
-                            nameof(model.Items),
-                            $"'{consumable.Name}' does not currently require reordering.");
+                        ModelState.AddModelError( nameof(model.Items), $"'{consumable.Name}' does not currently require reordering.");
                     }
                 }
 
@@ -214,8 +166,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                 }
 
 
-                await using var transaction =
-                    await _context.Database.BeginTransactionAsync();
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
                 try
                 {
@@ -254,16 +205,10 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
                         _context.OrderItems.Add(orderItem);
                     }
 
-
                     //Save order item
                     await _context.SaveChangesAsync();
-
-
                     await transaction.CommitAsync();
-
-                    TempData["SuccessMessage"] =
-                        $"Order '{order.OrderNumber}' was created successfully.";
-
+                    TempData["SuccessMessage"] =  $"Order '{order.OrderNumber}' was created successfully.";
                     return RedirectToAction(nameof(Index));
                 }
                 catch
@@ -276,25 +221,20 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
             {
                 var root = GetRootException(ex);
 
-                Console.Error.WriteLine(
-                    "============================================================");
+                Console.Error.WriteLine("============================================================");
                 Console.Error.WriteLine("ORDER CREATE DATABASE ERROR");
                 Console.Error.WriteLine($"Message: {ex.Message}");
                 Console.Error.WriteLine($"Root Message: {root.Message}");
                 Console.Error.WriteLine($"Stack Trace: {ex.StackTrace}");
-                Console.Error.WriteLine(
-                    "============================================================");
+                Console.Error.WriteLine("============================================================");
 
-                TempData["ErrorMessage"] =
-                    $"The order could not be saved. {root.Message}";
+                TempData["ErrorMessage"] =$"The order could not be saved. {root.Message}";
 
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return HandleException(
-                    ex,
-                    "Unable to create the order.");
+                return HandleException( ex,"Unable to create the order.");
             }
         }
 

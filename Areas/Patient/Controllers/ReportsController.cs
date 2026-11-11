@@ -199,6 +199,7 @@ namespace NMB_HLabSys.Areas.Patient.Controllers
                              }).ToListAsync();
 
             var filtered = raw.Where(x => x.When >= start && x.When < end).ToList();
+
             if (filtered.Count == 0) return new List<ReportRow>();
 
             var categories = await _context.TestCategories.ToListAsync();

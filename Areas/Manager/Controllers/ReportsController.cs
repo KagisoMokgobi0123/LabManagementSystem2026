@@ -627,9 +627,7 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
         // generate the report according to the selected dates.
 
-        private async Task<ManagementReportViewModel> BuildReportData(
-           DateTime startDate,
-           DateTime endDate)
+        private async Task<ManagementReportViewModel> BuildReportData( DateTime startDate,DateTime endDate)
         {
             var start = startDate.Date;
             var end = endDate.Date;
@@ -649,101 +647,67 @@ namespace NMB_HLabSys.Areas.Manager.Controllers
 
             //calculation to display all total completed and in progress.
 
-            var totalCompletedTests = await reportTests
-                .CountAsync(x => x.Status == "Completed");
-
-            var totalInProgressTests = await reportTests
-                .CountAsync(x => x.Status == "In Progress");
-
-            var totalEligibleTests =
-                totalCompletedTests + totalInProgressTests;
+            var totalCompletedTests = await reportTests.CountAsync(x => x.Status == "Completed");
+            var totalInProgressTests = await reportTests.CountAsync(x => x.Status == "In Progress");
+            var totalEligibleTests =totalCompletedTests + totalInProgressTests;
 
             //number of categories
 
-            var categoryTotals = await reportTests
-                .GroupBy(x => new
+            var categoryTotals = await reportTests.GroupBy(x => new
                 {
-                    x.TestType!.TestCategoryId,
-                    CategoryName = x.TestType.TestCategory!.Description
-                })
-                .Select(g => new CategoryReportItem
+                    x.TestType!.TestCategoryId,CategoryName = x.TestType.TestCategory!.Description
+                }).Select(g => new CategoryReportItem
                 {
                     TestCategoryId = g.Key.TestCategoryId,
                     CategoryName = g.Key.CategoryName,
-
-                    CompletedTests = g.Count(
-                        x => x.Status == "Completed"),
-
-                    InProgressTests = g.Count(
-                        x => x.Status == "In Progress")
-                })
-                .OrderByDescending(x => x.CompletedTests + x.InProgressTests)
-                .ThenBy(x => x.CategoryName)
-                .ToListAsync();
+                    CompletedTests = g.Count(x => x.Status == "Completed"),
+                    InProgressTests = g.Count(x => x.Status == "In Progress")
+                }).OrderByDescending(x => x.CompletedTests + x.InProgressTests)
+                .ThenBy(x => x.CategoryName).ToListAsync();
 
             //show total in percentages
 
             foreach (var category in categoryTotals)
             {
-                category.Percentage = category.TotalTests == 0
-                    ? 0
-                    : (decimal)category.CompletedTests /
+                category.Percentage = category.TotalTests == 0? 0: (decimal)category.CompletedTests /
                       category.TotalTests * 100;
             }
 
            
 
-            var topCategories = categoryTotals
-                .Take(TopCategoryLimit)
-                .ToList();
-
-            var topCategoryIds = topCategories
-                .Select(x => x.TestCategoryId)
-                .ToList();
+            var topCategories = categoryTotals.Take(TopCategoryLimit).ToList();
+            var topCategoryIds = topCategories.Select(x => x.TestCategoryId).ToList();
 
             //it will only count the top 10 categories.
 
-            var dailyCounts = await reportTests
-                .Where(x =>
-                    topCategoryIds.Contains(
-                        x.TestType!.TestCategoryId))
+            var dailyCounts = await reportTests .Where(x => topCategoryIds.Contains(x.TestType!.TestCategoryId))
                 .GroupBy(x => new
                 {
-                    Date = x.StartDateTime!.Value.Date,
-                    x.TestType!.TestCategoryId,
-                    x.Status
+                    Date = x.StartDateTime!.Value.Date, x.TestType!.TestCategoryId,x.Status
                 })
                 .Select(g => new DailyCategoryCount
                 {
-                    Date = g.Key.Date,
-                    TestCategoryId = g.Key.TestCategoryId,
+                    Date = g.Key.Date,TestCategoryId = g.Key.TestCategoryId,
                     TotalTests = g.Count()
                 })
                 .ToListAsync();
 
             // number of Remaining categories
 
-            var otherCategoryIds = categoryTotals
-                .Skip(TopCategoryLimit)
-                .Select(x => x.TestCategoryId)
-                .ToList();
-
+            var otherCategoryIds = categoryTotals.Skip(TopCategoryLimit).Select(x => x.TestCategoryId).ToList();
             var otherDailyCounts = new List<DailyCategoryCount>();
 
             if (otherCategoryIds.Count > 0)
             {
                 otherDailyCounts = await reportTests
-                    .Where(x =>
-                        otherCategoryIds.Contains(
-                            x.TestType!.TestCategoryId))
+                    .Where(x =>otherCategoryIds.Contains(x.TestType!.TestCategoryId))
                     .GroupBy(x => x.StartDateTime!.Value.Date)
                     .Select(g => new DailyCategoryCount
                     {
                         Date = g.Key,
                         TestCategoryId = 0,
                         TotalTests = g.Count()
-                    })
-                    .ToListAsync();
+                    }).ToListAsync();
             }
 
             //Including date labeling.

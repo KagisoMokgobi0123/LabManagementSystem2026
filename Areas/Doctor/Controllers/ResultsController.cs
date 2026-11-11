@@ -208,6 +208,7 @@ public sealed class ResultsController : Controller
         };
         _db.PatientDoctorConsents.Add(consent);
         await _db.SaveChangesAsync();
+
         _db.ConsentRequestItems.Add(new ConsentRequestItemModel
         {
             PatientConsentId = consent.PatientDoctorConsentId,
